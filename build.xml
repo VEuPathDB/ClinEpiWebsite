@@ -1,0 +1,124 @@
+<project name="ClinEpiWebsite" default="Installation" basedir=".">
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <import file="${projectsDir}/ClinEpiModel/build.xml" />
+  <import file="${projectsDir}/EbrcWebsiteCommon/build.xml" />
+
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo    Checkout    oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="ClinEpiWebsite-ChildCheckout">
+    <available file="${projectsDir}/EbrcWebsiteCommon" type="dir"  property="EbrcWebsiteCommon.present" />
+    <available file="${projectsDir}/ClinEpiModel" type="dir"  property="ClinEpiModel.present" />
+    <antcall target="EbrcWebsiteCommon-Checkout"/>
+    <antcall target="ClinEpiModel-Checkout"/>
+  </target>
+
+  <target name="EbrcWebsiteCommon-Checkout" unless="EbrcWebsiteCommon.present">
+    <ant target="defaultProjectCheckout" inheritAll="false">
+      <property name="svnurl" value="https://www.cbil.upenn.edu/svn/apidb/EbrcWebsiteCommon"/>
+      <property name="project" value="EbrcWebsiteCommon"/>
+      <property name="version" value="??"/>
+    </ant>
+  </target>
+
+  <target name="ClinEpiModel-Checkout" unless="ClinEpiModel.present">
+    <ant target="defaultProjectCheckout" inheritAll="false">
+      <property name="svnurl" value="https://www.cbil.upenn.edu/svn/apidb/ClinEpiModel"/>
+      <property name="project" value="ClinEpiModel"/>
+      <property name="version" value="??"/>
+    </ant>
+  </target>
+
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo    Update    oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="ClinEpiWebsite-ChildUpdate" >
+     <ant target="defaultProjectUpdate">
+      <property name="project" value="EbrcWebsiteCommon"/>
+    </ant>
+     <ant target="defaultProjectUpdate">
+      <property name="project" value="ClinEpiModel"/>
+    </ant>
+  </target>
+
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo  Installation  oooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="ClinEpiWebsite-Installation" depends="ClinEpiModel-Installation,
+                                                      EbrcWebsiteCommon-Installation,
+                                                      ClinEpiWebsite/Site-Installation">
+
+    <ant target="defaultProjectInstall">
+      <property name="project" value="ClinEpiWebsite"/>
+    </ant>
+
+    <!-- TODO Move from ApiCommonWebsite to EbrcWebsiteCommon
+    <antcall target="ApiCommonWebsite-Glossary"/>
+    -->
+
+  </target>
+
+ <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
+
+  <target name="ClinEpiWebsite/Site-Installation">
+    <ant target="defaultComponentInstall">
+      <property name="project" value="ClinEpiWebsite"/>
+      <property name="component" value="Site"/>
+    </ant>
+  </target>
+
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <target name="ClinEpiWebsite-WebInstallation" depends="EbrcWebsiteCommon-WebInstallation,
+                                                           ClinEpiWebsite-Installation,
+                                                           ClinEpiWebsite/Site-WebInstallation">
+  </target>
+
+
+  <target name="ClinEpiWebsite/Site-WebInstallation">
+
+    <ant target="eupathWebComponentInstall">
+      <property name="project" value="ClinEpiWebsite"/>
+      <property name="component" value="Site"/>
+    </ant>
+
+  </target>
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="ClinEpiWebsite-Release">
+    
+    <ant target="defaultProjectRelease">
+      <property name="cvsroot" value=":ext:cvs.sanger.ac.uk:/cvsroot/GUS"/>
+    </ant>
+  </target>  
+
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooo  Distributable  ooooooooooooooooooooooooo -->
+  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
+
+  <target name="ClinEpiWebsite-Distributable">
+
+    <copy todir="${targetDir}">
+      <fileset dir="${projectsDir}" >
+        <exclude name="**/CVS/*" />
+      </fileset>
+    </copy>  
+  </target>  
+
+</project>
+
