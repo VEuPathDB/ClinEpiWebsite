@@ -56,6 +56,7 @@
 
   <target name="ClinEpiWebsite-Installation" depends="ClinEpiModel-Installation,
                                                       EbrcWebsiteCommon-Installation,
+                                                      ClinEpiWebsite-MavenInstallation,
                                                       ClinEpiWebsite/Site-Installation">
 
     <ant target="defaultProjectInstall">
@@ -69,6 +70,14 @@
   </target>
 
  <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
+
+ <target name="ClinEpiWebsite-MavenInstallation">
+   <ant target="mavenBuildProject">
+     <property name="project" value="ClinEpiWebsite"/>
+   </ant>
+   <property name="alreadyBuilt" value="true"/>
+ </target>
+
 
   <target name="ClinEpiWebsite/Site-Installation">
     <ant target="defaultComponentInstall">
