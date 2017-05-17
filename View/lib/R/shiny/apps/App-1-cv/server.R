@@ -7,7 +7,11 @@ source("config.R")
 shinyServer(function(input, output, session) {
 
   datasetFetcher <- reactive(
-    getWdkDataset(session, fetchStyle, FALSE, dataStorageDir)
+    read.csv(
+        getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        sep = "\t",
+        check.names = FALSE
+     )
   )
   
     output$myChart <- renderChart({
