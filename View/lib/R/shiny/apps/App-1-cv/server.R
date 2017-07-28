@@ -6,34 +6,21 @@ source("config.R")
 
 shinyServer(function(input, output, session) {
 
-  datasetFetcher <- reactive(
-    read.csv(
+  datasetFetcher <- reactive({
+    file=read.csv(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
         sep = "\t",
         check.names = FALSE
      )
-  )
+     names(file) =  tolower(gsub("\\W", "", names(file)))
+
+     return(file);
+  })
   
     output$myChart <- renderChart({
 
       cv <- datasetFetcher()
 
-      str(cv)
-      names(cv) <- substr(names(cv),3,50) #Remove preceeding 'x.'
-      names(cv) = gsub("\\.", "", names(cv)) #Remove remaining periods
-
-      #coerce variables to required type:
-      cv$VisitType <- as.factor(cv$VisitType)
-      cv$AsexualParasitesPresent <- as.factor(cv$AsexualParasitesPresentmicroscopy)
-      cv$MalariaDiagnosis <- as.factor(cv$MalariaDiagnosisAndParasiteStatus)
-      cv$SubcountyInUganda <- as.factor(cv$SubcountyInUganda)
-      cv$AsexualParasiteDensity <- as.factor(cv$AsexualParasiteDensity )
-      cv$Febrile <- as.factor(cv$Febrile)
-##      cv$Feversubjective <- as.factor(cv$Feversubjective)
-##      cv$SevereMalariaSymptoms <- as.factor(cv$SevereMalariaSymptoms)
-##      cv$Species <- as.factor(cv$Species)
-
-      str(input)
 
       #Set values for graphing
       x_ <- input$x

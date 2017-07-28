@@ -23,10 +23,10 @@ shinyServer(function(input, output, session) {
 
     # Coerce variables in the data frame to desired datatype
     ps$Sex <- as.factor(ps$Sex)
-    ps$G6pdGenotype <- as.factor(ps$G6pdGenotype)
-    ps$HbsGenotype <- as.factor(ps$HbsGenotype)
+    ps$G6pdGenotype <- as.factor(ps$G6PDGenotype)
+    ps$HbsGenotype <- as.factor(ps$HbSGenotype)
     ps$AthalassemiaGenotype <- as.factor(ps$AthalassemiaGenotype)
-    ps$SubcountyInUganda <- as.factor(ps$SubcountyInUganda)
+    ps$SubcountyInUganda <- as.factor(ps$SubcountyinUganda)
 
     #str(ps) # Check data after conversion
 
@@ -42,9 +42,9 @@ shinyServer(function(input, output, session) {
     y1 <- input$y
     #if (is.na(y1)) { y1 <- "Avgageatvisit" }
     clr <- input$color
-    #if (is.na(clr)) { clr <- "G6pdGenotype" }
+    #if (is.na(clr)) { clr <- "G6PDGenotype" }
     facet <- input$facet
-    #if (is.na(facet)) { facet <- "SubcountyInUganda" }
+    #if (is.na(facet)) { facet <- "SubcountyinUganda" }
     plt <- input$ptype
     #if (is.na(plt)) { plt <- "point" }
 
