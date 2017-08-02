@@ -57,6 +57,7 @@
   <target name="ClinEpiWebsite-Installation" depends="ClinEpiModel-Installation,
                                                       EbrcWebsiteCommon-Installation,
                                                       ClinEpiWebsite-MavenInstallation,
+                                                      ClinEpiWebsite/Model-Installation,
                                                       ClinEpiWebsite/View-Installation,
                                                       ClinEpiWebsite/Site-Installation">
 
