@@ -79,6 +79,12 @@
    <property name="alreadyBuilt" value="true"/>
  </target>
 
+  <target name="ClinEpiWebsite/Model-Installation">
+    <ant target="defaultComponentInstall">
+      <property name="project" value="ClinEpiWebsite"/>
+      <property name="component" value="Model"/>
+    </ant>
+  </target>
 
   <target name="ClinEpiWebsite/Site-Installation">
     <ant target="defaultComponentInstall">
