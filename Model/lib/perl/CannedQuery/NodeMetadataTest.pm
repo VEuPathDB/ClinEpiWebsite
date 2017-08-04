@@ -1,0 +1,112 @@
+package ClinEpiWebsite::Model::CannedQuery::NodeMetadataTest;
+
+@ISA = qw( EbrcWebsiteCommon::Model::CannedQuery );
+
+=pod
+
+=head1 Purpose
+
+This canned query selects various physical characteristics associated with a given participant.
+
+=head1 Macros
+
+The following macros must be available to execute this query.
+
+=over
+
+=item Id - source id for the participant
+
+=back
+
+=cut
+
+# ========================================================================
+# ----------------------------- Declarations -----------------------------
+# ========================================================================
+
+use strict;
+
+use FileHandle;
+
+use EbrcWebsiteCommon::Model::CannedQuery;
+
+use Data::Dumper;
+
+# ========================================================================
+# ----------------------- Create, Init, and Access -----------------------
+# ========================================================================
+
+# --------------------------------- init ---------------------------------
+
+sub init {
+  my $Self = shift;
+  my $Args = ref $_[0] ? shift : {@_};
+
+  $Self->SUPER::init($Args);
+
+  $Self->setName                 ( $Args->{Name      });
+  $Self->setId                   ( $Args->{Id        });
+  $Self->setContXAxis            ( $Args->{ContXAxis });
+  $Self->setTest                ( $Args->{Test     });
+
+  my $contXAxis = $Self->getContXAxis();
+  my $test = $Self->getTest();
+
+  $Self->setSql(<<Sql);
+
+select pa.name as LEGEND
+  , ea.$test as MICRO_POS
+  , ea.$contXAxis as NAME
+-- profile_file is participant id
+from apidbtuning.participantattributes pa
+   , apidbtuning.protocolappnodeio io
+   , APIDBTUNING.EVENTATTRIBUTES ea
+where pa.name = \'<<Id>>\'
+and pa.protocol_app_node_id = io.input_node_id 
+and io.OUTPUT_NODE_ID = ea.PROTOCOL_APP_NODE_ID
+and ea.$test is not null
+order by $contXAxis 
+
+Sql
+
+  return $Self;
+}
+
+
+# -------------------------------- access --------------------------------
+
+sub getId                            { $_[0]->{'Id'                         } }
+sub setId                            { $_[0]->{'Id'                         } = $_[1]; $_[0] }
+
+sub getName                          { $_[0]->{'Name'                       } }
+sub setName                          { $_[0]->{'Name'                       } = $_[1]; $_[0] }
+
+sub getContXAxis                     { $_[0]->{'ContXAxis'                  } }
+sub setContXAxis                     { $_[0]->{'ContXAxis'                  } = $_[1]; $_[0] }
+
+sub getTest                          { $_[0]->{'Test'                       } }
+sub setTest                          { $_[0]->{'Test'                       } = $_[1]; $_[0] }
+
+
+# ========================================================================
+# --------------------------- Support Methods ----------------------------
+# ========================================================================
+
+sub prepareDictionary {
+  my $Self = shift;
+  my $Dict = shift || {};
+
+  $Dict->{Id} = $Self->getId();
+
+  my $Rv = $Dict;
+
+  return $Rv;
+
+}
+
+
+# ========================================================================
+# ---------------------------- End of Package ----------------------------
+# ========================================================================
+
+1;
