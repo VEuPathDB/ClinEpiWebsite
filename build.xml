@@ -57,7 +57,6 @@
   <target name="ClinEpiWebsite-Installation" depends="ClinEpiModel-Installation,
                                                       EbrcWebsiteCommon-Installation,
                                                       ClinEpiWebsite-MavenInstallation,
-                                                      ClinEpiWebsite/Model-Installation,
                                                       ClinEpiWebsite/View-Installation,
                                                       ClinEpiWebsite/Site-Installation,
 						      ClinEpiWebsite/Model-Installation">
@@ -81,12 +80,6 @@
    <property name="alreadyBuilt" value="true"/>
  </target>
 
-  <target name="ClinEpiWebsite/Model-Installation">
-    <ant target="defaultComponentInstall">
-      <property name="project" value="ClinEpiWebsite"/>
-      <property name="component" value="Model"/>
-    </ant>
-  </target>
 
   <target name="ClinEpiWebsite/Site-Installation">
     <ant target="defaultComponentInstall">
