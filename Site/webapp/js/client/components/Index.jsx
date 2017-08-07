@@ -16,20 +16,19 @@ is a data repository designed to facilitate the exploration, accessibility and e
 
       <h2 className="WelcomeSectionHeader">Search the Data</h2>
       <div className="SearchContainer">
-        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=ParticipantQuestions.ParticipantsByRelativeVisits">
+        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=ParticipantQuestions.ParticipantsByRelativeVisits_maled">
           <i className="SearchIconAlt fa fa-male"></i>
           <div className="SearchIconCaptionAlt">Participants</div>
         </a>
-        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=DwellingQuestions.DwellingsByCharacteristics
-">
+        <a className="SearchAlt" href="">
           <i className="SearchIconAlt fa fa-home"></i>
           <div className="SearchIconCaptionAlt">Households</div>
         </a>
-        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=ClinicalVisitQuestions.ClinicalVisitsByRelativeVisits">
+        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=ClinicalVisitQuestions.ClinicalVisitsByRelativeVisits_maled">
           <i className="SearchIconAlt fa fa-stethoscope"></i>
-          <div className="SearchIconCaptionAlt">Visits</div>
+          <div className="SearchIconCaptionAlt">Events</div>
         </a>
-        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=LighttrapQuestions.CollectionsByCharacteristics">
+        <a className="SearchAlt" href="">
           <i className="SearchIconAlt fa fa-bug"></i>
           <div className="SearchIconCaptionAlt">Vectors</div>
         </a>
@@ -41,18 +40,18 @@ is a data repository designed to facilitate the exploration, accessibility and e
           <div>
             <ul>
               <li>
-                <a href="/a/im.do?s=c8b23711dca1ca2e">
-                Find children from the PRISM cohort study living in households with low mosquito exposure but who had at least 2 malaria diagnoses / year during 2012-2013
+                <a href="/a/im.do?s=5b458c4e9fbf0b69">
+                Events from children in India who had Diarrheal Episode and Crypto Positive within 14 days
                 </a>
               </li>
               <li>
-                <a href="/a/im.do?s=efd94f0039d4f88f">
-                 Find households from the PRISM cohort study where two children under 5 respond differently to mosquito exposure (one with no malaria diagnoses and a second one with at least 2 diagnoses / year). 
+                <a href="/a/im.do?s=24b1f88e741c809f">
+                This strategy displays participants who did not have any Cryptosporidium positive tests and had a normal (-2&lt;x&lt;2 HAZ score at their 24 month visit.
                 </a>
               </li>
               <li>
-                <a href="/a/im.do?s=1e3dde358477482a">
-                 Find clinical visits in the PRISM cohort where children had 3 consecutive routine visits with asymptomatic parasitemia and a PBMC sample was collected at the middle visit
+                <a href="/a/im.do?s=adfbeddb525f8b12">
+                Identifies children with at least three Camphlobacter+ diarrhea events (&gte; 3 days duration) who had &lt; 3 E.coli diarrhea events in first year followed by second year where at least 10 of their anthropometric visits they had a weigh for age Z-score &lt; -2.
                 </a>
               </li>
 
@@ -105,7 +104,7 @@ is a data repository designed to facilitate the exploration, accessibility and e
               epidemiological data collected from areas where Malaria,
               Enteric disase and other globally significant disease are endemic.
             </div>
-            <Link className="WelcomeBoxLink" to="record/dataset/DS_c75ea37cb3">
+            <Link className="WelcomeBoxLink" to="record/dataset/DS_61ac5d073c">
               Learn more about the studies
             </Link>
           </div>
