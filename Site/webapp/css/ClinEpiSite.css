@@ -15,14 +15,15 @@ body {
 }
 
 #header {
-  height: 122px;
+  height: 152px;
   background: bgColor;
+  margin-bottom: 10px;
 }
 
 #header2 {
   background: bgColor;
   color: hlColor;
-  height: 9.4em;
+  height: 12em;
   min-width: 0;
   padding: 0 3em;
 }
@@ -30,7 +31,7 @@ body {
 #header_rt {
   position: relative;
   margin-right: 0;
-  margin-top: 45px;
+  margin-top: 70px;
 }
 
 #toplink {
@@ -39,29 +40,29 @@ body {
 
 .eupathdb-Logo {
   position: relative;
-  padding: 10px 0;
+  padding: 15px 0 5px;
 }
 
 /* Alpha Release Badge */
 .eupathdb-Logo:after {
   content: "Prototype";
   position: absolute;
-  bottom: 15px;
+  bottom: 8px;
   font-size: 1rem;
   border: 1px solid;
   padding: 2px 5px;
   background: #9c242d;
   color: #efefef;
-  left: 325px;
+  left: 385px;
 }
 
 .eupathdb-LogoRelease {
-  margin-top: 4px;
+  margin-top: 12px;
 }
 
 .eupathdb-LogoImage {
-  margin: 0 20px 0 0;
-  max-width: 300px;
+  margin: 0 18px;
+  max-width: 350px;
 }
 
 #nav-top a,
@@ -71,12 +72,19 @@ body {
 }
 
 .eupathdb-Menu {
-  height: 2.4em;
+  height: 2.8em;
   background: bgColor;
   border: none;
   border-bottom: 1px solid #868686;
   padding: 0 3em;
   min-width: 0;
+}
+
+.eupathdb-MenuItem, .eupathdb-SmallMenuItem {
+  font-size: 1.2em;
+}
+.eupathdb-MenuItem:hover {
+  background-color: #548394;
 }
 
 #menu #favorite-menu {
@@ -325,11 +333,33 @@ a.WelcomeBoxLink {
   display: flex;
   flex-wrap: wrap-reverse;
 }
+.ebrc-QuestionWizardHeading {
+  font-size: 2em;
+}
 
 .ebrc-QuestionWizardHackyStudyLink {
   margin-left: auto;
   padding-top: 2.5em;
   padding-left: 1em;
+}
+
+.ebrc-QuestionWizardParamGroupCount {
+  font-size: 1.2em;
+  color: #3c78d8;
+}
+
+.ebrc-QuestionWizardActiveGroupCount {
+  color: hlColor;
+  font-size: 1.3em;
+}
+
+
+
+button.ebrc-QuestionWizardParamGroupButton__active,
+button.ebrc-QuestionWizardParamGroupButton__active:active,
+button.ebrc-QuestionWizardParamGroupButton__active:focus,
+button.ebrc-QuestionWizardParamGroupButton__active:hover {
+  box-shadow: 0px 0px 0px 4px #9c242d;
 }
 
 #query_form {

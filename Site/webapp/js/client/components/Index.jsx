@@ -5,30 +5,46 @@ import { Link } from 'wdk-client/Components';
 /**
  * Home page for clinepidb sites
  */
-export default function Index(props) {
+export default function Index({ displayName, webAppUrl }) {
   return (
     <div className="Welcome">
 
       <h1 className="WelcomeHeadline">
-        <span className="SiteName"> {props.displayName} </span>
-is a data repository designed to facilitate the exploration, accessibility and effective analyses of epidemiologic study data to advance global public health research.
+        <span className="SiteName"> {displayName} </span>
+        is a data repository designed to facilitate the exploration and mining of epidemiological study datasets, advancing global public health.
       </h1>
 
       <h2 className="WelcomeSectionHeader">Search the Data</h2>
       <div className="SearchContainer">
-        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=ParticipantQuestions.ParticipantsByRelativeVisits_maled">
+        <a
+          className="SearchAlt"
+          title="Individuals for whom observations are available.  Depending on the nature of the study, this may include patients, caregivers, study subjects, etc"
+          href={`${webAppUrl}/showQuestion.do?questionFullName=ParticipantQuestions.ParticipantsByRelativeVisits_maled`}
+        >
           <i className="SearchIconAlt fa fa-male"></i>
           <div className="SearchIconCaptionAlt">Participants</div>
         </a>
-        <a className="SearchAlt" href="">
+        <a
+          className="SearchAlt"
+          title="Households / dwellings, associated with information on geographic location, physical characteristics, socioeconomic data, etc; note that individual households may include multiple participants"
+          href=""
+        >
           <i className="SearchIconAlt fa fa-home"></i>
           <div className="SearchIconCaptionAlt">Households</div>
         </a>
-        <a className="SearchAlt" href="/a/showQuestion.do?questionFullName=ClinicalVisitQuestions.ClinicalVisitsByRelativeVisits_maled">
+        <a
+          className="SearchAlt"
+          title="Depending on the nature of the study, events may include clinical visits, physical measurements, laboratory diagnostics, disease episodes (spanning multiple days), etc"
+          href={`${webAppUrl}/showQuestion.do?questionFullName=ClinicalVisitQuestions.ClinicalVisitsByRelativeVisits_maled`}
+        >
           <i className="SearchIconAlt fa fa-stethoscope"></i>
           <div className="SearchIconCaptionAlt">Events</div>
         </a>
-        <a className="SearchAlt" href="">
+        <a
+          className="SearchAlt"
+          title="Entomological collections (not available for all studies)"
+          href=""
+        >
           <i className="SearchIconAlt fa fa-bug"></i>
           <div className="SearchIconCaptionAlt">Vectors</div>
         </a>
@@ -40,24 +56,24 @@ is a data repository designed to facilitate the exploration, accessibility and e
           <div>
             <ul>
               <li>
-                <a href="/a/im.do?s=5b458c4e9fbf0b69">
+                <a href={`${webAppUrl}/im.do?s=5b458c4e9fbf0b69`}>
                 Events from children in India who had Diarrheal Episode and Crypto Positive within 14 days
                 </a>
               </li>
               <li>
-                <a href="/a/im.do?s=24b1f88e741c809f">
+                <a href={`${webAppUrl}/im.do?s=24b1f88e741c809f`}>
                 This strategy displays participants who did not have any Cryptosporidium positive tests and had a normal (-2&lt;x&lt;2 HAZ score at their 24 month visit.
                 </a>
               </li>
               <li>
-                <a href="/a/im.do?s=adfbeddb525f8b12">
+                <a href={`${webAppUrl}/im.do?s=adfbeddb525f8b12`}>
                 Identifies children with at least three Camphlobacter+ diarrhea events (&gte; 3 days duration) who had &lt; 3 E.coli diarrhea events in first year followed by second year where at least 10 of their anthropometric visits they had a weigh for age Z-score &lt; -2.
                 </a>
               </li>
 
             </ul>
             <p>
-              <a href="/a/showApplication.do?tab=public_strat"><em>Explore more sample search strategies</em> &raquo;</a>
+              <a href={`${webAppUrl}/showApplication.do?tab=public_strat`}><em>Explore more sample search strategies</em> &raquo;</a>
             </p>
           </div>
         </div>
@@ -66,26 +82,26 @@ is a data repository designed to facilitate the exploration, accessibility and e
           <h2 className="WelcomeSectionHeader">Explore Example Analyses</h2>
           <div className="AnalysisToolsContainer">
             <div className="AnalysisTool">
-              <a href="/a/images/analysis_slide.svg">
-                <img className="AnalysisToolImage" src="/a/images/bar-graph.png"/>
+              <a href={`${webAppUrl}/images/analysis_slide.svg`}>
+                <img className="AnalysisToolImage" src={`${webAppUrl}/images/bar-graph.png`}/>
                 <div>Enrichment</div>
               </a>
             </div>
             <div className="AnalysisTool">
-              <a href="/a/images/analysis_slide.svg">
-                <img className="AnalysisToolImage" src="/a/images/abundance.png"/>
+              <a href={`${webAppUrl}/images/analysis_slide.svg`}>
+                <img className="AnalysisToolImage" src={`${webAppUrl}/images/abundance.png`}/>
                 <div>Abundance</div>
               </a>
             </div>
             <div className="AnalysisTool">
-              <a href="/a/images/analysis_slide.svg">
-                <img className="AnalysisToolImage" src="/a/images/scatter.png"/>
+              <a href={`${webAppUrl}/images/analysis_slide.svg`}>
+                <img className="AnalysisToolImage" src={`${webAppUrl}/images/scatter.png`}/>
                 <div>Correlation</div>
               </a>
             </div>
             <div className="AnalysisTool">
-              <a href="/a/images/analysis_slide.svg">
-                <img className="AnalysisToolImage" src="/a/images/heatmap.png"/>
+              <a href={`${webAppUrl}/images/analysis_slide.svg`}>
+                <img className="AnalysisToolImage" src={`${webAppUrl}/images/heatmap.png`}/>
                 <div>Density</div>
               </a>
             </div>
@@ -151,5 +167,6 @@ is a data repository designed to facilitate the exploration, accessibility and e
 }
 
 Index.propTypes = {
-  displayName: PropTypes.string.isRequired
+  displayName: PropTypes.string.isRequired,
+  webAppUrl: PropTypes.string.isRequired
 }

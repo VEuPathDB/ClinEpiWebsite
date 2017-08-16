@@ -34,6 +34,26 @@ sub init {
   my $eventDur = $self->getEventDur() ? $self->getEventDur() : 'EUPATH_0000665';
   my $test = $self->getTest() ? $self->getTest() : 'EUPATH_0000704';
 
+  my $yLabel = "Weight for Height Z-score";
+
+  if ($yAxis eq 'EUPATH_0000682') {
+    $yLabel = "Head Circum for Age Z-score";
+  } elsif ($yAxis eq 'EUPATH_0000689') {
+    $yLabel = "Height for Age Z-score";
+  } elsif ($yAxis eq 'EUPATH_0000733') {
+    $yLabel = "Weight for Age Z-score";
+  } elsif ($yAxis eq 'EUPATH_0000662') {
+    $yLabel = "BMI for Age Z-score";
+  } elsif ($yAxis ne 'EUPATH_0000734') {
+      warn "This option is not yet recognized. Y-axis label will need to be established in Participant.pm template.";
+  }
+
+  my $xLabel = "Age in Days";
+
+  if ($xAxis ne 'EUPATH_0000644') {
+    warn "This option is not yet recognized. X-axis label will need to be established in Participant.pm template.";
+  }
+
   my $nodeMetadata =  ({
                         Id => $self->getId(), 
                         contXAxis => $xAxis,  
@@ -54,6 +74,8 @@ sub init {
   my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
   
   $line->setProfileSets($participantProfile);
+  $line->setXaxisLabel($xLabel);
+  $line->setYaxisLabel($yLabel);
   $self->setGraphObjects($line);
 
   return $self;
