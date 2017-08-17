@@ -5,6 +5,7 @@ require(ggplot2)
 
 source("../../lib/wdkDataset.R")
 source("config.R")
+source("functions.R")
 
 shinyServer(function(input, output, session) {
   
@@ -14,16 +15,17 @@ shinyServer(function(input, output, session) {
   metadata.file <- NULL
   singleVarData <- NULL
   
-  completeDF <- function(data, desiredCols) {
-    completeVec <- complete.cases(data[, desiredCols])
-    return(data[completeVec, ])
-  }
-  
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
  
   filesFetcher <- reactive({
-   
-    prtcpnt.file <<- read.csv(
+    #i assume well eventually use this function so ill leave it. will need to change it though
+    #file=read.csv(
+    #    getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+    #    sep = "\t",
+    #    check.names = FALSE
+    # )
+
+     prtcpnt.file <<- read.csv(
           getWdkDatasetFile('ShinyParticipants.tab', session, FALSE, dataStorageDir),
           sep = "\t",
           check.names = FALSE, 
@@ -45,12 +47,12 @@ shinyServer(function(input, output, session) {
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
           sep = "\t", 
           check.names = FALSE)
-
+   
     #this being done for now while i work in rstudio
-    #prtcpnt.file <<- read.csv("ParticipantsByRelativeVisits_maled_ShinyParticipants.txt", sep = "\t", check.names = FALSE, na.strings = "N/A")
-    #house.file <<- read.csv("ParticipantsByRelativeVisits_maled_ShinyHouseholds.txt", sep = "\t", check.names = FALSE, na.strings = "N/A")
-    #event.file <<- read.csv("ParticipantsByRelativeVisits_maled_ShinyEvents.txt", sep = "\t", check.names = FALSE, na.strings = "N/A")
-    #metadata.file <<- read.csv("Metadata_maled_Shiny.tsv", sep = "\t", check.names = FALSE)
+#    prtcpnt.file <<- read.csv("ShinyParticipants_gates.tab", sep = "\t", check.names = FALSE, na.strings = "N/A")
+ #   house.file <<- read.csv("ShinyHouseholds_gates.tab", sep = "\t", check.names = FALSE, na.strings = "N/A")
+ #   event.file <<- read.csv("ShinyEvents_gates.tab", sep = "\t", check.names = FALSE, na.strings = "N/A")
+ #   metadata.file <<- read.csv("ontologyMetadata_gates.tab", sep = "\t", check.names = FALSE)
   
     #make internal column names without brackets or spaces
     names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
@@ -113,7 +115,7 @@ shinyServer(function(input, output, session) {
     if (plotChoice == 'groups') {
       data <- groupsDataFetcher(myGroups, myX)
       tempDF <- data[, !(names(data)) %in% "groups"]
-      s <- strsplit(as.character(data$groups), split = ",")
+      s <- strsplit(as.character(data$groups), split = " | ", fixed = TRUE)
       data <- cbind.data.frame(apply(tempDF, 2, function(x) {rep(x, sapply(s,length))}), "groups" = unlist(s), stringsAsFactors=FALSE)
       
       nums <- getNums()
@@ -131,7 +133,7 @@ shinyServer(function(input, output, session) {
       #tanzania data is duplicated when x is country because there is a comma in the entry.. 
       if (myX %in% strings$source_id) {
         tempDF <- data[, !(names(data)) %in% myX]
-        s <- strsplit(as.character(data[[myX]]), split = ",")
+        s <- strsplit(as.character(data[[myX]]), split = " | ", fixed = TRUE)
         data <- cbind.data.frame(apply(tempDF, 2, function(x) {rep(x, sapply(s,length))}), "placeholder" = unlist(s), stringsAsFactors=FALSE)
         names(data)[ncol(data)] <- myX
         
@@ -198,11 +200,14 @@ shinyServer(function(input, output, session) {
           selectList <- c('EUPATH_0000734', 'EUPATH_0000704')
         }
         
-        checkboxGroupInput("groups",
-                           "Groups:", 
-                           choiceNames  = names(groupsChoiceList),
-                           choiceValues = unname(groupsChoiceList),
-                           selected = selectList)
+        dropdownButton(
+          label = "Click here to select groups", status = "default",
+          checkboxGroupInput("groups",
+                             "Groups:", 
+                             choiceNames  = names(groupsChoiceList),
+                             choiceValues = unname(groupsChoiceList),
+                             selected = selectList)
+        )
       } else {
       #  shinyjs::show("facetUI")
       }
@@ -315,7 +320,7 @@ shinyServer(function(input, output, session) {
         selectInput(inputId = "xaxis",
                     label = "X-Axis:",
                     choices = xChoiceList,
-                    selected = "EUPATH_0000734")
+                    selected = "EUPATH_0000689")
       }
     })
     
@@ -356,9 +361,11 @@ shinyServer(function(input, output, session) {
       nums <- getNums()
 
       xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
-      xlab <- as.character(xlab[1,3])
+      xlab <- as.character(xlab[1,2])
       
       myPlot <- ggplot(data = df, aes_string(x = myX))
+      myPlot <- myPlot + theme_bw()
+      myPlot <- myPlot + labs(y = "Count", x = xlab)
       
       if (plotChoice == 'groups') {
         myPlot <- myPlot + geom_histogram(stat = "bin", aes(fill = groups)) #+ scale_y_continuous(formatter = function(x) format(10 ^ x))
@@ -378,7 +385,8 @@ shinyServer(function(input, output, session) {
           }
         } else {
           myPlot <- myPlot + geom_histogram(stat = "count", fill = "#56B4E9")
-          myPlot <- myPlot + scale_x_discrete(label=abbreviate) 
+          myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+         # myPlot <- myPlot + scale_x_discrete(label=abbreviate) 
           if(length(levels(as.factor(df[[myX]]))) < 7) {
             if (myFacet != 'none') {
               myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3)   
@@ -390,9 +398,7 @@ shinyServer(function(input, output, session) {
           }
         }
       }
-      
-      myPlot <- myPlot + theme_bw()
-      myPlot <- myPlot + labs(y = "Count", x = xlab)
+
       message(paste("c'est fini"))
      
     #  shinyjs::hide("plot_loading", anim = TRUE, animType = "fade")
