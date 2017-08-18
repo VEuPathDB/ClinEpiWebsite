@@ -1,4 +1,4 @@
-package ClinEpiWebsite::Model::CannedQuery::NodeMetadataTest;
+package ClinEpiWebsite::Model::CannedQuery::NodeMetadataStatus;
 
 @ISA = qw( EbrcWebsiteCommon::Model::CannedQuery );
 
@@ -47,15 +47,40 @@ sub init {
   $Self->setName                 ( $Args->{Name      });
   $Self->setId                   ( $Args->{Id        });
   $Self->setContXAxis            ( $Args->{ContXAxis });
-  $Self->setTest                ( $Args->{Test     });
+  $Self->setStatus               ( $Args->{Status    });
+  $Self->setOptStatus            ( $Args->{OptStatus });
 
   my $contXAxis = $Self->getContXAxis();
-  my $test = $Self->getTest();
+  my $status = $Self->getStatus();
+  #this to allow a second optional status to return as well
+  my $optStatus = $Self->getOptStatus();
 
+if (defined $optStatus) {
   $Self->setSql(<<Sql);
 
 select pa.name as LEGEND
-  , ea.$test as MICRO_POS
+  , ea.$status as STATUS
+  , ea.$contXAxis as NAME
+  , ea.$optStatus as OPT_STATUS
+-- profile_file is participant id
+from apidbtuning.participantattributes pa
+   , apidbtuning.protocolappnodeio io
+   , APIDBTUNING.EVENTATTRIBUTES ea
+where pa.name = \'<<Id>>\'
+and pa.protocol_app_node_id = io.input_node_id 
+and io.OUTPUT_NODE_ID = ea.PROTOCOL_APP_NODE_ID
+and ea.$status is not null
+order by $contXAxis 
+
+Sql
+
+  return $Self;
+
+} else {
+  $Self->setSql(<<Sql);
+
+select pa.name as LEGEND
+  , ea.$status as STATUS
   , ea.$contXAxis as NAME
 -- profile_file is participant id
 from apidbtuning.participantattributes pa
@@ -64,14 +89,14 @@ from apidbtuning.participantattributes pa
 where pa.name = \'<<Id>>\'
 and pa.protocol_app_node_id = io.input_node_id 
 and io.OUTPUT_NODE_ID = ea.PROTOCOL_APP_NODE_ID
-and ea.$test is not null
+and ea.$status is not null
 order by $contXAxis 
 
 Sql
 
   return $Self;
+ }
 }
-
 
 # -------------------------------- access --------------------------------
 
@@ -84,9 +109,11 @@ sub setName                          { $_[0]->{'Name'                       } = 
 sub getContXAxis                     { $_[0]->{'ContXAxis'                  } }
 sub setContXAxis                     { $_[0]->{'ContXAxis'                  } = $_[1]; $_[0] }
 
-sub getTest                          { $_[0]->{'Test'                       } }
-sub setTest                          { $_[0]->{'Test'                       } = $_[1]; $_[0] }
+sub getStatus                        { $_[0]->{'Status'                     } }
+sub setStatus                        { $_[0]->{'Status'                     } = $_[1]; $_[0] }
 
+sub getOptStatus                     { $_[0]->{'OptStatus'                  } }
+sub setOptStatus                     { $_[0]->{'OptStatus'                  } = $_[1]; $_[0] }
 
 # ========================================================================
 # --------------------------- Support Methods ----------------------------
