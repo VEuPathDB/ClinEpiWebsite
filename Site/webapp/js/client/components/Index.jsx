@@ -56,8 +56,8 @@ export default function Index({ displayName, webAppUrl }) {
           <div>
             <ul>
               <li>
-                <a href={`${webAppUrl}/im.do?s=5b458c4e9fbf0b69`}>
-                Observations from children in India who had Diarrheal Episode and Crypto Positive within 14 days
+                <a href={`${webAppUrl}/im.do?s=c8b23711dca1ca2e`}>
+                Find children from the PRISM cohort study living in households with low mosquito exposure but who had at least 2 malaria diagnoses / year during 2012-2013
                 </a>
               </li>
               <li>
@@ -66,8 +66,8 @@ export default function Index({ displayName, webAppUrl }) {
                 </a>
               </li>
               <li>
-                <a href={`${webAppUrl}/im.do?s=adfbeddb525f8b12`}>
-                Identifies children with at least three Camphlobacter+ diarrhea observations (&gte; 3 days duration) who had &lt; 3 E.coli diarrhea observations in first year followed by second year where at least 10 of their anthropometric visits they had a weigh for age Z-score &lt; -2.
+                <a href={`${webAppUrl}/im.do?s=1e3dde358477482a`}>
+                Find clinical visits in the PRISM cohort where children had 3 consecutive routine visits with asymptomatic parasitemia and a PBMC sample was collected at the middle visit
                 </a>
               </li>
 
@@ -120,7 +120,7 @@ export default function Index({ displayName, webAppUrl }) {
               epidemiological data collected from areas where Malaria,
               Enteric disase and other globally significant disease are endemic.
             </div>
-            <Link className="WelcomeBoxLink" to="record/dataset/DS_61ac5d073c">
+            <Link className="WelcomeBoxLink" to="record/dataset/DS_0ad509829e">
               Learn more about the studies
             </Link>
           </div>
