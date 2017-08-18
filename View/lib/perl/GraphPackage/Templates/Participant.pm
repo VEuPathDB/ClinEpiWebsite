@@ -127,7 +127,7 @@ sub init {
     my $rAdjustString = << 'RADJUST';
       profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
       profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-      profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse(grepl("not", STATUS), "green", "blue")));
+      profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse((grepl("not", STATUS) | grepl("patent", STATUS)), "green", "blue")));
       profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), NA));
       profile.df.full$FILL = as.factor(profile.df.full$FILL);
       #profile.df.full$VALUE = 1;
