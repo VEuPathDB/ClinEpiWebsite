@@ -135,6 +135,10 @@ RADJUST
   
   $line->addAdjustProfile($rAdjustString);
   $line->setForceNoLines(1);
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2016-06-30";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2011-08-01";
+  $line->setDefaultXMax($xmax);
+  $line->setDefaultXMin($xmin);
   }
 
   $self->setGraphObjects($line);
