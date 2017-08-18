@@ -123,16 +123,18 @@ sub init {
 
   #this will need to be improved / maybe moved somewhere else later. just trying to get it working for now.
   if (!defined $yAxis && !defined $eventStart && defined $status) {
+    #this is a bit specific right now.. will look at it again later.
     my $rAdjustString = << 'RADJUST';
       profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
       profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
       profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse(grepl("not", STATUS), "green", "blue")));
-      profile.df.full = transform(profile.df.full, "SOLID"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), "solid", "hollow"));
-
+      profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), NA));
+      profile.df.full$FILL = as.factor(profile.df.full$FILL);
+      #profile.df.full$VALUE = 1;
 RADJUST
   
   $line->addAdjustProfile($rAdjustString);
-  #$line->setForceNoLines(1);
+  $line->setForceNoLines(1);
   }
 
   $self->setGraphObjects($line);
