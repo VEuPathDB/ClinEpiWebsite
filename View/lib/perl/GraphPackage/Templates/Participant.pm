@@ -30,28 +30,36 @@ sub init {
 
   my $xAxis = $self->getContXAxis();
   my $yAxis = $self->getYAxis();
+  print STDERR Dumper($yAxis);
   my $eventStart = $self->getEventStart();
   my $eventDur = $self->getEventDur();
   my $status = $self->getStatus();
   my $optStatus =  $self->getOptStatus();
 
   my $yLabel = "Weight for Height Z-score";
-
-  if (defined $yAxis) {
-    if ($yAxis eq 'EUPATH_0000682') {
+  my @legendLabel = [];
+  print STDERR Dumper($yAxis->[0]);
+  if (@{$yAxis}) {
+    if (scalar @{$yAxis} > 1) {
+      #specific for now. i think about it again later since this already needs so much work.
+      $yLabel = "Z-score"
+    } elsif ($yAxis->[0] eq 'EUPATH_0000719') {
+      $yLabel = "Length";
+    } elsif ($yAxis->[0] eq 'EUPATH_0000682') {
       $yLabel = "Head Circum for Age Z-score";
-    } elsif ($yAxis eq 'EUPATH_0000689') {
+    } elsif ($yAxis->[0] eq 'EUPATH_0000689') {
       $yLabel = "Height for Age Z-score";
-    } elsif ($yAxis eq 'EUPATH_0000733') {
+    } elsif ($yAxis->[0] eq 'EUPATH_0000733') {
       $yLabel = "Weight for Age Z-score";
-    } elsif ($yAxis eq 'EUPATH_0000662') {
+    } elsif ($yAxis->[0] eq 'EUPATH_0000662') {
       $yLabel = "BMI for Age Z-score";
-    } elsif ($yAxis ne 'EUPATH_0000734') {
+    } elsif ($yAxis->[0] ne 'EUPATH_0000734') {
       warn "This option is not yet recognized. Y-axis label will need to be established in Participant.pm template.";
     }
   } else {
     $yLabel = "";
   }
+  print STDERR Dumper($yLabel);
 
   my $xLabel = "Age in Days";
 
@@ -61,19 +69,38 @@ sub init {
     warn "This option is not yet recognized. X-axis label will need to be established in Participant.pm template.";
   }
 
-  my $nodeMetadata;
+  my @nodeMetadata;
+  my $count = 0;
   if (defined $yAxis) {
-    $nodeMetadata =  ({
-                        Id => $self->getId(), 
-                        contXAxis => $xAxis,  
-                        yAxis => $yAxis,
-                      });
+    for my $row (@{$yAxis}) {
+      $nodeMetadata[$count] =  ({
+                                 Id => $self->getId(), 
+                                 contXAxis => $xAxis,  
+                                 yAxis => $row,
+                               });
+    @legendLabel[$count] = "WHZ";
+    if ($row eq 'EUPATH_0000682') {
+      @legendLabel[$count] = "Head Circum for Age Z-score";
+    } elsif ($row eq 'EUPATH_0000719') {
+      $legendLabel[$count] = "LEN";
+    } elsif ($row eq 'EUPATH_0000689') {
+      $legendLabel[$count] = "HAZ";
+    } elsif ($row eq 'EUPATH_0000733') {
+      $legendLabel[$count] = "WAZ";
+    } elsif ($row eq 'EUPATH_0000662') {
+      $legendLabel[$count] = "BMI for Age Z-score";
+    } elsif ($row ne 'EUPATH_0000734') {
+      warn "This option is not yet recognized. Legend label will need to be established in Participant.pm template.";
+    } 
+      $count++;
+      print STDERR Dumper($count);
+    }
   } else {
-    $nodeMetadata =  ({
-                        Id => $self->getId(),
-                      });
+      $nodeMetadata[0] =  ({
+                            Id => $self->getId(),
+                          });
   }
-
+  print STDERR Dumper(\@nodeMetadata);
   my $nodeMetadataEvent;
   if (defined $eventStart) {
     $nodeMetadataEvent = ({ 
@@ -114,12 +141,33 @@ sub init {
   }
 
 #TODO will eventually need for loop here mimic the one in expression.pm to allow plot parts
-  my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet($nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus);
+  my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus);
   my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
   
   $line->setProfileSets($participantProfile);
   $line->setXaxisLabel($xLabel);
   $line->setYaxisLabel($yLabel);
+
+  my @colorOptions = ( "#56B4E9", "#CC79A7", "#0072B2", "#009E73", "#F0E442", "#999999", "#E69F00");
+  $count--;
+  my @colors = @colorOptions[0..$count];
+  if (defined $eventStart) {
+    @colors[$count+1] = "#000099";
+  }
+  if (defined $status) {
+    @colors[$count+2] = "#000099";
+  }
+
+  #my @colors = map { 
+  #  "#" . join "", map { sprintf "%02x", rand(255) } (0..2) 
+  #} (@nodeMetadata);
+  print STDERR Dumper(\@colors);
+  if (@colors) {
+    $line->setColors(\@colors);
+  }
+  if (@legendLabel) {
+    $line->setLegendLabels(\@legendLabel);
+  }
 
   #this will need to be improved / maybe moved somewhere else later. just trying to get it working for now.
   if (!defined $yAxis && !defined $eventStart && defined $status) {
