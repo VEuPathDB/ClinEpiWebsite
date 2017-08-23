@@ -276,7 +276,39 @@ shinyServer(function(input, output, session) {
       
       facetlist
     } 
-    
+   
+    output$choose_range <- renderUI({
+      plotChoice <- input$plotChoice
+      myX <- input$xaxis
+      myGroups <- input$groups
+      nums <- getNums()
+
+      if (plotChoice == 'groups') {
+        tempDF <- groupsDataFetcher(myGroups, myX)
+
+        myMin <- min(tempDF[[myX]])
+        myMax <- max(tempDF[[myX]])
+
+        sliderInput("range", "Range:",
+                    min = myMin, max = myMax, value = c(myMin,myMax))
+      } else {
+        if (myX %in% nums$source_id) {
+          if (!length(singleVarData)) {
+            data <- singleVarDataFetcher()
+          } else {
+            data <- singleVarData
+          }
+        tempDF <- completeDF(data, myX)
+        }
+
+        myMin <- min(tempDF[[myX]])
+        myMax <- max(tempDF[[myX]])
+
+        sliderInput("range", "Range:",
+                  min = myMin, max = myMax, value = c(myMin,myMax))
+      }
+    })
+ 
     output$choose_xaxis <- renderUI({
       plotChoice <- input$plotChoice
       
@@ -322,7 +354,9 @@ shinyServer(function(input, output, session) {
       myX <- input$xaxis
       myGroups <- input$groups
       myFacet <- input$facet
-      
+      myMin <- input$range[1]
+      myMax <- input$range[2]
+
       df <- getFinalDF(plotChoice, myGroups, myX)
       df <- completeDF(df, myX)
       nums <- getNums()
@@ -340,6 +374,10 @@ shinyServer(function(input, output, session) {
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "Count", x = xlab)
       
+      if (myX %in% nums$source_id || plotChoice == 'groups') {
+        myPlot <- myPlot + coord_cartesian(xlim=c(myMin,myMax))
+      }
+
       if (plotChoice == 'groups') {
         myPlot <- myPlot + geom_density(aes(fill = groups, y = 30 * ..count..), alpha = .2)
         if (length(levels(as.factor(df$groups))) > 12) {

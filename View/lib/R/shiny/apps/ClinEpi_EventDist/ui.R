@@ -34,6 +34,10 @@ shinyUI(
               div(
                 id = "xUI",
                 uiOutput("choose_xaxis")
+              ),
+              div(
+                id = "rangeUI",
+                uiOutput("choose_range")
               )      
        ),
        column(4,
