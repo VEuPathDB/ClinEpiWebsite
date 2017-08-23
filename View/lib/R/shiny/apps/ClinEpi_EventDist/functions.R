@@ -33,3 +33,8 @@ completeDF <- function(data, desiredCols) {
   completeVec <- complete.cases(data[, desiredCols])
   return(data[completeVec, ])
 }
+
+completeDT <- function(data, desiredCols) {
+  completeVec <- complete.cases(data[, (desiredCols), with=FALSE])
+  return(data[completeVec, ])
+}

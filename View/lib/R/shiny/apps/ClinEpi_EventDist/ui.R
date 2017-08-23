@@ -12,7 +12,7 @@ shinyUI(
               ".shiny-output-error:before { visibility: hidden; }",
               "#distribution{height:75vh !important;}"
    ),
-   titlePanel("Events Distribution for Selected Participants"),
+   titlePanel("Observations Distribution for Selected Participants"),
    fluidRow(
      div(
        id = "userInput",
@@ -21,7 +21,7 @@ shinyUI(
                 id = "plotTypeUI",
                 selectInput(inputId = "plotChoice",
                             label = "Choose plot to generate:",
-                            choices = list('Single Variable' = 'singleVar', 'Groups' = 'groups'),
+                            choices = list('Single Variable' = 'singleVar', 'Multi Variable' = 'groups'),
                             selected = "singleVar")
               ),
               div(

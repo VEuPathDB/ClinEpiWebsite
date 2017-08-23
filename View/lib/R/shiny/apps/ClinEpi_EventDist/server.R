@@ -18,12 +18,6 @@ shinyServer(function(input, output, session) {
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
  
   filesFetcher <- reactive({
-    #i assume well eventually use this function so ill leave it. will need to change it though
-    #file=read.csv(
-    #    getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
-    #    sep = "\t",
-    #    check.names = FALSE
-    # )
 
      prtcpnt.file <<- read.csv(
           getWdkDatasetFile('ShinyParticipants.tab', session, FALSE, dataStorageDir),
@@ -80,11 +74,12 @@ shinyServer(function(input, output, session) {
     } else {
       for (i in myGroups) {
         if (i %in% nums$source_id) {
-          merge1 <- data.frame("Participant_Id" = event.file$Participant_Id, "placeholder" = event.file$EUPATH_0000644, 
-                               "groups" = paste0(metadata.file$property[metadata.file$source_id == i], ": ", cut(event.file[[i]], 5)))
+          merge1 <- data.frame("Participant_Id" = event.file$Participant_Id, "placeholder" = event.file$EUPATH_0000644, "groups" = paste0(metadata.file$property[metadata.file$source_id == i], ": ", cut(event.file[[i]], 5)))
+          merge1 <- merge1[- grep("NA", merge1$groups),]
         } else {
           #right now this assumes that if a string the x axis is ageDays. when we have time as an option to we will need an if statement somewhere here
           merge1 <- data.frame("Participant_Id" = event.file$Participant_Id, "placeholder" = event.file$EUPATH_0000644, "groups" = event.file[[i]])
+          merge1 <- completeDT(merge1, "groups")
         }
         merge2 <- merge(merge1, prtcpnt.file, by = "Participant_Id")
         merge3 <- merge(merge2, house.file, by = "Participant_Id")
@@ -98,7 +93,6 @@ shinyServer(function(input, output, session) {
   }
     
   singleVarDataFetcher <- function(){
-    #not sure if i'll have to call filesFetcher from here or if i get them for free since the files are environment vars
     filesFetcher()
     
     #remove non-unique column names and merge them to one file to return
@@ -124,20 +118,17 @@ shinyServer(function(input, output, session) {
         data[[i]] = as.numeric(data[[i]])
       }
     } else {
-      message(paste("no longer in groups"))
       if (!length(singleVarData)) {
         data <- singleVarDataFetcher()
       } else {
         data <- singleVarData
       }
-      #tanzania data is duplicated when x is country because there is a comma in the entry.. 
       if (myX %in% strings$source_id) {
         tempDF <- data[, !(names(data)) %in% myX]
         s <- strsplit(as.character(data[[myX]]), split = " | ", fixed = TRUE)
         data <- cbind.data.frame(apply(tempDF, 2, function(x) {rep(x, sapply(s,length))}), "placeholder" = unlist(s), stringsAsFactors=FALSE)
         names(data)[ncol(data)] <- myX
         
-        #after above is done need to convert numbers back
         nums <- getNums()
         colsToMakeNumeric <- subset(nums, nums$source_id %in% names(data))
         for (i in colsToMakeNumeric$source_id) {
@@ -181,9 +172,6 @@ shinyServer(function(input, output, session) {
     groupsChoiceList <- as.vector(groupsSubset$source_id)
     names(groupsChoiceList) <- as.vector(groupsSubset$property)
     
-    message(paste("in groups list function"))
-   # shinyjs::show("facetUI")
-    
     groupsChoiceList
   }
   
@@ -197,7 +185,7 @@ shinyServer(function(input, output, session) {
         if (myX == 'zscore') {
           selectList <- c('EUPATH_0000734', 'EUPATH_0000689')
         } else {
-          selectList <- c('EUPATH_0000734', 'EUPATH_0000704')
+          selectList <- c('EUPATH_0000689')
         }
         
         dropdownButton(
@@ -208,8 +196,6 @@ shinyServer(function(input, output, session) {
                              choiceValues = unname(groupsChoiceList),
                              selected = selectList)
         )
-      } else {
-      #  shinyjs::show("facetUI")
       }
 
     })
@@ -236,9 +222,6 @@ shinyServer(function(input, output, session) {
         names(xchoiceList) <- as.vector(xchoices$property)
         xlist <- as.list(xchoiceList)
       }
-      
-      message(paste("in x list function."))
-     # shinyjs::show("groupsUI")
       
       xlist
     }
@@ -291,20 +274,8 @@ shinyServer(function(input, output, session) {
       names(choiceList) <- c('None', as.vector(choices$property))
       facetlist <- as.list(choiceList)
       
-      message(paste("got facet list"))
-      #shinyjs::hide(id = "plot_loading", anim = TRUE, animType = "fade")
-      #shinyjs::show("plot_area")
-      
       facetlist
     } 
-    
-   # observeEvent(input$plotChoice, {
-   #   shinyjs::hide(id="groupsUI")
-   #   shinyjs::hide(id="facetUI")
-   #   shinyjs::hide(id="plot_area")
-   #   shinyjs::show("plot_loading")
-   #   message(paste("in observe thing"))
-   # })
     
     output$choose_xaxis <- renderUI({
       plotChoice <- input$plotChoice
@@ -348,27 +319,29 @@ shinyServer(function(input, output, session) {
       if(is.null(input$facet)) {
         return()
       }
-      myGroups <- input$groups
       myX <- input$xaxis
+      myGroups <- input$groups
       myFacet <- input$facet
       
-     # shinyjs::hide(id="plot_area") 
-    #  shinyjs::show("plot_loading")
-      message(paste("just starting"))
-        
       df <- getFinalDF(plotChoice, myGroups, myX)
       df <- completeDF(df, myX)
       nums <- getNums()
 
-      xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
-      xlab <- as.character(xlab[1,2])
-      
+      if (myX == 'ageDays') {
+        xlab <- "Age in Days"
+      } else if (myX == 'zscore') {
+        xlab <- "Z-score"
+      } else {
+        xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
+        xlab <- as.character(xlab[1,2])
+      }
+
       myPlot <- ggplot(data = df, aes_string(x = myX))
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "Count", x = xlab)
       
       if (plotChoice == 'groups') {
-        myPlot <- myPlot + geom_histogram(stat = "bin", aes(fill = groups)) #+ scale_y_continuous(formatter = function(x) format(10 ^ x))
+        myPlot <- myPlot + geom_density(aes(fill = groups, y = 30 * ..count..), alpha = .2)
         if (length(levels(as.factor(df$groups))) > 12) {
           myPlot <- myPlot + theme(legend.position="none")
         }
@@ -398,11 +371,6 @@ shinyServer(function(input, output, session) {
           }
         }
       }
-
-      message(paste("c'est fini"))
-     
-    #  shinyjs::hide("plot_loading", anim = TRUE, animType = "fade")
-    #  shinyjs::show("plot_area")
 
       myPlot
     })
