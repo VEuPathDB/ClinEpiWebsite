@@ -379,7 +379,7 @@ shinyServer(function(input, output, session) {
       }
 
       if (plotChoice == 'groups') {
-        myPlot <- myPlot + geom_density(aes(fill = groups, y = 30 * ..count..), alpha = .2)
+        myPlot <- myPlot + geom_density(aes(fill = groups, y = .3 * ..count..), alpha = .2)
         if (length(levels(as.factor(df$groups))) > 12) {
           myPlot <- myPlot + theme(legend.position="none")
         }
