@@ -18,11 +18,7 @@ use EbrcWebsiteCommon::View::GraphPackage::GGBarPlot;
 use Scalar::Util qw /blessed/;
 use Data::Dumper;
 
-#for now will just do something simple, will call it participant summary [prtcpnt_sum]
-# may have to do some radjust to manipulate the df(s) into what we want
-# will have to add rpostscript to add segments and glyphs for events
-
-#sub noElemFile { return 1; }
+sub finalProfileAdjustments {} 
 
 sub init {
   my $self = shift;
@@ -30,21 +26,24 @@ sub init {
 
   my $xAxis = $self->getContXAxis();
   my $yAxis = $self->getYAxis();
-  print STDERR Dumper($yAxis);
   my $eventStart = $self->getEventStart();
   my $eventDur = $self->getEventDur();
   my $status = $self->getStatus();
   my $optStatus =  $self->getOptStatus();
 
+  my $subtitle = "red lines = +/- 2 sd";
   my $yLabel = "Weight for Height Z-score";
   my @legendLabel = [];
-  print STDERR Dumper($yAxis->[0]);
   if (@{$yAxis}) {
     if (scalar @{$yAxis} > 1) {
       #specific for now. i think about it again later since this already needs so much work.
-      $yLabel = "Z-score"
+      $yLabel = "Z-score";
+    } elsif ($yAxis->[0] eq 'EUPATH_0000732') {
+      $yLabel = "Weight";
+      $subtitle = "";
     } elsif ($yAxis->[0] eq 'EUPATH_0000719') {
       $yLabel = "Length";
+      $subtitle = "";
     } elsif ($yAxis->[0] eq 'EUPATH_0000682') {
       $yLabel = "Head Circum for Age Z-score";
     } elsif ($yAxis->[0] eq 'EUPATH_0000689') {
@@ -58,8 +57,8 @@ sub init {
     }
   } else {
     $yLabel = "";
+    $subtitle = "";
   }
-  print STDERR Dumper($yLabel);
 
   my $xLabel = "Age in Days";
 
@@ -78,29 +77,30 @@ sub init {
                                  contXAxis => $xAxis,  
                                  yAxis => $row,
                                });
-    @legendLabel[$count] = "WHZ";
+    $legendLabel[$count] = "Weight for Height Z-score";
     if ($row eq 'EUPATH_0000682') {
-      @legendLabel[$count] = "Head Circum for Age Z-score";
+      $legendLabel[$count] = "Head Circum for Age Z-score";
+    } elsif ($row eq 'EUPATH_0000732') {
+      $legendLabel[$count] = "Weight";
     } elsif ($row eq 'EUPATH_0000719') {
-      $legendLabel[$count] = "LEN";
+      $legendLabel[$count] = "Length";
     } elsif ($row eq 'EUPATH_0000689') {
-      $legendLabel[$count] = "HAZ";
+      $legendLabel[$count] = "Height for Age Z-score";
     } elsif ($row eq 'EUPATH_0000733') {
-      $legendLabel[$count] = "WAZ";
+      $legendLabel[$count] = "Weight for Age Z-score";
     } elsif ($row eq 'EUPATH_0000662') {
       $legendLabel[$count] = "BMI for Age Z-score";
     } elsif ($row ne 'EUPATH_0000734') {
       warn "This option is not yet recognized. Legend label will need to be established in Participant.pm template.";
     } 
       $count++;
-      print STDERR Dumper($count);
     }
   } else {
       $nodeMetadata[0] =  ({
                             Id => $self->getId(),
                           });
   }
-  print STDERR Dumper(\@nodeMetadata);
+
   my $nodeMetadataEvent;
   if (defined $eventStart) {
     $nodeMetadataEvent = ({ 
@@ -108,6 +108,13 @@ sub init {
                             eventStart => $eventStart, 
                             eventDur => $eventDur,
                           });
+    if ($eventDur eq 'EUPATH_0000665') {
+      if ($subtitle eq '') {
+        $subtitle = "bars = diarrhea";
+      } else {
+        $subtitle = $subtitle . "; bars = diarrhea";
+      }
+    }
   } else {
     $nodeMetadataEvent = ({
                             Id => $self->getId(),
@@ -129,6 +136,13 @@ sub init {
                                contXAxis => $xAxis,
                                status => $status
                              });
+    if ($status eq 'EUPATH_0000704') {
+      if ($subtitle eq '') {
+        $subtitle = "points = micro+";
+      } else {
+        $subtitle = $subtitle . "; points = micro+";
+      }
+    }
     }
   } else {
     $nodeMetadataStatus = ({
@@ -140,28 +154,30 @@ sub init {
     die "No data was provided to plot. Must provide 'yAxis', 'eventStart' or 'status' in arguments.";
   }
 
-#TODO will eventually need for loop here mimic the one in expression.pm to allow plot parts
+#TODO will eventually need for loop in this file (mimic the one in expression.pm) to allow plot parts
   my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus);
   my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
   
   $line->setProfileSets($participantProfile);
   $line->setXaxisLabel($xLabel);
   $line->setYaxisLabel($yLabel);
+  $line->setSubtitle($subtitle);
 
   my @colorOptions = ( "#56B4E9", "#CC79A7", "#0072B2", "#009E73", "#F0E442", "#999999", "#E69F00");
   $count--;
+  #TODO add a check here that count is not outside bounds of colorOptions and let it reuse colorOptions if it is. 
   my @colors = @colorOptions[0..$count];
   if (defined $eventStart) {
-    @colors[$count+1] = "#000099";
+    $colors[$count+1] = "#000099";
   }
   if (defined $status) {
-    @colors[$count+2] = "#000099";
+    if (defined $eventStart) {
+      $colors[$count+2] = "#000099";
+    } else {
+      $colors[$count+1] = "#000099";
+    }
   }
 
-  #my @colors = map { 
-  #  "#" . join "", map { sprintf "%02x", rand(255) } (0..2) 
-  #} (@nodeMetadata);
-  print STDERR Dumper(\@colors);
   if (@colors) {
     $line->setColors(\@colors);
   }
@@ -169,26 +185,7 @@ sub init {
     $line->setLegendLabels(\@legendLabel);
   }
 
-  #this will need to be improved / maybe moved somewhere else later. just trying to get it working for now.
-  if (!defined $yAxis && !defined $eventStart && defined $status) {
-    #this is a bit specific right now.. will look at it again later.
-    my $rAdjustString = << 'RADJUST';
-      profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
-      profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-      profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse((grepl("not", STATUS) | grepl("patent", STATUS)), "green", "blue")));
-      profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), NA));
-      profile.df.full$FILL = as.factor(profile.df.full$FILL);
-      #profile.df.full$VALUE = 1;
-RADJUST
-  
-  $line->addAdjustProfile($rAdjustString);
-  $line->setForceNoLines(1);
-  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2016-06-30";
-  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2011-08-01";
-  $line->setDefaultXMax($xmax);
-  $line->setDefaultXMin($xmin);
-  }
-
+  $self->finalProfileAdjustments($line);
   $self->setGraphObjects($line);
 
   return $self;

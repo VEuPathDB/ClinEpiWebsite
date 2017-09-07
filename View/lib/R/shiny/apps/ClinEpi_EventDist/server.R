@@ -2,6 +2,8 @@
 
 require(shiny)
 require(ggplot2)
+require(grid)
+require(gridSVG)
 
 source("../../lib/wdkDataset.R")
 source("config.R")
@@ -379,7 +381,8 @@ shinyServer(function(input, output, session) {
       }
 
       if (plotChoice == 'groups') {
-        myPlot <- myPlot + geom_density(aes(fill = groups, y = .3 * ..count..), alpha = .2)
+        myPlot <- myPlot + geom_area(aes(y = ..count.., fill = groups, group = groups), stat = "bin", alpha = .2)
+      #  myPlot <- myPlot + geom_density(aes(fill = groups, y = .3 * ..count..), alpha = .2)
         if (length(levels(as.factor(df$groups))) > 12) {
           myPlot <- myPlot + theme(legend.position="none")
         }
@@ -410,7 +413,27 @@ shinyServer(function(input, output, session) {
         }
       }
 
-      myPlot
+      tempsvg <- tempfile(fileext=".svg")
+      message(paste("temp file:", tempsvg))
+      on.exit(unlink(tempsvg))
+      myWidth = input$dimension[1]/100
+      message(paste("my width:", myWidth))
+      myHeight = input$dimension[2]/100
+      pdf(width = myWidth, height = myHeight)
+
+      print(myPlot)
+      myJS <- normalizePath("tooltip.js")
+      grid.script(filename=myJS, type="application/ecmascript", inline=TRUE)
+    
+      devs <- .Devices
+      devs[[dev.cur()]] <- "gridsvg"
+      assign(".Devices", devs, envir = baseenv())
+      
+      grid.export(name=tempsvg)
+      grDevices::dev.off(which = dev.cur())
+      
+      svgoutput <- readLines(tempsvg)
+      paste(svgoutput, sep="") 
     })
 
 })

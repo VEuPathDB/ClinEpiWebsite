@@ -12,6 +12,18 @@ shinyUI(
               ".shiny-output-error:before { visibility: hidden; }",
               "#distribution{height:75vh !important;}"
    ),
+   tags$head(tags$script('var dimension = [0, 0];
+                         $(document).on("shiny:connected", function(e) {
+                         dimension[0] = window.innerWidth;
+                         dimension[1] = window.innerHeight;
+                         Shiny.onInputChange("dimension", dimension);
+                         });
+                         $(window).resize(function(e) {
+                         dimension[0] = window.innerWidth;
+                         dimension[1] = window.innerHeight;
+                         Shiny.onInputChange("dimension", dimension);
+                         });'
+   )),
    titlePanel("Observations Distribution for Selected Participants"),
    fluidRow(
      div(
@@ -51,7 +63,7 @@ shinyUI(
    hr(),
    div(
      id = "plot_area",
-     plotOutput("distribution",  width = '100%')
+     htmlOutput("distribution")
    )      
     
   )
