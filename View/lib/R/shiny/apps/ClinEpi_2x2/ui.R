@@ -100,12 +100,16 @@ shinyUI(
    hr(),
    div(
      id = "plot_area",
-     DT::dataTableOutput("statsTable"),
+     fluidRow(
+       column(6,
+              DT::dataTableOutput("statsTable")
+       ),
+       column(6,
+              DT::dataTableOutput("table")      
+       )
+     ),
      hr(),
-     plotOutput("plot"),
-     DT::dataTableOutput("table")
-     
-   ) 
-              
+     plotOutput("plot")
+   )            
   )
 )

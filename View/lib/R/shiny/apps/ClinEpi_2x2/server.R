@@ -145,20 +145,14 @@ shinyServer(function(input, output, session) {
       
       if (any(colnames(event.file)) %in% myAttr & levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
         selectInput(inputId = "attr_stp1",
-                    label = "Value:",
-                    choices = list('Change in value over time selected' = 'delta', '% Days' = 'percentDays', "Direct comparison" = "direct"),
+                    label = "where",
+                    choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
                     selected = "delta",
                     width = '100%')
-      #} else if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
-      #  selectInput(inputId = "attr_stp1",
-      #              label = "Value:",
-      #              choices = list('% Days' = 'percentDays', "Direct comparison" = "direct"),
-      #              selected = "direct",
-      #              width = '100%')
       } else {
         if (myAttr %in% nums$source_id) {
           selectInput(inputId = "attr_stp1",
-                      label = "Logical Operator:",
+                      label = "is",
                       choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                       selected = "greaterThan",
                       width = '100%')
@@ -167,20 +161,20 @@ shinyServer(function(input, output, session) {
           if (length(attrStp1List) == 2) {
             if (any(attrStp1List %in% "Yes")) {
               selectInput(inputId = "attr_stp1",
-                          label = "Value:",
+                          label = NULL,
                           choices = attrStp1List,
                           selected = "Yes",
                           width = '100%')
             } else if (any(attrStp1List %in% "TRUE")) {
               selectInput(inputId = "attr_stp1",
-                          label = "Value:",
+                          label = NULL,
                           choices = attrStp1List,
                           selected = "TRUE",
                           width = '100%')
             }
           } else {
             selectInput(inputId = "attr_stp1",
-                        label = "Value:",
+                        label = NULL,
                         choices = attrStp1List,
                         width = '100%')
           }
@@ -201,20 +195,14 @@ shinyServer(function(input, output, session) {
       
      if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
         selectInput(inputId = "out_stp1",
-                    label = "Value:",
-                    choices = list('Change in value over time selected' = 'delta', '% Days' = 'percentDays', "Direct comparison" = "direct"),
+                    label = "where",
+                    choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
                     selected = "delta",
                     width = '100%')
-     #} else if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
-     #  selectInput(inputId = "out_stp1",
-     #             label = "Value:",
-     #             choices = list('% Days' = 'percentDays', "Direct comparison" = "direct"),
-     #             selected = "direct",
-     #             width = '100%')
      } else {
         if (myOut %in% nums$source_id) {
           selectInput(inputId = "out_stp1",
-                      label = "Logical Operator:",
+                      label = "is",
                       choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                       selected = "greaterThan",
                       width = '100%')
@@ -223,20 +211,20 @@ shinyServer(function(input, output, session) {
           if (length(outStp1List) == 2) {
             if (any(outStp1List %in% "Yes")) {
               selectInput(inputId = "out_stp1",
-                          label = "Value:",
+                          label = NULL,
                           choices = outStp1List,
                           selected = "Yes",
                           width = '100%')
             } else if (any(outStp1List %in% "TRUE")) {
               selectInput(inputId = "out_stp1",
-                          label = "Value:",
+                          label = NULL,
                           choices = outStp1List,
                           selected = "TRUE",
                           width = '100%')
             }
           } else {
             selectInput(inputId = "out_stp1",
-                        label = "Value:",
+                        label = NULL,
                         choices = outStp1List,
                         width = '100%')
           }
@@ -257,14 +245,14 @@ shinyServer(function(input, output, session) {
       if (myStp1Val %in% anthro) {
         if (myStp1Val == 'percentDays') {
           numericInput(inputId = "attr_stp2",
-                       label = "% Days Greater Than",
+                       label = NULL,
                        value = 50,
                        min = 0,
                        max = 100,
                        width = '100%')
         } else {
           selectInput(inputId = "attr_stp2",
-                      label = "Logical Operator:",
+                      label = "is",
                       choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                       selected = "greaterThan",
                       width = '100%')
@@ -283,8 +271,10 @@ shinyServer(function(input, output, session) {
           myMax <- max(tempDF[, (myAttr), with=FALSE])
           
           #just going to set default value to whatever the mean is
-          sliderInput("attr_stp2", "Comparative value:",
-                      min = myMin, max = myMax, value = mean(tempDF[[myAttr]], na.rm = T) , round=TRUE, width = '100%')
+          #sliderInput("attr_stp2", "Comparative value:",
+          #            min = myMin, max = myMax, value = mean(tempDF[[myAttr]], na.rm = T) , round=TRUE, width = '100%')
+          numericInput("attr_stp2", NULL,
+                       min = myMin, max = myMax, value = mean(tempDF[[myAttr]]), width = '100%')
         }
       }
       
@@ -302,14 +292,14 @@ shinyServer(function(input, output, session) {
       if (myStp1Val %in% anthro) {
         if (myStp1Val == 'percentDays') {
           numericInput(inputId = "out_stp2",
-                       label = "% Days Greater Than",
+                       label = NULL,
                        value = 50,
                        min = 0,
                        max = 100,
                        width = '100%')
         } else {
           selectInput(inputId = "out_stp2",
-                      label = "Logical Operator:",
+                      label = "is",
                       choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                       selected = "greaterThan",
                       width = '100%')
@@ -328,8 +318,10 @@ shinyServer(function(input, output, session) {
           myMax <- max(tempDF[, (myOut), with=FALSE])
           
           #just going to set default value to whatever the mean is 
-          sliderInput("out_stp2", "Comparative value:",
-                      min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width = '100%')
+          #sliderInput("out_stp2", "Comparative value:",
+          #            min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width = '100%')
+          numericInput("out_stp2", NULL,
+                       min = myMin, max = myMax, value = mean(tempDF[[myOut]]), width = '100%')
         } 
       }
       
@@ -346,7 +338,7 @@ shinyServer(function(input, output, session) {
       if (myStp1Val %in% anthro) {
         if (myStp1Val == "percentDays") {
           selectInput(inputId = "attr_stp3",
-                      label = "Logical Operator:",
+                      label = "are",
                       choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                       selected = "greaterThan",
                       width = '100%')
@@ -362,11 +354,15 @@ shinyServer(function(input, output, session) {
           }
           myMax <- max(tempDF[, (myAttr), with=FALSE])
           
-          sliderInput("attr_stp3", "Comparative value:",
-                      min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+          #sliderInput("attr_stp3", "Comparative value:",
+          #            min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+          numericInput("attr_stp3", NULL,
+                       min = myMin, max = myMax, value = mean(tempDF[[myAttr]]), width = '100%')
         } else {
-          sliderInput("attr_stp3", "Comparative value:",
-                      min = -20, max = 20, value = -1, step = .1, width = '100%')
+          #sliderInput("attr_stp3", "Comparative value:",
+          #            min = -20, max = 20, value = -1, step = .1, width = '100%')
+          numericInput("attr_stp3", NULL,
+                       min = -20, max = 20, value = -0.5, step = .1, width = '100%')
         }
         
       }
@@ -384,7 +380,7 @@ shinyServer(function(input, output, session) {
       if (myStp1Val %in% anthro) {
         if (myStp1Val == "percentDays") {
           selectInput(inputId = "out_stp3",
-                      label = "Logical Operator:",
+                      label = "are",
                       choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                       selected = "greaterThan",
                       width = '100%')
@@ -400,11 +396,15 @@ shinyServer(function(input, output, session) {
           }
           myMax <- max(tempDF[, (myOut), with=FALSE])
           
-          sliderInput("out_stp3", "Comparative value:",
-                      min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+          #sliderInput("out_stp3", "Comparative value:",
+          #            min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+          numericInput("out_stp3", NULL,
+                       min = myMin, max = myMax, value = mean(tempDF[[myOut]]), width = '100%')
         } else {
-          sliderInput("out_stp3", "Comparative value:",
-                      min = -20, max = 20, value = -1, step = .1, width = '100%')
+          #sliderInput("out_stp3", "Comparative value:",
+          #            min = -20, max = 20, value = -1, step = .1, width = '100%')
+          numericInput("out_stp3", NULL,
+                       min = -20, max = 20, value = -0.5, step = .1, width = '100%')
         }
         
       }
@@ -422,15 +422,17 @@ shinyServer(function(input, output, session) {
         data <- singleVarData
         tempDF <- completeDT(data, myOut)
         
-        if (any(colnames(event.file)) %in% myAttr & levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
+        if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
           myMin = 0
         } else {
           myMin <- min(tempDF[, (myAttr), with=FALSE])
         }
         myMax <- max(tempDF[, (myAttr), with=FALSE])
         
-        sliderInput("attr_stp4", "Comparative value:",
-                    min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+        #sliderInput("attr_stp4", "Comparative value:",
+        #            min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+        numericInput("attr_stp4", NULL,
+                     min = myMin, max = myMax, value = mean(tempDF[[myAttr]]), width = '100%')
       }
     })
       
@@ -452,11 +454,13 @@ shinyServer(function(input, output, session) {
         }
         myMax <- max(tempDF[, (myOut), with=FALSE])
         
-        sliderInput("out_stp4", "Comparative value:",
-                    min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+        #sliderInput("out_stp4", "Comparative value:",
+        #            min = myMin, max = myMax, value = mean(tempDF[[myOut]], na.rm = T) , round=TRUE, width='100%')
+        numericInput("out_stp4", NULL,
+                     min = myMin, max = myMax, value = mean(tempDF[[myOut]]), width = '100%')
       }
-    })
-       
+    })      
+ 
     output$plot <- renderPlot({
       
         tableData <- plotData()
@@ -475,9 +479,9 @@ shinyServer(function(input, output, session) {
         df <- rbind(df, c(df[1,2], NA))
         df <- rbind(df, c(df[2,2], NA))
         df <- cbind(c("Outcome+", "Outcome-", "Outcome+", "Outcome-"), df)
-        colnames(df) <- c("Outcome" ,"Value", "Attribute")
+        colnames(df) <- c("Outcome" ,"Proportion", "Attribute")
         df <- data.table(df)
-        df$Value = as.numeric(df$Value)
+        df$Proportion = as.numeric(df$Proportion)
         df$Attribute <- c("Attribute+", "Attribute+", "Attribute-", "Attribute-")
         df$Outcome <- factor(df$Outcome, levels = c("Outcome+", "Outcome-"))
         df$Attribute <- factor(df$Attribute, levels = c("Attribute+", "Attribute-"))
@@ -492,10 +496,10 @@ shinyServer(function(input, output, session) {
         total <- tableData$Totals[3]
         OPprop <- outPos / total
         ONprop <- outNeg / total
-        width <- c( OPprop, ONprop, OPprop, ONprop)
+        width <- c( OPprop*1.9, ONprop*1.9, OPprop*1.9, ONprop*1.9)
         df <- data.table(df, width)
         
-        myPlot <- ggplot(data = df, aes(x = Outcome, y = Value, width = width, fill = Attribute))
+        myPlot <- ggplot(data = df, aes(x = Outcome, y = Proportion, width = width, fill = Attribute))
         myPlot <- myPlot + theme_bw()
         #myPlot <- myPlot + labs(y = ylab, x = xlab)
         
@@ -526,8 +530,15 @@ shinyServer(function(input, output, session) {
       if (is.null(data)) {
         return()
       }
-      
-      datatable(data, options = list(sDom = '<"top"><"bottom">'))
+
+      datatable(data, 
+                width = '100%',
+                options = list(
+                  sDom = '<"top"><"bottom">', 
+                  autoWidth = TRUE, 
+                  columnDefs = list(list(width = '60px', targets = c(1,2,3)))
+        )
+      )
     })
     
     output$statsTable <- DT::renderDataTable({
@@ -550,11 +561,27 @@ shinyServer(function(input, output, session) {
       OR <- (a*d)/(b*c)
       #get rr
       RR <- (a/(a+b)) / (c/(c+d))
+      #if 10 digits or fewer dont use exponential notation
+      options("scipen"=10)
+      #round to 4 digits and for p-value show "<0.0001" when appropriate
+      OR <- round(OR, digits=4)
+      RR <- round(RR, digits=4)
+      p <- round(p, digits=4)
+      if (p < 0.0001) {
+        p <- "<0.0001"
+      }
       #make stats table
       stats <- data.table("p-value" = p, "Odds Ratio" = OR, "Relative Risk" = RR)
       rownames(stats) <- "Statistics"
-      
-      datatable(stats, options = list(sDom = '<"top"><"bottom">'))
+     
+      datatable(stats,
+                width = '100%',
+                options = list(
+                  sDom = '<"top"><"bottom">',
+                  autoWidth = TRUE,
+                  columnDefs = list(list(width = '60px', targets = c(1,2,3)))
+        )
+      )
     })
     
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
