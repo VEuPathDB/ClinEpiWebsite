@@ -3,14 +3,16 @@
 
 shinyUI(
   fluidPage(
+   tags$head(tags$style(
+      HTML("input[type='search']:disabled {visibility:hidden}"),
+      HTML(".js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar {background: transparent}"),
+      HTML(".js-irs-2 .irs-bar-edge, .js-irs-2 .irs-bar {background: transparent}")
+    )),
    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
               "#2x2{height:90vh !important;}"
    ),
-   tags$head(tags$style(
-     HTML("input[type='search']:disabled {visibility:hidden}")
-   )),
    titlePanel("Contingency Tables for Selected Participants"),
    div(
      id = "userInput",
