@@ -1,5 +1,5 @@
 ## ui.R
-#require(plotly)
+require(plotly)
 
 shinyUI(
   fluidPage(
@@ -95,7 +95,7 @@ shinyUI(
       id = "plot_area",
       DT::dataTableOutput("table"),
       hr(),
-      plotOutput("plot", width = '100%', height = '1000px')
+      plotlyOutput("plot", width = '100%', height = '1000px')
       
     ) 
     
