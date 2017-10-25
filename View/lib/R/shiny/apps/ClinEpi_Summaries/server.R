@@ -928,7 +928,13 @@ shinyServer(function(input, output, session) {
         #data <- data[, -"temp"]
         data$Group[nrow(data)] <- "Totals"
       }
-      
+    
+      ageDays <- "EUPATH_0000644" 
+      #temp placeholder for checking if data has time vars for x axis
+      if (!any(colnames(singleVarData) %in% ageDays)) {
+        names(data)[names(data) == 'Line'] <- 'X-Axis'
+      } 
+
       datatable(data, 
                 width = '100%',
                 rownames = FALSE
