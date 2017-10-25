@@ -706,9 +706,9 @@ shinyServer(function(input, output, session) {
       datatable(data, 
                 width = '100%',
                 options = list(
-                  sDom = '<"top"><"bottom">', 
+                  sDom = '<"top"><"bottom">',
                   autoWidth = TRUE, 
-                  columnDefs = list(list(width = '60px', targets = c(1,2,3)))
+                  columnDefs = list(list(width = '250px', className = 'dt-right', targets = c(1,2,3)))
         )
       )
     })
@@ -739,21 +739,38 @@ shinyServer(function(input, output, session) {
       #round to 4 digits and for p-value show "<0.0001" when appropriate
       OR <- round(OR, digits=4)
       RR <- round(RR, digits=4)
+  
+      #calc conf interval. later install epitools and let it do the work for you.
+      alpha <- 0.05
+      siglog <- sqrt((1/a) + (1/b) + (1/c) + (1/d))
+      zalph <- qnorm(1 - alpha/2)
+      logOR <- log(OR)
+      logRR <- log(RR)
+      logloOR <- logOR - zalph * siglog
+      logloRR <- logRR - zalph * siglog
+      loghiOR <- logOR + zalph * siglog
+      loghiRR <- logRR + zalph * siglog
+      
+      ORlo <- round(exp(logloOR), digits=4)
+      RRlo <- round(exp(logloRR), digits=4)
+      ORhi <- round(exp(loghiOR), digits=4)
+      RRhi <- round(exp(loghiRR), digits=4)
+
       p <- round(p, digits=4)
       if (p != "NaN" & p < 0.0001) {
         p <- "<0.0001"
       }
       #make stats table
-      stats <- data.table("p-value" = p, "Odds Ratio" = OR, "Relative Risk" = RR)
+      stats <- data.table("p-value" = p, "Odds Ratio" = paste(ORlo, "-", ORhi), "Relative Risk" = paste(RRlo, "-", RRhi))
       colnames(stats) <- c("p-value", "Odds Ratio", "Relative Risk")
       rownames(stats) <- "Statistics"
       
       datatable(stats, 
                 width = '100%',
                 options = list(
-                  sDom = '<"top"><"bottom">', 
+                  sDom = '<"top"><"bottom">',
                   autoWidth = TRUE, 
-                  columnDefs = list(list(width = '60px', targets = c(1,2,3)))
+                  columnDefs = list(list(width = '250px', className = 'dt-right', targets = c(1,2,3)))
                 )
       )
     })

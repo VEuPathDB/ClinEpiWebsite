@@ -103,11 +103,12 @@ shinyUI(
    div(
      id = "plot_area",
      fluidRow(
-       column(6,
-              DT::dataTableOutput("statsTable")
-       ),
-       column(6,
-              DT::dataTableOutput("table")      
+       column(12,
+              DT::dataTableOutput("table"),
+      # ),
+      # column(6,
+              DT::dataTableOutput("statsTable"),
+              helpText("*Pearson's Chi-Square test applied: small sample sizes result in unreliable p-values.")      
        )
      ),
      hr(),
