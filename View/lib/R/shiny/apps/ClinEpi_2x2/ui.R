@@ -1,5 +1,5 @@
 ## ui.R
-#require(plotly)
+require(plotly)
 
 shinyUI(
   fluidPage(
@@ -111,7 +111,7 @@ shinyUI(
        )
      ),
      hr(),
-     plotOutput("plot")
+     plotlyOutput("plot")
    )            
   )
 )
