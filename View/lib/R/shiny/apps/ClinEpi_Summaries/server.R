@@ -827,7 +827,11 @@ shinyServer(function(input, output, session) {
             #myPlot <- myPlot + quantile()
             myPlot <- myPlot + geom_smooth(span = .3, na.rm = TRUE)
           }
+         
+          numColors <- length(levels(as.factor(df$LINES)))
+          
         } else {
+          names(df)[names(df) == 'LINES'] <- 'XAXIS'
           # if y axis is numeric box plots otherwise bar pltos.
           #define axis labels here
           xlab <- ""
@@ -841,8 +845,9 @@ shinyServer(function(input, output, session) {
             df$YAXIS <- as.numeric(df$YAXIS)
           }
           
+          df$XAXIS <- as.factor(df$XAXIS) 
           #plot here
-          myPlot <- ggplot(data = df, aes(x = LINES, y = YAXIS, fill = factor(LINES)))
+          myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, fill = XAXIS))
           myPlot <- myPlot + theme_bw()
           myPlot <- myPlot + labs(y = ylab, x = xlab)
           message(paste("plot type:", plotType))
@@ -856,6 +861,9 @@ shinyServer(function(input, output, session) {
             message("plotting mean")
             myPlot <- myPlot + geom_boxplot()
           }
+
+          numColors <- length(levels(as.factor(df$XAXIS)))   
+
         }
         
         #add facet if available
@@ -864,7 +872,7 @@ shinyServer(function(input, output, session) {
         }
         
         #find num colors needed
-        numColors <- length(levels(as.factor(df$LINES)))
+        
         myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
         myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
         
@@ -879,7 +887,7 @@ shinyServer(function(input, output, session) {
         )
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
-        myPlotly <- ggplotly(myPlot)
+        #myPlotly <- ggplotly(myPlot)
         myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
         
         myPlotly
