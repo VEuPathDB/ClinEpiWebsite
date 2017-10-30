@@ -677,7 +677,7 @@ shinyServer(function(input, output, session) {
         myPlot <- myPlot + geom_bar(stat = "identity", position = "fill")
         #myPlot <- myPlot + scale_fill_manual(values = c("#32baba", "#e26c6c"))
         #myPlot <- myPlot + scale_fill_manual(values = plasma(2))
-        myPlot <- myPlot + scale_fill_manual(values = viridis(2))
+        myPlot <- myPlot + scale_fill_manual(values = viridis(2, begin = .25, end = .75))
         
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
