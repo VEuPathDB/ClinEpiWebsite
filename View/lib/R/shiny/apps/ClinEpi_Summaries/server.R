@@ -872,10 +872,16 @@ shinyServer(function(input, output, session) {
         }
         
         #find num colors needed
-        
-        myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
-        myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
-        
+        if (numColors > 2) {
+          myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
+          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
+        } else if (numColors == 2) {
+          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
+          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
+        } else {
+          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
+          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
+        }
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
           title = xlab,
