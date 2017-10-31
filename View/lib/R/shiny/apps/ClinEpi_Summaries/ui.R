@@ -6,6 +6,9 @@ shinyUI(
     tags$head(tags$style(
       HTML(".js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar {background: transparent}")
     )),
+    tags$style(type="text/css",
+              ".shiny-output-error { visibility: hidden; }",
+              ".shiny-output-error:before { visibility: hidden; }"),
     titlePanel("Summarize Observation Data For Selected Participants"),
     div(
       id = "userInput",
