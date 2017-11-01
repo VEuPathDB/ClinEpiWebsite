@@ -7,7 +7,8 @@ require(viridisLite)
 
 source("../../lib/wdkDataset.R")
 source("config.R")
-source("functions.R")
+source("../../lib/ebrc_functions.R")
+source("../../lib/clinepi_functions.R")
 
 #also need to figure out why the plots renders multiple times
 #maybe let user define their own groups??
@@ -16,14 +17,14 @@ source("functions.R")
 shinyServer(function(input, output, session) {
   
   event.file <- NULL
+  event.file.exists <- NULL
   prtcpnt.file <- NULL
   house.file <- NULL
+  house.file.exists <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
   prevFacet <- NULL
   
-  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
- 
   filesFetcher <- reactive({
 
     if (is.null(prtcpnt.file)) {
@@ -37,13 +38,13 @@ shinyServer(function(input, output, session) {
           na.strings = "N/A"))
 
       event_temp <- try(fread(
-          getWdkDatasetFile('ShinyEvents.tab', session, FALSE, dataStorageDir),
+          getWdkDatasetFile('ShinyObservations.tab', session, FALSE, dataStorageDir),
           na.strings = "N/A"))
 
       metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
-          ))
-      
+          ))     
+ 
       if (grepl("Error", prtcpnt_temp[1])){
         stop("Error: Participant file missing or unreadable!")
       } else {
@@ -93,18 +94,31 @@ shinyServer(function(input, output, session) {
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
-    if (exists("event.file") & !is.null(event.file)) {
-      merge1 <- merge(event.file, prtcpnt.file)
+    if (exists("event.file")) {
+      if (!is.null(event.file) & nrow(event.file) > 1) {
+        merge1 <- merge(event.file, prtcpnt.file)
+        event.file.exists <<- TRUE
+      } else {
+        merge1 <- prtcpnt.file
+        event.file.exists <<- FALSE
+      }
     } else {
       merge1 <- prtcpnt.file
+      event.file.exists <<- FALSE
     }
     
-    if (exists("house.file") & !is.null(house.file)) {
-      #house.file <<- house.file[, (drop):=NULL]
-      house.file <<- house.file[, -(drop), with = FALSE]
-      singleVarData <<- merge(merge1, house.file)
+    if (exists("house.file")) {
+      if (!is.null(house.file) & nrow(house.file) > 1) {
+        house.file <<- house.file[, -(drop), with = FALSE]
+        singleVarData <<- merge(merge1, house.file)
+        house.file.exists <<- TRUE
+      } else {
+        singleVarData <<- merge1
+        house.file.exists <<- FALSE
+      }
     } else {
       singleVarData <<- merge1
+      house.file.exists <<- FALSE
     }
     
     if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
@@ -112,9 +126,9 @@ shinyServer(function(input, output, session) {
     }
     
     #for all dates convert strings to date format
-    dates <- getDates()$source_id
+    dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
-    
+   message("done with singleVarDataFetcher!") 
     singleVarData
   }
   
@@ -129,7 +143,18 @@ shinyServer(function(input, output, session) {
       plotChoice <- input$plotChoice
       
       if (plotChoice == 'groups'){
-        groupsChoiceList <- getGroupsList(myX)
+        if (myX == 'zscore') {
+          groupsSubset <- metadata.file[grep("z-score", metadata.file$property), ]
+          cols <- groupsSubset$source_id
+          useData <- singleVarData[, cols, with = FALSE]
+        } else {
+          if (event.file.exists) {
+            useData <- event.file
+          } else {
+            useData <- singleVarData
+          }
+        }
+        groupsChoiceList <- getUIList(useData, metadata.file)
         if (myX == 'zscore') {
           selectList <- c('EUPATH_0000734', 'EUPATH_0000689')
         } else {
@@ -150,6 +175,12 @@ shinyServer(function(input, output, session) {
     
     #reconsider this. still useful with plotly? replace with choose_timeframe and call singleVarDataFetcher there like in the others??
     output$choose_range <- renderUI({
+      message("in choose_range ui")
+      if (!length(singleVarData)) {
+        message(paste("fetching dt"))
+        singleVarData <<- singleVarDataFetcher()
+      }
+
       if (is.null(input$plotChoice)) {
         return()
       }
@@ -159,7 +190,7 @@ shinyServer(function(input, output, session) {
       myX <- input$xaxis
       myGroups <- input$groups
       plotChoice <- input$plotChoice
-      nums <- getNums()
+      nums <- getNums(metadata.file)
       
       if (plotChoice == 'groups') {
         tempDF <- groupsDataFetcher(myGroups, myX)
@@ -189,10 +220,6 @@ shinyServer(function(input, output, session) {
     
     output$choose_xaxis <- renderUI({
       message("in choose_xaxis ui")
-      if (!length(singleVarData)) {
-        message(paste("fetching dt"))
-        singleVarData <<- singleVarDataFetcher()
-      }
   
       if (is.null(input$plotChoice)) {
         return()
@@ -200,13 +227,13 @@ shinyServer(function(input, output, session) {
       plotChoice <- input$plotChoice
       
       if (plotChoice == 'groups') {
-        getXList(plotChoice)
+        #getXList(plotChoice)
         selectInput(inputId = "xaxis",
                     label = "X-Axis:",
                     choices = list('Z-score' = 'zscore', 'Age in Days' = 'ageDays'),
                     selected = 'zscore') 
       } else {
-        xChoiceList <- getXList()
+        xChoiceList <- getUIList(singleVarData, metadata.file)
         selectInput(inputId = "xaxis",
                     label = "X-Axis:",
                     choices = xChoiceList,
@@ -215,18 +242,25 @@ shinyServer(function(input, output, session) {
     })
     
     output$choose_facet <- renderUI({
+      message("in choose_facet ui")
       if (is.null(input$plotChoice)) {
         return()
       }
-      if (is.null(input$xaxis)) {
+      if (is.null(input$xaxis)) { 
         return()
       }
       plotChoice <- input$plotChoice
       myX <- input$xaxis
       myGroups <- input$groups
       
-      facetChoiceList <- getFacetList()
-
+      if (house.file.exists) {
+        useData <- list(prtcpnt.file, house.file)
+        facetChoiceList <- lapply(useData, getUIList, metadata.file, minLevels = 2, maxLevels = 12)
+        facetChoiceList <- unlist(facetChoiceList, recursive = FALSE)
+      } else {
+        facetChoiceList <- getUIList(prtcpnt.file, metadata.file, minLevels = 2, maxLevels = 12)
+      }
+      
       if (!is.null(prevFacet)) {
         if (prevFacet %in% facetChoiceList) {
           mySelected <- prevFacet
@@ -247,6 +281,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$distribution <- renderPlotly({
+      message("render plot!")
       if (is.null(input$xaxis)) {
         return()
       }
@@ -268,7 +303,7 @@ shinyServer(function(input, output, session) {
        
       df <- completeDT(df, myX)
       
-      nums <- getNums()
+      nums <- getNums(metadata.file)
 
       if (myX == 'ageDays') {
         xlab <- "Age in Days"
@@ -301,14 +336,14 @@ shinyServer(function(input, output, session) {
       } else {
         if (myX %in% nums$source_id) {
           #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), fill = "#56B4E9", real.geom="geom_histogram")
-          myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .75, direction = -1))
-          myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .25), linetype = "dashed", size = 1)
+          myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
+          myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
           if (myFacet != 'none') {
             myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3)   
           }
         } else {
           #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), stat = "count", fill = "#56B4E9", real.geom="geom_histogram")
-          myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .75, direction = -1))
+          myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
           if(length(levels(as.factor(df[[myX]]))) < 7) {
             if (myFacet != 'none') {
@@ -374,7 +409,7 @@ shinyServer(function(input, output, session) {
         }
       }
      
-      nums <- getNums()
+      nums <- getNums(metadata.file)
       
       if (myFacet %in% nums$source_id) {
         data[[myFacet]] <- cut_number(data[[myFacet]],4)
@@ -388,7 +423,7 @@ shinyServer(function(input, output, session) {
       #since singlevar is default im assuming fles fetcher is already called. can add check later though to be safe.
       
       groupsData <- NULL
-      nums <- getNums()
+      nums <- getNums(metadata.file)
       
       if (myX == 'zscore') {
         for (i in myGroups) {
@@ -420,93 +455,4 @@ shinyServer(function(input, output, session) {
       groupsData
     }
     
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #below are functions dependent on the four original files pulled in or on singleVarData variable. could fix in future so can be put in other file (functions.R ??)
-    
-    getNums <- function(){
-      #identify nums 
-      nums <- subset(metadata.file, metadata.file$type == "number", "source_id") 
-      
-      nums
-    }
-    
-    getDates <- function(){
-      #identify nums 
-      nums <- subset(metadata.file, metadata.file$type == "date", "source_id") 
-      
-      nums
-    }
-    
-    getStrings <- function(){
-      #identify nums 
-      nums <- subset(metadata.file, metadata.file$type == "string", "source_id") 
-      
-      nums
-    }
-    
-    getDropList <- function(){
-      c("EUPATH_0000644", "BFO_0000015", "EUPATH_0000702", "OBI_0100051")
-    }
-    
-    getFacetList <- function(){
-      data <- singleVarData  
-      drop <- getDropList()
-      
-      all.colnames <- c(colnames(prtcpnt.file), colnames(house.file))
-      colnames <- setdiff(all.colnames, drop)
-      
-      #get display names from metadata
-      choices <- subset(metadata.file, source_id %in% colnames)
-      choicesNumeric <- subset(choices, type %in% "number")
-      #remove from choices df anything with levels ==0 or > 12 in tempDF
-      temp <- as.vector(choices$source_id)
-      boolean <- sapply(data[ , (temp), with=FALSE ], function(x) {(length(levels(as.factor(x))) < 13 & length(levels(as.factor(x))) > 1)})
-      choices <- choices[match(names(boolean), choices$source_id),]
-      choices <- choices[as.vector(boolean),]
-      choices <- rbind(choices, choicesNumeric)
-      unique(choices)
-      myorder <- sort(choices$property)
-      choices <- choices[match(myorder, choices$property),]
-      #convert df to list
-      choiceList <- as.vector(c("none", choices$source_id))
-      names(choiceList) <- as.vector(c("None", choices$property))
-      facetlist <- as.list(choiceList)
-      
-      facetlist
-    }
-    
-    getXList <- function(){
-      xlist <- NULL
-      data <- singleVarData
-
-      xcolnames <- colnames(data)
-      #get display names from metadata
-      xchoices <- subset(metadata.file, source_id %in% xcolnames)
-      myorder <- sort(xchoices$property)
-      xchoices <- xchoices[match(myorder, xchoices$property),]
-      #convert df to list
-      xchoiceList <- as.vector(xchoices$source_id)
-      names(xchoiceList) <- as.vector(xchoices$property)
-      xlist <- as.list(xchoiceList)  
-     
-      xlist
-    }
-    
-    getGroupsList <- function(myX) {
-      
-      if (myX == 'zscore') {
-        groupsSubset <- metadata.file[grep("z-score", metadata.file$property), ]
-      } else if (myX == 'ageDays'){
-        colnames <- colnames(event.file[,4:29])
-        groupsSubset <- subset(metadata.file, source_id %in% colnames)
-      } else {
-        return;
-      }
-      
-      groupsChoiceList <- as.vector(groupsSubset$source_id)
-      names(groupsChoiceList) <- as.vector(groupsSubset$property)
-      
-      groupsChoiceList
-    }
-
 })

@@ -8,7 +8,8 @@ require(viridisLite)
 
 source("../../lib/wdkDataset.R")
 source("config.R")
-source("functions.R")
+source("../../lib/ebrc_functions.R")
+source("../../lib/clinepi_functions.R")
 
 options(shiny.sanitize.errors = TRUE)
 
@@ -44,7 +45,7 @@ shinyServer(function(input, output, session) {
           na.strings = "N/A"))
 
       event_temp <- try(fread(
-          getWdkDatasetFile('ShinyEvents.tab', session, FALSE, dataStorageDir),
+          getWdkDatasetFile('ShinyObservations.tab', session, FALSE, dataStorageDir),
           na.strings = "N/A"))
 
       metadata_temp <- try(fread(
@@ -100,13 +101,13 @@ shinyServer(function(input, output, session) {
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
-    if (exists("event.file") & !is.null(event.file)) {
+    if (exists("event.file") & !is.null(event.file) & nrow(event.file) > 1) {
       merge1 <- merge(event.file, prtcpnt.file)
     } else {
       merge1 <- prtcpnt.file
     }
     
-    if (exists("house.file") & !is.null(house.file)) {
+    if (exists("house.file") & !is.null(house.file) & nrow(house.file) > 1) {
       #house.file <<- house.file[, (drop):=NULL]
       house.file <<- house.file[, -(drop), with = FALSE]
       singleVarData <<- merge(merge1, house.file)
@@ -119,7 +120,7 @@ shinyServer(function(input, output, session) {
     }
     
     #for all dates convert strings to date format
-    dates <- getDates()$source_id
+    dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
     
     singleVarData
@@ -153,8 +154,8 @@ shinyServer(function(input, output, session) {
   
   setAttrVals <- reactive ({
     myAttr <- input$attr
-    nums <- getNums()
-    dates <- getDates()
+    nums <- getNums(metadata.file)
+    dates <- getDates(metadata.file)
     
     if (myAttr %in% nums$source_id | myAttr %in% dates$source_id) {
       data <- singleVarData
@@ -186,8 +187,8 @@ shinyServer(function(input, output, session) {
   
   setOutVals <- reactive({
     myOut <- input$out
-    nums <- getNums()
-    dates <- getDates()
+    nums <- getNums(metadata.file)
+    dates <- getDates(metadata.file)
     
     if (myOut %in% nums$source_id | myOut %in% dates$source_id) {
       data <- singleVarData
@@ -246,7 +247,7 @@ shinyServer(function(input, output, session) {
     
     output$choose_attribute <- renderUI({
       
-        attrChoiceList <- getAttrList()
+        attrChoiceList <- getUIList(singleVarData, metadata.file)
         selectInput(inputId = "attr",
                     label = "Variable 1:",
                     choices = attrChoiceList,
@@ -257,7 +258,7 @@ shinyServer(function(input, output, session) {
     output$choose_outcome <- renderUI({
       
       #this list should contain anything from events file
-      outChoiceList <- getAttrList()
+      outChoiceList <- getUIList(singleVarData, metadata.file)
       selectInput(inputId = "out",
                   label = "Variable2:",
                   choices = outChoiceList,
@@ -270,8 +271,8 @@ shinyServer(function(input, output, session) {
         return()
       }
       myAttr <- input$attr
-      nums <- getNums()
-      dates <- getDates()
+      nums <- getNums(metadata.file)
+      dates <- getDates(metadata.file)
       
       data <- singleVarData
       tempDF <- completeDT(data, myAttr)
@@ -298,7 +299,7 @@ shinyServer(function(input, output, session) {
                            separator = "and",
                            startview = "year")
           } else {
-            attrStp1List <- getAttrStp1List(myAttr)
+            attrStp1List <- getUIStp1List(singleVarData, myAttr)
             if (length(attrStp1List) == 2) {
               if (any(attrStp1List %in% "Yes")) {
                 selectInput(inputId = "attr_stp1",
@@ -341,7 +342,7 @@ shinyServer(function(input, output, session) {
                          separator = "and",
                          startview = "year")
         } else {
-          attrStp1List <- getAttrStp1List(myAttr)
+          attrStp1List <- getUIStp1List(singleVarData, myAttr)
           if (length(attrStp1List) == 2) {
             if (any(attrStp1List %in% "Yes")) {
               selectInput(inputId = "attr_stp1",
@@ -377,8 +378,8 @@ shinyServer(function(input, output, session) {
         return()
       }
       myOut <- input$out
-      nums <- getNums()
-      dates <- getDates()
+      nums <- getNums(metadata.file)
+      dates <- getDates(metadata.file)
       
       data <- singleVarData
       tempDF <- completeDT(data, myOut)
@@ -405,7 +406,7 @@ shinyServer(function(input, output, session) {
                            separator = "and",
                            startview = "year")
           } else {
-            outStp1List <- getAttrStp1List(myOut)
+            outStp1List <- getUIStp1List(singleVarData, myOut)
             if (length(outStp1List) == 2) {
               if (any(outStp1List %in% "Yes")) {
                 selectInput(inputId = "out_stp1",
@@ -448,7 +449,7 @@ shinyServer(function(input, output, session) {
                          separator = "and",
                          startview = "year")
         } else {
-          outStp1List <- getAttrStp1List(myOut)
+          outStp1List <- getUIStp1List(singleVarData, myOut)
           if (length(outStp1List) == 2) {
             if (any(outStp1List %in% "Yes")) {
               selectInput(inputId = "out_stp1",
@@ -827,7 +828,7 @@ shinyServer(function(input, output, session) {
         
         #get attr col
         attrData <- completeDT(data, myAttr)
-        attrData <- getFinalDT(attrData, myAttr)
+        attrData <- getFinalDT(attrData, metadata.file, myAttr)
         myCols <- c("Participant_Id", myAttr)
         attrData <- attrData[, myCols, with=FALSE]
         
@@ -854,14 +855,14 @@ shinyServer(function(input, output, session) {
           }
         }
         message("in plotData()")
-        attrData <- makeGroups(attrData, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
-        attrLabel <- makeGroupLabel(myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+        attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+        attrLabel <- makeGroupLabel(myAttr, metadata.file, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
         colnames(attrData) <- c("Participant_Id", "Attribute")
        print(attrData)
         #get outcome data
         #may not need to do the splitting on pipes. grepl will still return true for it.
         outData <- completeDT(data, myOut)
-        outData <- getFinalDT(outData, myOut)
+        outData <- getFinalDT(outData, metadata.file, myOut)
         myCols <- c("Participant_Id", myOut)
         outData <- outData[, myCols, with=FALSE]
         
@@ -886,8 +887,8 @@ shinyServer(function(input, output, session) {
             }
           }
         
-        outData <- makeGroups(outData, myOut, out_stp1, out_stp2, out_stp3, out_stp4)
-        outLabel <- makeGroupLabel(myOut, out_stp1, out_stp2, out_stp3, out_stp4)
+        outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4)
+        outLabel <- makeGroupLabel(myOut, metadata.file, out_stp1, out_stp2, out_stp3, out_stp4)
         colnames(outData) <- c("Participant_Id", "Outcome")
         print(outData)
         #merge on participant id an1d keep all prtcpnts.
@@ -928,300 +929,5 @@ shinyServer(function(input, output, session) {
       #debounce will wait 2s with no changes to inputs before plotting.
     }), 2000)
     
-    
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #below are functions dependent on the four original files pulled in or on singleVarData variable. could fix in future so can be put in other file (functions.R ??)
-    
-    getNums <- function(){
-      #identify nums 
-      nums <- subset(metadata.file, metadata.file$type == "number", "source_id") 
-      
-      nums
-    }
-    
-    getStrings <- function(){
-      #identify nums 
-      nums <- subset(metadata.file, metadata.file$type == "string", "source_id") 
-      
-      nums
-    }
-    
-    getDates <- function(){
-      #identify nums 
-      nums <- subset(metadata.file, metadata.file$type == "date", "source_id") 
-      
-      nums
-    }
-    
-    getDropList <- function(){
-      c("EUPATH_0000644", "BFO_0000015", "EUPATH_0000702", "OBI_0100051")
-    }
-    
-    getAttrList <- function(){
-      data <- singleVarData  
-      drop <- getDropList()
-      
-      colnames <- colnames(data)
-      colnames <- setdiff(colnames, drop)
-      #get display names from metadata
-      choices <- subset(metadata.file, source_id %in% colnames)
-      myorder <- sort(choices$property)
-      choices <- choices[match(myorder, choices$property),]
-      #convert data table to list
-      choiceList <- as.vector(choices$source_id)
-      names(choiceList) <- as.vector(choices$property)
-      list <- as.list(choiceList)
-      
-      list
-    }
-    
-    getOutList <- function(){
-      data <- event.file
-      drop <- getDropList()
-      
-      colnames <- colnames(data)
-      colnames <- setdiff(colnames, drop)
-      #get display names from metadata
-      choices <- subset(metadata.file, source_id %in% colnames)
-      myorder <- sort(choices$property)
-      choices <- choices[match(myorder, choices$property),]
-      #convert data table to list
-      choiceList <- as.vector(choices$source_id)
-      names(choiceList) <- as.vector(choices$property)
-      list <- as.list(choiceList)
-      
-      list
-    }
-    
-    getAttrStp1List <- function(col){
-      data <- singleVarData
-      tempDF <- completeDT(data, col)
-      
-      data <- setDT(tempDF)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-                          by = setdiff(names(tempDF), eval(col))][!is.na(eval(col))]
- 
-      levels <- levels(as.factor(data[[col]]))
-    }
-    
-    #seperate pipe delimited fields into their own rows if necessary
-    getFinalDT <- function(data, col){
-     
-      strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
-      
-      if (col %in% strings$source_id) {
-        data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-                              by = setdiff(names(data), eval(col))][!is.na(eval(col))]
-      }
-       
-      data
-      
-    }
-    
-    makeGroups <- function(data, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4){
-      #should see if can make this a seperate function to go in the shiny function lib eventually. just pass it stp1, stp2 etc.. dunno
-      if (is.null(groups_stp1)) {
-        message("groups stp1 is null!! returning")
-        return()
-      }
-      message("preparing data to make own groups")
-      #get group data for make groups option
-      groupData <- completeDT(data, myGroups)
-      groupData <- getFinalDT(groupData, myGroups)
-      myCols <- c("Participant_Id", myGroups)
-      outData <- groupData[, myCols, with=FALSE]
-      
-      #if anthro direct comparison do same as for number
-      if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
-        if (groups_stp1 == "direct") {
-          if (is.null(groups_stp3)) {
-            return()
-          }
-          groups_stp1 = groups_stp2
-          groups_stp2 = groups_stp3
-        }
-      }
-      #this if statement will have to change. handle dates first
-      if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
-        outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
-        cols <- c("Participant_Id", "GROUPS")
-        outData <- outData[, cols, with = FALSE]
-        outData <- unique(outData)
-        message("custom groups for date")
-        #for numbers
-      } else if (groups_stp1 == "lessThan") {
-        if (is.null(groups_stp2)) {
-          return()
-        }
-        outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
-      } else if (groups_stp1 == "greaterThan") {
-        if (is.null(groups_stp2)) {
-          return()
-        }
-        outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
-      } else if (groups_stp1 == "equals") {
-        if (is.null(groups_stp2)) {
-          return()
-        }
-        outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
-        #for change over time  
-      } else if (groups_stp1 == "delta") {
-        if(is.null(groups_stp3)) {
-          return()
-        }
-        outData <- completeDT(data, myGroups)
-        outData <- getFinalDT(outData, myGroups)
-        myCols <- c("Participant_Id", "EUPATH_0000644", myGroups)
-        outData <- outData[, myCols, with=FALSE]
-        #should start an empty table here to add values in as i go through the loop
-        tempTable <- NULL
-        #do the below for each participant. think i need for loop. :( but will see if i can think up better way.
-        prtcpnts <- levels(as.factor(outData$Participant_Id))
-        for (i in prtcpnts) {
-          currData <- subset(outData, outData$Participant_Id %in% i)
-          
-          startDay <- min(currData[, EUPATH_0000644])
-          startVal <- currData[[myGroups]][currData$EUPATH_0000644 == startDay]
-          endVal <- currData[[myGroups]][currData$EUPATH_0000644 == max(currData[, EUPATH_0000644])]
-          diffVal <- startVal - endVal
-          
-          #if statement for direction of change
-          if (startVal > endVal) {
-            diffVal = diffVal * -1
-          }
-          
-          if (groups_stp2 == "lessThan") {
-            if (diffVal < groups_stp3) {
-              row <- c(i, 1)
-            } else {
-              row <- c(i,0)
-            }
-          } else if (groups_stp2 == "greaterThan") {
-            if (diffVal > groups_stp3) {
-              row <- c(i,1)
-            } else {
-              row <- c(i,0)
-            }
-          } else {
-            if (diffVal == groups_stp3) {
-              row <- c(i,1)
-            } else {
-              row <- c(i,0)
-            }
-          }
-          
-          #add participant to growing data table for outcomes
-          tempTable <- rbindlist(list(tempTable, as.list(row)))
-        }
-        #edit outdata so the merge with attr data works..
-        outData <- tempTable
-        colnames(outData) <- c("Participant_Id", "GROUPS")
-      } else if (groups_stp1 == "percentDays") {
-        if (is.null(groups_stp4)) {
-          return()
-        }
-        tempTable <- NULL
-        #may be able to do this option with aggregate. look into it TODO
-        prtcpnts <- levels(as.factor(outData$Participant_Id))
-        for (i in prtcpnts) {
-          currData <- subset(outData, outData$Participant_Id %in% i)
-          
-          if (groups_stp3 == "lessThan") {
-            currData <- transform(currData, "GROUPS" =  ifelse(currData[[myGroups]] < groups_stp4,1 ,0))
-          } else if (groups_stp3 == "greaterThan") {
-            currData <- transform(currData, "GROUPS" =  ifelse(currData[[myGroups]] > groups_stp4,1 ,0))
-          } else {
-            currData <- transform(currData, "GROUPS" =  ifelse(currData[[myGroups]] == groups_stp4,1 ,0))
-          }
-          colnames(currData) <- c("Participant_Id", "drop", "GROUPS")
-          if ((sum(currData$Outcome)/length(currData$Outcome)*100) >= groups_stp2) {
-            row <- c(i,1)
-          } else {
-            row <- c(i,0)
-          }
-          
-          tempTable <- rbindlist(list(tempTable, as.list(row)))
-        }
-        outData <- tempTable
-        colnames(outData) <- c("Participant_Id", "GROUPS")
-      }  else {
-        #for strings
-        outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(any(grepl(groups_stp1, x, fixed=TRUE)) == TRUE) {1} else {0} })
-      }
-      if (ncol(outData) > 2) {
-        colnames(outData) <- c("Participant_Id", "drop", "GROUPS")
-      }
-      
-      outData <- as.data.table(outData)
-      #dtop dtop
-      if (any(colnames(outData) %in% "drop")) {
-        outData$drop <- NULL
-      }
-      
-      outData
-    }
-    
-    makeGroupLabel <- function(myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4){
-      numeric <- c("lessThan", "greaterThan", "equals")
-      anthro <- c("percentDays", "delta", "direct")
-      label <- vector()
-      
-      displayName <- metadata.file$property[metadata.file$source_id == myFacet]
-      if (facet_stp1 %in% numeric ){
-        if (facet_stp1 == "greaterThan") {
-          label[1] <- paste0(displayName, " > ", facet_stp2)
-          label[2] <- paste0(displayName, " <= ", facet_stp2)
-        } else if (facet_stp1 == "lessThan") {
-          label[1] <- paste0(displayName, " < ", facet_stp2)
-          label[2] <- paste0(displayName, " >= ", facet_stp2)
-        } else {
-          label[1] <- paste0(displayName, " = ", facet_stp2)
-          label[2] <- paste0(displayName, " != ", facet_stp2)
-        }
-      } else if (facet_stp1 %in% anthro) {
-        if (facet_stp1 == "direct") {
-          if (facet_stp2 == "lessThan") {
-            label[1] <- paste0(displayName, " < ", facet_stp3)
-            label[2] <- paste0(displayName, " >= ", facet_stp3)
-          } else if (facet_stp2 == "greaterThan") {
-            label[1] <- paste0(displayName, " > ", facet_stp3)
-            label[2] <- paste0(displayName, " <= ", facet_stp3)
-          } else {
-            label[1] <- paste0(displayName, " = ", facet_stp3)
-            label[2] <- paste0(displayName, " != ", facet_stp3)
-          }
-        } else if (facet_stp1 == "delta") {
-          if (facet_stp2 == "lessThan") {
-            label[1] <- paste0("Change in ", displayName, " over time < ", facet_stp3)
-            label[2] <- paste0("Change in ", displayName, " over time >= ", facet_stp3)
-          } else if (facet_stp2 == "greaterThan") {
-            label[1] <- paste0("Change in ", displayName, " over time > ", facet_stp3)
-            label[2] <- paste0("Change in ", displayName, " over time <= ", facet_stp3)
-          } else {
-            label[1] <- paste0("Change in ", displayName, " over time = ", facet_stp3)
-            label[2] <- paste0("Change in ", displayName, " over time != ", facet_stp3)
-          }
-        } else {
-          if (facet_stp3 == "lessThan") {
-            label[1] <- paste0(displayName, " < ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-            label[2] <- paste0(displayName, " >= ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-          } else if (facet_stp3 == "greaterThan") {
-            label[1] <- paste0(displayName, " > ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-            label[2] <- paste0(displayName, " <= ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-          } else {
-            label[1] <- paste0(displayName, " = ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-            label[2] <- paste0(displayName, " != ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-          }
-        }
-      } else {
-        if (!any(c("POSIXct", "Date") %in% class(facet_stp1))) {
-          label[1] <- facet_stp1
-          label[2] <- "Other"
-        } else {
-          label[1] <- "Within Date Range"
-          label[2] <- "Outside Date Range"
-        }
-      }
-      label
-    }
 
 })

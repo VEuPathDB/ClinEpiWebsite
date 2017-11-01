@@ -8,7 +8,7 @@ shinyUI(
               ".shiny-output-error:before { visibility: hidden; }",
               "#distribution{height:90vh !important;}"
    ),
-   titlePanel("Events Distribution for Selected Participants"),
+   titlePanel("Observation Distributions for Selected Participants"),
    fluidRow(
      div(
        id = "userInput",
