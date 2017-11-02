@@ -17,7 +17,8 @@ shinyUI(
                 id = "plotTypeUI",
                 selectInput(inputId = "plotChoice",
                             label = "Choose plot to generate:",
-                            choices = list('Single Variable' = 'singleVar', 'Multi Variable' = 'groups'),
+                            #choices = list('Single Variable' = 'singleVar', 'Multi Variable' = 'groups'),
+                            choices = list('Single Variable' = 'singleVar'), 
                             selected = "singleVar")
               ),
               div(

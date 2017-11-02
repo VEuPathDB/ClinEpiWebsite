@@ -233,7 +233,10 @@ shinyServer(function(input, output, session) {
                     choices = list('Z-score' = 'zscore', 'Age in Days' = 'ageDays'),
                     selected = 'zscore') 
       } else {
-        xChoiceList <- getUIList(singleVarData, metadata.file)
+        #temporary until i figure out how to plot histograms with dates in plotly
+        dates <- getDates(metadata.file)$source_id
+        useData <- singleVarData[, -dates, with = FALSE]
+        xChoiceList <- getUIList(useData, metadata.file, maxLevels = 100)
         selectInput(inputId = "xaxis",
                     label = "X-Axis:",
                     choices = xChoiceList,
@@ -255,10 +258,10 @@ shinyServer(function(input, output, session) {
       
       if (house.file.exists) {
         useData <- list(prtcpnt.file, house.file)
-        facetChoiceList <- lapply(useData, getUIList, metadata.file, minLevels = 2, maxLevels = 12)
+        facetChoiceList <- lapply(useData, getUIList, metadata.file, minLevels = 2, maxLevels = 12, addNone = TRUE)
         facetChoiceList <- unlist(facetChoiceList, recursive = FALSE)
       } else {
-        facetChoiceList <- getUIList(prtcpnt.file, metadata.file, minLevels = 2, maxLevels = 12)
+        facetChoiceList <- getUIList(prtcpnt.file, metadata.file, minLevels = 2, maxLevels = 12, addNone = TRUE)
       }
       
       if (!is.null(prevFacet)) {
@@ -304,6 +307,7 @@ shinyServer(function(input, output, session) {
       df <- completeDT(df, myX)
       
       nums <- getNums(metadata.file)
+      dates <- getDates(metadata.file)
 
       if (myX == 'ageDays') {
         xlab <- "Age in Days"
@@ -334,7 +338,7 @@ shinyServer(function(input, output, session) {
            # scale_fill_brewer(palette = cbPalette)
         }
       } else {
-        if (myX %in% nums$source_id) {
+        if (myX %in% nums$source_id | myX %in% dates$source_id) {
           #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), fill = "#56B4E9", real.geom="geom_histogram")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
@@ -369,7 +373,7 @@ shinyServer(function(input, output, session) {
         size = 14
       )
       
-      myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
+      myPlotly <- ggplotly(myPlot, tooltip = c("text"))
       myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
       
       myPlotly
@@ -410,9 +414,10 @@ shinyServer(function(input, output, session) {
       }
      
       nums <- getNums(metadata.file)
-      
-      if (myFacet %in% nums$source_id) {
-        data[[myFacet]] <- cut_number(data[[myFacet]],4)
+      dates <- getDates(metadata.file)      
+
+      if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
+        data[[myFacet]] <- cut(data[[myFacet]],4)
       }
       
       data
