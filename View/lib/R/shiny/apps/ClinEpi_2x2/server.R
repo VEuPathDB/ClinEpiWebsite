@@ -260,7 +260,7 @@ shinyServer(function(input, output, session) {
       #this list should contain anything from events file
       outChoiceList <- getUIList(singleVarData, metadata.file)
       selectInput(inputId = "out",
-                  label = "Variable2:",
+                  label = "Variable 2:",
                   choices = outChoiceList,
                   selected = "EUPATH_0000665",
                   width = '100%')
@@ -762,9 +762,11 @@ shinyServer(function(input, output, session) {
         p <- "<0.0001"
       }
       #make stats table
-      stats <- data.table("p-value" = p, "Odds Ratio" = paste(ORlo, "-", ORhi), "Relative Risk" = paste(RRlo, "-", RRhi))
-      colnames(stats) <- c("p-value", "Odds Ratio", "Relative Risk")
-      rownames(stats) <- "Statistics"
+      odds.ratio <- c(OR, paste(ORlo, "-", ORhi))
+      relative.risk <- c(RR, paste(RRlo, "-", RRhi))
+      p.val <- c(p, "N/A")
+      stats <- data.table("p-value" = p.val, "Odds Ratio" = odds.ratio, "Relative Risk" = relative.risk)
+      rownames(stats) <- c("Statistics", "95% Confidence Interval")
       
       datatable(stats, 
                 width = '100%',
