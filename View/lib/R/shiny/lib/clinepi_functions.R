@@ -31,7 +31,7 @@ getDropList <- function(){
 #makes named list containing source_ids and display names for ui
 #can limit what gets returned by limiting what cols are in data  
 #can also provide list of data frames to grab cols from i.e. data = list(df1, df2)
-getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf) {
+getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, addNone = FALSE) {
   drop <- getDropList()
 
   colnames <- colnames(data)
@@ -43,6 +43,7 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf) {
     return()
   }
   choicesNumeric <- subset(choices, type %in% "number")
+ # choicesDates <- subset(choices, type %in% "date")
 
   #limit by minLevels and maxLevels
   temp <- as.vector(choices$source_id)
@@ -51,12 +52,17 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf) {
   choices <- choices[as.vector(boolean),]
 
   #add numbers back in, sort alphabetically and convert df to named list
-  choices <- rbind(choices, choicesNumeric)
-  unique(choices)
+  choices <- rbind(choices, choicesNumeric)#, choicesDates)
+  choices <- unique(choices)
   myorder <- sort(choices$property)
   choices <- choices[match(myorder, choices$property),]
-  choiceList <- as.vector(choices$source_id)
-  names(choiceList) <- as.vector(choices$property)
+  if (addNone) {
+    choiceList <- as.vector(c("none", choices$source_id))
+    names(choiceList) <- as.vector(c("None", choices$property))
+  } else {
+    choiceList <- as.vector(choices$source_id)
+    names(choiceList) <- as.vector(choices$property)
+  }
   mylist <- as.list(choiceList)
 
   mylist
