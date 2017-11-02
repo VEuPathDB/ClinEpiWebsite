@@ -236,7 +236,7 @@ shinyServer(function(input, output, session) {
         #temporary until i figure out how to plot histograms with dates in plotly
         dates <- getDates(metadata.file)$source_id
         useData <- singleVarData[, -dates, with = FALSE]
-        xChoiceList <- getUIList(useData, metadata.file, maxLevels = 100)
+        xChoiceList <- getUIList(useData, metadata.file)
         selectInput(inputId = "xaxis",
                     label = "X-Axis:",
                     choices = xChoiceList,
@@ -268,10 +268,10 @@ shinyServer(function(input, output, session) {
         if (prevFacet %in% facetChoiceList) {
           mySelected <- prevFacet
         } else {
-          mySelected <- "EUPATH_0000452"
+          mySelected <- "OBI_0001627"
         }
       } else { 
-        mySelected <- "EUPATH_0000452"
+        mySelected <- "OBI_0001627"
       }
       message("in facet ui")
       print(mySelected)
