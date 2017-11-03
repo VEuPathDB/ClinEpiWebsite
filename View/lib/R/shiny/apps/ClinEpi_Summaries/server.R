@@ -18,7 +18,7 @@ source("../../lib/clinepi_functions.R")
 #figure out when we need naToZero function when building own groups and facets. imagine need it for events stuffs but not others ??
 # for some reason delta laz > -.5 returns fewer ppl than >-1.. seems should be reversed
 
-options(shiny.sanitize.errors = TRUE)  
+#options(shiny.sanitize.errors = TRUE)  
 
 shinyServer(function(input, output, session) {
   
@@ -98,7 +98,7 @@ shinyServer(function(input, output, session) {
     drop <- c("source_id", "project_id")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
-  
+    
     if (exists("event.file")) {
       if (!is.null(event.file) & nrow(event.file) > 1) {
         merge1 <- merge(event.file, prtcpnt.file)
@@ -113,7 +113,7 @@ shinyServer(function(input, output, session) {
     }
     
     if (exists("house.file")) {
-      if (!is.null(house.file) & nrow(house.file) > 1) {
+      if (!is.null(house.file) & nrow(house.file) > 1) { 
         house.file <<- house.file[, -(drop), with = FALSE]
         singleVarData <<- merge(merge1, house.file)
         house.file.exists <<- TRUE
@@ -124,7 +124,7 @@ shinyServer(function(input, output, session) {
     } else {
       singleVarData <<- merge1
       house.file.exists <<- FALSE
-    }  
+    }
    
     if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
       setkey(singleVarData, EUPATH_0000644)
@@ -313,13 +313,13 @@ shinyServer(function(input, output, session) {
         }
       } else {
         if (groupsType == "direct") {
-           
-          if (house.file.exists) { 
+
+          if (house.file.exists) {
             useData <- list(prtcpnt.file, house.file)
             groupChoiceList <- lapply(useData, getUIList, metadata.file = metadata.file)
             groupChoiceList <- unlist(groupChoiceList, recursive = FALSE)
           } else {
-            groupChoiceList <- getUIList(prtcpnt.file, metdata.file)
+            groupChoiceList <- getUIList(prtcpnt.file, metadata.file)
           }
 
           selectInput(inputId = "groups",
@@ -347,7 +347,7 @@ shinyServer(function(input, output, session) {
       }
       
       if (facetType == "direct") {
-       
+
         if (house.file.exists) {
           useData <- list(prtcpnt.file, house.file)
           facetChoiceList <- lapply(useData, getUIList, metadata.file = metadata.file, minLevels = 2, maxLevels = 12)
@@ -917,16 +917,17 @@ shinyServer(function(input, output, session) {
         }
         
         #find num colors needed
-        if (numColors > 2) {
+        if (numColors > 2) { 
           myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
           myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
         } else if (numColors == 2) {
           myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
           myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
         } else {
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5)
+          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
+          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
         }
-
+     
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
           title = xlab,
