@@ -320,7 +320,7 @@ shinyServer(function(input, output, session) {
       
       myPlot <- ggplot(data = df, aes_string(x = myX))
       myPlot <- myPlot + theme_bw()
-      myPlot <- myPlot + labs(y = "Count", x = xlab)
+      myPlot <- myPlot + labs(y = "", x = "")
       
       if ( myX %in% nums$source_id  || plotChoice == 'groups'){
         myPlot <- myPlot + coord_cartesian(xlim=c(myMin,myMax))
