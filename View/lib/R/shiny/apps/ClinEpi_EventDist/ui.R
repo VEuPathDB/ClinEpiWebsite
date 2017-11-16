@@ -38,7 +38,6 @@ shinyUI(
         h4("Coming soon...")
       ) 
     )
-   )
   )
- )
+)
 
