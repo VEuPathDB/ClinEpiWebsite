@@ -35,12 +35,7 @@ shinyUI(
     ),
     tabPanel("Notes", fluid = TRUE,
       fluidPage(
-        h4("Tutorial"),
-        h5("some stuff"),
-        h4("Notes"),
-        h5("some more stuff"),
-        h4("References"),
-        h5("the rest of the stuff")
+        h4("Coming soon...")
       ) 
     )
    )
