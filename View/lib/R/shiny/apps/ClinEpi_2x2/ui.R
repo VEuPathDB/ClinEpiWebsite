@@ -1,117 +1,91 @@
 ## ui.R
-#require(plotly)
+require(plotly)
 
 shinyUI(
   fluidPage(
-   tags$head(tags$style(
-      HTML("input[type='search']:disabled {visibility:hidden}"),
-      HTML(".js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar {background: transparent}"),
-      HTML(".js-irs-2 .irs-bar-edge, .js-irs-2 .irs-bar {background: transparent}")
-    )),
-   tags$style(type="text/css",
+    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
-              ".shiny-output-error:before { visibility: hidden; }",
-              "#2x2{height:90vh !important;}"
-   ),
-   titlePanel("Contingency Tables for Selected Participants"),
-   div(
-     id = "userInput",
-     fluidRow(
-       div(
-         id = "timeframeInput",
-         column(12, 
-                align = "center",
-                div(
-                  id = "timeframeUI",
-                  uiOutput("choose_timeframe")
-                )
-         )
-       )
-     ),
-     fluidRow(
-         column(6,
-                div(
-                  id = "attributeUI",
-                  uiOutput("choose_attribute")
-                )
-         ),
-         column(6,
-                div(
-                  id = "outcomeUI",
-                  uiOutput("choose_outcome")
-                )
-         )
-     ),
-     fluidRow(
-       column(6,
-              div(
-                id = "attr_stp1",
-                uiOutput("attr_stp1")
-              )
-       ),
-       column(6,
-              div(
-                id = "out_stp1",
-                uiOutput("out_stp1")
-              )
-       )
-     ),
-     fluidRow(
-       column(6,
-              div(
-                id = "attr_stp2",
-                uiOutput("attr_stp2")
-              )
-       ),
-       column(6,
-              div(
-                id = "out_stp2",
-                uiOutput("out_stp2")
-              )
-       )
-     )
-   ), 
-   fluidRow(
-     column(6,
-            div(
-              id = "attr_stp3",
-              uiOutput("attr_stp3")
-            )
-     ),
-     column(6,
-            div(
-              id = "out_stp3",
-              uiOutput("out_stp3")
-            )
-     )
-   ),
-   fluidRow(
-     column(6,
-            div(
-              id = "attr_stp4",
-              uiOutput("attr_stp4")
-            )
-     ),
-     column(6,
-            div(
-              id = "out_stp4",
-              uiOutput("out_stp4")
-            )           
-     )
-   ),
-   hr(),
-   div(
-     id = "plot_area",
-     fluidRow(
-       column(6,
-              DT::dataTableOutput("statsTable")
-       ),
-       column(6,
-              DT::dataTableOutput("table")      
-       )
-     ),
-     hr(),
-     plotOutput("plot")
-   )            
+              ".shiny-output-error:before { visibility: hidden; }"
+    ),
+    tags$head(tags$style(
+      HTML("input[type='search']:disabled {visibility:hidden}"),
+      HTML(".js-irs .irs-bar-edge, .js-irs .irs-bar {background: transparent}")
+      #HTML(".js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: blue}")
+    )),
+    titlePanel("Contingency Tables for Selected Participants"),
+    tabsetPanel(
+      tabPanel("Plot", fluid = TRUE,
+               fluidPage(
+                 h5(),
+                 fluidRow(
+                   column(12, 
+                            align = "center",
+                            uiOutput("choose_timeframe")
+                   )
+                 ),
+                 fluidRow(
+                   column(6,
+                     uiOutput("choose_attribute")
+                   ),
+                   column(6,
+                     uiOutput("choose_outcome")
+                   )
+                 ),
+                 fluidRow(
+                   column(6,
+                     uiOutput("attr_stp1")
+                   ),
+                   column(6,
+                     uiOutput("out_stp1")
+                   )
+                 ),
+                 fluidRow(
+                   column(6,
+                     uiOutput("attr_stp2")
+                   ),
+                   column(6,
+                     uiOutput("out_stp2")
+                   )
+                 ), 
+                 fluidRow(
+                   column(6,
+                     uiOutput("attr_stp3")
+                   ),
+                   column(6,
+                     uiOutput("out_stp3")
+                   )
+                 ),
+                 fluidRow(
+                   column(6,
+                     uiOutput("attr_stp4")
+                   ),
+                   column(6,
+                     uiOutput("out_stp4")
+                   )
+                 ),
+                 hr(),
+                 fluidRow(
+                   column(12,
+                          DT::dataTableOutput("statsTable"),
+                          DT::dataTableOutput("table"),
+                          helpText("*Pearson's Chi-Square test applied: small sample sizes result in unreliable p-values.")
+                   )
+                 ),
+                 hr(),
+                 plotlyOutput("plot")
+               ) 
+      ),
+      tabPanel("Notes", fluid = TRUE,
+               fluidPage(
+                 h4("Tutorial"),
+                 h5("some stuff"),
+                 h4("Notes"),
+                 h5("some more stuff"),
+                 h4("References"),
+                 h5("the rest of the stuff")
+               )
+      )
+    )
   )
 )
+

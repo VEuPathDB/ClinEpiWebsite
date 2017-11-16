@@ -1,70 +1,49 @@
 ## ui.R
-#require(rCharts)
-#require(ggplot2)
-require(shinyjs)
-#options(RCHART_LIB = 'polycharts')
+require(plotly)
 
 shinyUI(
   fluidPage(
-   useShinyjs(),
    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
-              "#distribution{height:75vh !important;}"
+              "#distribution{height:90vh !important;}"
    ),
-   tags$head(tags$script('var dimension = [0, 0];
-                         $(document).on("shiny:connected", function(e) {
-                         dimension[0] = window.innerWidth;
-                         dimension[1] = window.innerHeight;
-                         Shiny.onInputChange("dimension", dimension);
-                         });
-                         $(window).resize(function(e) {
-                         dimension[0] = window.innerWidth;
-                         dimension[1] = window.innerHeight;
-                         Shiny.onInputChange("dimension", dimension);
-                         });'
-   )),
-   titlePanel("Observations Distribution for Selected Participants"),
-   fluidRow(
-     div(
-       id = "userInput",
-       column(3,
-              div(
-                id = "plotTypeUI",
-                selectInput(inputId = "plotChoice",
-                            label = "Choose plot to generate:",
-                            choices = list('Single Variable' = 'singleVar', 'Multi Variable' = 'groups'),
-                            selected = "singleVar")
-              ),
-              div(
-                id = "groupsUI",
-                #h5("Groups:"),
-                uiOutput("choose_groups")
-              )
-       ),
-       column(4, offset = 1,
-              div(
-                id = "xUI",
-                uiOutput("choose_xaxis")
-              ),
-              div(
-                id = "rangeUI",
-                uiOutput("choose_range")
-              )      
-       ),
-       column(4,
-              div(
-                id = "facetUI",
-                uiOutput("choose_facet")
-              )
+   titlePanel("Observation Distributions for Selected Participants"),
+   tabsetPanel(
+     tabPanel("Plot", fluid = TRUE,
+       fluidPage(
+         h5(),
+         fluidRow(
+           column(3,
+                  selectInput(inputId = "plotChoice",
+                              label = "Choose plot to generate:",
+                              choices = list('Single Variable' = 'singleVar'), 'Multi Variable' = 'groups'),
+                              selected = "singleVar"),
+                  uiOutput("choose_groups")
+           ),
+           column(4, offset = 1,
+                  uiOutput("choose_xaxis"),
+                  uiOutput("choose_range")
+           ),
+           column(4,
+                  uiOutput("choose_facet")
+           )
+         ), 
+         hr(),
+         plotlyOutput("distribution")
       )
+    ),
+    tabPanel("Notes", fluid = TRUE,
+      fluidPage(
+        h4("Tutorial"),
+        h5("some stuff"),
+        h4("Notes"),
+        h5("some more stuff"),
+        h4("References"),
+        h5("the rest of the stuff")
+      ) 
     )
-   ), 
-   hr(),
-   div(
-     id = "plot_area",
-     htmlOutput("distribution")
-   )      
-    
+   )
   )
-)
+ )
+
