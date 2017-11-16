@@ -17,7 +17,7 @@ shinyUI(
            column(3,
                   selectInput(inputId = "plotChoice",
                               label = "Choose plot to generate:",
-                              choices = list('Single Variable' = 'singleVar'), 'Multi Variable' = 'groups'),
+                              choices = list('Single Variable' = 'singleVar', 'Multi Variable' = 'groups'),
                               selected = "singleVar"),
                   uiOutput("choose_groups")
            ),
@@ -39,5 +39,6 @@ shinyUI(
       ) 
     )
   )
+ )
 )
 
