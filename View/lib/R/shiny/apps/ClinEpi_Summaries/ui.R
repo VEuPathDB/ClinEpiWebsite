@@ -3,104 +3,91 @@ require(plotly)
 
 shinyUI(
   fluidPage(
+    tags$style(type="text/css",
+              ".shiny-output-error { visibility: hidden; }",
+              ".shiny-output-error:before { visibility: hidden; }"
+    ),
     tags$head(tags$style(
       HTML(".js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar {background: transparent}")
     )),
-    tags$style(type="text/css",
-              ".shiny-output-error { visibility: hidden; }",
-              ".shiny-output-error:before { visibility: hidden; }"),
-    titlePanel("Summarize Observation Data For Selected Participants"),
-    div(
-      id = "userInput",
-      fluidRow(
-        div(
-          id = "timeframeInput",
-          column(12, 
-                 align = "center",
+    uiOutput("title"),
+    tabsetPanel(
+      tabPanel("Plot", fluid = TRUE,
+               fluidPage(
+                 h5(),
+                 fluidRow(
+                   column(12, 
+                          align = "center",
+                          timelineUI("timeline")
+                   )
+                 ),
+                 fluidRow(
+                   column(4,
+                          column(12,
+                                 fluidRow(
+                                   uiOutput("choose_yaxis")
+                                 ),
+                                 fluidRow(
+                                   uiOutput("yaxis_stp1")
+                                 ),
+                                 fluidRow(
+                                   uiOutput("yaxis_stp2")
+                                 )
+                          )
+                   ),
+                   column(4,
+                          column(12,
+                                 fluidRow(
+                                   uiOutput("groups_type")
+                                 )
+                          ),
+                          column(12,
+                                  fluidRow(
+                                    customGroupsUI("group", colWidth = 12)
+                                  )
+                          )
+                   ),
+                   column(4,
+                          column(12,
+                                 fluidRow(
+                                   uiOutput("facet_type")
+                                 )
+                          ),
+                          column(12,
+                                 fluidRow(
+                                   customGroupsUI("facet", colWidth = 12)
+                                 )
+                          )
+                   )
+                 ),
+                 fluidRow(
+                   column(12, align = "center",
+                          actionButton("btn", "Plot!",
+                                       style='padding:8px; font-size:115%; color:white; background-color:#366dc4',
+                                       width = '15%')
+                          )
+                 ),
+                 hr(),
                  div(
-                   id = "timeframeUI",
-                   uiOutput("choose_timeframe")
-                 )
-          )
-        )
-      ),
-      fluidRow(
-        column(4,
-               div(
-                 id = "attributeUI",
-                 uiOutput("choose_yaxis")
+                   id = "plot_area",
+                   DT::dataTableOutput("table"),
+                   hr(),
+                   plotlyOutput("plot", width = '100%', height = '1000px')
+                   
+                 ) 
                )
-        ),
-        column(4,
-               div(
-                 id = "outcomeUI",
-                 uiOutput("groups_type")
+      ),
+      tabPanel("Notes", fluid = TRUE,
+               fluidPage(
+                 h4("Tutorial"),
+                 h5("some stuff"),
+                 h4("Notes"),
+                 h5("some more stuff"),
+                 h4("References"),
+                 h5("the rest of the stuff")
                )
-        ),
-        column(4,
-               div(
-                 id = "outcomeUI",
-                 uiOutput("facet_type")
-               )
-        )
-      ),
-      fluidRow(
-        column(4,
-               uiOutput("yaxis_stp1")
-               ),
-        column(4,
-               uiOutput("choose_groups")
-        ),
-        column(4,
-               uiOutput("choose_facet")
-        )
-      ),
-      fluidRow(
-        column(4,
-               uiOutput("yaxis_stp2")),
-        column(4,
-               uiOutput("groups_stp1")
-        ),
-        column(4,
-               uiOutput("facet_stp1")
-        )
-      ),
-      fluidRow(
-        column(4),
-        column(4,
-               uiOutput("groups_stp2")
-        ),
-        column(4,
-               uiOutput("facet_stp2")
-        )
-      ),
-      fluidRow(
-        column(4),
-        column(4,
-               uiOutput("groups_stp3")
-        ),
-        column(4,
-               uiOutput("facet_stp3")
-        )
-      ),
-      fluidRow(
-        column(4),
-        column(4,
-               uiOutput("groups_stp4")
-        ),
-        column(4,
-               uiOutput("facet_stp4")
-        )
       )
-    ),
-    hr(),
-    div(
-      id = "plot_area",
-      DT::dataTableOutput("table"),
-      hr(),
-      plotlyOutput("plot", width = '100%', height = '1000px')
-      
-    ) 
-    
+    )
   )
 )
+

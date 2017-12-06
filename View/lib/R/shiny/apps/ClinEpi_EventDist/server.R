@@ -5,11 +5,6 @@ require(data.table)
 require(plotly)
 require(viridisLite)
 
-source("../../lib/wdkDataset.R")
-source("config.R")
-source("../../lib/ebrc_functions.R")
-source("../../lib/clinepi_functions.R")
-
 #also need to figure out why the plots renders multiple times
 #maybe let user define their own groups??
 #reorganize ui and plotData to reflect newer apps structure
@@ -24,7 +19,10 @@ shinyServer(function(input, output, session) {
   metadata.file <- NULL
   singleVarData <- NULL
   prevFacet <- NULL
-  
+  current <- NULL
+  facetInfo <- NULL
+  xaxisInfo <- NULL  
+
   filesFetcher <- reactive({
 
     if (is.null(prtcpnt.file)) {
@@ -32,18 +30,18 @@ shinyServer(function(input, output, session) {
       prtcpnt_temp <- try(fread(
           getWdkDatasetFile('ShinyParticipants.tab', session, FALSE, dataStorageDir),
           na.strings = "N/A"))
-
+ 
       house_temp <- try(fread(
           getWdkDatasetFile('ShinyHouseholds.tab', session, FALSE, dataStorageDir),
           na.strings = "N/A"))
-
+ 
       event_temp <- try(fread(
           getWdkDatasetFile('ShinyObservations.tab', session, FALSE, dataStorageDir),
           na.strings = "N/A"))
-
+ 
       metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
-          ))     
+          ))
  
       if (grepl("Error", prtcpnt_temp[1])){
         stop("Error: Participant file missing or unreadable!")
@@ -127,10 +125,28 @@ shinyServer(function(input, output, session) {
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
-    for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
-   message("done with singleVarDataFetcher!") 
+    for (col in dates) {
+      if (col != 'EUPATH_0010222') {
+        singleVarData[[col]] <- sub(" .*", "", singleVarData[[col]])
+        singleVarData[[col]] <- as.Date(singleVarData[[col]])
+      }
+    }
+    #for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
+
     singleVarData
   }
+  
+  output$title <- renderUI({
+    singleVarDataFetcher()
+
+    current <<- callModule(timeline, "timeline", singleVarData)
+print("checkpoint")
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
+    
+    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis)) 
+
+    titlePanel("Distributions of Observations for Selected Participants")
+  })
   
     output$choose_groups <- renderUI({
       if (is.null(input$plotChoice)) {
@@ -173,52 +189,7 @@ shinyServer(function(input, output, session) {
       }
     })
     
-    #reconsider this. still useful with plotly? replace with choose_timeframe and call singleVarDataFetcher there like in the others??
-    output$choose_range <- renderUI({
-      message("in choose_range ui")
-      if (!length(singleVarData)) {
-        message(paste("fetching dt"))
-        singleVarData <<- singleVarDataFetcher()
-      }
-
-      if (is.null(input$plotChoice)) {
-        return()
-      }
-      if (is.null(input$xaxis)) {
-        return()
-      }
-      myX <- input$xaxis
-      myGroups <- input$groups
-      plotChoice <- input$plotChoice
-      nums <- getNums(metadata.file)
-      
-      if (plotChoice == 'groups') {
-        tempDF <- groupsDataFetcher(myGroups, myX)
-        
-        myMin <- min(tempDF[, (myX), with=FALSE])
-        myMax <- max(tempDF[, (myX), with=FALSE])
-        
-        sliderInput("range", "Range:",
-                    min = myMin, max = myMax, value = c(myMin,myMax))
-      } else {
-        #whats the point of the first half of this if statement?? isnt that a number?
-        if (myX %in% nums$source_id) {
-          message("hmm")
-          data <- singleVarData
-          tempDF <- completeDT(data, myX)
-      
-          myMin <- min(tempDF[, (myX), with=FALSE])
-          myMax <- max(tempDF[, (myX), with=FALSE])
-        
-          message(paste("in choose range function"))
-      
-          sliderInput("range", "Range:",
-                    min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE)
-        }
-      }
-    })
-    
-    output$choose_xaxis <- renderUI({
+   output$choose_xaxis <- renderUI({
       message("in choose_xaxis ui")
   
       if (is.null(input$plotChoice)) {
@@ -233,54 +204,138 @@ shinyServer(function(input, output, session) {
                     choices = list('Z-score' = 'zscore', 'Age in Days' = 'ageDays'),
                     selected = 'zscore') 
       } else {
-        #temporary until i figure out how to plot histograms with dates in plotly
-        dates <- getDates(metadata.file)$source_id
-        useData <- singleVarData[, -dates, with = FALSE]
-        xChoiceList <- getUIList(useData, metadata.file)
         selectInput(inputId = "xaxis",
                     label = "X-Axis:",
-                    choices = xChoiceList,
-                    selected = "EUPATH_0000689")
+                    choices = c("All possible" = "direct"),
+                    selected = "direct",
+                    width = '100%')
       }
     })
     
-    output$choose_facet <- renderUI({
-      message("in choose_facet ui")
-      if (is.null(input$plotChoice)) {
-        return()
-      }
-      if (is.null(input$xaxis)) { 
-        return()
-      }
-      plotChoice <- input$plotChoice
-      myX <- input$xaxis
-      myGroups <- input$groups
-      
-      if (house.file.exists) {
-        useData <- list(prtcpnt.file, house.file)
-        facetChoiceList <- lapply(useData, getUIList, metadata.file, minLevels = 2, maxLevels = 12, addNone = TRUE)
-        facetChoiceList <- unlist(facetChoiceList, recursive = FALSE)
-      } else {
-        facetChoiceList <- getUIList(prtcpnt.file, metadata.file, minLevels = 2, maxLevels = 12, addNone = TRUE)
-      }
-      
-      if (!is.null(prevFacet)) {
-        if (prevFacet %in% facetChoiceList) {
-          mySelected <- prevFacet
-        } else {
-          mySelected <- "OBI_0001627"
-        }
-      } else { 
-        mySelected <- "OBI_0001627"
-      }
-      message("in facet ui")
-      print(mySelected)
-      
-      selectInput(inputId = "facet",
+    output$facet_type <- renderUI({
+      selectInput(inputId = "facetType",
                   label = "Facet:",
-                  choices = facetChoiceList,
-                  selected = mySelected)
-           
+                  choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                  selected = "direct",
+                  width = '100%')
+    })
+    
+    groupLabel <- reactive({
+      if (is.null(input$xaxis)) {
+        return()
+      } else {
+        groupsType <- input$xaxis
+      }
+      
+      label = "bins for"
+      
+      return(label)
+    })
+    
+    groupData <- reactive({
+      if (is.null(input$xaxis)) {
+        return()
+      } else {
+        groupsType <- input$xaxis
+      }
+      #temporary until i figure out how to plot histograms with dates in plotly
+      dates <- getDates(metadata.file)$source_id
+      
+      if (groupsType == "direct") {
+        if (length(dates > 0)) {
+          ptmp <- prtcpnt.file[, -dates, with=FALSE]
+        } else {
+          ptmp <- prtcpnt.file
+        }
+        if (house.file.exists) {
+          if (length(dates > 0)) {
+            htmp <- house.file[, -dates, with=FALSE]
+          } else {
+            htmp <- house.file
+          }
+          useData <- list(ptmp, htmp)
+        } else {
+          useData <- list(ptmp)
+        }
+      } else {
+        if (length(dates > 0)) {
+          stmp <- singleVarData[, -dates, with=FALSE]
+        } else {
+          stmp <- singleVarData
+        }
+        useData <- list(stmp)
+      }  
+      
+      return(useData)
+    })
+    
+    selectedGroup <- reactive({
+      if (is.null(input$xaxis)) {
+        return()
+      } else {
+        groupsType <- input$xaxis
+      }
+      
+      if (groupsType == "direct") {
+        selected <- "EUPATH_0000744"
+      } else {
+        selected <- "EUPATH_0000704"
+      }  
+      
+      return(selected)
+    })
+    
+    facetLabel <- reactive({
+      if (is.null(input$facetType)) {
+        return()
+      } else {
+        facetType <- input$facetType
+      }
+      
+      label = ""
+      if (facetType == "direct") {
+        label <- "facets for"
+      } else if (facetType != "none") {
+        label <- "facet where:"
+      }
+      
+      return(label)
+    })
+    
+    facetData <- reactive({
+      if (is.null(input$facetType)) {
+        return()
+      } else {
+        facetType <- input$facetType
+      }
+      
+      if (facetType == "direct") {
+        if (house.file.exists) {
+          useData <- list(prtcpnt.file, house.file)
+        } else {
+          useData <- list(prtcpnt.file)
+        }
+      } else {
+        useData <- list(singleVarData)
+      }
+      
+      return(useData)
+    })
+    
+    selectedFacet <- reactive({
+      if (is.null(input$facetType)) {
+        return()
+      } else {
+        groupsType <- input$facetType
+      }
+      
+      if (groupsType == "direct") {
+        selected <- "EUPATH_0000452"
+      } else {
+        selected <- "EUPATH_0000704"
+      }  
+      
+      return(selected)
     })
     
     output$distribution <- renderPlotly({
@@ -291,14 +346,24 @@ shinyServer(function(input, output, session) {
       if (is.null(input$plotChoice)) {
         return()
       }
-      if (is.null(input$facet)) {
+      if (is.null(input$facetType)) {
         return()
       }
       myX <- input$xaxis
+      if (myX == "direct" | myX == "makeGroups") {
+        if (is.null(xaxisInfo$group)) {
+          return()
+        } else {
+          myX <- xaxisInfo$group
+        }
+      }
       plotChoice <- input$plotChoice
-      myMin <- input$range[1]
-      myMax <- input$range[2]
-      myFacet <- input$facet
+      if (input$facetType == "none") {
+        myFacet <- "none"
+      } else {
+        myFacet <- facetInfo$group
+      }
+      facetType = input$facetType
       #should switch to same setup as in other two.. use plotData()
       df <- plotData()
    
@@ -322,10 +387,6 @@ shinyServer(function(input, output, session) {
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
       
-      if ( myX %in% nums$source_id  || plotChoice == 'groups'){
-        myPlot <- myPlot + coord_cartesian(xlim=c(myMin,myMax))
-      }
-      
       if (plotChoice == 'groups') {
         #myPlot <- myPlot + geom_tooltip(aes(fill = groups, y = .3 * ..count.., tooltip=groups), alpha = .2, real.geom=geom_histogram)  
         myPlot <- myPlot + geom_density(aes(fill = groups, y = .3 * ..count.., text = paste0("Group: ", group , "<br>", "Count: ", .3 * ..count..)), alpha = .2) 
@@ -333,29 +394,41 @@ shinyServer(function(input, output, session) {
         if (length(levels(as.factor(df$groups))) > 12) {
           myPlot <- myPlot + theme(legend.position="none")
         }
-        if (myFacet != 'none') {
-          myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
+        if (facetType == 'direct') {
+          myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
            # scale_fill_brewer(palette = cbPalette)
+        } else if (facetType == 'makeGroups') {
+          myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
         }
       } else {
+        #consider when facetType is makeGroups to use geom_density instead ??
         if (myX %in% nums$source_id | myX %in% dates$source_id) {
           #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), fill = "#56B4E9", real.geom="geom_histogram")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
-          if (myFacet != 'none') {
-            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3)   
+          if (facetType == 'direct') {
+            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3) 
+            # scale_fill_brewer(palette = cbPalette)
+          } else if (facetType == 'makeGroups') {
+            myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
           }
         } else {
           #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), stat = "count", fill = "#56B4E9", real.geom="geom_histogram")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
           if(length(levels(as.factor(df[[myX]]))) < 7) {
-            if (myFacet != 'none') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3)   
+            if (facetType == 'direct') {
+              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3) 
+              # scale_fill_brewer(palette = cbPalette)
+            } else if (facetType == 'makeGroups') {
+              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
             }
           } else {
-            if (myFacet != 'none') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)   
+            if (facetType == 'direct') {
+              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
+              # scale_fill_brewer(palette = cbPalette)
+            } else if (facetType == 'makeGroups') {
+              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
             }
           }
         }
@@ -382,31 +455,62 @@ shinyServer(function(input, output, session) {
     
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #datagrabbed through reactive expression for better control of reactive context
-    
-    plotData <- debounce(reactive({
-      if (is.null(input$plotChoice)) {
-        return()
-      }
-      plotChoice <- input$plotChoice
+    #now just need to edit this and the plotly output to handle the makegroups option in ui
+    plotData <- eventReactive(input$btn, {
       if (is.null(input$xaxis)) {
         return()
       }
-      if (is.null(input$facet)) {
+      if (is.null(input$plotChoice)) {
         return()
       }
-      myFacet <- input$facet
+      if (is.null(input$facetType)) {
+        return()
+      }
+      facetType <- input$facetType
+      myX <- input$xaxis
+      if (myX == "direct" | myX == "makeGroups") {
+        if (is.null(xaxisInfo$group)) {
+          return()
+        } else {
+          myX <- xaxisInfo$group
+        }
+      }
+      plotChoice <- input$plotChoice
+      if (input$facetType == "none") {
+        myFacet <- "none"
+      } else {
+        myFacet <- facetInfo$group
+      }
+      facet_stp1 <- facetInfo$group_stp1
+      facet_stp3 <- facetInfo$group_stp3
+      facet_stp4 <- facetInfo$group_stp4
+      facet_stp2 <- facetInfo$group_stp2
       prevFacet <<- myFacet
       myGroups <- input$groups
-      myX <- input$xaxis
+      myTimeframe <- current$timeframe
       
       strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
       if (plotChoice == 'groups') {
         data <- groupsDataFetcher(myGroups, myX)
+        #subset data
+        #which cols can be used for this will have to change. too specific right now
+        if (any(colnames(data) %in% "EUPATH_0000644")) {
+          if (!is.null(myTimeframe)) {
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data)
+          }
+        }
         col = 'groups'
         data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
                             by = setdiff(names(data), eval(col))][!is.na(eval(col))]
       } else {
         data <- singleVarData
+        #subset data
+        #which cols can be used for this will have to change. too specific right now
+        if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
+          if (!is.null(myTimeframe)) {
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
+          } 
+        }
         if (myX %in% strings$source_id) {
           data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
                               by = setdiff(names(data), eval(myX))][!is.na(eval(myX))]
@@ -416,13 +520,60 @@ shinyServer(function(input, output, session) {
       nums <- getNums(metadata.file)
       dates <- getDates(metadata.file)      
 
-      if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
-        data[[myFacet]] <- cut(data[[myFacet]],4)
+      #for handling facets, this works for direct. need if statement
+      if (facetType == "direct") {
+        if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
+          data[[myFacet]] <- cut(data[[myFacet]],4)
+        }
+      } else {
+        numeric <- c("lessThan", "greaterThan", "equals")
+        anthro <- c("percentDays", "delta", "direct")
+        if (facetType != "none") {
+          if (is.null(facet_stp1)) {
+            return()
+          } else {
+            if (facet_stp1 %in% numeric) {
+              if (is.null(facet_stp2)) {
+                return()
+              }
+            }
+            if (facet_stp1 %in% anthro) {
+              if (facet_stp1 == "percentDays") {
+                if (is.null(facet_stp4)) {
+                  return()
+                }
+              } else {
+                if (is.null(facet_stp3)) {
+                  return()
+                }
+              }
+            }
+          }
+          outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+          message(paste("label is:", label))
+          message("have custom facet! now merge..")
+          #add makeGroups data to df and return
+          colnames(outData) <- c("Participant_Id", "FACET")
+          #will need a var called label that changes based on what the facet steps are. the below only works for strings.
+          #if (any(colnames(event.file) %in% myFacet)) {
+          #  naToZero(outData, "FACET")
+          #}
+          message(paste("levels facet:", levels(as.factor(outData$FACET))))
+          outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
+          # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
+          message(paste("levels facet:", levels(as.factor(outData$FACET))))
+          print(head(data))
+          print(head(outData))
+          data <- merge(data, outData, by = "Participant_Id", all = TRUE)
+          print(head(data))
+          message(paste("levels facet:", levels(as.factor(data$FACET))))
+        }
       }
       
       data
       
-    }), 2000)
+    })
     
     groupsDataFetcher <- function(myGroups, myX) {
       #since singlevar is default im assuming fles fetcher is already called. can add check later though to be safe.
