@@ -1,0 +1,3 @@
+dependencies:
+  - '{{ project_home }}/EbrcWebsiteCommon/Model/lib/conifer'
+  - '{{ project_home }}/WDK/Model/lib/conifer'

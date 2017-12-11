@@ -63,12 +63,12 @@ select pa.name as LEGEND
   , ea.$contXAxis as NAME
   , ea.$optStatus as OPT_STATUS
 -- profile_file is participant id
-from apidbtuning.participantattributes pa
-   , apidbtuning.protocolappnodeio io
-   , APIDBTUNING.EVENTATTRIBUTES ea
+from apidbtuning.Participants pa
+   , apidbtuning.PANIO io
+   , apidbtuning.Observations ea
 where pa.name = \'<<Id>>\'
-and pa.protocol_app_node_id = io.input_node_id 
-and io.OUTPUT_NODE_ID = ea.PROTOCOL_APP_NODE_ID
+and pa.pan_id = io.input_pan_id 
+and io.OUTPUT_PAN_ID = ea.PAN_ID
 and ea.$status is not null
 order by $contXAxis 
 
@@ -83,12 +83,12 @@ select pa.name as LEGEND
   , ea.$status as STATUS
   , ea.$contXAxis as NAME
 -- profile_file is participant id
-from apidbtuning.participantattributes pa
-   , apidbtuning.protocolappnodeio io
-   , APIDBTUNING.EVENTATTRIBUTES ea
+from apidbtuning.Participants pa
+   , apidbtuning.PANIO io
+   , apidbtuning.Observations ea
 where pa.name = \'<<Id>>\'
-and pa.protocol_app_node_id = io.input_node_id 
-and io.OUTPUT_NODE_ID = ea.PROTOCOL_APP_NODE_ID
+and pa.pan_id = io.input_pan_id 
+and io.OUTPUT_PAN_ID = ea.PAN_ID
 and ea.$status is not null
 order by $contXAxis 
 

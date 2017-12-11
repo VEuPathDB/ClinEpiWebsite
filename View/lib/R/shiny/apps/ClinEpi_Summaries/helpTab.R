@@ -1,0 +1,44 @@
+help <-      tabPanel("Help", fluid = TRUE,
+               fluidPage(
+                 h4("Overview"),
+                 h5(
+                   p("This Shiny app has different behavior for longitudinal vs. non-longitudinal datasets."),
+                   strong("Longitudinal:"), br(),
+                   p("For longitudinal datasets this app allows you to plot summary information for variables of interest against time. You will see a timeline and several drop-down menus at the top of the application. The first is labelled 'Y-axis', the second 'Facet Line' and the third 'Facet Plot'. The white points on the timeline can be adjusted to subset the data by a time period of interest. The Y-axis menu allows you to select a variable in the dataset which you would like to see summary data for. While the Facet Line menu allows you to select which variables you will see that summary data for and will draw lines on the resulting plot. For example, you may want to see the participants' average height for males and females over time. In this case, you would select height under the Y-axis menu and biological sex under  the Facet Line menu. The Facet Plot menu is similar in concept to the Facet Line menu, except that rather than selecting a variable by which to draw lines you will select a variable for drawing seperate plots. Both the Facet Line and Facet Plot menus will allow you to either make your own groups based on a variable in the dataset, or to use all possible values for a variable."),
+                   p("Whenever you click the 'Plot' button, you will see the plot appear. If you update your selections in the menus above the 'Plot' button, you will need to click it again."),
+                   p("After clicking 'Plot' a line graph will appear. If the Y-axis variable you selected is numeric, a series of vertical bars will also appear on the plot. These vertical bars function similarly to a box-and-whisker plot. The highest point of the line represents the maximum value for the Y-axis variable for that time point, and the lowest point the minimum value. The solitary points on these vertical bars similarly represent the 25th and 75th percentiles for each time point. Finally, a smoothed line with 95% confidence interval will be drawn for each group for the variable selected in Facet Line. If alternatively, you would like to see the actual calculated mean per time point, there is a radio button under the Y-axis menu which allows this. If, however, the Y-axis variable you selected is non-numeric then the radio button will allow you to choose between plotting the Y-axis as 'Count' or 'Proportion'. Please see 'Notes' for further details on plotting with 'Smoothed Conditional Mean'."),
+                   p("If you hover over any of the color shaded areas a tooltip will appear providing you the X-axis and Y-axis values for that time point. If you are plotting data with the 'Smoothed Conditional Mean' option you can also hover over the gray area to get the minimum and maximum values for the confidence interval at that time point."),
+                   strong("Non-longitudinal:"), br(),
+                   p("For non-longitudinal datasets this app allows you to plot summary information for variables of interest against other variables in the dataset. You will see several drop-down menus at the top of the application. The first is labelled 'Y-axis', the second 'X-axis' and the third 'Facet Plot'. The Y-axis menu allows you to select a variable in the dataset which you would like to see summary data for. While the X-axis menu allows you to select which variable you will see that data plotted against. For example, you may want to see the participants' average height for males and females. In this case, you would select height under the Y-axis menu and biological sex under the X-axis menu. The Facet Plot menu will allow you to select a variable by which to draw seperate plots. The Facet Plot menu will allow you to either make your own groups based on a variable in the dataset, or to use all possible values for a variable."),
+                   p("Whenever you click the 'Plot' button, you will see the plot appear. If you update your selections in the menus above the 'Plot' button, you will need to click it again."),
+                   p("After clicking 'Plot' either a bar plot or a box-and-whisker plot will appear. If the Y-axis variable you selected is numeric, you will see a box-and-whisker plot. If, however, the Y-axis variable you selected is non-numeric then a bar plot will appear showing the proportion of participants for each X-axis group which meet the condition you selected for the Y-axis variable. If you would like to see the actual number of participants as opposed to the proportion, the radio button under the Y-axis menu will allow you to do this."),
+                   p("If you hover over any of the color shaded areas a tooltip will appear telling you all pertinent information. For box-and-whisker plots the values of all horizontal bars as well as the highest and lowest points will be displayed. For bar plots the X-axis and Y-axis values will be displayed."),
+                   strong("General:"), br(),
+                   p("It is also worth noting the panel that appears in the top right of the plot when you hover over any portion of it. This menu will allow you to pan and zoom the graph,
+to download the graph as an image and to change how tooltips are displayed among other things.")
+                 ),
+                 br(),
+                 h4("Notes"),
+                 h5(
+                   p("For longitudinal datasets the X-axis will always be the timeframe you have selected in the slider bar at the top of the application divided into 24 equal bins. This means that as you decrease the amount of time in the timeframe slider you also decrease the length of time represented by each bin/ time point. For example, if you are plotting roughly 2 years of data then each time point will represent approximately a month. If you subset the data to plot only 6 months across the X-axis, then each time point will change to represent roughly 1 week."),
+                   p("When plotting data using the 'Smoothed Conditional Mean' option, the smoothing method is determined by the number of data points (with each participant contributing multiple data points) per line per plot. If this number exceeds 1,000 gam is used, otherwise loess."),
+                   p("When the 'All possible' option is used in combination with a numeric variable under 'Facet Line' or 'Facet Plot', the variable will be binned automatically to 4 groups. While we intentionally attempt to make these groups in a way that each will have roughly the same number of participants, it is still worth noting the size of the resulting bins. There will inevitably be cases where the sample sizes are perhaps uneven or simply too small to truly be informative."),
+                   p("For longitudinal datasets, we find using the 2x2 app in combination with the Data Summaries app to be very informative (and fun!).")
+                 ),
+                 br(),
+                 h4("Version Information"),
+                 h5(
+                   p("Shiny Server: 1.5.6.875", br(),
+                     "R: 3.4.1 (2017-06-30)", br(),
+                     "Packages:", br(),
+                     tags$ul(
+                       tags$li("data.table: 1.10.4-2"),
+                       tags$li("DT: 0.2"),
+                       tags$li("plotly: 4.7.1"),
+                       tags$li("shiny: 1.0.5"),
+                       tags$li("viridisLite: 0.2.0")
+                     )
+                   ) 
+                 )
+               )
+             )

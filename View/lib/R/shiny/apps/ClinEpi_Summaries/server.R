@@ -6,19 +6,11 @@ require(plotly)
 require(DT)
 require(viridisLite)
 
-source("../../lib/wdkDataset.R")
-source("config.R")
-source("../../lib/ebrc_functions.R")
-source("../../lib/clinepi_functions.R")
-
 #are there any stats evidence for significance we could do?
-#if there is no timeframe info (agedays or dates) consider a box plot instead. make sure that idea isnt redundant with any other apps or anything, and makes sense to do
 #for facets ui: consider selecting more than one group/ check boxes ??
 #make sure levels for numeric groups always start with the group that has square bracket in front (meaning smallest -> largest)
 #figure out when we need naToZero function when building own groups and facets. imagine need it for events stuffs but not others ??
 # for some reason delta laz > -.5 returns fewer ppl than >-1.. seems should be reversed
-
-#options(shiny.sanitize.errors = TRUE)  
 
 shinyServer(function(input, output, session) {
   
@@ -29,6 +21,9 @@ shinyServer(function(input, output, session) {
   house.file.exists <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
+  current <- NULL
+  facetInfo <- NULL
+  groupInfo <- NULL
  
   filesFetcher <- reactive({
 
@@ -132,126 +127,30 @@ shinyServer(function(input, output, session) {
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
-    for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
+    for (col in dates) {
+      if (col != 'EUPATH_0010222') {
+        singleVarData[[col]] <- sub(" .*", "", singleVarData[[col]])
+        singleVarData[[col]] <- as.Date(singleVarData[[col]])
+      }
+    }
+    #for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
 
     singleVarData
   }
   
-  subsetDataFetcher <- function(min,max){
-    data <- singleVarData
-    
-    #eupath_0000743 is last date observed. so the below doesnt include prtcpnts who drop out before the max day set
-    #this inner if statement temporary (hopefully) until we sort the root of the problem. events table has data up to ageday 745, but prtcpnt file says no observations past 732
-    if (any(colnames(prtcpnt.file) %in% "EUPATH_0000743")) {
-      grabMe <- length(levels(as.factor(prtcpnt.file$EUPATH_0000743)))
-      maxDay <- levels(as.factor(prtcpnt.file$EUPATH_0000743))[grabMe]
-      if (max > maxDay) {
-        tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max]
-      } else {
-        tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max & data$EUPATH_0000743 >= max]
-      }
-    } else {
-      tempDF <- data
-    }
-    
-    #maybe make it so that if it cant find these two columns then it doesn't let there be a subset/ timeframe option at all but will continue without it
-    #can even have some else if options if there are backups that are likely to exist
-    
-    tempDF
-  }
-  
-  outRange <- reactiveValues()
-  facetRange <- reactiveValues()
-  
-  setOutVals <- reactive({
-    myGroups <- input$groups
-    nums <- getNums(metadata.file)
-    dates <- getDates(metadata.file)
-    
-    if (myGroups %in% nums$source_id | myGroups %in% dates$source_id) {
-      data <- singleVarData
-      tempDF <- completeDT(data, myGroups)
-      
-      if (any(colnames(event.file) %in% myGroups) & any(colnames(tempDF) %in% "BFO_0000015")) {
-        if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
-          outRange$myMin = 0
-        }
-      } else {
-        outRange$myMin <- min(tempDF[[myGroups]])
-      }
-      outRange$myMax <- max(tempDF[[myGroups]])
-      
-      if (myGroups %in% nums$source_id) {
-        outRange$mean <- mean(tempDF[[myGroups]])
-      } else {
-        outRange$startDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroups]]), .25))
-        outRange$endDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroups]]), .75))
-        outRange$myMin <- as.Date(outRange$myMin)
-        outRange$myMax <- as.Date(outRange$myMax)
-        message(paste("start and end dates:", outRange$startDate, outRange$endDate))
-      }
-    }
-    
-  })
-  
-  setFacetVals <- reactive({
-    myFacet <- input$facet
-    nums <- getNums(metadata.file)
-    dates <- getDates(metadata.file)
-    
-    if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
-      data <- singleVarData
-      tempDF <- completeDT(data, myFacet)
-      
-      if (any(colnames(event.file) %in% myFacet) & any(colnames(tempDF) %in% "BFO_0000015")) {
-        if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
-          facetRange$myMin = 0
-        }
-      } else {
-        facetRange$myMin <- min(tempDF[[myFacet]])
-      }
-      facetRange$myMax <- max(tempDF[[myFacet]])
-      
-      if (myFacet %in% nums$source_id) {
-        facetRange$mean <- mean(tempDF[[myFacet]])
-      } else {
-        facetRange$startDate <- as.Date(quantile(as.POSIXct(tempDF[[myFacet]]), .25))
-        facetRange$endDate <- as.Date(quantile(as.POSIXct(tempDF[[myFacet]]), .75)) 
-        facetRange$myMin <- as.Date(facetRange$myMin)
-        facetRange$myMax <- as.Date(facetRange$myMax)
-        message(paste("facet start and end dates:", facetRange$startDate, facetRange$endDate))
-      }
-    }
-    
-  })
-  
-  #make sure ranges are updated when attr or out change
-  observeEvent(input$groups, setOutVals())
-  observeEvent(input$facet, setFacetVals())
-  
   #ui stuffs
-    output$choose_timeframe <- renderUI({
-      ageDays = "EUPATH_0000644"
-    
-      if (!length(singleVarData)) {
-        data <- singleVarDataFetcher()
-      } else {
-        data <- singleVarData
-      }
-      
-      if (any(colnames(singleVarData) %in% ageDays)) {
-        tempDF <- completeDT(data, ageDays)
-        
-        
-        myMin <- min(tempDF[, (ageDays), with=FALSE])
-        myMax <- max(tempDF[, (ageDays), with=FALSE]) 
-        
-        sliderInput("timeframe", "Timeframe:",
-                    min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
-      }
-        
-    })
-    
+  output$title <- renderUI({
+    singleVarDataFetcher()
+
+    current <<- callModule(timeline, "timeline", singleVarData)
+
+    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType))
+
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
+
+    titlePanel("Summarize Observation Data for Selected Participants")
+  })
+  
     output$groups_type <- renderUI({
       ageDays <- "EUPATH_0000644"
       
@@ -279,67 +178,24 @@ shinyServer(function(input, output, session) {
                   width = '100%')
     })
     
-    output$choose_groups <- renderUI({
-      if (is.null(input$groupsType)) {
+    facetLabel <- reactive({
+      if (is.null(input$facetType)) {
         return()
       } else {
-        groupsType <- input$groupsType
-      }
-      ageDays <- "EUPATH_0000644"
-      
-      if (any(colnames(singleVarData) %in% ageDays)) {
-        if (groupsType == "direct") {
-
-          if (house.file.exists) {
-            useData <- list(prtcpnt.file, house.file)
-            groupChoiceList <- lapply(useData, getUIList, metadata.file = metadata.file)
-            groupChoiceList <- unlist(groupChoiceList, recursive = FALSE)
-          } else {
-            groupChoiceList <- getUIList(prtcpnt.file, metadata.file)
-          }
-
-          selectInput(inputId = "groups",
-                      label = "facets for",
-                      choices = groupChoiceList,
-                      selected = "EUPATH_0000744",
-                      width = '100%')
-        } else {
-          groupChoiceList <- getUIList(singleVarData, metadata.file)
-          selectInput(inputId = "groups",
-                      label = "facet where:",
-                      choices = groupChoiceList,
-                      selected = "EUPATH_0000704",
-                      width = '100%')
-        }
-      } else {
-        if (groupsType == "direct") {
-
-          if (house.file.exists) {
-            useData <- list(prtcpnt.file, house.file)
-            groupChoiceList <- lapply(useData, getUIList, metadata.file = metadata.file)
-            groupChoiceList <- unlist(groupChoiceList, recursive = FALSE)
-          } else {
-            groupChoiceList <- getUIList(prtcpnt.file, metadata.file)
-          }
-
-          selectInput(inputId = "groups",
-                      label = "x-axis categories for",
-                      choices = groupChoiceList,
-                      selected = "EUPATH_0000744",
-                      width = '100%')
-        } else {
-          groupChoiceList <- getUIList(singleVarData, metadata.file)
-          selectInput(inputId = "groups",
-                      label = "x-axis category where:",
-                      choices = groupChoiceList,
-                      selected = "EUPATH_0000704",
-                      width = '100%')
-        }
+        facetType <- input$facetType
       }
       
+      label = ""
+      if (facetType == "direct") {
+        label <- "facets for"
+      } else if (facetType != "none") {
+        label <- "facet where:"
+      }
+      
+      return(label)
     })
     
-    output$choose_facet <- renderUI({
+    facetData <- reactive({
       if (is.null(input$facetType)) {
         return()
       } else {
@@ -347,32 +203,79 @@ shinyServer(function(input, output, session) {
       }
       
       if (facetType == "direct") {
-
         if (house.file.exists) {
           useData <- list(prtcpnt.file, house.file)
-          facetChoiceList <- lapply(useData, getUIList, metadata.file = metadata.file, minLevels = 2, maxLevels = 12)
-          facetChoiceList <- unlist(facetChoiceList, recursive = FALSE)
         } else {
-          facetChoiceList <- getUIList(prtcpnt.file, metadata.file, minLevels = 2, maxLevels = 12)
+          useData <- list(prtcpnt.file)
         }
-
-        selectInput(inputId = "facet",
-                    label = "facets for",
-                    choices = facetChoiceList,
-                    selected = "EUPATH_0000452",
-                    width = '100%')
-      } else if (facetType != "none") {
-        #will have to change selected here TODO
-        facetChoiceList <- getUIList(singleVarData, metadata.file)
-        selectInput(inputId = "facet",
-                    label = "facet where:",
-                    choices = facetChoiceList,
-                    selected = "EUPATH_0000452",
-                    width = '100%')
+      } else {
+        useData <- list(singleVarData)
       }
       
+      return(useData)
     })
     
+    groupLabel <- reactive({
+        if (is.null(input$groupsType)) {
+          return()
+        } else {
+          groupsType <- input$groupsType
+        }
+        ageDays <- "EUPATH_0000644"
+      
+        if (any(colnames(singleVarData) %in% ageDays)) {
+          if (groupsType == "direct") {
+            label = "facets for"
+          } else {
+            label = "facet where:"
+          }
+        } else {
+          if (groupsType == "direct") {
+            label = "x-axis categories for"
+          } else {
+            label = "x-axis category where:"
+          }
+        }
+        
+        return(label)
+    })
+    
+    groupData <- reactive({
+      if (is.null(input$groupsType)) {
+        return()
+      } else {
+        groupsType <- input$groupsType
+      }
+      
+      if (groupsType == "direct") {
+        if (house.file.exists) {
+          useData <- list(prtcpnt.file, house.file)
+        } else {
+          useData <- list(prtcpnt.file)
+        }
+      } else {
+        useData <- list(singleVarData)
+      }  
+      
+      return(useData)
+    })
+    
+    selectedGroup <- reactive({
+      if (is.null(input$groupsType)) {
+        return()
+      } else {
+        groupsType <- input$groupsType
+      }
+      
+      if (groupsType == "direct") {
+        selected <- "EUPATH_0000744"
+      } else {
+        selected <- "EUPATH_0000704"
+      }  
+      
+      return(selected)
+    })
+
     output$choose_yaxis <- renderUI({
       
       #this list should contain anything from events file
@@ -444,375 +347,6 @@ shinyServer(function(input, output, session) {
                      inline = TRUE)
       }
       
-    })
-    
-    output$groups_stp1 <- renderUI({
-      if (is.null(input$groupsType)) {
-        return()
-      } else {
-        if (input$groupsType == "direct") {
-          return()
-        }
-      }
-      if (is.null(input$groups)) {
-        return()
-      }
-   
-      myGroups <- input$groups
-      nums <- getNums(metadata.file)
-      dates <- getDates(metadata.file)
-      
-      data <- singleVarData
-      tempDF <- completeDT(data, myGroups)
-     
-      if (any(colnames(event.file) %in% myGroups) & any(colnames(tempDF) %in% "BFO_0000015")) {
-        if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
-          selectInput(inputId = "groups_stp1",
-                      label = "where",
-                      choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
-                      selected = "delta",
-                      width = '100%') 
-        } else {
-          if (myGroups %in% nums$source_id) {
-            selectInput(inputId = "groups_stp1",
-                        label = "is",
-                        choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                        selected = "greaterThan",
-                        width = '100%')
-          } else if (myGroups %in% dates$source_id) {
-            dateRangeInput(inputId = "groups_stp1",
-                           label = "is between",
-                           start = outRange$startDate, end = outRange$endDate,
-                           min = outRange$myMin, max = outRange$myMax,
-                           separator = "and",
-                           startview = "year")
-          } else {
-            outStp1List <- getUIStp1List(singleVarData, myGroups)
-            if (length(outStp1List) == 2) {
-              if (any(outStp1List %in% "Yes")) {
-                selectInput(inputId = "groups_stp1",
-                            label = "is",
-                            choices = outStp1List,
-                            selected = "Yes",
-                            width = '100%')
-              } else if (any(outStp1List %in% "TRUE")) {
-                selectInput(inputId = "groups_stp1",
-                            label = "is",
-                            choices = outStp1List,
-                            selected = "TRUE",
-                            width = '100%')
-              }
-            } else {
-              selectInput(inputId = "groups_stp1",
-                          label = "is",
-                          choices = outStp1List,
-                          width = '100%')
-            }
-          }
-        }
-     } else {
-        if (myGroups %in% nums$source_id) {
-          selectInput(inputId = "groups_stp1",
-                      label = "is",
-                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                      selected = "greaterThan",
-                      width = '100%')
-        } else if (myGroups %in% dates$source_id) {
-          dateRangeInput(inputId = "groups_stp1",
-                         label = "is between",
-                         start = outRange$startDate, end = outRange$endDate,
-                         min = outRange$myMin, max = outRange$myMax,
-                         separator = "and",
-                         startview = "year")
-        } else {
-          outStp1List <- getUIStp1List(singleVarData, myGroups)
-          if (length(outStp1List) == 2) {
-            if (any(outStp1List %in% "Yes")) {
-              selectInput(inputId = "groups_stp1",
-                          label = "is",
-                          choices = outStp1List,
-                          selected = "Yes",
-                          width = '100%')
-            } else if (any(outStp1List %in% "TRUE")) {
-              selectInput(inputId = "groups_stp1",
-                          label = "is",
-                          choices = outStp1List,
-                          selected = "TRUE",
-                          width = '100%')
-            }
-          } else {
-            selectInput(inputId = "groups_stp1",
-                        label = "is",
-                        choices = outStp1List,
-                        width = '100%')
-          }
-        }
-      }
-      
-    })
-    
-    output$facet_stp1 <- renderUI({
-      if (is.null(input$facetType)) {
-        return()
-      } else {
-        if (input$facetType != "makeGroups") {
-          return()
-        }
-      }
-      if (is.null(input$facet)) {
-        return()
-      }
-      
-      myFacet <- input$facet
-      nums <- getNums(metadata.file)
-      dates <- getDates(metadata.file)
-      
-      data <- singleVarData
-      tempDF <- completeDT(data, myFacet)
-      
-      if (any(colnames(event.file) %in% myFacet) & any(colnames(tempDF) %in% "BFO_0000015")) {
-        if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
-          selectInput(inputId = "facet_stp1",
-                      label = "where",
-                      choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
-                      selected = "delta",
-                      width = '100%') 
-        } else {
-          if (myFacet %in% nums$source_id) {
-            selectInput(inputId = "facet_stp1",
-                        label = "is",
-                        choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                        selected = "greaterThan",
-                        width = '100%')
-          } else if (myFacet %in% dates$source_id) {
-            dateRangeInput(inputId = "facet_stp1",
-                           label = "is between",
-                           start = facetRange$startDate, end = facetRange$endDate,
-                           min = facetRange$myMin, max = facetRange$myMax,
-                           separator = "and",
-                           startview = "year")
-          } else {
-            outStp1List <- getUIStp1List(singleVarData, myFacet)
-            if (length(outStp1List) == 2) {
-              if (any(outStp1List %in% "Yes")) {
-                selectInput(inputId = "facet_stp1",
-                            label = "is",
-                            choices = outStp1List,
-                            selected = "Yes",
-                            width = '100%')
-              } else if (any(outStp1List %in% "TRUE")) {
-                selectInput(inputId = "facet_stp1",
-                            label = "is",
-                            choices = outStp1List,
-                            selected = "TRUE",
-                            width = '100%')
-              }
-            } else {
-              selectInput(inputId = "facet_stp1",
-                          label = "is",
-                          choices = outStp1List,
-                          width = '100%')
-            }
-          }
-        }
-      } else {
-        if (myFacet %in% nums$source_id) {
-          selectInput(inputId = "facet_stp1",
-                      label = "is",
-                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                      selected = "greaterThan",
-                      width = '100%')
-        } else if (myFacet %in% dates$source_id) {
-          dateRangeInput(inputId = "facet_stp1",
-                         label = "is between",
-                         start = facetRange$startDate, end = facetRange$endDate,
-                         min = facetRange$myMin, max = facetRange$myMax,
-                         separator = "and",
-                         startview = "year")
-        } else {
-          outStp1List <- getUIStp1List(singleVarData, myFacet)
-          if (length(outStp1List) == 2) {
-            if (any(outStp1List %in% "Yes")) {
-              selectInput(inputId = "facet_stp1",
-                          label = "is",
-                          choices = outStp1List,
-                          selected = "Yes",
-                          width = '100%')
-            } else if (any(outStp1List %in% "TRUE")) {
-              selectInput(inputId = "facet_stp1",
-                          label = "is",
-                          choices = outStp1List,
-                          selected = "TRUE",
-                          width = '100%')
-            }
-          } else {
-            selectInput(inputId = "facet_stp1",
-                        label = "is",
-                        choices = outStp1List,
-                        width = '100%')
-          }
-        }
-      }
-      
-    })
- 
-    output$groups_stp2 <- renderUI({
-      if (is.null(input$groups_stp1)) {
-        return()
-      }
-      myStp1Val <- input$groups_stp1
-      
-      numeric <- c("lessThan", "greaterThan", "equals")
-      anthro <- c("percentDays", "delta", "direct")
-      
-      if (myStp1Val %in% anthro) {
-        if (myStp1Val == 'percentDays') {
-          numericInput(inputId = "groups_stp2",
-                       label = NULL,
-                       value = 50,
-                       min = 0,
-                       max = 100,
-                       width = '100%')
-        } else {
-          selectInput(inputId = "groups_stp2",
-                      label = "is",
-                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                      selected = "greaterThan",
-                      width = '100%')
-        }
-      } else {
-        if (myStp1Val %in% numeric) {
-          #just going to set default value to whatever the mean is 
-          sliderInput("groups_stp2", NULL,
-                      min = outRange$myMin, max = outRange$myMax, value = outRange$mean, step = .1, width = '100%')
-        } 
-      }
-      
-    })
-    
-    output$facet_stp2 <- renderUI({
-      if (is.null(input$facet_stp1)) {
-        return()
-      }
-      if (is.null(input$facetType) | input$facetType != "makeGroups") {
-        return()
-      }
-      myStp1Val <- input$facet_stp1
-      
-      numeric <- c("lessThan", "greaterThan", "equals")
-      anthro <- c("percentDays", "delta", "direct")
-      
-      if (myStp1Val %in% anthro) {
-        if (myStp1Val == 'percentDays') {
-          numericInput(inputId = "facet_stp2",
-                       label = NULL,
-                       value = 50,
-                       min = 0,
-                       max = 100,
-                       width = '100%')
-        } else {
-          selectInput(inputId = "facet_stp2",
-                      label = "is",
-                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                      selected = "greaterThan",
-                      width = '100%')
-        }
-      } else {
-        if (myStp1Val %in% numeric) {
-          #just going to set default value to whatever the mean is 
-          sliderInput("facet_stp2", NULL,
-                      min = facetRange$myMin, max = facetRange$myMax, value = facetRange$mean, step = .1, width = '100%')
-        } 
-      }
-      
-    })
-    
-    output$groups_stp3 <- renderUI ({
-      if (is.null(input$groups_stp1)) {
-        return()
-      }
-      myStp1Val <- input$groups_stp1
-    
-      anthro <- c("delta", "direct", "percentDays")
-      
-      if (myStp1Val %in% anthro) {
-        if (myStp1Val == "percentDays") {
-          selectInput(inputId = "groups_stp3",
-                      label = "are",
-                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                      selected = "greaterThan",
-                      width = '100%')
-        } else if (myStp1Val == "direct") {
-          sliderInput("groups_stp3", NULL,
-                      min = outRange$myMin, max = outRange$myMax, value = outRange$mean, step = .1, width='100%')
-        } else {
-          sliderInput("groups_stp3", NULL,
-                      min = -20, max = 20, value = -1, step = .1, width = '100%')
-        }
-        
-      }
-      
-    })
-    
-    output$facet_stp3 <- renderUI ({
-      if (is.null(input$facet_stp1)) {
-        return()
-      }
-      if (is.null(input$facetType) | input$facetType != "makeGroups") {
-        return()
-      }
-      myStp1Val <- input$facet_stp1
-      
-      anthro <- c("delta", "direct", "percentDays")
-      
-      if (myStp1Val %in% anthro) {
-        if (myStp1Val == "percentDays") {
-          selectInput(inputId = "facet_stp3",
-                      label = "are",
-                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                      selected = "greaterThan",
-                      width = '100%')
-        } else if (myStp1Val == "direct") {
-          sliderInput("facet_stp3", NULL,
-                      min = facetRange$myMin, max = facetRange$myMax, value = facetRange$mean, step = .1, width='100%')
-        } else {
-          sliderInput("facet_stp3", NULL,
-                      min = -20, max = 20, value = -1, step = .1, width = '100%')
-        }
-        
-      }
-      
-    })
-      
-    output$groups_stp4 <- renderUI({
-      if (is.null(input$groups_stp1)) {
-        return()
-      }
-      myStp1Val <- input$groups_stp1
-      message(paste("class group stp1:", class(myStp1Val)))
-      if (!any(c("POSIXct", "Date") %in% class(myStp1Val))) {
-        if (myStp1Val == "percentDays") {
-          sliderInput("groups_stp4", NULL,
-                      min = outRange$myMin, max = outRange$myMax, value = outRange$mean, step = .1, width='100%')
-        }
-      }
-    })
-    
-    output$facet_stp4 <- renderUI({
-      if (is.null(input$facet_stp1)) {
-        return()
-      }
-      if (is.null(input$facetType) | input$facetType != "makeGroups") {
-        return()
-      }
-      myStp1Val <- input$facet_stp1
-      
-      if (!any(c("POSIXct", "Date") %in% class(myStp1Val))) {
-        if (myStp1Val == "percentDays") {
-          sliderInput("facet_stp4", NULL,
-                      min = facetRange$myMin, max = facetRange$myMax, value = facetRange$mean, step = .1, width='100%')
-        }
-      }
     })
     
     output$plot <- renderPlotly({
@@ -992,40 +526,39 @@ shinyServer(function(input, output, session) {
       )
     })
 
-    observeEvent(tableData(), tableData())
-    
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #values grabbed through reactive functions for better control of reactive context
   
     #all the work will be done here in prepping data
-    tableData <- debounce(reactive({
+    tableData <- eventReactive(input$btn, {
       
       #collecting inputs 
-      myTimeframe <- input$timeframe
+      myTimeframe <- current$timeframe
       groupsType <- input$groupsType
       facetType <- input$facetType
-      myFacet <- input$facet
+      myFacet <- facetInfo$group
       myY <- input$yaxis
       yaxis_stp2 <- input$yaxis_stp2
-      myGroups <- input$groups
+      myGroups <- groupInfo$group
       #grab optional inputs
-      groups_stp1 <- input$groups_stp1
-      groups_stp3 <- input$groups_stp3
-      groups_stp4 <- input$groups_stp4
-      groups_stp2 <- input$groups_stp2
-      facet_stp1 <- input$facet_stp1
-      facet_stp3 <- input$facet_stp3
-      facet_stp4 <- input$facet_stp4
-      facet_stp2 <- input$facet_stp2
+      groups_stp1 <- groupInfo$group_stp1
+      groups_stp3 <- groupInfo$group_stp3
+      groups_stp4 <- groupInfo$group_stp4
+      groups_stp2 <- groupInfo$group_stp2
+      facet_stp1 <- facetInfo$group_stp1
+      facet_stp3 <- facetInfo$group_stp3
+      facet_stp4 <- facetInfo$group_stp4
+      facet_stp2 <- facetInfo$group_stp2
       yaxis_stp1 <- input$yaxis_stp1
       message("have all inputs for plotData")
       #subset data
       #which cols can be used for this will have to change. too specific right now
       if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
         if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2])
+          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
           message("subsetting data..")
         } else {
+          print("timeline input is null")
           return()
         }
       } else {
@@ -1153,21 +686,17 @@ shinyServer(function(input, output, session) {
             label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
             message(paste("label is:", label))
             message("have custom facet! now merge..")
-            print(head(outData))
             #add makeGroups data to df and return
             colnames(outData) <- c("Participant_Id", "FACET")
             #will need a var called label that changes based on what the facet steps are. the below only works for strings.
             if (any(colnames(event.file) %in% myFacet)) {
               naToZero(outData, "FACET")
             }
-            print(head(outData))
             message(paste("levels facet:", levels(as.factor(outData$FACET))))
             outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
            # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
-            print(head(outData))
             message(paste("levels facet:", levels(as.factor(outData$FACET))))
             plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
-            print(head(plotData))
             message(paste("levels facet:", levels(as.factor(plotData$FACET))))
           }
         }
@@ -1214,17 +743,15 @@ shinyServer(function(input, output, session) {
           }
           message("have custom groups! now merge..")
           #add makeGroups data to df and return
-          print(head(outData))
           outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
           plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
-          print(head(plotData))
           print("NA in groups:", any(is.na(plotData$GROUPS)))
         }
         plotData
       }
       
       #debounce will wait 2s with no changes to inputs before plotting.
-    }), 2500)
+    })
       
     plotData <- reactive({  
       message("just before tableData call")
@@ -1303,8 +830,6 @@ shinyServer(function(input, output, session) {
         } else {
           plotData <- plotData[, -dropCols, with=FALSE]
           plotData <- unique(plotData)
-          print(head(plotData))
-          print(head(mergeData))
           plotData <- merge(plotData, mergeData, by = mergeBy2)
         }
         plotData <- unique(plotData)
