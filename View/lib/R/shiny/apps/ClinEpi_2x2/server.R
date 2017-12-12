@@ -18,40 +18,36 @@ shinyServer(function(input, output, session) {
   event.file <- NULL
   prtcpnt.file <- NULL
   house.file <- NULL
+  attributes.file <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
   current <- NULL
   attrInfo <- NULL
   outInfo <- NULL
+  attribute.file <- NULL
   
   filesFetcher <- reactive({
   
-  if (is.null(prtcpnt.file)) {
+  if (is.null(attribute.file)) {
 
-      prtcpnt_temp <- try(fread(
-          getWdkDatasetFile('ShinyParticipants.tab', session, FALSE, dataStorageDir),
-          na.strings = "N/A"))
-
-      house_temp <- try(fread(
-          getWdkDatasetFile('ShinyHouseholds.tab', session, FALSE, dataStorageDir),
-          na.strings = "N/A"))
-
-      event_temp <- try(fread(
-          getWdkDatasetFile('ShinyObservations.tab', session, FALSE, dataStorageDir),
-          na.strings = "N/A"))
-
-      metadata_temp <- try(fread(
-          getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
-          ))     
+    attribute_temp <- try(fread(
+    	getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        na.strings = c("N/A", "na", "")))
+    metadata_temp <- try(fread(
+        getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
+        na.strings = c("N/A", "na", "")))
+    
+    if (grepl("Error", attribute_temp[1])){
+      stop("Error: Attributes file missing or unreadable!")
+    } else {
+      attributes.file <<- attribute_temp
+      names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+      names(attributes.file)[names(attributes.file) == 'source_id'] <<- 'Participant_Id'
+      #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
+      attributes.file <<- cbind(attributes.file, custom = "Selected")
+      setkey(attributes.file, Participant_Id)
+    }
  
-      if (grepl("Error", prtcpnt_temp[1])){
-        stop("Error: Participant file missing or unreadable!")
-      } else {
-        prtcpnt.file <<- prtcpnt_temp
-        names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
-        setkey(prtcpnt.file, Participant_Id)
-      }
-      
       if (grepl("Error", metadata_temp[1])){
         stop("Error: Metadata file missing or unreadable!")
       } else {
@@ -64,22 +60,10 @@ shinyServer(function(input, output, session) {
           true <- duplicated(metadata.file$property) | duplicated(metadata.file$property, fromLast = TRUE)
           metadata.file <<- transform(metadata.file, "property" = ifelse(true, paste0(property, ", ", parent), property))
         }
-      }
-      
-      if (grepl("Error", house_temp[1])){
-        message("Warning: Household file not found or unreadable.")
-      } else {
-        house.file <<- house_temp
-        names(house.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(house.file)))
-        setkey(house.file, Participant_Id)
-      }
-      
-      if (grepl("Error", event_temp[1])){
-        message("Warning: Events file not found or unreadable.")
-      } else {
-        event.file <<- event_temp
-        names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
-        setkey(event.file, Participant_Id)
+        
+        #add user defined group
+        #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
+        metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
       }
       
     }
@@ -87,9 +71,54 @@ shinyServer(function(input, output, session) {
   
   singleVarDataFetcher <- function(){
     filesFetcher()
+   
+    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+
+    #this temporary until i figure how i'm supposed to do it. 
+    #will also need to be able to identify one dataset from another, and which to grab.
+    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB") 
+    contents <- list.files(mirror.dir)
+    builds <- contents[grepl("build-", contents)]
+    num <- sort(builds)[length(builds)]
+    #get datasetName
+    custom.props <- try(fread(
+        getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
+    datasetName <- colnames(custom.props)
+    mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
+
+    prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
+    house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
+    event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
+    
+    if (grepl("Error", prtcpnt_temp[1])){
+      stop("Error: Participant file missing or unreadable!")
+    } else {
+      prtcpnt.file <<- prtcpnt_temp
+      names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
+      names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      setkey(prtcpnt.file, Participant_Id)
+    }
+    
+    if (grepl("Error", house_temp[1])){
+      message("Warning: Household file not found or unreadable.")
+    } else {
+      house.file <<- house_temp
+      names(house.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(house.file)))
+      names(house.file)[names(house.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      setkey(house.file, Participant_Id)
+    }
+    
+    if (grepl("Error", event_temp[1])){
+      message("Warning: Events file not found or unreadable.")
+    } else {
+      event.file <<- event_temp
+      names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
+      names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      setkey(event.file, Participant_Id)
+    }
     
     #remove non-unique column names and merge them to one data table to return
-    drop <- c("source_id", "project_id")
+    drop <- c("NAME", "PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
@@ -113,13 +142,13 @@ shinyServer(function(input, output, session) {
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
-    for (col in dates) {
-      if (col != 'EUPATH_0010222') {
-        singleVarData[[col]] <- sub(" .*", "", singleVarData[[col]])
-        singleVarData[[col]] <- as.Date(singleVarData[[col]])
-      }
-    }
-    #for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
+    for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
+    
+    #merge attributes column onto data table
+    singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
+    naToZero(singleVarData, col = "custom")
+    singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
+    #naToZero(singleVarData, col = "search_weight")
     
     singleVarData
   }
@@ -132,12 +161,12 @@ shinyServer(function(input, output, session) {
     attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000704"))
  
     outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000665")) 
-
+    print("done with modules")
     titlePanel("Contingency Tables for Selected Participants")
-  })
+  }) 
   
     output$plot <- renderPlotly({
-      
+      print("about to render plot")
         tableData <- plotData()
         if (is.null(tableData)) {
           message("plotData returned null!")
@@ -286,29 +315,35 @@ shinyServer(function(input, output, session) {
     
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #values grabbed through reactive functions for better control of reactive context
-  
+
     #all the work will be done here in prepping data
     plotData <- eventReactive(input$btn, {
-      
+     
+      print("in plotData")
       #collecting inputs 
       myTimeframe <- current$timeframe
       if (is.null(attrInfo$group)) {
+        message("attr group is null")
         return()
       } else {
+        message("setting myAttr")
         myAttr <- attrInfo$group
       }
       if (is.null(outInfo$group)) {
+        print("out group is null")
         return()
       } else {
+        print("setting myOut")
         myOut <- outInfo$group
       }
-      
+      print("have attr and out info")
       #subset data
       #which cols can be used for this will have to change. too specific right now
       if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
         if (!is.null(myTimeframe)) {
           data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
         } else {
+          print("exiting for timeline problem")
           return()
         }
       } else {
@@ -318,9 +353,10 @@ shinyServer(function(input, output, session) {
       go <- TRUE
       
       if (is.null(outInfo$group_stp1) | is.null(attrInfo$group_stp1)) {
+        print("out or attr stp1 is null")
         go <- FALSE
       }
-        
+     
       #once last field is populated .. GO
       if (go) {
         message("GO!!")
