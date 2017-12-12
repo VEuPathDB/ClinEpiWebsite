@@ -222,7 +222,7 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
     colnames(outData) <- c("Participant_Id", "GROUPS")
   }  else {
     #for strings
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(any(grepl(groups_stp1, x, fixed=TRUE)) == TRUE) {1} else {0} })
+    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1 %in% x) {1} else {0} })
   }
   if (ncol(outData) > 2) {
     colnames(outData) <- c("Participant_Id", "drop", "GROUPS")
