@@ -13,9 +13,10 @@ Meanwhile, the value in the bottom right corner represents the number of partici
             br(),
             h4("Notes"),
             h5(
+              p("It is important to note that this analysis tool uses the entire set of participants for the current dataset. In order to see how the subset of participants you returned in the participant query compare to the others in the dataset, you should select 'User Defined Group' when choosing a variable. The participants returned in the participant query belong to the group 'Selected' while all others belong to the group 'Not Selected'."),
               p("The p-value is calculated using Pearson's Chi Square test. As a result, this statistic may be unreliable for small sample sizes. This value represents the probability that the two selected variables are randomly vs. significantly associated. Typically, we consider a p-value below 0.05 to indicate confidence that the two variables are significantly associated."),
               p("The Odds Ratio measures the magnitude and direction of the association of the two selected variables. A value above 1 indicates that the two variables are positively associated, or that the presence of Variable 1 increases the odds of also seeing Variable 2. It is calculated as the ratio of the odds of seeing Variable 1 given Variable 2."),
-              p("The Relative Risk represents the likelihood of Variable 1 occuring given Variable 2. So a value of 20 would indicate that we are 20 times more likely to see Variable 1 occur in the group positive for Variable 2. It is calculated as the ratio of the probability that Variable 1 will be seen in the group positive for Variable 2 to the probability that Variable 1 will be seen in the group negative for Variable 2. "),
+              p("The Relative Risk represents the likelihood of Variable 1 occuring given Variable 2. So a value of 20 would indicate that we are 20 times more likely to see Variable 1 occur in the group positive for Variable 2. It is calculated as the ratio of the probability that Variable 1 will be seen in the group positive for Variable 2 to the probability that Variable 1 will be seen in the group negative for Variable 2. "), 
               br(),
               p("So given a table such as the following:"),
               tags$table(

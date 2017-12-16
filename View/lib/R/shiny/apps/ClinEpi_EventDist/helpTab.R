@@ -7,6 +7,11 @@ help <- tabPanel("Help", fluid = TRUE,
               p("It is also worth noting the panel that appears in the top right of the plot when you hover over any portion of it. This menu will allow you to pan and zoom the graph, to download the graph as an image and to change how tooltips are displayed among other things.") 
             ),
             br(),
+            h4("Notes"),
+            h5(
+              p("It is important to note that this analysis tool uses the entire set of participants for the current dataset. In order to see how the subset of participants you returned in the participant query compare to the others in the dataset, you should select 'User Defined Group' when choosing a variable. The participants returned in the participant query belong to the group 'Selected' while all others belong to the group 'Not Selected'.")
+            ),
+            br(),
             h4("Version Information"),
             h5(
               p("Shiny Server: 1.5.6.875", br(),

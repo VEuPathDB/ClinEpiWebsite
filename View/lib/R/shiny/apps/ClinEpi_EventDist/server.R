@@ -21,74 +21,101 @@ shinyServer(function(input, output, session) {
   prevFacet <- NULL
   current <- NULL
   facetInfo <- NULL
-  xaxisInfo <- NULL  
+  xaxisInfo <- NULL
+  attribute.file <- NULL  
 
   filesFetcher <- reactive({
 
-    if (is.null(prtcpnt.file)) {
+    if (is.null(attribute.file)) {
 
-      prtcpnt_temp <- try(fread(
-          getWdkDatasetFile('ShinyParticipants.tab', session, FALSE, dataStorageDir),
-          na.strings = "N/A"))
- 
-      house_temp <- try(fread(
-          getWdkDatasetFile('ShinyHouseholds.tab', session, FALSE, dataStorageDir),
-          na.strings = "N/A"))
- 
-      event_temp <- try(fread(
-          getWdkDatasetFile('ShinyObservations.tab', session, FALSE, dataStorageDir),
-          na.strings = "N/A"))
- 
-      metadata_temp <- try(fread(
-          getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
-          ))
- 
-      if (grepl("Error", prtcpnt_temp[1])){
-        stop("Error: Participant file missing or unreadable!")
-      } else {
-        prtcpnt.file <<- prtcpnt_temp
-        names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
-        setkey(prtcpnt.file, Participant_Id)
-      }
-      
+      attribute_temp <- try(fread(
+        getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        na.strings = c("N/A", "na", "")))
+    metadata_temp <- try(fread(
+        getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
+        na.strings = c("N/A", "na", "")))
+
+    if (grepl("Error", attribute_temp[1])){
+      stop("Error: Attributes file missing or unreadable!")
+    } else {
+      attributes.file <<- attribute_temp
+      names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+      names(attributes.file)[names(attributes.file) == 'source_id'] <<- 'Participant_Id'
+      #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
+      attributes.file <<- cbind(attributes.file, custom = "Selected")
+      setkey(attributes.file, Participant_Id)
+    }
+
       if (grepl("Error", metadata_temp[1])){
         stop("Error: Metadata file missing or unreadable!")
       } else {
         metadata.file <<- metadata_temp
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
-        
+
         #check for unique display names in metdata file.
         if (length(unique(metadata.file$property)) != nrow(metadata.file)) {
           true <- duplicated(metadata.file$property) | duplicated(metadata.file$property, fromLast = TRUE)
           metadata.file <<- transform(metadata.file, "property" = ifelse(true, paste0(property, ", ", parent), property))
         }
-      }
-      
-      if (grepl("Error", house_temp[1])){
-        message("Warning: Household file not found or unreadable.")
-      } else {
-        house.file <<- house_temp
-        names(house.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(house.file)))
-        setkey(house.file, Participant_Id)
-      }
-      
-      if (grepl("Error", event_temp[1])){
-        message("Warning: Events file not found or unreadable.")
-      } else {
-        event.file <<- event_temp
-        names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
-        setkey(event.file, Participant_Id)
-      }
-      
+
+        #add user defined group
+        #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
+        metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
+      }     
+ 
     }
   })
   
   singleVarDataFetcher <- function(){
     filesFetcher()
     
+    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+
+    #this temporary until i figure how i'm supposed to do it. 
+    #will also need to be able to identify one dataset from another, and which to grab.
+    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
+    contents <- list.files(mirror.dir)
+    builds <- contents[grepl("build-", contents)]
+    num <- sort(builds)[length(builds)]
+    #get datasetName
+    custom.props <- try(fread(
+        getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
+    datasetName <- colnames(custom.props)
+    mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
+
+    prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
+    house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
+    event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
+
+    if (grepl("Error", prtcpnt_temp[1])){
+      stop("Error: Participant file missing or unreadable!")
+    } else {
+      prtcpnt.file <<- prtcpnt_temp
+      names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
+      names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      setkey(prtcpnt.file, Participant_Id)
+    }
+
+    if (grepl("Error", house_temp[1])){
+      message("Warning: Household file not found or unreadable.")
+    } else {
+      house.file <<- house_temp
+      names(house.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(house.file)))
+      names(house.file)[names(house.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      setkey(house.file, Participant_Id)
+    }
+
+    if (grepl("Error", event_temp[1])){
+      message("Warning: Events file not found or unreadable.")
+    } else {
+      event.file <<- event_temp
+      names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
+      names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+    }
+
     #remove non-unique column names and merge them to one data table to return
-    drop <- c("source_id", "project_id")
+    drop <- c("NAME", "PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
@@ -125,13 +152,12 @@ shinyServer(function(input, output, session) {
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
-    for (col in dates) {
-      if (col != 'EUPATH_0010222') {
-        singleVarData[[col]] <- sub(" .*", "", singleVarData[[col]])
-        singleVarData[[col]] <- as.Date(singleVarData[[col]])
-      }
-    }
-    #for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]]))
+    for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
+
+    #merge attributes column onto data table
+    singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
+    naToZero(singleVarData, col = "custom")
+    singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
 
     singleVarData
   }
