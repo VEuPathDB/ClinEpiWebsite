@@ -21,6 +21,7 @@ shinyServer(function(input, output, session) {
   house.file.exists <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
+  longitudinal <- NULL
   current <- NULL
   facetInfo <- NULL
   groupInfo <- NULL
@@ -89,6 +90,11 @@ shinyServer(function(input, output, session) {
     prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))   
+    longitudinal <<- fread("../../lib/longitudinal.tab")
+    longitudinal <<- longitudinal[longitudinal$dataset_name == datasetName]
+    longitudinal <<- setDT(longitudinal)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
+                        by = setdiff(names(longitudinal), "columns")][!is.na(longitudinal$columns)]   
+
     if (grepl("Error", prtcpnt_temp[1])){
       stop("Error: Participant file missing or unreadable!")
     } else {
@@ -148,9 +154,7 @@ shinyServer(function(input, output, session) {
       house.file.exists <<- FALSE
     }
    
-    if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
-      setkey(singleVarData, EUPATH_0000644)
-    }
+    metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
@@ -168,7 +172,7 @@ shinyServer(function(input, output, session) {
   output$title <- renderUI({
     singleVarDataFetcher()
 
-    current <<- callModule(timeline, "timeline", singleVarData)
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
 
     groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType))
 
@@ -178,9 +182,9 @@ shinyServer(function(input, output, session) {
   })
   
     output$groups_type <- renderUI({
-      ageDays <- "EUPATH_0000644"
+      selected <- current$longitudinal
       
-      if (any(colnames(singleVarData) %in% ageDays)) {
+      if (!is.null(selected)) {
         selectInput(inputId = "groupsType",
                     label = "Facet Line:",
                     choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
@@ -247,9 +251,9 @@ shinyServer(function(input, output, session) {
         } else {
           groupsType <- input$groupsType
         }
-        ageDays <- "EUPATH_0000644"
+        selected <- current$longitudinal
       
-        if (any(colnames(singleVarData) %in% ageDays)) {
+        if (!is.null(selected)) {
           if (groupsType == "direct") {
             label = "facets for"
           } else {
@@ -342,10 +346,10 @@ shinyServer(function(input, output, session) {
         myY <- input$yaxis
       }
       nums <- getNums(metadata.file)
-      ageDays <- "EUPATH_0000644"
+      selected <- current$longitudinal
       
       if (myY %in% nums$source_id) {
-        if (any(colnames(singleVarData) %in% ageDays)) {
+        if (!is.null(selected)) {
           radioButtons(inputId = "yaxis_stp2",
                        label = "Display as:",
                        choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
@@ -381,8 +385,9 @@ shinyServer(function(input, output, session) {
       } else {
         plotType <- input$yaxis_stp2
       }
-      ageDays <- "EUPATH_0000644"
+      selected <- current$longitudinal
       
+      dates <- getDates(metadata.file)
         #get data from plotData here
         df <- plotData()
       
@@ -393,7 +398,7 @@ shinyServer(function(input, output, session) {
         
         names(df)[names(df) == 'GROUPS'] <- 'LINES'
         #temp placeholder for checking if data has time vars for x axis
-        if (any(colnames(singleVarData) %in% ageDays)) {
+        if (!is.null(selected)) {
           #define axis labels here
           xlab <- "Time"
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
@@ -407,8 +412,10 @@ shinyServer(function(input, output, session) {
           }
           
           #format xaxis ticks
-          df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
-          
+          if (!selected %in% dates$source_id) {
+            df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
+          }
+
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
           myPlot <- myPlot + theme_bw()
@@ -541,9 +548,9 @@ shinyServer(function(input, output, session) {
         data$Group[nrow(data)] <- "Totals"
       }
     
-      ageDays <- "EUPATH_0000644" 
+      selected <- current$longitudinal
       #temp placeholder for checking if data has time vars for x axis
-      if (!any(colnames(singleVarData) %in% ageDays)) {
+      if (!is.null(selected)) {
         names(data)[names(data) == 'Line'] <- 'X-Axis'
       } 
 
@@ -559,6 +566,7 @@ shinyServer(function(input, output, session) {
     tableData <- eventReactive(input$btn, {
       
       #collecting inputs 
+      selected <- current$longitudinal
       myTimeframe <- current$timeframe
       groupsType <- input$groupsType
       facetType <- input$facetType
@@ -579,7 +587,7 @@ shinyServer(function(input, output, session) {
       message("have all inputs for plotData")
       #subset data
       #which cols can be used for this will have to change. too specific right now
-      if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
+      if (!is.null(selected)) {
         if (!is.null(myTimeframe)) {
           data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
           message("subsetting data..")
@@ -636,8 +644,8 @@ shinyServer(function(input, output, session) {
         plotData <- completeDT(data, myY)
         plotData <- getFinalDT(plotData, metadata.file, myY)
         
-        if (any(colnames(plotData) %in% "EUPATH_0000644")) {
-          myCols <- c("Participant_Id", myY, "EUPATH_0000644")
+        if (!is.null(selected)) {
+          myCols <- c("Participant_Id", myY, selected)
           tempData <- plotData[, myCols, with=FALSE] 
           colnames(tempData) <- c("Participant_Id", "YAXIS", "XAXIS")
         } else {
@@ -648,7 +656,6 @@ shinyServer(function(input, output, session) {
         
         if (groupsType == "direct") {
           message("groups is direct")
-          #check which column to pull for time, for now written in as EUPATH_0000644
           myCols <- c("Participant_Id", myGroups)
           groupData <- plotData[, myCols, with=FALSE]
           groupData <- unique(groupData)
@@ -658,7 +665,6 @@ shinyServer(function(input, output, session) {
         
         if (facetType == "direct") {
           message("facet is direct")
-          #check which column to pull for time, for now written in as EUPATH_0000644
           myCols <- c("Participant_Id", myFacet)
           facetData <- plotData[, myCols, with=FALSE]
           facetData <- unique(facetData)
@@ -669,7 +675,7 @@ shinyServer(function(input, output, session) {
         plotData <- tempData
         #need better way. too specific right now. just need to know if xaxis is time
         #consider what to do about cinning for actual dates. will that work??
-        if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
+        if (!is.null(selected)) {
           plotData$XAXIS <- cut(plotData$XAXIS, 24) 
           message("binning xaxis data")
         }
