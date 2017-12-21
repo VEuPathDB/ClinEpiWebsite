@@ -437,7 +437,7 @@ print("checkpoint")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
           if (facetType == 'direct') {
-            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3) 
+            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
             # scale_fill_brewer(palette = cbPalette)
           } else if (facetType == 'makeGroups') {
             myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
@@ -448,7 +448,7 @@ print("checkpoint")
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
           if(length(levels(as.factor(df[[myX]]))) < 7) {
             if (facetType == 'direct') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3) 
+              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
               # scale_fill_brewer(palette = cbPalette)
             } else if (facetType == 'makeGroups') {
               myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
