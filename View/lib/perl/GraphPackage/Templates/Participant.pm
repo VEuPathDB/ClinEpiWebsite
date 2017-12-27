@@ -14,6 +14,7 @@ use EbrcWebsiteCommon::View::GraphPackage::ScatterPlot;
 use EbrcWebsiteCommon::View::GraphPackage::GGScatterPlot;
 use EbrcWebsiteCommon::View::GraphPackage::GGLinePlot;
 use EbrcWebsiteCommon::View::GraphPackage::GGBarPlot;
+use EbrcWebsiteCommon::View::GraphPackage::GGPiePlot;
 
 use Scalar::Util qw /blessed/;
 use Data::Dumper;
@@ -30,6 +31,8 @@ sub init {
   my $eventDur = $self->getEventDur();
   my $status = $self->getStatus();
   my $optStatus =  $self->getOptStatus();
+  my $tblPrefix = $self->getDatasetId();
+  $tblPrefix =~ s/DS_/D/g;
 
   my $subtitle = "red lines = +/- 2 sd";
   my $yLabel = "Weight for Height Z-score";
@@ -76,6 +79,7 @@ sub init {
                                  Id => $self->getId(), 
                                  contXAxis => $xAxis,  
                                  yAxis => $row,
+                                 tblPrefix => $tblPrefix,
                                });
     $legendLabel[$count] = "Weight for Height Z-score";
     if ($row eq 'EUPATH_0000682') {
@@ -98,6 +102,7 @@ sub init {
   } else {
       $nodeMetadata[0] =  ({
                             Id => $self->getId(),
+                            tblPrefix => $tblPrefix,
                           });
   }
 
@@ -107,6 +112,7 @@ sub init {
                             Id => $self->getId(), 
                             eventStart => $eventStart, 
                             eventDur => $eventDur,
+                            tblPrefix => $tblPrefix
                           });
     if ($eventDur eq 'EUPATH_0000665') {
       if ($subtitle eq '') {
@@ -118,6 +124,7 @@ sub init {
   } else {
     $nodeMetadataEvent = ({
                             Id => $self->getId(),
+                            tblPrefix => $tblPrefix,
                           });
   }
 
@@ -128,13 +135,15 @@ sub init {
                                Id => $self->getId(),
                                contXAxis => $xAxis,
                                status => $status,
-                               optStatus => $optStatus
+                               optStatus => $optStatus,
+                               tblPrefix => $tblPrefix,
                              });
     } else {
       $nodeMetadataStatus = ({
                                Id => $self->getId(),
                                contXAxis => $xAxis,
-                               status => $status
+                               status => $status,
+                               tblPrefix => $tblPrefix,
                              });
     if ($status eq 'EUPATH_0000704') {
       if ($subtitle eq '') {
@@ -147,6 +156,7 @@ sub init {
   } else {
     $nodeMetadataStatus = ({
                                Id => $self->getId(),
+                               tblPrefix => $tblPrefix,
                           });
   }
 
@@ -189,6 +199,47 @@ sub init {
   $self->setGraphObjects($line);
 
   return $self;
+
+}
+
+1;
+
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_841a9f5259;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+#anything to add or override put it here
+
+1;
+
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_0ad509829e;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+  profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+  profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+  profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse((grepl("not", STATUS) | grepl("patent", STATUS)), "green", "blue")));
+  profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), NA));
+  profile.df.full$FILL = as.factor(profile.df.full$FILL);
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+  $profile->setForceNoLines(1);
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2016-06-30";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2011-08-01";
+  $profile->setDefaultXMax($xmax);
+  $profile->setDefaultXMin($xmin);
+  $profile->setTimeline('TRUE');
 
 }
 

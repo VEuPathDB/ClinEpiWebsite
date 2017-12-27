@@ -44,13 +44,18 @@ sub init {
 
   $Self->SUPER::init($Args);
 
-  $Self->setName                 ( $Args->{Name      });
-  $Self->setId                   ( $Args->{Id        });
-  $Self->setContXAxis            ( $Args->{ContXAxis });
-  $Self->setYAxis                ( $Args->{YAxis     });
+  $Self->setName                 ( $Args->{Name        });
+  $Self->setId                   ( $Args->{Id          });
+  $Self->setContXAxis            ( $Args->{ContXAxis   });
+  $Self->setYAxis                ( $Args->{YAxis       });
+  $Self->setTblPrefix            ( $Args->{TblPrefix   });
 
   my $contXAxis = $Self->getContXAxis();
   my $yAxis = $Self->getYAxis();
+  my $tblPrefix = $Self->getTblPrefix();
+  my $prtcpntTable = $tblPrefix . "Participants";
+  my $ioTable = $tblPrefix . "PANIO";
+  my $obsTable = $tblPrefix . "Observations";
 
   $Self->setSql(<<Sql);
 
@@ -58,9 +63,9 @@ select pa.name as LEGEND
   , ea.$yAxis as VALUE
   , ea.$contXAxis as NAME
 -- profile_file is participant id
-from apidbtuning.Participants pa
-   , apidbtuning.PANIO io
-   , apidbtuning.Observations ea
+from apidbtuning.$prtcpntTable pa
+   , apidbtuning.$ioTable io
+   , apidbtuning.$obsTable ea
 where pa.name = \'<<Id>>\'
 and pa.pan_id = io.input_pan_id 
 and io.OUTPUT_PAN_ID = ea.PAN_ID
@@ -87,6 +92,8 @@ sub setContXAxis                     { $_[0]->{'ContXAxis'                  } = 
 sub getYAxis                         { $_[0]->{'YAxis'                      } }
 sub setYAxis                         { $_[0]->{'YAxis'                      } = $_[1]; $_[0] }
 
+sub getTblPrefix                     { $_[0]->{'TblPrefix'                  } }
+sub setTblPrefix                     { $_[0]->{'TblPrefix'                  } = $_[1]; $_[0] }
 
 # ========================================================================
 # --------------------------- Support Methods ----------------------------

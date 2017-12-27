@@ -21,6 +21,7 @@ shinyServer(function(input, output, session) {
   attributes.file <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
+  longitudinal <- NULL
   current <- NULL
   attrInfo <- NULL
   outInfo <- NULL
@@ -71,7 +72,7 @@ shinyServer(function(input, output, session) {
   
   singleVarDataFetcher <- function(){
     filesFetcher()
-   
+
     model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
 
     #this temporary until i figure how i'm supposed to do it. 
@@ -89,7 +90,12 @@ shinyServer(function(input, output, session) {
     prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
-    
+   
+    longitudinal <<- fread("../../lib/longitudinal.tab")
+    longitudinal <<- longitudinal[longitudinal$dataset_name == datasetName]  
+    longitudinal <<- setDT(longitudinal)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))), 
+                        by = setdiff(names(longitudinal), "columns")][!is.na(longitudinal$columns)]    
+
     if (grepl("Error", prtcpnt_temp[1])){
       stop("Error: Participant file missing or unreadable!")
     } else {
@@ -139,6 +145,9 @@ shinyServer(function(input, output, session) {
     if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
       setkey(singleVarData, EUPATH_0000644)
     }
+
+    #remove unnecessary metadata info
+    metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
@@ -156,7 +165,7 @@ shinyServer(function(input, output, session) {
   output$title <- renderUI({
     singleVarDataFetcher()
 
-    current <<- callModule(timeline, "timeline", singleVarData)
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
   
     attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000704"))
  

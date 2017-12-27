@@ -48,9 +48,14 @@ sub init {
   $Self->setId                   ( $Args->{Id          });
   $Self->setEventStart           ( $Args->{EventStart  });
   $Self->setEventDur             ( $Args->{EventDur    });
+  $Self->setTblPrefix            ( $Args->{TblPrefix   });
 
   my $eventStart = $Self->getEventStart();
   my $eventDur = $Self->getEventDur();
+  my $tblPrefix = $Self->getTblPrefix();
+  my $prtcpntTable = $tblPrefix . "Participants";
+  my $ioTable = $tblPrefix . "PANIO";
+  my $obsTable = $tblPrefix . "Observations";
 
   $Self->setSql(<<Sql);
 
@@ -61,9 +66,9 @@ select pa.name as LEGEND
   , concat(ea.$eventDur,' day(s)') as DURATION
   , (ea.$eventStart + ea.$eventDur - 1) as END_DATE
 -- profile_file is participant id
-from apidbtuning.Participants pa
-   , apidbtuning.PANIO io
-   , apidbtuning.Observations ea
+from apidbtuning.$prtcpntTable pa
+   , apidbtuning.$ioTable io
+   , apidbtuning.$obsTable ea
 where pa.name = \'<<Id>>\'
 and pa.pan_id = io.input_pan_id 
 and io.OUTPUT_PAN_ID = ea.PAN_ID
@@ -90,6 +95,8 @@ sub setEventStart                    { $_[0]->{'EventStart'                 } = 
 sub getEventDur                      { $_[0]->{'EventDur'                   } }
 sub setEventDur                      { $_[0]->{'EventDur'                   } = $_[1]; $_[0] }
 
+sub getTblPrefix                     { $_[0]->{'TblPrefix'                  } }
+sub setTblPrefix                     { $_[0]->{'TblPrefix'                  } = $_[1]; $_[0] }
 
 # ========================================================================
 # --------------------------- Support Methods ----------------------------

@@ -18,6 +18,7 @@ shinyServer(function(input, output, session) {
   house.file.exists <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
+  longitudinal <- NULL
   prevFacet <- NULL
   current <- NULL
   facetInfo <- NULL
@@ -31,7 +32,7 @@ shinyServer(function(input, output, session) {
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
         na.strings = c("N/A", "na", "")))
-    metadata_temp <- try(fread(
+      metadata_temp <- try(fread(
         getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
         na.strings = c("N/A", "na", "")))
 
@@ -88,6 +89,11 @@ shinyServer(function(input, output, session) {
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
 
+    longitudinal <<- fread("../../lib/longitudinal.tab")
+    longitudinal <<- longitudinal[longitudinal$dataset_name == datasetName]
+    longitudinal <<- setDT(longitudinal)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
+                        by = setdiff(names(longitudinal), "columns")][!is.na(longitudinal$columns)]
+
     if (grepl("Error", prtcpnt_temp[1])){
       stop("Error: Participant file missing or unreadable!")
     } else {
@@ -121,7 +127,7 @@ shinyServer(function(input, output, session) {
     
     if (exists("event.file")) {
       if (!is.null(event.file) & nrow(event.file) > 1) {
-        merge1 <- merge(event.file, prtcpnt.file)
+        merge1 <- merge(event.file, prtcpnt.file, by = "Participant_Id")
         event.file.exists <<- TRUE
       } else {
         merge1 <- prtcpnt.file
@@ -135,7 +141,7 @@ shinyServer(function(input, output, session) {
     if (exists("house.file")) {
       if (!is.null(house.file) & nrow(house.file) > 1) {
         house.file <<- house.file[, -(drop), with = FALSE]
-        singleVarData <<- merge(merge1, house.file)
+        singleVarData <<- merge(merge1, house.file, by = "Participant_Id")
         house.file.exists <<- TRUE
       } else {
         singleVarData <<- merge1
@@ -146,9 +152,7 @@ shinyServer(function(input, output, session) {
       house.file.exists <<- FALSE
     }
     
-    if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
-      setkey(singleVarData, EUPATH_0000644)
-    }
+    metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
@@ -165,7 +169,7 @@ shinyServer(function(input, output, session) {
   output$title <- renderUI({
     singleVarDataFetcher()
 
-    current <<- callModule(timeline, "timeline", singleVarData)
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
 print("checkpoint")
     facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
     
@@ -433,7 +437,7 @@ print("checkpoint")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
           if (facetType == 'direct') {
-            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3) 
+            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
             # scale_fill_brewer(palette = cbPalette)
           } else if (facetType == 'makeGroups') {
             myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
@@ -444,7 +448,7 @@ print("checkpoint")
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
           if(length(levels(as.factor(df[[myX]]))) < 7) {
             if (facetType == 'direct') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 3) 
+              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
               # scale_fill_brewer(palette = cbPalette)
             } else if (facetType == 'makeGroups') {
               myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
@@ -514,13 +518,14 @@ print("checkpoint")
       prevFacet <<- myFacet
       myGroups <- input$groups
       myTimeframe <- current$timeframe
-      
+      selected <- current$longitudinal     
+ 
       strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
       if (plotChoice == 'groups') {
         data <- groupsDataFetcher(myGroups, myX)
         #subset data
         #which cols can be used for this will have to change. too specific right now
-        if (any(colnames(data) %in% "EUPATH_0000644")) {
+        if (!is.null(selected)) {
           if (!is.null(myTimeframe)) {
             data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data)
           }
@@ -532,7 +537,7 @@ print("checkpoint")
         data <- singleVarData
         #subset data
         #which cols can be used for this will have to change. too specific right now
-        if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
+        if (!is.null(selected)) {
           if (!is.null(myTimeframe)) {
             data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
           } 
@@ -577,8 +582,6 @@ print("checkpoint")
           }
           outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
           label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-          message(paste("label is:", label))
-          message("have custom facet! now merge..")
           #add makeGroups data to df and return
           colnames(outData) <- c("Participant_Id", "FACET")
           #will need a var called label that changes based on what the facet steps are. the below only works for strings.

@@ -9,22 +9,46 @@ timelineUI <- function(id) {
   #need a namespace
   ns <- NS(id)
   
-  uiOutput(ns("choose_timeframe"))
+  tagList(
+    fluidRow(
+      column(3, align = "left",
+        uiOutput(ns("choose_longitudinal"))
+      ),
+      column(9,
+        uiOutput(ns("choose_timeframe"))
+      )
+    )
+  )
 }
 
 #make sure this returns inputs and range info 
-timeline <- function(input, output, session, data) {
+timeline <- function(input, output, session, data, longitudinal, metadata.file) {
   ns <- session$ns
-  print("in timeline module")
+
+  output$choose_longitudinal <- renderUI({
+    colnames <- longitudinal$columns
+    choices <- subset(metadata.file, source_id %in% colnames)
+    if (nrow(choices) == 0) {
+      return()
+    }
+    choiceList <- as.vector(choices$source_id)
+    names(choiceList) <- as.vector(choices$property)
+    mylist <- as.list(choiceList)
+    
+    selectInput(inputId = ns("longitudinal"),
+                label = "Longitudinal Variable:",
+                choices = mylist)
+  })
+
   output$choose_timeframe <- renderUI({
-    ageDays = "EUPATH_0000644"
-    print("about to renderUI")
-    if (any(colnames(data) %in% ageDays)) {
-      tempDF <- completeDT(data, ageDays)
-      print("finding min and max")
-      myMin <- min(tempDF[, (ageDays), with=FALSE])
-      myMax <- max(tempDF[, (ageDays), with=FALSE]) 
-      
+    selected <- input$longitudinal   
+    if (is.null(selected)) {
+      return()
+    } else {
+      tempDF <- completeDT(data, selected)
+      myMin <- min(tempDF[[selected]])
+      myMax <- max(tempDF[[selected]]) 
+
       sliderInput(ns("timeframe"), "Timeframe:",
                   min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
     }
