@@ -15,14 +15,6 @@ plot <- tabPanel("Plot", fluid = TRUE,
                        customGroupsUI("out", colWidth = 12)
                 )
               ),
-              fluidRow(
-                column(12, align = "center",
-                       actionButton("btn", "Plot!",
-                                    style='padding:8px; font-size:115%; color:white; background-color:#366dc4',
-                                    width = '15%'
-                       )
-                )
-              ),
               hr(),
               fluidRow(
                 column(12,

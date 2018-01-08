@@ -492,7 +492,7 @@ print("checkpoint")
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #datagrabbed through reactive expression for better control of reactive context
     #now just need to edit this and the plotly output to handle the makegroups option in ui
-    plotData <- eventReactive(input$btn, {
+    plotData <- debounce(reactive({
       if (is.null(input$xaxis)) {
         return()
       }
@@ -608,7 +608,7 @@ print("checkpoint")
       
       data
       
-    })
+    }), 2000)
     
     groupsDataFetcher <- function(myGroups, myX) {
       #since singlevar is default im assuming fles fetcher is already called. can add check later though to be safe.

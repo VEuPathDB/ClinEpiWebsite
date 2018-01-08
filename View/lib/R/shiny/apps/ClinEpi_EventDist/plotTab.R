@@ -41,13 +41,6 @@ plot <-  tabPanel("Plot", fluid = TRUE,
                       )
                )
              ),
-             fluidRow(
-                      column(12, align = "center",
-                             actionButton("btn", "Plot!",
-                                          style='padding:8px; font-size:115%; color:white; background-color:#366dc4',
-                                          width = '15%')
-                      )
-             ), 
              hr(),
              plotlyOutput("distribution")
           )

@@ -1,15 +1,5 @@
 ## server.r
 
-require(shiny)
-require(data.table)
-require(plotly)
-require(DT)
-require(viridisLite)
-
-#% days for diarrhea doesnt show up in outcome because its in participant info rather than events.. what to do.. what to do  
-#eupath_0000743 appears to be wrong
-#should the ui remember downstream choices?? ex: if you switch from < to > should the num be maintained or change back to mean? 
-#biological sex is broken because it has only two options but theyre not yes/no or true/false
 #the sliders only show transparent for the first two to appear, names not reused/ dont refer only to whats on screen at the time
 #do we want to move naToZero before the merge and only apply to outdata? seems NA for prtcpnt and house info are real NAs
 
@@ -330,9 +320,8 @@ shinyServer(function(input, output, session) {
     #values grabbed through reactive functions for better control of reactive context
 
     #all the work will be done here in prepping data
-    plotData <- eventReactive(input$btn, {
-     
-      print("in plotData")
+    plotData <- reactive({
+      
       #collecting inputs 
       myTimeframe <- current$timeframe
       if (is.null(attrInfo$group)) {
@@ -483,8 +472,6 @@ shinyServer(function(input, output, session) {
         tableData
       } 
       
-      #debounce will wait 2s with no changes to inputs before plotting.
     })
-    
 
 })

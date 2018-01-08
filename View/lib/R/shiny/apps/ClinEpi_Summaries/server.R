@@ -570,7 +570,7 @@ shinyServer(function(input, output, session) {
     #values grabbed through reactive functions for better control of reactive context
   
     #all the work will be done here in prepping data
-    tableData <- eventReactive(input$btn, {
+    tableData <- debounce(reactive({
       
       #collecting inputs 
       selected <- current$longitudinal
@@ -790,7 +790,7 @@ shinyServer(function(input, output, session) {
       }
       
       #debounce will wait 2s with no changes to inputs before plotting.
-    })
+    }), 2000)
       
     plotData <- reactive({  
       message("just before tableData call")
