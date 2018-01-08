@@ -43,10 +43,8 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
-      names(attributes.file)[names(attributes.file) == 'source_id'] <<- 'Participant_Id'
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
-      setkey(attributes.file, Participant_Id)
     }
  
       if (grepl("Error", metadata_temp[1])){
@@ -66,7 +64,6 @@ shinyServer(function(input, output, session) {
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
       }
-      
     }
   })
   
@@ -120,16 +117,29 @@ shinyServer(function(input, output, session) {
       event.file <<- event_temp
       names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
       names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      names(event.file)[names(event.file) == 'NAME'] <<- 'Observation_Id'
       setkey(event.file, Participant_Id)
+
+      #merge attributes column onto data table
+      if (colnames(attributes.file)[1] == 'Participant_Id') {
+        event.file <<- merge(event.file, attributes.file, by = "Participant_Id", all = TRUE)
+        naToZero(event.file, col = "custom")
+        event.file$custom[event.file$custom == 0] <<- "Not Selected"
+      } else {
+        event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
+        naToZero(event.file, col = "custom")
+        event.file$custom[event.file$custom == 0] <<- "Not Selected"
+      }
+      #naToZero(singleVarData, col = "search_weight")
     }
     
     #remove non-unique column names and merge them to one data table to return
-    drop <- c("NAME", "PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
+    drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
     if (exists("event.file") & !is.null(event.file) & nrow(event.file) > 1) {
-      merge1 <- merge(event.file, prtcpnt.file)
+      merge1 <- merge(event.file, prtcpnt.file, by = "Participant_Id")
     } else {
       merge1 <- prtcpnt.file
     }
@@ -137,7 +147,7 @@ shinyServer(function(input, output, session) {
     if (exists("house.file") & !is.null(house.file) & nrow(house.file) > 1) {
       #house.file <<- house.file[, (drop):=NULL]
       house.file <<- house.file[, -(drop), with = FALSE]
-      singleVarData <<- merge(merge1, house.file)
+      singleVarData <<- merge(merge1, house.file, by = "Participant_Id")
     } else {
       singleVarData <<- merge1
     }
@@ -148,17 +158,11 @@ shinyServer(function(input, output, session) {
 
     #remove unnecessary metadata info
     metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
-    
+
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
-    
-    #merge attributes column onto data table
-    singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
-    naToZero(singleVarData, col = "custom")
-    singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
-    #naToZero(singleVarData, col = "search_weight")
-    
+
     singleVarData
   }
   
