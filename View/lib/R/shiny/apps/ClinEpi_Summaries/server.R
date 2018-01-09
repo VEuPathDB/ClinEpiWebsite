@@ -455,6 +455,15 @@ shinyServer(function(input, output, session) {
          
           numColors <- length(levels(as.factor(df$LINES)))
           
+          #find num colors needed
+          if (numColors > 2) { 
+            myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
+          } else if (numColors == 2) {
+            myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
+          } else {
+            myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
+          }
+
         } else {
           names(df)[names(df) == 'LINES'] <- 'XAXIS'
           # if y axis is numeric box plots otherwise bar pltos.
@@ -489,6 +498,17 @@ shinyServer(function(input, output, session) {
 
           numColors <- length(levels(as.factor(df$XAXIS)))   
 
+          #find num colors needed
+          if (numColors > 2) { 
+            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
+          } else if (numColors == 2) {
+            
+            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
+          } else {
+            
+            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
+          }
+
         }
         
         #add facet if available
@@ -496,18 +516,6 @@ shinyServer(function(input, output, session) {
           myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
         }
         
-        #find num colors needed
-        if (numColors > 2) { 
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
-          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
-        } else if (numColors == 2) {
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
-          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
-        } else {
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
-          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
-        }
-     
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
           title = xlab,
