@@ -5,10 +5,6 @@ require(data.table)
 require(plotly)
 require(viridisLite)
 
-#also need to figure out why the plots renders multiple times
-#maybe let user define their own groups??
-#reorganize ui and plotData to reflect newer apps structure
-
 shinyServer(function(input, output, session) {
   
   event.file <- NULL
@@ -277,30 +273,30 @@ print("checkpoint")
       #temporary until i figure out how to plot histograms with dates in plotly
       dates <- getDates(metadata.file)$source_id
       
-      if (groupsType == "direct") {
-        if (length(dates > 0)) {
-          ptmp <- prtcpnt.file[, -dates, with=FALSE]
-        } else {
-          ptmp <- prtcpnt.file
-        }
-        if (house.file.exists) {
-          if (length(dates > 0)) {
-            htmp <- house.file[, -dates, with=FALSE]
-          } else {
-            htmp <- house.file
-          }
-          useData <- list(ptmp, htmp)
-        } else {
-          useData <- list(ptmp)
-        }
-      } else {
+      #if (groupsType == "direct") {
+      #  if (length(dates > 0)) {
+       #   ptmp <- prtcpnt.file[, -dates, with=FALSE]
+      #  } else {
+      #    ptmp <- prtcpnt.file
+      #  }
+      #  if (house.file.exists) {
+       #   if (length(dates > 0)) {
+      #      htmp <- house.file[, -dates, with=FALSE]
+      #    } else {
+      #      htmp <- house.file
+      #    }
+       #   useData <- list(ptmp, htmp)
+       # } else {
+      #    useData <- list(ptmp)
+      #  }
+      #} else {
         if (length(dates > 0)) {
           stmp <- singleVarData[, -dates, with=FALSE]
         } else {
           stmp <- singleVarData
         }
         useData <- list(stmp)
-      }  
+      #}  
       
       return(useData)
     })
@@ -345,15 +341,15 @@ print("checkpoint")
         facetType <- input$facetType
       }
       
-      if (facetType == "direct") {
-        if (house.file.exists) {
-          useData <- list(prtcpnt.file, house.file)
-        } else {
-          useData <- list(prtcpnt.file)
-        }
-      } else {
+      #if (facetType == "direct") {
+      #  if (house.file.exists) {
+      #    useData <- list(prtcpnt.file, house.file)
+      #  } else {
+      #    useData <- list(prtcpnt.file)
+      #  }
+      #} else {
         useData <- list(singleVarData)
-      }
+      #}
       
       return(useData)
     })
