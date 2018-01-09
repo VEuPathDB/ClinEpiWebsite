@@ -464,6 +464,10 @@ shinyServer(function(input, output, session) {
             myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
           }
 
+          if (selected %in% dates$source_id) {
+            myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+          }
+
         } else {
           names(df)[names(df) == 'LINES'] <- 'XAXIS'
           # if y axis is numeric box plots otherwise bar pltos.
