@@ -62,7 +62,11 @@ shinyServer(function(input, output, session) {
 
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
+        if (colnames(attributes.file)[1] == 'Participant_Id') {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+        }
       } 
 
     }
@@ -100,6 +104,12 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
+
+      if (colnames(attributes.file)[1] == 'Participant_Id') {
+        prtcpnt.file <<- merge(prcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
+        naToZero(prtcpnt.file, col = "custom")
+        prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
+      }
     }
 
     if (grepl("Error", house_temp[1])){
@@ -121,11 +131,7 @@ shinyServer(function(input, output, session) {
       setkey(event.file, Participant_Id)
 
       #merge attributes column onto data table
-      if (colnames(attributes.file)[1] == 'Participant_Id') {
-        event.file <<- merge(event.file, attributes.file, by = "Participant_Id", all = TRUE)
-        naToZero(event.file, col = "custom")
-        event.file$custom[event.file$custom == 0] <<- "Not Selected"
-      } else {
+      if (colnames(attributes.file)[1] == 'Observation_Id') {
         event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
         naToZero(event.file, col = "custom")
         event.file$custom[event.file$custom == 0] <<- "Not Selected"
@@ -596,7 +602,7 @@ shinyServer(function(input, output, session) {
       #which cols can be used for this will have to change. too specific right now
       if (!is.null(selected)) {
         if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
+          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, selected)
           message("subsetting data..")
         } else {
           print("timeline input is null")

@@ -2,23 +2,24 @@
 
 
 subsetDataFetcher <- function(min, max, data){
+
+  #this version maled specific.
   #eupath_0000743 is last date observed. so the below doesnt include prtcpnts who drop out before the max day set
   #this inner if statement temporary (hopefully) until we sort the root of the problem. events table has data up to ageday 745, but prtcpnt file says no observations past 732
-  if (any(colnames(data) %in% "EUPATH_0000743")) {
-    grabMe <- length(levels(as.factor(data$EUPATH_0000743)))
-    maxDay <- levels(as.factor(data$EUPATH_0000743))[grabMe]
-    if (max > maxDay) {
-      tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max]
-    } else {
-      tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max & data$EUPATH_0000743 >= max]
-    }
-  } else {
-    tempDF <- data
-  }
-  
-  #maybe make it so that if it cant find these two columns then it doesn't let there be a subset/ timeframe option at all but will continue without it
-  #can even have some else if options if there are backups that are likely to exist
-  
+  #if (any(colnames(data) %in% "EUPATH_0000743")) {
+  #  grabMe <- length(levels(as.factor(data$EUPATH_0000743)))
+  #  maxDay <- levels(as.factor(data$EUPATH_0000743))[grabMe]
+  #  if (max > maxDay) {
+  #    tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max]
+  #  } else {
+   #   tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max & data$EUPATH_0000743 >= max]
+   # }
+  #} else {
+  #  tempDF <- data
+  #}
+ 
+  tempDF <- data[data[[col]] >= min & data[[col]] <= max] 
+ 
   tempDF
 }
   
