@@ -440,8 +440,7 @@ print("checkpoint")
         }
       } else {
         #consider when facetType is makeGroups to use geom_density instead ??
-        if (myX %in% nums$source_id | myX %in% dates$source_id) {
-          #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), fill = "#56B4E9", real.geom="geom_histogram")
+        if ((myX %in% nums$source_id | myX %in% dates$source_id) & myX != myFacet) {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
           if (facetType == 'direct') {
@@ -451,7 +450,6 @@ print("checkpoint")
             myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
           }
         } else {
-          #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), stat = "count", fill = "#56B4E9", real.geom="geom_histogram")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
           if(length(levels(as.factor(df[[myX]]))) < 7) {
@@ -473,19 +471,26 @@ print("checkpoint")
       }
             
       message(paste("c'est fini"))
-      
-      #should keep playing with this vs doing it with ggplot syntax. also see if facet_grid gets the axis labels alignment better
+     
       x_list <- list(
-        title = xlab,
-        size = 14 
-      )
-      y_list <- list(
-        title = "Count",
+        title = paste0(c(rep("\n", 3),
+                       rep(" ", 10),
+                       xlab,
+                       rep(" ", 10)),
+                       collapse = ""),
         size = 14
       )
+      y_list <- list(
+        title = paste0(c(rep(" ", 10),
+                       "Count",
+                       rep(" ", 10),
+                       "\n"),
+                       collapse = ""),
+        size = 14
+      ) 
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"))
-      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
+      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 10), xaxis = x_list, yaxis = y_list)
       
       myPlotly
     })
@@ -547,7 +552,7 @@ print("checkpoint")
         #which cols can be used for this will have to change. too specific right now
         if (!is.null(selected)) {
           if (!is.null(myTimeframe)) {
-            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, selected)
           } 
         }
         if (myX %in% strings$source_id) {

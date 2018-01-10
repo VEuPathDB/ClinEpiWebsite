@@ -487,7 +487,7 @@ shinyServer(function(input, output, session) {
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, fill = XAXIS))
           myPlot <- myPlot + theme_bw()
-          myPlot <- myPlot + labs(y = ylab, x = xlab)
+          myPlot <- myPlot + labs(y = "", x = "")
           message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion") {
@@ -522,17 +522,25 @@ shinyServer(function(input, output, session) {
         
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
-          title = xlab,
+          title = paste0(c(rep("\n", 3),
+                         rep(" ", 10),
+                         xlab,
+                         rep(" ", 10)),
+                         collapse = ""),
           size = 14 
         )
         y_list <- list(
-          title = ylab,
+          title = paste0(c(rep(" ", 10),
+                         ylab,
+                         rep(" ", 10),
+                         "\n"),
+                         collapse = ""),
           size = 14
         )
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
         #myPlotly <- ggplotly(myPlot)
-        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
+        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 10), xaxis = x_list, yaxis = y_list)
         
         myPlotly
       

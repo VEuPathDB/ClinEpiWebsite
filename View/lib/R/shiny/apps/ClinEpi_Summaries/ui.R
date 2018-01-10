@@ -9,7 +9,7 @@ shinyUI(
               ".dataTable {border: none;}"
    ),
    tags$head(tags$style(
-     HTML(".js-irs-0 .irs-line-left, .js-irs-0 .irs-line-right {background: transparent}"
+     HTML(".js-irs-0 .irs-line-left, .js-irs-0 .irs-line-right {background: transparent}")
    )),
    uiOutput("title"),
    tabsetPanel(
