@@ -490,7 +490,7 @@ print("checkpoint")
       ) 
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"))
-      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 10), xaxis = x_list, yaxis = y_list)
+      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 20), xaxis = x_list, yaxis = y_list)
       
       myPlotly
     })
