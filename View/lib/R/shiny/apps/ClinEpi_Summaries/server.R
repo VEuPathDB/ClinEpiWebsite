@@ -190,7 +190,7 @@ shinyServer(function(input, output, session) {
 
     facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
 
-    titlePanel("Summarize Observation Data for Selected Participants")
+    titlePanel("Data Summaries")
   })
   
     output$groups_type <- renderUI({

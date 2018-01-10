@@ -183,7 +183,7 @@ print("checkpoint")
     
     xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis)) 
 
-    titlePanel("Distributions of Observations for Selected Participants")
+    titlePanel("Data Distributions")
   })
   
     output$choose_groups <- renderUI({

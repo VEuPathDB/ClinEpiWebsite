@@ -171,7 +171,7 @@ shinyServer(function(input, output, session) {
  
     outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000665")) 
     print("done with modules")
-    titlePanel("Contingency Tables for Selected Participants")
+    titlePanel("Contingency Tables")
   }) 
   
     output$plot <- renderPlotly({
