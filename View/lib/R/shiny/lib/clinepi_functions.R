@@ -1,7 +1,7 @@
 ### all clinepi specific functions b/c rely on data and/or metadata to be formatted consistently
 
 
-subsetDataFetcher <- function(min, max, data){
+subsetDataFetcher <- function(min, max, data, col){
 
   #this version maled specific.
   #eupath_0000743 is last date observed. so the below doesnt include prtcpnts who drop out before the max day set
