@@ -101,7 +101,7 @@ shinyServer(function(input, output, session) {
       setkey(prtcpnt.file, Participant_Id)
 
       if (colnames(attributes.file)[1] == 'Participant_Id') {
-        prtcpnt.file <<- merge(prcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
+        prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
         naToZero(prtcpnt.file, col = "custom")
         prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
       }
