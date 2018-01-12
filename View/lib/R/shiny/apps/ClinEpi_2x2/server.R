@@ -16,9 +16,17 @@ shinyServer(function(input, output, session) {
   attrInfo <- NULL
   outInfo <- NULL
   attribute.file <- NULL
-  
+  propUrl <- NULL
+
   filesFetcher <- reactive({
-  
+ 
+  #not sure if i need properties here, or just in the module
+  #also not sure which vars should be scopes to the page, rather than the function
+  if (is.null(propUrl)) {
+    propUrl <<- getPropertiesUrl(session)
+  }
+  message(paste("propUrl:", propUrl))
+
   if (is.null(attribute.file)) {
 
     attribute_temp <- try(fread(
@@ -161,15 +169,15 @@ shinyServer(function(input, output, session) {
 
     singleVarData
   }
-  
+ 
   output$title <- renderUI({
     singleVarDataFetcher()
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
   
-    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000704"))
+    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000704"), moduleName = "attrInfo")
  
-    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000665")) 
+    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000665"), moduleName = "outInfo") 
     print("done with modules")
     titlePanel("Contingency Tables")
   }) 
@@ -243,7 +251,10 @@ shinyServer(function(input, output, session) {
  
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot)
-        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 30, t = 20), xaxis = x_list, yaxis = y_list)
+        myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
+        myPlotly <- layout(myPlotly, margin = list(l = 150, r = 20, b = 30, t = 20), 
+                                     xaxis = x_list, 
+                                     yaxis = y_list)
         
         myPlotly
       
@@ -334,7 +345,8 @@ shinyServer(function(input, output, session) {
 
     #all the work will be done here in prepping data
     plotData <- reactive({
-      
+      #test <- propText()    
+  
       #collecting inputs 
       myTimeframe <- current$timeframe
       longitudinal <- current$longitudinal
@@ -385,7 +397,86 @@ shinyServer(function(input, output, session) {
         attr_stp2 <- attrInfo$group_stp2
         attr_stp3 <- attrInfo$group_stp3
         attr_stp4 <- attrInfo$group_stp4
-        
+  
+        #could maybe make this a function just to improve readability 
+        #first thing is to save properties 
+        if (length(attr_stp1) > 1) {
+          if (length(out_stp1) > 1) {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "attrInfo$group\t", myAttr, "\n",
+                    "attrInfo$group_stp1[1]\t", attr_stp1[1], "\n",
+                    "attrInfo$group_stp1[2]\t", attr_stp1[2], "\n",
+                    "attrInfo$group_stp2\t", attr_stp2, "\n",
+                    "attrInfo$group_stp3\t", attr_stp3, "\n",
+                    "attrInfo$group_stp4\t", attr_stp4, "\n",
+                    "outInfo$group\t", myOut, "\n",
+                    "outInfo$group_stp1[1]\t", out_stp1[1], "\n",
+                    "outInfo$group_stp1[2]\t", out_stp1[2], "\n",
+                    "outInfo$group_stp2\t", out_stp2, "\n",
+                    "outInfo$group_stp3\t", out_stp3, "\n",
+                    "outInfo$group_stp4\t", out_stp4
+                   )
+          } else {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "attrInfo$group\t", myAttr, "\n",
+                    "attrInfo$group_stp1[1]\t", attr_stp1[1], "\n",
+                    "attrInfo$group_stp1[2]\t", attr_stp1[2], "\n",
+                    "attrInfo$group_stp2\t", attr_stp2, "\n",
+                    "attrInfo$group_stp3\t", attr_stp3, "\n",
+                    "attrInfo$group_stp4\t", attr_stp4, "\n",
+                    "outInfo$group\t", myOut, "\n",
+                    "outInfo$group_stp1\t", out_stp1, "\n",
+                    "outInfo$group_stp2\t", out_stp2, "\n",
+                    "outInfo$group_stp3\t", out_stp3, "\n",
+                    "outInfo$group_stp4\t", out_stp4
+                   )
+          }
+        } else {
+          if (length(out_stp1) > 1) {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "attrInfo$group\t", myAttr, "\n",
+                    "attrInfo$group_stp1\t", attr_stp1, "\n",
+                    "attrInfo$group_stp2\t", attr_stp2, "\n",
+                    "attrInfo$group_stp3\t", attr_stp3, "\n",
+                    "attrInfo$group_stp4\t", attr_stp4, "\n",
+                    "outInfo$group\t", myOut, "\n",
+                    "outInfo$group_stp1[1]\t", out_stp1[1], "\n",
+                    "outInfo$group_stp1[2]\t", out_stp1[2], "\n",
+                    "outInfo$group_stp2\t", out_stp2, "\n",
+                    "outInfo$group_stp3\t", out_stp3, "\n",
+                    "outInfo$group_stp4\t", out_stp4
+                   )
+          } else {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "attrInfo$group\t", myAttr, "\n",
+                    "attrInfo$group_stp1\t", attr_stp1, "\n",
+                    "attrInfo$group_stp2\t", attr_stp2, "\n",
+                    "attrInfo$group_stp3\t", attr_stp3, "\n",
+                    "attrInfo$group_stp4\t", attr_stp4, "\n",
+                    "outInfo$group\t", myOut, "\n",
+                    "outInfo$group_stp1\t", out_stp1, "\n",
+                    "outInfo$group_stp2\t", out_stp2, "\n",
+                    "outInfo$group_stp3\t", out_stp3, "\n",
+                    "outInfo$group_stp4\t", out_stp4
+                   )
+          }
+        }
+
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)   
+ 
         #get attr col
         attrData <- completeDT(data, myAttr)
         attrData <- getFinalDT(attrData, metadata.file, myAttr)

@@ -1,12 +1,6 @@
 ## server.r
 
-require(shiny)
-require(data.table)
-require(plotly)
-require(DT)
-require(viridisLite)
-
-#are there any stats evidence for significance we could do?
+#need to look at dates options at min yaxis and facet line dont seem to work
 #for facets ui: consider selecting more than one group/ check boxes ??
 #make sure levels for numeric groups always start with the group that has square bracket in front (meaning smallest -> largest)
 #figure out when we need naToZero function when building own groups and facets. imagine need it for events stuffs but not others ??
@@ -26,8 +20,20 @@ shinyServer(function(input, output, session) {
   facetInfo <- NULL
   groupInfo <- NULL
   attribute.file <- NULL
+  propUrl <- NULL
+  properties <- NULL  
 
   filesFetcher <- reactive({
+
+    if (is.null(propUrl)) {
+      propUrl <<- getPropertiesUrl(session)
+      properties <<- try(fread(propUrl))
+
+      if (grepl("Error", properties)) {
+        properties <<- NULL
+      }
+    }
+    message(paste("propUrl:", propUrl))
 
     if (is.null(attribute.file)) {
 
@@ -186,38 +192,65 @@ shinyServer(function(input, output, session) {
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
 
-    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType))
+    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), moduleName = "groupInfo")
 
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), moduleName = "facetInfo")
 
     titlePanel("Data Summaries")
   })
   
     output$groups_type <- renderUI({
-      selected <- current$longitudinal
-      
-      if (!is.null(selected)) {
-        selectInput(inputId = "groupsType",
-                    label = "Facet Line:",
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
-                    selected = "direct",
-                    width = '100%')
+      longitudinal <- current$longitudinal
+      mySelected <- properties$selected[properties$input == "input$groupsType"]
+
+      if (is.null(properties)) {
+        if (!is.null(longitudinal)) {
+          selectInput(inputId = "groupsType",
+                      label = "Facet Line:",
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      selected = "direct",
+                      width = '100%')
+        } else {
+          selectInput(inputId = "groupsType",
+                      label = "X-Axis:",
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      selected = "direct",
+                      width = '100%')
+        }
       } else {
-        selectInput(inputId = "groupsType",
-                    label = "X-Axis:",
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
-                    selected = "direct",
-                    width = '100%')
+        if (!is.null(longitudinal)) {
+          selectInput(inputId = "groupsType",
+                      label = "Facet Line:",
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      selected = mySelected,
+                      width = '100%')
+        } else {
+          selectInput(inputId = "groupsType",
+                      label = "X-Axis:",
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      selected = mySelected,
+                      width = '100%')
+        }
       }
       
     })
     
     output$facet_type <- renderUI({
-      selectInput(inputId = "facetType",
-                  label = "Facet Plot:",
-                  choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                  selected = "none",
-                  width = '100%')
+      mySelected <- properties$selected[properties$input == "input$facetType"]
+
+      if (is.null(properties)) {
+        selectInput(inputId = "facetType",
+                    label = "Facet Plot:",
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = "none",
+                    width = '100%')
+      } else {
+        selectInput(inputId = "facetType",
+                    label = "Facet Plot:",
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = mySelected,
+                    width = '100%')
+      }
     })
     
     facetLabel <- reactive({
@@ -263,9 +296,9 @@ shinyServer(function(input, output, session) {
         } else {
           groupsType <- input$groupsType
         }
-        selected <- current$longitudinal
+        longitudinal <- current$longitudinal
       
-        if (!is.null(selected)) {
+        if (!is.null(longitudinal)) {
           if (groupsType == "direct") {
             label = "facets for"
           } else {
@@ -320,7 +353,8 @@ shinyServer(function(input, output, session) {
     })
 
     output$choose_yaxis <- renderUI({
-      
+      mySelected <- properties$selected[properties$input == "input$yaxis"]
+
       #this list should contain anything from events file
       if (event.file.exists) {
         useData <- event.file
@@ -328,11 +362,20 @@ shinyServer(function(input, output, session) {
         useData <- singleVarData
       }
       outChoiceList <- getUIList(useData, metadata.file)
-      selectInput(inputId = "yaxis",
-                  label = "Y-Axis:",
-                  choices = outChoiceList,
-                  selected = "EUPATH_0000689",
-                  width = '100%')
+      
+      if (is.null(properties)) {
+        selectInput(inputId = "yaxis",
+                    label = "Y-Axis:",
+                    choices = outChoiceList,
+                    selected = "EUPATH_0000689",
+                    width = '100%')
+      } else {
+        selectInput(inputId = "yaxis",
+                    label = "Y-Axis:",
+                    choices = outChoiceList,
+                    selected = mySelected,
+                    width = '100%')
+      }
     })
     
     output$yaxis_stp1 <- renderUI({
@@ -340,14 +383,36 @@ shinyServer(function(input, output, session) {
         return()
       }
       myY <- input$yaxis
+      myYSelected <- properties$selected[properties$input == "input$yaxis"]
+      mySelected <- properties$selected[properties$input == "input$yaxis_stp1"]
+
       attrStp1List <- getUIStp1List(singleVarData, myY)
       nums <- getNums(metadata.file)
-      
-      if (!myY %in% nums$source_id) {
-        selectInput(inputId = "yaxis_stp1",
-                    label = "for",
-                    choices = attrStp1List,
-                    width = '100%') 
+
+      dontUseProps <- FALSE
+      if (is.null(properties)) {
+        dontUseProps <- TRUE
+      } else {
+        if (myY != myYSelected) {
+          dontUseProps = TRUE
+        }
+      }      
+
+      if (dontUseProps) {      
+        if (!myY %in% nums$source_id) {
+          selectInput(inputId = "yaxis_stp1",
+                      label = "for",
+                      choices = attrStp1List,
+                      width = '100%') 
+        }
+      } else {
+        if (!myY %in% nums$source_id) {
+          selectInput(inputId = "yaxis_stp1",
+                      label = "for",
+                      choices = attrStp1List,
+                      selected = mySelected,
+                      width = '100%')
+        }
       }
       
     })
@@ -359,35 +424,77 @@ shinyServer(function(input, output, session) {
         myY <- input$yaxis
       }
       nums <- getNums(metadata.file)
-      selected <- current$longitudinal
-      
-      if (myY %in% nums$source_id) {
-        if (!is.null(selected)) {
-          radioButtons(inputId = "yaxis_stp2",
-                       label = "Display as:",
-                       choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
-                       selected = "smooth",
-                       width = '100%',
-                       inline = TRUE)
+      longitudinal <- current$longitudinal
+      myYSelected <- properties$selected[properties$input == "input$yaxis"]
+      mySelected <- properties$selected[properties$input == "input$yaxis_stp2"]      
+
+      dontUseProps <- FALSE
+      if (is.null(properties)) {
+        dontUseProps <- TRUE
+      } else {
+        if (myY != myYSelected) {
+          dontUseProps = TRUE
+        }
+      }
+
+      if (dontUseProps) {
+        if (myY %in% nums$source_id) {
+          if (!is.null(longitudinal)) {
+            radioButtons(inputId = "yaxis_stp2",
+                         label = "Display as:",
+                         choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
+                         selected = "smooth",
+                         width = '100%',
+                         inline = TRUE)
+          } else {
+            #later think up better way. shouldnt show something with only one option. but this is a required input later on. will need if statements below instead.
+            radioButtons(inputId = "yaxis_stp2",
+                         label = "Display as:",
+                         choices = list("Mean" = "mean"),
+                         selected = "mean",
+                         width = '100%',
+                         inline = TRUE)
+          }
         } else {
-          #later think up better way. shouldnt show something with only one option. but this is a required input later on. will need if statements below instead.
+          if (is.null(input$yaxis_stp1)) {
+            return()
+          }
           radioButtons(inputId = "yaxis_stp2",
                        label = "Display as:",
-                       choices = list("Mean" = "mean"),
-                       selected = "mean",
+                       choices = list("Count" = "count", "Proportion" = "proportion"),
+                       selected = "proportion",
                        width = '100%',
                        inline = TRUE)
         }
       } else {
-        if (is.null(input$yaxis_stp1)) {
-          return()
+        if (myY %in% nums$source_id) {
+          if (!is.null(longitudinal)) {
+            radioButtons(inputId = "yaxis_stp2",
+                         label = "Display as:",
+                         choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
+                         selected = mySelected,
+                         width = '100%',
+                         inline = TRUE)
+          } else {
+            #later think up better way. shouldnt show something with only one option. but this is a required input later on. will need if statements below instead.
+            radioButtons(inputId = "yaxis_stp2",
+                         label = "Display as:",
+                         choices = list("Mean" = "mean"),
+                         selected = mySelected,
+                         width = '100%',
+                         inline = TRUE)
+          }
+        } else {
+          if (is.null(input$yaxis_stp1)) {
+            return()
+          }
+          radioButtons(inputId = "yaxis_stp2",
+                       label = "Display as:",
+                       choices = list("Count" = "count", "Proportion" = "proportion"),
+                       selected = mySelected,
+                       width = '100%',
+                       inline = TRUE)
         }
-        radioButtons(inputId = "yaxis_stp2",
-                     label = "Display as:",
-                     choices = list("Count" = "count", "Proportion" = "proportion"),
-                     selected = "proportion",
-                     width = '100%',
-                     inline = TRUE)
       }
       
     })
@@ -398,7 +505,7 @@ shinyServer(function(input, output, session) {
       } else {
         plotType <- input$yaxis_stp2
       }
-      selected <- current$longitudinal
+      longitudinal <- current$longitudinal
       
       dates <- getDates(metadata.file)
         #get data from plotData here
@@ -411,7 +518,7 @@ shinyServer(function(input, output, session) {
         
         names(df)[names(df) == 'GROUPS'] <- 'LINES'
         #temp placeholder for checking if data has time vars for x axis
-        if (!is.null(selected)) {
+        if (!is.null(longitudinal)) {
           #define axis labels here
           xlab <- "Time"
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
@@ -425,7 +532,7 @@ shinyServer(function(input, output, session) {
           }
           
           #format xaxis ticks
-          if (!selected %in% dates$source_id) {
+          if (!longitudinal %in% dates$source_id) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
           }
 
@@ -464,7 +571,7 @@ shinyServer(function(input, output, session) {
             myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
           }
 
-          if (selected %in% dates$source_id) {
+          if (longitudinal %in% dates$source_id) {
             myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
           }
 
@@ -540,7 +647,7 @@ shinyServer(function(input, output, session) {
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
         #myPlotly <- ggplotly(myPlot)
-        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 20), xaxis = x_list, yaxis = y_list)
+        myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 20), xaxis = x_list, yaxis = y_list)
         
         myPlotly
       
@@ -581,9 +688,9 @@ shinyServer(function(input, output, session) {
         data$Group[nrow(data)] <- "Totals"
       }
     
-      selected <- current$longitudinal
+      longitudinal <- current$longitudinal
       #temp placeholder for checking if data has time vars for x axis
-      if (!is.null(selected)) {
+      if (!is.null(longitudinal)) {
         names(data)[names(data) == 'Line'] <- 'X-Axis'
       } 
 
@@ -599,7 +706,7 @@ shinyServer(function(input, output, session) {
     tableData <- debounce(reactive({
       
       #collecting inputs 
-      selected <- current$longitudinal
+      longitudinal <- current$longitudinal
       myTimeframe <- current$timeframe
       groupsType <- input$groupsType
       facetType <- input$facetType
@@ -620,9 +727,9 @@ shinyServer(function(input, output, session) {
       message("have all inputs for plotData")
       #subset data
       #which cols can be used for this will have to change. too specific right now
-      if (!is.null(selected)) {
+      if (!is.null(longitudinal)) {
         if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, selected)
+          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
           message("subsetting data..")
         } else {
           print("timeline input is null")
@@ -674,11 +781,111 @@ shinyServer(function(input, output, session) {
         message("GO!!")
         #may not need to do the splitting on pipes. grepl will still return true for it.
         #should have natozero before this for non-anthro events?? so an NA for diarrhea -> 0 ?? 
+
+        #could maybe make this a function just to improve readability 
+        #first thing is to save properties 
+        if (length(facet_stp1) > 1) {
+          if (length(groups_stp1) > 1) {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "facetInfo$group\t", myFacet, "\n",
+                    "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
+                    "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
+                    "facetInfo$group_stp2\t", facet_stp2, "\n",
+                    "facetInfo$group_stp3\t", facet_stp3, "\n",
+                    "facetInfo$group_stp4\t", facet_stp4, "\n",
+                    "groupInfo$group\t", myGroups, "\n",
+                    "groupInfo$group_stp1[1]\t", groups_stp1[1], "\n",
+                    "groupInfo$group_stp1[2]\t", groups_stp1[2], "\n",
+                    "groupInfo$group_stp2\t", groups_stp2, "\n",
+                    "groupInfo$group_stp3\t", groups_stp3, "\n",
+                    "groupInfo$group_stp4\t", groups_stp4, "\n",
+                    "input$groupsType\t", groupsType, "\n",
+                    "input$facetType\t", facetType, "\n",
+                    "input$yaxis\t", myY, "\n",
+                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
+                    "input$yaxis_stp2\t", yaxis_stp2
+                   )
+          } else {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "facetInfo$group\t", myFacet, "\n",
+                    "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
+                    "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
+                    "facetInfo$group_stp2\t", facet_stp2, "\n",
+                    "facetInfo$group_stp3\t", facet_stp3, "\n",
+                    "facetInfo$group_stp4\t", facet_stp4, "\n",
+                    "groupInfo$group\t", myGroups, "\n",
+                    "groupInfo$group_stp1\t", groups_stp1, "\n",
+                    "groupInfo$group_stp2\t", groups_stp2, "\n",
+                    "groupInfo$group_stp3\t", groups_stp3, "\n",
+                    "groupInfo$group_stp4\t", groups_stp4, "\n",
+                    "input$groupsType\t", groupsType, "\n",
+                    "input$facetType\t", facetType, "\n",
+                    "input$yaxis\t", myY, "\n",
+                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
+                    "input$yaxis_stp2\t", yaxis_stp2
+                   )
+          }
+        } else {
+          if (length(groups_stp1) > 1) {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "facetInfo$group\t", myFacet, "\n",
+                    "facetInfo$group_stp1\t", facet_stp1, "\n",
+                    "facetInfo$group_stp2\t", facet_stp2, "\n",
+                    "facetInfo$group_stp3\t", facet_stp3, "\n",
+                    "facetInfo$group_stp4\t", facet_stp4, "\n",
+                    "groupInfo$group\t", myGroups, "\n",
+                    "groupInfo$group_stp1[1]\t", groups_stp1[1], "\n",
+                    "groupInfo$group_stp1[2]\t", groups_stp1[2], "\n",
+                    "groupInfo$group_stp2\t", groups_stp2, "\n",
+                    "groupInfo$group_stp3\t", groups_stp3, "\n",
+                    "groupInfo$group_stp4\t", groups_stp4, "\n",
+                    "input$groupsType\t", groupsType, "\n",
+                    "input$facetType\t", facetType, "\n",
+                    "input$yaxis\t", myY, "\n",
+                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
+                    "input$yaxis_stp2\t", yaxis_stp2
+                   )
+          } else {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "facetInfo$group\t", myFacet, "\n",
+                    "facetInfo$group_stp1\t", facet_stp1, "\n",
+                    "facetInfo$group_stp2\t", facet_stp2, "\n",
+                    "facetInfo$group_stp3\t", facet_stp3, "\n",
+                    "facetInfo$group_stp4\t", facet_stp4, "\n",
+                    "groupInfo$group\t", myGroups, "\n",
+                    "groupInfo$group_stp1\t", groups_stp1, "\n",
+                    "groupInfo$group_stp2\t", groups_stp2, "\n",
+                    "groupInfo$group_stp3\t", groups_stp3, "\n",
+                    "groupInfo$group_stp4\t", groups_stp4, "\n",
+                    "input$groupsType\t", groupsType, "\n",
+                    "input$facetType\t", facetType, "\n",
+                    "input$yaxis\t", myY, "\n",
+                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
+                    "input$yaxis_stp2\t", yaxis_stp2
+                   )
+          }
+        }
+
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)
+
         plotData <- completeDT(data, myY)
         plotData <- getFinalDT(plotData, metadata.file, myY)
         
-        if (!is.null(selected)) {
-          myCols <- c("Participant_Id", myY, selected)
+        if (!is.null(longitudinal)) {
+          myCols <- c("Participant_Id", myY, longitudinal)
           tempData <- plotData[, myCols, with=FALSE] 
           colnames(tempData) <- c("Participant_Id", "YAXIS", "XAXIS")
         } else {
@@ -708,7 +915,7 @@ shinyServer(function(input, output, session) {
         plotData <- tempData
         #need better way. too specific right now. just need to know if xaxis is time
         #consider what to do about cinning for actual dates. will that work??
-        if (!is.null(selected)) {
+        if (!is.null(longitudinal)) {
           plotData$XAXIS <- cut(plotData$XAXIS, 24) 
           message("binning xaxis data")
         }

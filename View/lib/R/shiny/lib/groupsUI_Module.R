@@ -32,9 +32,16 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("EUPATH_0000704"), groupsType = reactive("makeGroups")) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("EUPATH_0000704"), groupsType = reactive("makeGroups"), moduleName) {
   ns <- session$ns
-  
+
+  propUrl <- getPropertiesUrl(session)
+  properties <- try(fread(propUrl))
+
+  if (grepl("Error", properties)) {
+    properties <- NULL
+  }   
+ 
   groupRange <- reactiveValues()
   
   setGroupVals <- reactive({
@@ -87,11 +94,20 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     attrChoiceList <- lapply(useData(), getUIList, metadata.file = metadata.file)
     attrChoiceList <- unlist(attrChoiceList, recursive = FALSE)
   
-    selectInput(inputId = ns("group"),
-                label = groupLabel(),
-                choices = attrChoiceList,
-                selected = selected(),
-                width = '100%')
+    if (is.null(properties)) {
+      selectInput(inputId = ns("group"),
+                  label = groupLabel(),
+                  choices = attrChoiceList,
+                  selected = selected(),
+                  width = '100%')
+    } else {
+      selectInput(inputId = ns("group"),
+                  label = groupLabel(),
+                  choices = attrChoiceList,
+                  selected = properties$selected[properties$input == paste0(moduleName, "$group")],
+                  width = '100%')
+    }
+
   })
   
   output$choose_stp1 <- renderUI({
@@ -109,14 +125,70 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     
     data <- singleVarData
     tempDF <- completeDT(data, myGroup)
-    
-    if (any(colnames(tempDF) %in% "BFO_0000015")) {
-      if (any(colnames(event.file) %in% myGroup) & levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
-        selectInput(inputId = ns("group_stp1"),
-                    label = "where",
-                    choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
-                    selected = "delta",
-                    width = '100%')
+
+    myGroupSelected <- properties$selected[properties$input == paste0(moduleName, "$group")]
+    mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
+
+    dontUseProps <- FALSE
+    if (is.null(properties)) {
+      dontUseProps <- TRUE
+    } else {
+      if (myGroupSelected != myGroup) {
+        dontUseProps <- TRUE
+      }
+    }
+
+    if (dontUseProps) {
+      if (any(colnames(tempDF) %in% "BFO_0000015")) {
+        if (any(colnames(event.file) %in% myGroup) & levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
+          selectInput(inputId = ns("group_stp1"),
+                      label = "where",
+                      choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
+                      selected = "delta",
+                      width = '100%')
+        } else {        
+          if (myGroup %in% nums$source_id) {
+            selectInput(inputId = ns("group_stp1"),
+                        label = "is",
+                        choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                        selected = "greaterThan",
+                        width = '100%')
+          } else if (myGroup %in% dates$source_id) {
+            dateRangeInput(inputId = ns("group_stp1"),
+                           label = "is between",
+                           start = groupRange$startDate, end = groupRange$endDate,
+                           min = groupRange$myMin, max = groupRange$myMax,
+                           separator = "and",
+                           startview = "year")
+          } else {    
+            attrStp1List <- getUIStp1List(singleVarData, myGroup)
+            if (length(attrStp1List) == 2) {
+              if (any(attrStp1List %in% "Yes")) {
+                selectInput(inputId = ns("group_stp1"),
+                            label = NULL,
+                            choices = attrStp1List,
+                            selected = "Yes",
+                            width = '100%')
+              } else if (any(attrStp1List %in% "TRUE")) {
+                selectInput(inputId = ns("group_stp1"),
+                            label = NULL,
+                            choices = attrStp1List,
+                            selected = "TRUE",
+                            width = '100%')
+              } else {
+                selectInput(inputId = ns("group_stp1"),
+                            label = NULL,
+                            choices = attrStp1List,
+                            width = '100%')
+              }
+            } else {
+              selectInput(inputId = ns("group_stp1"),
+                          label = NULL,
+                          choices = attrStp1List,
+                          width = '100%')
+            }
+          }
+        }
       } else {
         if (myGroup %in% nums$source_id) {
           selectInput(inputId = ns("group_stp1"),
@@ -165,42 +237,24 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         selectInput(inputId = ns("group_stp1"),
                     label = "is",
                     choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                    selected = "greaterThan",
+                    selected = mySelected,
                     width = '100%')
       } else if (myGroup %in% dates$source_id) {
+        mySelected1 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[1]")]
+        mySelected1 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[1]")]
         dateRangeInput(inputId = ns("group_stp1"),
                        label = "is between",
-                       start = groupRange$startDate, end = groupRange$endDate,
+                       start = mySelected1, end = mySelected2,
                        min = groupRange$myMin, max = groupRange$myMax,
                        separator = "and",
                        startview = "year")
       } else {
         attrStp1List <- getUIStp1List(singleVarData, myGroup)
-        if (length(attrStp1List) == 2) {
-          if (any(attrStp1List %in% "Yes")) {
-            selectInput(inputId = ns("group_stp1"),
-                        label = NULL,
-                        choices = attrStp1List,
-                        selected = "Yes",
-                        width = '100%')
-          } else if (any(attrStp1List %in% "TRUE")) {
-            selectInput(inputId = ns("group_stp1"),
-                        label = NULL,
-                        choices = attrStp1List,
-                        selected = "TRUE",
-                        width = '100%')
-          } else {
-            selectInput(inputId = ns("group_stp1"),
-                        label = NULL,
-                        choices = attrStp1List,
-                        width = '100%')
-          }
-        } else {
-          selectInput(inputId = ns("group_stp1"),
-                      label = NULL,
-                      choices = attrStp1List,
-                      width = '100%')
-        }
+        selectInput(inputId = ns("group_stp1"),
+                    label = NULL,
+                    choices = attrStp1List,
+                    selected = mySelected,
+                    width = '100%')
       }
     }
     
@@ -211,30 +265,66 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       return()
     }
     myStp1Val <- input$group_stp1
-    
+    myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
+    mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp2")]    
+
     numeric <- c("lessThan", "greaterThan", "equals")
     anthro <- c("percentDays", "delta", "direct")
+
+    dontUseProps <- FALSE
+    if (is.null(properties)) {
+      dontUseProps <- TRUE
+    } else {
+      if (myStp1Selected != myStp1Val) {
+        dontUseProps <- TRUE
+      }
+    }
     
-    if (myStp1Val %in% anthro) {
-      if (myStp1Val == 'percentDays') {
-        numericInput(inputId = ns("group_stp2"),
-                     label = NULL,
-                     value = 50,
-                     min = 0,
-                     max = 100,
-                     width = '100%')
+    if (dontUseProps) {
+      if (myStp1Val %in% anthro) {
+        if (myStp1Val == 'percentDays') {
+          numericInput(inputId = ns("group_stp2"),
+                       label = NULL,
+                       value = 50,
+                       min = 0,
+                       max = 100,
+                       width = '100%')
+        } else {
+          selectInput(inputId = ns("group_stp2"),
+                      label = "is",
+                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                      selected = "greaterThan",
+                      width = '100%')
+        }
       } else {
-        selectInput(inputId = ns("group_stp2"),
-                    label = "is",
-                    choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                    selected = "greaterThan",
-                    width = '100%')
+        if (myStp1Val %in% numeric) {
+          #just going to set default value to whatever the mean is
+          sliderInput(ns("group_stp2"), NULL,
+                      min = groupRange$myMin, max = groupRange$myMax, value = groupRange$mean, step = .1, width = '100%')
+        }
       }
     } else {
-      if (myStp1Val %in% numeric) {
-        #just going to set default value to whatever the mean is
-        sliderInput(ns("group_stp2"), NULL,
-                    min = groupRange$myMin, max = groupRange$myMax, value = groupRange$mean, step = .1, width = '100%')
+      if (myStp1Val %in% anthro) {
+        if (myStp1Val == 'percentDays') {
+          numericInput(inputId = ns("group_stp2"),
+                       label = NULL,
+                       value = mySelected,
+                       min = 0,
+                       max = 100,
+                       width = '100%')
+        } else {
+          selectInput(inputId = ns("group_stp2"),
+                      label = "is",
+                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                      selected = mySelected,
+                      width = '100%')
+        }
+      } else {
+        if (myStp1Val %in% numeric) {
+          #just going to set default value to whatever the mean is
+          sliderInput(ns("group_stp2"), NULL,
+                    min = groupRange$myMin, max = groupRange$myMax, value = mySelected, step = .1, width = '100%')
+        }
       }
     }
     
@@ -245,24 +335,52 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       return()
     }
     myStp1Val <- input$group_stp1
-    
+    myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
+    mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp3")]
+
     anthro <- c("delta", "direct", "percentDays")
     
-    if (myStp1Val %in% anthro) {
-      if (myStp1Val == "percentDays") {
-        selectInput(inputId = ns("group_stp3"),
-                    label = "are",
-                    choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
-                    selected = "greaterThan",
-                    width = '100%')
-      } else if (myStp1Val == "direct") {
-        sliderInput(ns("group_stp3"), NULL,
-                    min = groupRange$myMin, max = groupRange$myMax, value = groupRange$mean, step = .1, width='100%')
-      } else {
-        sliderInput(ns("group_stp3"), NULL,
-                    min = -20, max = 20, value = -1, step = .1, width = '100%')
+    dontUseProps <- FALSE
+    if (is.null(properties)) {
+      dontUseProps <- TRUE
+    } else {
+      if (myStp1Selected != myStp1Val) {
+        dontUseProps <- TRUE
       }
-      
+    }
+
+    if (dontUseProps) {
+      if (myStp1Val %in% anthro) {
+        if (myStp1Val == "percentDays") {
+          selectInput(inputId = ns("group_stp3"),
+                      label = "are",
+                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                      selected = "greaterThan",
+                      width = '100%')
+        } else if (myStp1Val == "direct") {
+          sliderInput(ns("group_stp3"), NULL,
+                      min = groupRange$myMin, max = groupRange$myMax, value = groupRange$mean, step = .1, width='100%')
+        } else {
+          sliderInput(ns("group_stp3"), NULL,
+                      min = -20, max = 20, value = -1, step = .1, width = '100%')
+        }
+      }
+    } else {
+      if (myStp1Val %in% anthro) {
+        if (myStp1Val == "percentDays") {
+          selectInput(inputId = ns("group_stp3"),
+                      label = "are",
+                      choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                      selected = mySelected,
+                      width = '100%')
+        } else if (myStp1Val == "direct") {
+          sliderInput(ns("group_stp3"), NULL,
+                      min = groupRange$myMin, max = groupRange$myMax, value = mySelected, step = .1, width='100%')
+        } else {
+          sliderInput(ns("group_stp3"), NULL,
+                      min = -20, max = 20, value = mySelected, step = .1, width = '100%')
+        }
+      }
     }
     
   })
@@ -272,11 +390,31 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       return()
     }
     myStp1Val <- input$group_stp1
-    
-    if (!any(c("POSIXct", "Date") %in% class(myStp1Val))) {
-      if (myStp1Val == "percentDays") {
-        sliderInput(ns("group_stp4"), NULL,
-                    min = groupRange$myMin, max = groupRange$myMax, value = groupRange$mean, step = .1, width='100%')
+    myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
+    mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp4")]    
+
+    dontUseProps <- FALSE
+    if (is.null(properties)) {
+      dontUseProps <- TRUE
+    } else {
+      if (myStp1Selected != myStp1Val) {
+        dontUseProps <- TRUE
+      }
+    }
+
+    if (dontUseProps) {
+      if (!any(c("POSIXct", "Date") %in% class(myStp1Val))) {
+        if (myStp1Val == "percentDays") {
+          sliderInput(ns("group_stp4"), NULL,
+                      min = groupRange$myMin, max = groupRange$myMax, value = groupRange$mean, step = .1, width='100%')
+        }
+      }
+    } else {
+      if (!any(c("POSIXct", "Date") %in% class(myStp1Val))) {
+        if (myStp1Val == "percentDays") {
+          sliderInput(ns("group_stp4"), NULL,
+                      min = groupRange$myMin, max = groupRange$myMax, value = mySelected, step = .1, width='100%')
+        }
       }
     }
   })

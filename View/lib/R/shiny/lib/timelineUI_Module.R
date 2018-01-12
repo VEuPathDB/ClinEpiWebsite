@@ -25,6 +25,13 @@ timelineUI <- function(id) {
 timeline <- function(input, output, session, data, longitudinal, metadata.file) {
   ns <- session$ns
 
+  propUrl <- getPropertiesUrl(session)
+  properties <- try(fread(propUrl))
+
+  if (grepl("Error", properties)) {
+    properties <- NULL
+  }
+
   output$choose_longitudinal <- renderUI({
     colnames <- longitudinal$columns
     choices <- subset(metadata.file, source_id %in% colnames)
@@ -35,9 +42,17 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     names(choiceList) <- as.vector(choices$property)
     mylist <- as.list(choiceList)
     
-    selectInput(inputId = ns("longitudinal"),
-                label = "Longitudinal Variable:",
-                choices = mylist)
+    if (is.null(properties)) {
+      selectInput(inputId = ns("longitudinal"),
+                  label = "Longitudinal Variable:",
+                  choices = mylist)
+    } else {
+      selectInput(inputId = ns("longitudinal"),
+                  label = "Longitudinal Variable:",
+                  choices = mylist,
+                  selected = properties$selected[properties$input == "current$longitudinal"])
+    }
+
   })
 
   output$choose_timeframe <- renderUI({
@@ -49,8 +64,15 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       myMin <- min(tempDF[[selected]])
       myMax <- max(tempDF[[selected]]) 
 
-      sliderInput(ns("timeframe"), "Timeframe:",
-                  min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
+      if (is.null(properties)) {
+        sliderInput(ns("timeframe"), "Timeframe:",
+                    min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
+      } else {
+        selectedMin <- as.Date(properties$selected[properties$input == "current$timeframe[1]"])
+        selectedMax <- as.Date(properties$selected[properties$input == "current$timeframe[2]"])
+        sliderInput(ns("timeframe"), "Timeframe:",
+                    min = myMin, max = myMax, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
+      }
     }
     
   })
