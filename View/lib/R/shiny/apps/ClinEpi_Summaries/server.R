@@ -43,10 +43,8 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
-      names(attributes.file)[names(attributes.file) == 'source_id'] <<- 'Participant_Id'
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
-      setkey(attributes.file, Participant_Id)
     }
 
       if (grepl("Error", metadata_temp[1])){
@@ -64,7 +62,11 @@ shinyServer(function(input, output, session) {
 
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
+        if (colnames(attributes.file)[1] == 'Participant_Id') {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+        }
       } 
 
     }
@@ -102,6 +104,12 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
+
+      if (colnames(attributes.file)[1] == 'Participant_Id') {
+        prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
+        naToZero(prtcpnt.file, col = "custom")
+        prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
+      }
     }
 
     if (grepl("Error", house_temp[1])){
@@ -119,17 +127,26 @@ shinyServer(function(input, output, session) {
       event.file <<- event_temp
       names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
       names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      names(event.file)[names(event.file) == 'NAME'] <<- 'Observation_Id'
       setkey(event.file, Participant_Id)
+
+      #merge attributes column onto data table
+      if (colnames(attributes.file)[1] == 'Observation_Id') {
+        event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
+        naToZero(event.file, col = "custom")
+        event.file$custom[event.file$custom == 0] <<- "Not Selected"
+      }
+      #naToZero(singleVarData, col = "search_weight")
     }
 
     #remove non-unique column names and merge them to one data table to return
-    drop <- c("NAME", "PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
+    drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
     if (exists("event.file")) {
       if (!is.null(event.file) & nrow(event.file) > 1) {
-        merge1 <- merge(event.file, prtcpnt.file)
+        merge1 <- merge(event.file, prtcpnt.file, by = "Participant_Id")
         event.file.exists <<- TRUE
       } else {
         merge1 <- prtcpnt.file
@@ -143,7 +160,7 @@ shinyServer(function(input, output, session) {
     if (exists("house.file")) {
       if (!is.null(house.file) & nrow(house.file) > 1) { 
         house.file <<- house.file[, -(drop), with = FALSE]
-        singleVarData <<- merge(merge1, house.file)
+        singleVarData <<- merge(merge1, house.file, by = "Participant_Id")
         house.file.exists <<- TRUE
       } else {
         singleVarData <<- merge1
@@ -153,17 +170,12 @@ shinyServer(function(input, output, session) {
       singleVarData <<- merge1
       house.file.exists <<- FALSE
     }
-   
+
     metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
-
-    #merge attributes column onto data table
-    singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
-    naToZero(singleVarData, col = "custom")
-    singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
 
     singleVarData
   }
@@ -178,7 +190,7 @@ shinyServer(function(input, output, session) {
 
     facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
 
-    titlePanel("Summarize Observation Data for Selected Participants")
+    titlePanel("Data Summaries")
   })
   
     output$groups_type <- renderUI({
@@ -276,7 +288,8 @@ shinyServer(function(input, output, session) {
       } else {
         groupsType <- input$groupsType
       }
-      
+  
+      #can't remember why we arent using events here....  
       if (groupsType == "direct") {
         if (house.file.exists) {
           useData <- list(prtcpnt.file, house.file)
@@ -442,6 +455,19 @@ shinyServer(function(input, output, session) {
          
           numColors <- length(levels(as.factor(df$LINES)))
           
+          #find num colors needed
+          if (numColors > 2) { 
+            myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
+          } else if (numColors == 2) {
+            myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
+          } else {
+            myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
+          }
+
+          if (selected %in% dates$source_id) {
+            myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+          }
+
         } else {
           names(df)[names(df) == 'LINES'] <- 'XAXIS'
           # if y axis is numeric box plots otherwise bar pltos.
@@ -461,7 +487,7 @@ shinyServer(function(input, output, session) {
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, fill = XAXIS))
           myPlot <- myPlot + theme_bw()
-          myPlot <- myPlot + labs(y = ylab, x = xlab)
+          myPlot <- myPlot + labs(y = "", x = "")
           message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion") {
@@ -476,6 +502,17 @@ shinyServer(function(input, output, session) {
 
           numColors <- length(levels(as.factor(df$XAXIS)))   
 
+          #find num colors needed
+          if (numColors > 2) { 
+            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
+          } else if (numColors == 2) {
+            
+            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
+          } else {
+            
+            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
+          }
+
         }
         
         #add facet if available
@@ -483,31 +520,27 @@ shinyServer(function(input, output, session) {
           myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
         }
         
-        #find num colors needed
-        if (numColors > 2) { 
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
-          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
-        } else if (numColors == 2) {
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
-          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
-        } else {
-          myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
-          myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
-        }
-     
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
-          title = xlab,
+          title = paste0(c(rep("\n", 3),
+                         rep(" ", 10),
+                         xlab,
+                         rep(" ", 10)),
+                         collapse = ""),
           size = 14 
         )
         y_list <- list(
-          title = ylab,
+          title = paste0(c(rep(" ", 10),
+                         ylab,
+                         rep(" ", 10),
+                         "\n"),
+                         collapse = ""),
           size = 14
         )
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
         #myPlotly <- ggplotly(myPlot)
-        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
+        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 20), xaxis = x_list, yaxis = y_list)
         
         myPlotly
       
@@ -563,7 +596,7 @@ shinyServer(function(input, output, session) {
     #values grabbed through reactive functions for better control of reactive context
   
     #all the work will be done here in prepping data
-    tableData <- eventReactive(input$btn, {
+    tableData <- debounce(reactive({
       
       #collecting inputs 
       selected <- current$longitudinal
@@ -589,7 +622,7 @@ shinyServer(function(input, output, session) {
       #which cols can be used for this will have to change. too specific right now
       if (!is.null(selected)) {
         if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
+          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, selected)
           message("subsetting data..")
         } else {
           print("timeline input is null")
@@ -783,7 +816,7 @@ shinyServer(function(input, output, session) {
       }
       
       #debounce will wait 2s with no changes to inputs before plotting.
-    })
+    }), 2000)
       
     plotData <- reactive({  
       message("just before tableData call")

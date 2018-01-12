@@ -5,10 +5,6 @@ require(data.table)
 require(plotly)
 require(viridisLite)
 
-#also need to figure out why the plots renders multiple times
-#maybe let user define their own groups??
-#reorganize ui and plotData to reflect newer apps structure
-
 shinyServer(function(input, output, session) {
   
   event.file <- NULL
@@ -41,10 +37,8 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
-      names(attributes.file)[names(attributes.file) == 'source_id'] <<- 'Participant_Id'
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
-      setkey(attributes.file, Participant_Id)
     }
 
       if (grepl("Error", metadata_temp[1])){
@@ -62,7 +56,11 @@ shinyServer(function(input, output, session) {
 
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
+        if (colnames(attributes.file)[1] == 'Participant_Id') {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+        }
       }     
  
     }
@@ -101,6 +99,12 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
+
+      if (colnames(attributes.file)[1] == 'Participant_Id') {
+        prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
+        naToZero(prtcpnt.file, col = "custom")
+        prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
+      }
     }
 
     if (grepl("Error", house_temp[1])){
@@ -118,10 +122,19 @@ shinyServer(function(input, output, session) {
       event.file <<- event_temp
       names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
       names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      names(event.file)[names(event.file) == 'NAME'] <<- 'Observation_Id'
+
+      #merge attributes column onto data table
+      if (colnames(attributes.file)[1] == 'Observation_Id') {
+        event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
+        naToZero(event.file, col = "custom")
+        event.file$custom[event.file$custom == 0] <<- "Not Selected"
+      }
+      #naToZero(singleVarData, col = "search_weight")
     }
 
     #remove non-unique column names and merge them to one data table to return
-    drop <- c("NAME", "PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
+    drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
@@ -151,17 +164,12 @@ shinyServer(function(input, output, session) {
       singleVarData <<- merge1
       house.file.exists <<- FALSE
     }
-    
+
     metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
-
-    #merge attributes column onto data table
-    singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
-    naToZero(singleVarData, col = "custom")
-    singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
 
     singleVarData
   }
@@ -175,7 +183,7 @@ print("checkpoint")
     
     xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis)) 
 
-    titlePanel("Distributions of Observations for Selected Participants")
+    titlePanel("Data Distributions")
   })
   
     output$choose_groups <- renderUI({
@@ -271,30 +279,30 @@ print("checkpoint")
       #temporary until i figure out how to plot histograms with dates in plotly
       dates <- getDates(metadata.file)$source_id
       
-      if (groupsType == "direct") {
-        if (length(dates > 0)) {
-          ptmp <- prtcpnt.file[, -dates, with=FALSE]
-        } else {
-          ptmp <- prtcpnt.file
-        }
-        if (house.file.exists) {
-          if (length(dates > 0)) {
-            htmp <- house.file[, -dates, with=FALSE]
-          } else {
-            htmp <- house.file
-          }
-          useData <- list(ptmp, htmp)
-        } else {
-          useData <- list(ptmp)
-        }
-      } else {
+      #if (groupsType == "direct") {
+      #  if (length(dates > 0)) {
+       #   ptmp <- prtcpnt.file[, -dates, with=FALSE]
+      #  } else {
+      #    ptmp <- prtcpnt.file
+      #  }
+      #  if (house.file.exists) {
+       #   if (length(dates > 0)) {
+      #      htmp <- house.file[, -dates, with=FALSE]
+      #    } else {
+      #      htmp <- house.file
+      #    }
+       #   useData <- list(ptmp, htmp)
+       # } else {
+      #    useData <- list(ptmp)
+      #  }
+      #} else {
         if (length(dates > 0)) {
           stmp <- singleVarData[, -dates, with=FALSE]
         } else {
           stmp <- singleVarData
         }
         useData <- list(stmp)
-      }  
+      #}  
       
       return(useData)
     })
@@ -339,15 +347,15 @@ print("checkpoint")
         facetType <- input$facetType
       }
       
-      if (facetType == "direct") {
-        if (house.file.exists) {
-          useData <- list(prtcpnt.file, house.file)
-        } else {
-          useData <- list(prtcpnt.file)
-        }
-      } else {
+      #if (facetType == "direct") {
+      #  if (house.file.exists) {
+      #    useData <- list(prtcpnt.file, house.file)
+      #  } else {
+      #    useData <- list(prtcpnt.file)
+      #  }
+      #} else {
         useData <- list(singleVarData)
-      }
+      #}
       
       return(useData)
     })
@@ -432,8 +440,7 @@ print("checkpoint")
         }
       } else {
         #consider when facetType is makeGroups to use geom_density instead ??
-        if (myX %in% nums$source_id | myX %in% dates$source_id) {
-          #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), fill = "#56B4E9", real.geom="geom_histogram")
+        if ((myX %in% nums$source_id | myX %in% dates$source_id) & myX != myFacet) {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
           if (facetType == 'direct') {
@@ -443,7 +450,6 @@ print("checkpoint")
             myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
           }
         } else {
-          #myPlot <- myPlot + geom_tooltip(aes(tooltip=paste0("count: ", ..count..)), stat = "count", fill = "#56B4E9", real.geom="geom_histogram")
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
           if(length(levels(as.factor(df[[myX]]))) < 7) {
@@ -465,19 +471,26 @@ print("checkpoint")
       }
             
       message(paste("c'est fini"))
-      
-      #should keep playing with this vs doing it with ggplot syntax. also see if facet_grid gets the axis labels alignment better
+     
       x_list <- list(
-        title = xlab,
-        size = 14 
-      )
-      y_list <- list(
-        title = "Count",
+        title = paste0(c(rep("\n", 3),
+                       rep(" ", 10),
+                       xlab,
+                       rep(" ", 10)),
+                       collapse = ""),
         size = 14
       )
+      y_list <- list(
+        title = paste0(c(rep(" ", 10),
+                       "Count",
+                       rep(" ", 10),
+                       "\n"),
+                       collapse = ""),
+        size = 14
+      ) 
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"))
-      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
+      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 20), xaxis = x_list, yaxis = y_list)
       
       myPlotly
     })
@@ -486,7 +499,7 @@ print("checkpoint")
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #datagrabbed through reactive expression for better control of reactive context
     #now just need to edit this and the plotly output to handle the makegroups option in ui
-    plotData <- eventReactive(input$btn, {
+    plotData <- debounce(reactive({
       if (is.null(input$xaxis)) {
         return()
       }
@@ -527,7 +540,7 @@ print("checkpoint")
         #which cols can be used for this will have to change. too specific right now
         if (!is.null(selected)) {
           if (!is.null(myTimeframe)) {
-            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data)
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data, selected)
           }
         }
         col = 'groups'
@@ -539,7 +552,7 @@ print("checkpoint")
         #which cols can be used for this will have to change. too specific right now
         if (!is.null(selected)) {
           if (!is.null(myTimeframe)) {
-            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, selected)
           } 
         }
         if (myX %in% strings$source_id) {
@@ -602,7 +615,7 @@ print("checkpoint")
       
       data
       
-    })
+    }), 2000)
     
     groupsDataFetcher <- function(myGroups, myX) {
       #since singlevar is default im assuming fles fetcher is already called. can add check later though to be safe.

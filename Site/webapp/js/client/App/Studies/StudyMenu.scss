@@ -1,0 +1,22 @@
+$red: #DD314E;
+.StudyMenuItem {
+  width: 280px;
+  align-items: center;
+  font-weight: 400;
+  .StudyMenuItem-Links {
+    .fa {
+      font-size: 1.4em;
+      padding: 5px;
+      transition: all 0.25s;
+      &:hover {
+        color: $red;
+      }
+    }
+  }
+}
+
+.StudyMenuItem--disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  * { pointer-events: none !important; }
+}

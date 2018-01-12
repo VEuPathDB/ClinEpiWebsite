@@ -1,15 +1,5 @@
 ## server.r
 
-require(shiny)
-require(data.table)
-require(plotly)
-require(DT)
-require(viridisLite)
-
-#% days for diarrhea doesnt show up in outcome because its in participant info rather than events.. what to do.. what to do  
-#eupath_0000743 appears to be wrong
-#should the ui remember downstream choices?? ex: if you switch from < to > should the num be maintained or change back to mean? 
-#biological sex is broken because it has only two options but theyre not yes/no or true/false
 #the sliders only show transparent for the first two to appear, names not reused/ dont refer only to whats on screen at the time
 #do we want to move naToZero before the merge and only apply to outdata? seems NA for prtcpnt and house info are real NAs
 
@@ -43,10 +33,8 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
-      names(attributes.file)[names(attributes.file) == 'source_id'] <<- 'Participant_Id'
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
-      setkey(attributes.file, Participant_Id)
     }
  
       if (grepl("Error", metadata_temp[1])){
@@ -64,9 +52,12 @@ shinyServer(function(input, output, session) {
         
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        metadata.file <<- rbind(metadata.file, list("custom", "User Defined Group", "string", "none"))
+        if (colnames(attributes.file)[1] == 'Participant_Id') {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+        }
       }
-      
     }
   })
   
@@ -103,6 +94,12 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
+
+      if (colnames(attributes.file)[1] == 'Participant_Id') {
+        prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
+        naToZero(prtcpnt.file, col = "custom")
+        prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
+      }
     }
     
     if (grepl("Error", house_temp[1])){
@@ -120,16 +117,25 @@ shinyServer(function(input, output, session) {
       event.file <<- event_temp
       names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
       names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
+      names(event.file)[names(event.file) == 'NAME'] <<- 'Observation_Id'
       setkey(event.file, Participant_Id)
+
+      #merge attributes column onto data table
+      if (colnames(attributes.file)[1] == 'Observation_Id') {
+        event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
+        naToZero(event.file, col = "custom")
+        event.file$custom[event.file$custom == 0] <<- "Not Selected"
+      }
+      #naToZero(singleVarData, col = "search_weight")
     }
     
     #remove non-unique column names and merge them to one data table to return
-    drop <- c("NAME", "PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
+    drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
     prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
     
     if (exists("event.file") & !is.null(event.file) & nrow(event.file) > 1) {
-      merge1 <- merge(event.file, prtcpnt.file)
+      merge1 <- merge(event.file, prtcpnt.file, by = "Participant_Id")
     } else {
       merge1 <- prtcpnt.file
     }
@@ -137,7 +143,7 @@ shinyServer(function(input, output, session) {
     if (exists("house.file") & !is.null(house.file) & nrow(house.file) > 1) {
       #house.file <<- house.file[, (drop):=NULL]
       house.file <<- house.file[, -(drop), with = FALSE]
-      singleVarData <<- merge(merge1, house.file)
+      singleVarData <<- merge(merge1, house.file, by = "Participant_Id")
     } else {
       singleVarData <<- merge1
     }
@@ -148,17 +154,11 @@ shinyServer(function(input, output, session) {
 
     #remove unnecessary metadata info
     metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
-    
+
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
-    
-    #merge attributes column onto data table
-    singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
-    naToZero(singleVarData, col = "custom")
-    singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
-    #naToZero(singleVarData, col = "search_weight")
-    
+
     singleVarData
   }
   
@@ -171,7 +171,7 @@ shinyServer(function(input, output, session) {
  
     outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000665")) 
     print("done with modules")
-    titlePanel("Contingency Tables for Selected Participants")
+    titlePanel("Contingency Tables")
   }) 
   
     output$plot <- renderPlotly({
@@ -194,12 +194,12 @@ shinyServer(function(input, output, session) {
         df <- rbind(df, c(df[1,2], NA))
         df <- rbind(df, c(df[2,2], NA))
         df <- cbind(c(cols[1], cols[2], cols[1], cols[2]), df)
-        colnames(df) <- c("Outcome" ,"Proportion", "Attribute")
+        colnames(df) <- c("Variable2" ,"Proportion", "Variable1")
         df <- data.table(df)
         df$Proportion = as.numeric(df$Proportion)
-        df$Attribute <- c(rows[1], rows[1], rows[2], rows[2])
-        df$Outcome <- factor(df$Outcome, levels = c(cols[1], cols[2]))
-        df$Attribute <- factor(df$Attribute, levels = c(rows[1], rows[2]))
+        df$Variable1 <- c(rows[1], rows[1], rows[2], rows[2])
+        df$Variable2 <- factor(df$Variable2, levels = c(cols[1], cols[2]))
+        df$Variable1 <- factor(df$Variable1, levels = c(rows[1], rows[2]))
         
         #define axis labels here
         xlab <- ""
@@ -215,7 +215,7 @@ shinyServer(function(input, output, session) {
         df$width <- width
    
         #plot here
-        myPlot <- ggplot(data = df, aes(x = Outcome, y = Proportion, width = width, fill = Attribute))
+        myPlot <- ggplot(data = df, aes(x = Variable2, y = Proportion, width = width, fill = Variable1))
         myPlot <- myPlot + theme_bw()
         myPlot <- myPlot + labs(y = ylab, x = xlab)
         
@@ -224,19 +224,26 @@ shinyServer(function(input, output, session) {
         #myPlot <- myPlot + scale_fill_manual(values = plasma(2))
         myPlot <- myPlot + scale_fill_manual(values = viridis(2, begin = .25, end = .75))
         
-        #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
-          title = xlab,
-          size = 14 
-        )
-        y_list <- list(
-          title = ylab,
+          title = paste0(c(rep("\n", 3),
+                         rep(" ", 10),
+                         xlab,
+                         rep(" ", 10)),
+                         collapse = ""),
           size = 14
         )
-        
+        y_list <- list(
+          title = paste0(c(rep(" ", 10),
+                         ylab,
+                         rep(" ", 10),
+                         "\n"),
+                         collapse = ""),
+          size = 14
+        )       
+ 
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot)
-        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(xaxis = x_list, yaxis = y_list)
+        myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 30, t = 20), xaxis = x_list, yaxis = y_list)
         
         myPlotly
       
@@ -326,11 +333,11 @@ shinyServer(function(input, output, session) {
     #values grabbed through reactive functions for better control of reactive context
 
     #all the work will be done here in prepping data
-    plotData <- eventReactive(input$btn, {
-     
-      print("in plotData")
+    plotData <- reactive({
+      
       #collecting inputs 
       myTimeframe <- current$timeframe
+      longitudinal <- current$longitudinal
       if (is.null(attrInfo$group)) {
         message("attr group is null")
         return()
@@ -348,9 +355,9 @@ shinyServer(function(input, output, session) {
       print("have attr and out info")
       #subset data
       #which cols can be used for this will have to change. too specific right now
-      if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
+      if (any(colnames(singleVarData) %in% longitudinal)) {
         if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData)
+          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
         } else {
           print("exiting for timeline problem")
           return()
@@ -479,8 +486,6 @@ shinyServer(function(input, output, session) {
         tableData
       } 
       
-      #debounce will wait 2s with no changes to inputs before plotting.
     })
-    
 
 })

@@ -1,0 +1,197 @@
+$red: #DD314E;
+
+.HeaderNav {
+  width: 100%;
+  padding: 5px 10px;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1000000;
+
+  #EuPathLogo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: '160px';
+    opacity: 0.5;
+  }
+
+  &-Primary {
+    flex: 1;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+  }
+
+  .HeaderNav-Secondary {
+    flex: 0.2;
+    position: relative;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    z-index: 20;
+  }
+
+  &-Switch {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  @media (max-width: 1444px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    .HeaderNav-Social {
+      margin: -10px 0 0;
+    }
+    &-Switch {
+      margin-top: -110px;
+      margin-left: 360px;
+      &-Primary, &-Secondary {
+        width: 100%;
+      }
+      .HeaderNav-Secondary {
+        margin-top: -10px;
+      }
+      .SiteMenu {
+        margin-top: 10px;
+        min-width: 500px;
+        margin-right: -20px;
+      }
+      .UserMenu {
+        margin-left: 20px;
+      }
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    &-Primary {
+      order: 2;
+    }
+  }
+
+  &, box, row {
+    align-items: center;
+  }
+
+  &-Branding {
+    padding: 5px 5px 20px;
+    align-self: flex-start;
+
+    .HeaderNav-Logo {
+      max-width: 70px;
+      margin: 0 10px 0 0;
+    }
+
+    h1.HeaderNav-Title {
+      margin: 0;
+      font-size: 55px;
+    }
+
+    p {
+      margin: 0;
+      padding: 0;
+      opacity: 0.5;
+      font-size: 16px;
+      font-weight: 200;
+      line-height: 1.3em;
+      letter-spacing: 0.2px;
+      code {
+        font-family: 'Inconsolata', 'Menlo', 'Monaco', 'Courier New', 'Courier';
+        background-color: black;
+        display: inline-block;
+        margin: 0 2px;
+        padding: 1px 3px;
+      }
+      small {
+        opacity: 0.7;
+      }
+    }
+  }
+
+  &-Social {
+    a.HeaderNav-Social-Link {
+      &, &:link, &:active, &:visited { color: #fff; }
+      opacity: 0.45;
+      transition: all 0.6s;
+      font-size: 25px;
+      padding: 8px;
+      display: block;
+      &:hover {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+    }
+  }
+}
+
+.HeaderNav-Title {
+  font-weight: 300;
+  // text-shadow: none;
+  font-family: 'Exo 2';
+
+  a, &:link, &:visited, &:hover {
+    color: $red;
+    text-decoration: none;
+    transition: all 0.5s;
+    &:hover {
+      transform: scale(0.95);
+    }
+    mark {
+      color: white;
+      font-weight: 400;
+      font-family: 'Exo 2';
+      background-color: transparent;
+    }
+  }
+}
+
+.HeaderNav-Sticky {
+  color: #fff;
+  width: 100%;
+  height: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  background-size: cover;
+  background-position: center 35%;
+  background-color: rgb(35, 115, 120);
+  display: flex;
+  flex-wrap: nowrap;
+  position: fixed;
+  top: 0;
+  flex-direction: row;
+  padding: 7.5px;
+  pointer-events: all;
+  align-items: center;
+  justify-content: space-between;
+
+  .UserMenu {
+    flex-direction: row;
+    height: 100%;
+    align-items: center;
+    padding-top: 20px;
+    margin: 0 30px;
+    .UserMenu-Icon {
+      font-size: 25px;
+      margin-right: 10px;
+    }
+  }
+
+  .HeaderNav-Title {
+    margin: 10px;
+    padding-top: 3px;
+    font-size: 25px;
+  }
+
+  .HeaderNav-Sticky-Logo {
+    max-height: 30px;
+    margin: 5px 0 0 10px;
+  }
+  .SiteMenu {
+    width: auto;
+    margin-top: 4px;
+
+    .SiteMenuItem {
+      &:last-of-type {
+        margin-right: auto;
+      }
+    }
+  }
+
+}

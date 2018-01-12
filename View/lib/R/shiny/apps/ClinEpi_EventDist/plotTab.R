@@ -11,7 +11,7 @@ plot <-  tabPanel("Plot", fluid = TRUE,
                column(3,
                       selectInput(inputId = "plotChoice",
                                   label = "Choose plot to generate:",
-                                  choices = list('Single Variable' = 'singleVar', 'Multi Variable' = 'groups'),
+                                  choices = list('Single Variable' = 'singleVar'),# 'Multi Variable' = 'groups'),
                                   selected = "singleVar"),
                       uiOutput("choose_groups")
                ),
@@ -41,13 +41,6 @@ plot <-  tabPanel("Plot", fluid = TRUE,
                       )
                )
              ),
-             fluidRow(
-                      column(12, align = "center",
-                             actionButton("btn", "Plot!",
-                                          style='padding:8px; font-size:115%; color:white; background-color:#366dc4',
-                                          width = '15%')
-                      )
-             ), 
              hr(),
              plotlyOutput("distribution")
           )

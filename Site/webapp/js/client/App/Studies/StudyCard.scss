@@ -1,4 +1,7 @@
+$textColor: rgb(56,76,75);
+
 .wdk-Showcase {
+  * { box-sizing: border-box; }
   .StudyCard-Heading {
     font-size: 1.3rem;
     align-items: flex-start;
@@ -6,6 +9,10 @@
     padding: 12px 12px 5px;
     font-weight: 800;
     display: flex;
+    a, a:link, a:visited, a:active {
+      color: $textColor;
+      text-decoration: none;
+    }
 
     h2 {
       flex: 1;

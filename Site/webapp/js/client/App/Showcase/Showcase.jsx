@@ -4,8 +4,8 @@ import './Showcase.scss';
 import ShowcaseFilter from './ShowcaseFilter';
 
 import { IconAlt as Icon } from 'wdk-client/Components';
-import { StudyCardList } from 'Client/App/StudyCard';
-import { SearchCardList } from 'Client/App/SearchCard';
+import { StudyCardList } from 'Client/App/Studies';
+import { SearchCardList } from 'Client/App/Searches';
 import { ImageCardList } from 'Client/App/ImageCard';
 
 class Showcase extends React.Component {
@@ -29,7 +29,7 @@ class Showcase extends React.Component {
     this.setState({ filteredItems });
   }
 
-  getItemRenderer (contentType, props) {
+  getListRenderer (contentType, props) {
     switch (contentType.toLowerCase()) {
       case 'studycardlist':
         return <StudyCardList {...props} />
@@ -43,10 +43,9 @@ class Showcase extends React.Component {
   render () {
     const { handleFilter } = this;
     const { filteredItems } = this.state;
-    const { content } = this.props;
+    const { content, prefix } = this.props;
     const { title, viewAllUrl, filters, contentType, items, description } = content;
-
-    const cards = this.getItemRenderer(contentType, { list: filteredItems });
+    const cards = this.getListRenderer(contentType, { list: filteredItems, prefix });
 
     return (
       <stack className="wdk-Showcase">

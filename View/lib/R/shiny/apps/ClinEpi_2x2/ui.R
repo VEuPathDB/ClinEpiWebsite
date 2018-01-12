@@ -2,14 +2,15 @@
 
 shinyUI(
   fluidPage(
+    theme = "cerulean.css",
     tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
-              "table, th, td { border: 1px solid black; padding: 15px;}"
+              ".dataTable {border: none;}"
     ),
     tags$head(tags$style(
       HTML("input[type='search']:disabled {visibility:hidden}"),
-      HTML(".js-irs .irs-bar-edge, .js-irs .irs-bar {background: transparent}")
+      HTML(".js-irs-0 .irs-line-left, .js-irs-0 .irs-line-right {background: transparent}")
     )),
     uiOutput("title"),
     tabsetPanel(
