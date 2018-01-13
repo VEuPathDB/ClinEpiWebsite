@@ -95,8 +95,10 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(properties)) {
       dontUseProps <- TRUE
     } else {
-      if (groupsTypeSelected != groupsType()) {
-        dontUseProps <- TRUE
+      if (!is.null(groupsType())) {
+        if (groupsTypeSelected != groupsType()) {
+          dontUseProps <- TRUE
+        }
       }
     }
  
