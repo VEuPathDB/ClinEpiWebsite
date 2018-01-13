@@ -32,7 +32,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("EUPATH_0000704"), groupsType = reactive("makeGroups"), moduleName) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("EUPATH_0000704"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName) {
   ns <- session$ns
 
   propUrl <- getPropertiesUrl(session)
@@ -83,18 +83,24 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   observeEvent(input$group, setGroupVals())
   
   output$choose_group <- renderUI({
-    print("in choose_group")
-    print(paste("group label:", groupLabel()))
-    print(paste("selected:", selected()))
-    print(paste("groupsType:", groupsType()))
     if (groupsType() != "makeGroups" & groupsType() != "direct") {
       return()
     }
     
     attrChoiceList <- lapply(useData(), getUIList, metadata.file = metadata.file)
     attrChoiceList <- unlist(attrChoiceList, recursive = FALSE)
-  
+    groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
+ 
+    dontUseProps <- FALSE
     if (is.null(properties)) {
+      dontUseProps <- TRUE
+    } else {
+      if (groupsTypeSelected != groupsType()) {
+        dontUseProps <- TRUE
+      }
+    }
+ 
+    if (dontUseProps) {
       selectInput(inputId = ns("group"),
                   label = groupLabel(),
                   choices = attrChoiceList,
@@ -128,6 +134,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
 
     myGroupSelected <- properties$selected[properties$input == paste0(moduleName, "$group")]
     mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
+    groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]  
 
     dontUseProps <- FALSE
     if (is.null(properties)) {
@@ -135,6 +142,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     } else {
       if (myGroupSelected != myGroup) {
         dontUseProps <- TRUE
+      }
+      if (!is.null(groupsTypeSelected)) {
+        if (groupsType() != groupsTypeSelected & myGroup %in% dates$source_id) {
+          dontUseProps <- TRUE
+        }
       }
     }
 

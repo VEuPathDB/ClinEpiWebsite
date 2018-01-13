@@ -192,9 +192,9 @@ shinyServer(function(input, output, session) {
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
 
-    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), moduleName = "groupInfo")
+    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
 
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), moduleName = "facetInfo")
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
 
     titlePanel("Data Summaries")
   })
@@ -278,10 +278,13 @@ shinyServer(function(input, output, session) {
       }
       
       if (facetType == "direct") {
+        dates <- getDates(metadata.file)$source_id
+        ptmp <- prtcpnt.file[, !dates, with = FALSE]
         if (house.file.exists) {
-          useData <- list(prtcpnt.file, house.file)
+          htmp <- house.file[, !dates, with = FALSE]
+          useData <- list(ptmp, htmp)
         } else {
-          useData <- list(prtcpnt.file)
+          useData <- list(ptmp)
         }
       } else {
         useData <- list(singleVarData)
@@ -324,10 +327,13 @@ shinyServer(function(input, output, session) {
   
       #can't remember why we arent using events here....  
       if (groupsType == "direct") {
+        dates <- getDates(metadata.file)$source_id
+        ptmp <- prtcpnt.file[, !dates, with = FALSE]
         if (house.file.exists) {
-          useData <- list(prtcpnt.file, house.file)
+          htmp <- house.file[, !dates, with = FALSE]
+          useData <- list(ptmp, htmp)
         } else {
-          useData <- list(prtcpnt.file)
+          useData <- list(ptmp)
         }
       } else {
         useData <- list(singleVarData)
@@ -976,7 +982,9 @@ shinyServer(function(input, output, session) {
         if (any(colnames(plotData) %in% "GROUPS")) {
           if (myGroups %in% nums$source_id | myGroups %in% dates$source_id) {
             if (length(levels(as.factor(plotData$GROUPS))) >= 4) {
+              message("need to bin dates")
               hold <- try(ggplot2::cut_number(plotData$GROUPS, 4))
+              message(paste("test binning:", levels(as.factor(hold))))
               if (!grepl("Error", hold[1])){
                 plotData$GROUPS <- hold
               }

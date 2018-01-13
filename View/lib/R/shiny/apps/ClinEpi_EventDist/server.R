@@ -191,7 +191,7 @@ shinyServer(function(input, output, session) {
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
 
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), moduleName = "facetInfo")
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
     
     xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), moduleName = "xaxisInfo") 
 
