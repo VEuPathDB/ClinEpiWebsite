@@ -507,7 +507,7 @@ shinyServer(function(input, output, session) {
         }
         message("in plotData()")
         attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
-        attrLabel <- makeGroupLabel(myAttr, metadata.file, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+        attrLabel <- makeGroupLabel(myAttr, metadata.file, attr_stp1, attr_stp2, attr_stp3, attr_stp4, colnames(event.file))
         colnames(attrData) <- c("Participant_Id", "Attribute")
        print(attrData)
         #get outcome data
@@ -539,7 +539,7 @@ shinyServer(function(input, output, session) {
           }
         
         outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4)
-        outLabel <- makeGroupLabel(myOut, metadata.file, out_stp1, out_stp2, out_stp3, out_stp4)
+        outLabel <- makeGroupLabel(myOut, metadata.file, out_stp1, out_stp2, out_stp3, out_stp4, colnames(event.file))
         colnames(outData) <- c("Participant_Id", "Outcome")
         print(outData)
         #merge on participant id an1d keep all prtcpnts.

@@ -662,7 +662,7 @@ shinyServer(function(input, output, session) {
             }
           }
           outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
           #add makeGroups data to df and return
           colnames(outData) <- c("Participant_Id", "FACET")
           #will need a var called label that changes based on what the facet steps are. the below only works for strings.

@@ -259,7 +259,7 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
 }
 
 #this make appropriate labels for groups created in function above    
-makeGroupLabel <- function(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4){
+makeGroupLabel <- function(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list){
   numeric <- c("lessThan", "greaterThan", "equals")
   anthro <- c("percentDays", "delta", "direct")
   label <- vector()
@@ -314,7 +314,21 @@ makeGroupLabel <- function(myFacet, metadata.file, facet_stp1, facet_stp2, facet
   } else {
     if (!any(c("POSIXct", "Date") %in% class(facet_stp1))) {
       label[1] <- facet_stp1
-      label[2] <- "Other"
+      if (label[1] == "Yes") {
+        label[2] <- "No"
+      } else if (label[1] == "No") {
+        label[2] <- "Yes"
+      } else if (label[1] == "True") {
+        label[2] <- "False"
+      } else if (label[1] == "False") {
+        label[2] <- "True"
+      } else {
+        if (myFacet %in% event.list) {
+          label[2] <- paste0("No ", facet_stp1)
+        } else {
+          label[2] <- paste0("Not ", facet_stp1)
+        }
+      }
     } else {
       label[1] <- "Within Date Range"
       label[2] <- "Outside Date Range"

@@ -540,6 +540,9 @@ shinyServer(function(input, output, session) {
           #format xaxis ticks
           if (!longitudinal %in% dates$source_id) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
+          } else {
+            df$XAXIS <- as.factor(df$XAXIS)
+            levels(df$XAXIS) <- sort(levels(df$XAXIS))
           }
 
           #plot here
@@ -961,7 +964,7 @@ shinyServer(function(input, output, session) {
               }
             }
             outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-            label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+            label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
             message(paste("label is:", label))
             message("have custom facet! now merge..")
             #add makeGroups data to df and return
@@ -1016,7 +1019,7 @@ shinyServer(function(input, output, session) {
             }
           }
           outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
-          label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+          label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = colnames(event.file))
           message(paste("label is:", label))
           if (any(colnames(event.file) %in% myGroups)) {
             naToZero(plotData, "GROUPS")
