@@ -252,9 +252,10 @@ shinyServer(function(input, output, session) {
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot)
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-        myPlotly <- layout(myPlotly, margin = list(l = 150, r = 20, b = 30, t = 20), 
+        myPlotly <- layout(myPlotly, margin = list(l = 100, r = 0, b = 30, t = 40), 
                                      xaxis = x_list, 
-                                     yaxis = y_list)
+                                     yaxis = y_list,
+                                     legend = list(x = .1, y = 100))
         
         myPlotly
       
