@@ -370,6 +370,11 @@ shinyServer(function(input, output, session) {
       if (any(colnames(singleVarData) %in% longitudinal)) {
         if (!is.null(myTimeframe)) {
           data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
+          message("subsetting data...")
+          if (nrow(data) == 0) {
+            message("data is null, returning")
+            return()
+          }
         } else {
           print("exiting for timeline problem")
           return()

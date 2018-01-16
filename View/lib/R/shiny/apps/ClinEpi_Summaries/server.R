@@ -148,10 +148,11 @@ shinyServer(function(input, output, session) {
     #remove non-unique column names and merge them to one data table to return
     drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
     #consider moving drop to event.file TODO
-    prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
+    prtcpnt.file <<- prtcpnt.file[, !drop, with = FALSE]
     
     if (exists("event.file")) {
       if (!is.null(event.file) & nrow(event.file) > 1) {
+        event.file <<- event.file[, !drop, with = FALSE]
         merge1 <- merge(event.file, prtcpnt.file, by = "Participant_Id")
         event.file.exists <<- TRUE
       } else {
@@ -740,6 +741,10 @@ shinyServer(function(input, output, session) {
         if (!is.null(myTimeframe)) {
           data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
           message("subsetting data..")
+          if (nrow(data) == 0) {
+            message("data is null, returning")
+            return()
+          }
         } else {
           print("timeline input is null")
           return()
@@ -890,6 +895,7 @@ shinyServer(function(input, output, session) {
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
 
+        message(paste("\t ", head(data)))
         plotData <- completeDT(data, myY)
         plotData <- getFinalDT(plotData, metadata.file, myY)
         

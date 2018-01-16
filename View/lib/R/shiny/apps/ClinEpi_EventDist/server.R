@@ -609,6 +609,11 @@ shinyServer(function(input, output, session) {
         if (!is.null(longitudinal)) {
           if (!is.null(myTimeframe)) {
             data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data, longitudinal)
+            message("subsetting data..")
+            if (nrow(data) == 0) {
+              message("data is null, returning")
+              return()
+            }
           }
         }
         col = 'groups'
@@ -621,6 +626,11 @@ shinyServer(function(input, output, session) {
         if (!is.null(longitudinal)) {
           if (!is.null(myTimeframe)) {
             data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
+            message("subsetting data..")
+            if (nrow(data) == 0) {
+              message("data is null, returning")
+              return()
+            }
           } 
         }
         if (myX %in% strings$source_id) {
@@ -665,19 +675,8 @@ shinyServer(function(input, output, session) {
           label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
           #add makeGroups data to df and return
           colnames(outData) <- c("Participant_Id", "FACET")
-          #will need a var called label that changes based on what the facet steps are. the below only works for strings.
-          #if (any(colnames(event.file) %in% myFacet)) {
-          #  naToZero(outData, "FACET")
-          #}
-          message(paste("levels facet:", levels(as.factor(outData$FACET))))
           outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
-          # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
-          message(paste("levels facet:", levels(as.factor(outData$FACET))))
-          print(head(data))
-          print(head(outData))
           data <- merge(data, outData, by = "Participant_Id", all = TRUE)
-          print(head(data))
-          message(paste("levels facet:", levels(as.factor(data$FACET))))
         }
       }
       
