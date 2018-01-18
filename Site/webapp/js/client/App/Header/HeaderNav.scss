@@ -12,7 +12,7 @@ $red: #DD314E;
     top: 0;
     right: 0;
     width: '160px';
-    opacity: 0.5;
+    opacity: 0.75;
   }
 
   &-Primary {
@@ -23,7 +23,7 @@ $red: #DD314E;
   }
 
   .HeaderNav-Secondary {
-    flex: 0.2;
+    flex: 0.3;
     position: relative;
     justify-content: space-between;
     flex-wrap: nowrap;
@@ -36,35 +36,9 @@ $red: #DD314E;
     flex-direction: row;
     align-items: center;
   }
-  @media (max-width: 1444px) {
-    flex-direction: column;
-    justify-content: flex-start;
-    .HeaderNav-Social {
-      margin: -10px 0 0;
-    }
-    &-Switch {
-      margin-top: -110px;
-      margin-left: 360px;
-      &-Primary, &-Secondary {
-        width: 100%;
-      }
-      .HeaderNav-Secondary {
-        margin-top: -10px;
-      }
-      .SiteMenu {
-        margin-top: 10px;
-        min-width: 500px;
-        margin-right: -20px;
-      }
-      .UserMenu {
-        margin-left: 20px;
-      }
-      flex-direction: column;
-      align-items: flex-end;
-    }
-    &-Primary {
-      order: 2;
-    }
+
+  .UserMenu {
+    padding-right: 10px;
   }
 
   &, box, row {
@@ -124,7 +98,6 @@ $red: #DD314E;
 
 .HeaderNav-Title {
   font-weight: 300;
-  // text-shadow: none;
   font-family: 'Exo 2';
 
   a, &:link, &:visited, &:hover {
@@ -165,7 +138,7 @@ $red: #DD314E;
     flex-direction: row;
     height: 100%;
     align-items: center;
-    padding-top: 20px;
+    padding-top: 16px;
     margin: 0 30px;
     .UserMenu-Icon {
       font-size: 25px;
@@ -183,9 +156,11 @@ $red: #DD314E;
     max-height: 30px;
     margin: 5px 0 0 10px;
   }
+
   .SiteMenu {
     width: auto;
-    margin-top: 4px;
+    margin: 5px 30px 0;
+    font-size: 0.9em;
 
     .SiteMenuItem {
       &:last-of-type {

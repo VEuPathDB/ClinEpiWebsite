@@ -17,10 +17,14 @@ class SearchCard extends React.Component {
   }
 
   render () {
-    const { search } = this.props;
-    const { type, study, url, description } = search;
+    const { search, prefix = '' } = this.props;
+    const { type, studyId, url, appUrl, description } = search;
 
-    const studyObj = this.getStudyById(study);
+    const href = typeof appUrl === 'string'
+      ? prefix + appUrl
+      : url;
+
+    const studyObj = this.getStudyById(studyId);
 
     const icon = getSearchIconByType(type);
     const name = getSearchNameByType(type);
@@ -28,15 +32,17 @@ class SearchCard extends React.Component {
 
     return (
       <div className={'Card LinkCard SearchCard ' + bodyClass}>
-        <box className="SearchCard-Icon">
-          <Icon fa={icon} />
-        </box>
-        <box className="SearchCard-Body">
+        <box className="SearchCard-Header">
+          <box className="SearchCard-Icon">
+            <Icon fa={icon} />
+          </box>
           <h2>{studyObj ? studyObj.name : 'Unknown Study'}</h2>
           <h3>{name}</h3>
+        </box>
+        <box className="SearchCard-Body">
           <p>{description}</p>
         </box>
-        <a href={url} className="SearchCard-Footer">
+        <a href={href} className="SearchCard-Footer">
           Explore Results <Icon fa={'chevron-circle-right'} />
         </a>
       </div>

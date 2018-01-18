@@ -11,10 +11,9 @@ export function getSearchIconByType (type = '') {
       return 'stethoscope';
     case 'vector':
     case 'vectors':
-      return 'bug';
     case 'lighttraps':
     case 'lights':
-      return 'lightbulb-o fa-rotate-180';
+      return 'bug';
     default:
       return 'globe';
   }

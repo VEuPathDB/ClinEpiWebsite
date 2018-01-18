@@ -20,9 +20,21 @@ shinyServer(function(input, output, session) {
   facetInfo <- NULL
   xaxisInfo <- NULL
   attribute.file <- NULL  
+  propUrl <- NULL
+  properties <- NULL
 
   filesFetcher <- reactive({
 
+    if (is.null(propUrl)) {
+      propUrl <<- getPropertiesUrl(session)
+      properties <<- try(fread(propUrl))
+
+      if (grepl("Error", properties)) {
+        properties <<- NULL
+      }
+    }
+    message(paste("propUrl:", propUrl))
+    
     if (is.null(attribute.file)) {
 
       attribute_temp <- try(fread(
@@ -178,10 +190,10 @@ shinyServer(function(input, output, session) {
     singleVarDataFetcher()
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
-print("checkpoint")
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType))
+
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
     
-    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis)) 
+    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), moduleName = "xaxisInfo") 
 
     titlePanel("Data Distributions")
   })
@@ -228,7 +240,6 @@ print("checkpoint")
     })
     
    output$choose_xaxis <- renderUI({
-      message("in choose_xaxis ui")
   
       if (is.null(input$plotChoice)) {
         return()
@@ -242,20 +253,40 @@ print("checkpoint")
                     choices = list('Z-score' = 'zscore', 'Age in Days' = 'ageDays'),
                     selected = 'zscore') 
       } else {
-        selectInput(inputId = "xaxis",
-                    label = "X-Axis:",
-                    choices = c("All possible" = "direct"),
-                    selected = "direct",
-                    width = '100%')
+        mySelected <- properties$selected[properties$input == "input$xaxis"]
+        
+        if (is.null(properties)) {
+          selectInput(inputId = "xaxis",
+                      label = "X-Axis:",
+                      choices = c("All possible" = "direct"),
+                      selected = "direct",
+                      width = '100%')
+        } else {
+          selectInput(inputId = "xaxis",
+                      label = "X-Axis:",
+                      choices = c("All possible" = "direct"),
+                      selected = mySelected,
+                      width = '100%')
+        }
       }
     })
     
     output$facet_type <- renderUI({
-      selectInput(inputId = "facetType",
-                  label = "Facet:",
-                  choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                  selected = "direct",
-                  width = '100%')
+      mySelected <- properties$selected[properties$input == "input$facetType"]
+
+      if (is.null(properties)) {
+        selectInput(inputId = "facetType",
+                    label = "Facet:",
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = "direct",
+                    width = '100%')
+      } else {
+        selectInput(inputId = "facetType",
+                    label = "Facet:",
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = mySelected,
+                    width = '100%')
+      }
     })
     
     groupLabel <- reactive({
@@ -490,7 +521,11 @@ print("checkpoint")
       ) 
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"))
-      myPlotly <- config(myPlotly, displaylogo = FALSE, collaborate = FALSE) %>% layout(margin = list(l = 150, r = 20, b = 150, t = 20), xaxis = x_list, yaxis = y_list)
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
+      myPlotly <- layout(myPlotly, margin = list(l = 100, r = 0, b = 150, t = 100), 
+                                   xaxis = x_list, 
+                                   yaxis = y_list,
+                                   legend = list(x = .1, y = 100))
       
       myPlotly
     })
@@ -510,6 +545,7 @@ print("checkpoint")
         return()
       }
       facetType <- input$facetType
+      xType <- input$xaxis
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
         if (is.null(xaxisInfo$group)) {
@@ -531,16 +567,57 @@ print("checkpoint")
       prevFacet <<- myFacet
       myGroups <- input$groups
       myTimeframe <- current$timeframe
-      selected <- current$longitudinal     
+      longitudinal <- current$longitudinal     
  
+      #could maybe make this a function just to improve readability 
+        #first thing is to save properties 
+        if (length(facet_stp1) > 1) {
+            text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "facetInfo$group\t", myFacet, "\n",
+                    "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
+                    "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
+                    "facetInfo$group_stp2\t", facet_stp2, "\n",
+                    "facetInfo$group_stp3\t", facet_stp3, "\n",
+                    "facetInfo$group_stp4\t", facet_stp4, "\n",
+                    "xaxisInfo$group\t", myX, "\n",
+                    "input$facetType\t", facetType, "\n",
+                    "input$xaxis\t", xType
+                   )
+        } else {
+          text <- paste0("input\tselected\n",
+                    "current$longitudinal\t", longitudinal, "\n",
+                    "current$timeframe[1]\t", myTimeframe[1], "\n",
+                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    "facetInfo$group\t", myFacet, "\n",
+                    "facetInfo$group_stp1\t", facet_stp1, "\n",
+                    "facetInfo$group_stp2\t", facet_stp2, "\n",
+                    "facetInfo$group_stp3\t", facet_stp3, "\n",
+                    "facetInfo$group_stp4\t", facet_stp4, "\n",
+                    "xaxisInfo$group\t", myX, "\n",
+                    "input$facetType\t", facetType, "\n",
+                    "input$xaxis\t", xType
+                   )
+        }
+
+      PUT(propUrl, body = "")
+      PUT(propUrl, body = text)
+
       strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
       if (plotChoice == 'groups') {
         data <- groupsDataFetcher(myGroups, myX)
         #subset data
         #which cols can be used for this will have to change. too specific right now
-        if (!is.null(selected)) {
+        if (!is.null(longitudinal)) {
           if (!is.null(myTimeframe)) {
-            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data, selected)
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], data, longitudinal)
+            message("subsetting data..")
+            if (nrow(data) == 0) {
+              message("data is null, returning")
+              return()
+            }
           }
         }
         col = 'groups'
@@ -550,9 +627,14 @@ print("checkpoint")
         data <- singleVarData
         #subset data
         #which cols can be used for this will have to change. too specific right now
-        if (!is.null(selected)) {
+        if (!is.null(longitudinal)) {
           if (!is.null(myTimeframe)) {
-            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, selected)
+            data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
+            message("subsetting data..")
+            if (nrow(data) == 0) {
+              message("data is null, returning")
+              return()
+            }
           } 
         }
         if (myX %in% strings$source_id) {
@@ -594,22 +676,11 @@ print("checkpoint")
             }
           }
           outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
           #add makeGroups data to df and return
           colnames(outData) <- c("Participant_Id", "FACET")
-          #will need a var called label that changes based on what the facet steps are. the below only works for strings.
-          #if (any(colnames(event.file) %in% myFacet)) {
-          #  naToZero(outData, "FACET")
-          #}
-          message(paste("levels facet:", levels(as.factor(outData$FACET))))
           outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
-          # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
-          message(paste("levels facet:", levels(as.factor(outData$FACET))))
-          print(head(data))
-          print(head(outData))
           data <- merge(data, outData, by = "Participant_Id", all = TRUE)
-          print(head(data))
-          message(paste("levels facet:", levels(as.factor(data$FACET))))
         }
       }
       

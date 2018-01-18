@@ -1,4 +1,8 @@
+require(shiny)
+require(data.table)
 require(plotly)
+require(viridisLite)
+require(httr)
 source("../../lib/wdkDataset.R")
 source("config.R")
 source("../../lib/ebrc_functions.R")
