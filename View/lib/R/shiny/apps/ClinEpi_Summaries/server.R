@@ -69,9 +69,9 @@ shinyServer(function(input, output, session) {
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if (colnames(attributes.file)[1] == 'Participant_Id') {
-          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
         } else {
-          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
       } 
 
@@ -549,7 +549,7 @@ shinyServer(function(input, output, session) {
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
           myPlot <- myPlot + theme_bw()
-          myPlot <- myPlot + labs(y = ylab, x = xlab)
+          myPlot <- myPlot + labs(y = "", x = "")
           message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion" | plotType == "count") {
@@ -658,10 +658,10 @@ shinyServer(function(input, output, session) {
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
         #myPlotly <- ggplotly(myPlot)
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-        myPlotly <- layout(myPlotly, margin = list(l = 100, r = 0, b = 150, t = 100),
+        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = list(x = .1, y = 100))
+                                     legend = list(x = 100, y = .5))
         
         myPlotly
       
@@ -980,9 +980,9 @@ shinyServer(function(input, output, session) {
             #add makeGroups data to df and return
             colnames(outData) <- c("Participant_Id", "FACET")
             #will need a var called label that changes based on what the facet steps are. the below only works for strings.
-            if (any(colnames(event.file) %in% myFacet)) {
-              naToZero(outData, "FACET")
-            }
+            #if (any(colnames(event.file) %in% myFacet)) {
+             # naToZero(outData, "FACET")
+            #}
             message(paste("levels facet:", levels(as.factor(outData$FACET))))
             outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
            # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
@@ -1047,10 +1047,8 @@ shinyServer(function(input, output, session) {
     }), 2000)
       
     plotData <- reactive({  
-      message("just before tableData call")
         plotData <- tableData()
         if (is.null(plotData)) {
-          message("oh no! tableData returned null!")
           return()
         } else {
           #collecting inputs .. i think these are the only ones i need here.. well see
@@ -1063,9 +1061,8 @@ shinyServer(function(input, output, session) {
           }
           yaxis_stp1 <- input$yaxis_stp1
           
-          strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
+          strings <- getStrings(metadata.file)
         
-        message("and format rest of data .. being lazy and not including custom messages with each step :(")
         #prepare for return
         
         #determine necessary column id vectors before start
@@ -1106,7 +1103,10 @@ shinyServer(function(input, output, session) {
         if (myY %in% strings$source_id) {
           #will have to replace all instances of myY with 1 and all else with 0 before can sum
           plotData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp1, 1, 0))
-          mergeData <- aggregate(as.formula(aggStr1), plotData, sum)
+          #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
+          tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, sum)
+          tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
+          mergeData <- aggregate(as.formula(aggStr1), tempData, sum) 
           if (yaxis_stp2 == "proportion") {
             groupSum <- as.data.table(aggregate(as.formula(aggStr2), plotData, FUN = function(x){length(unique(x))}))
             colnames(groupSum) <- sumCols

@@ -44,11 +44,11 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     
     if (is.null(properties)) {
       selectInput(inputId = ns("longitudinal"),
-                  label = "Longitudinal Variable:",
+                  label = "Select Time/Age Variable:",
                   choices = mylist)
     } else {
       selectInput(inputId = ns("longitudinal"),
-                  label = "Longitudinal Variable:",
+                  label = "Select Time/Age Variable:",
                   choices = mylist,
                   selected = properties$selected[properties$input == "current$longitudinal"])
     }

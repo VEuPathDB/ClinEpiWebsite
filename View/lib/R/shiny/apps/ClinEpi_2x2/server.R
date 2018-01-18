@@ -61,9 +61,9 @@ shinyServer(function(input, output, session) {
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if (colnames(attributes.file)[1] == 'Participant_Id') {
-          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
         } else {
-          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
       }
     }
@@ -252,10 +252,10 @@ shinyServer(function(input, output, session) {
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot)
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-        myPlotly <- layout(myPlotly, margin = list(l = 100, r = 0, b = 30, t = 40), 
+        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 30, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = list(x = .1, y = 100))
+                                     legend = list(x = 100, y = .5))
         
         myPlotly
       
