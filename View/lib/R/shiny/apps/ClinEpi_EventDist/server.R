@@ -22,6 +22,7 @@ shinyServer(function(input, output, session) {
   attribute.file <- NULL  
   propUrl <- NULL
   properties <- NULL
+  plotChoice <- 'singleVar'
 
   filesFetcher <- reactive({
 
@@ -193,20 +194,16 @@ shinyServer(function(input, output, session) {
 
     facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
     
-    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), moduleName = "xaxisInfo") 
+    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo") 
 
     titlePanel("Data Distributions")
   })
   
     output$choose_groups <- renderUI({
-      if (is.null(input$plotChoice)) {
-        return()
-      }
       if (is.null(input$xaxis)) {
         return()
       }
       myX <- input$xaxis
-      plotChoice <- input$plotChoice
       
       if (plotChoice == 'groups'){
         if (myX == 'zscore') {
@@ -240,11 +237,6 @@ shinyServer(function(input, output, session) {
     })
     
    output$choose_xaxis <- renderUI({
-  
-      if (is.null(input$plotChoice)) {
-        return()
-      }
-      plotChoice <- input$plotChoice
       
       if (plotChoice == 'groups') {
         #getXList(plotChoice)
@@ -412,9 +404,6 @@ shinyServer(function(input, output, session) {
       if (is.null(input$xaxis)) {
         return()
       }
-      if (is.null(input$plotChoice)) {
-        return()
-      }
       if (is.null(input$facetType)) {
         return()
       }
@@ -426,7 +415,6 @@ shinyServer(function(input, output, session) {
           myX <- xaxisInfo$group
         }
       }
-      plotChoice <- input$plotChoice
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
@@ -451,7 +439,8 @@ shinyServer(function(input, output, session) {
         xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
         xlab <- as.character(xlab[1,2])
       }
-      
+     message(paste("colnames:", colnames(df)))
+     message(paste("taste df: ", head(df))) 
       myPlot <- ggplot(data = df, aes_string(x = myX))
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
@@ -538,9 +527,6 @@ shinyServer(function(input, output, session) {
       if (is.null(input$xaxis)) {
         return()
       }
-      if (is.null(input$plotChoice)) {
-        return()
-      }
       if (is.null(input$facetType)) {
         return()
       }
@@ -554,7 +540,6 @@ shinyServer(function(input, output, session) {
           myX <- xaxisInfo$group
         }
       }
-      plotChoice <- input$plotChoice
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
@@ -685,7 +670,11 @@ shinyServer(function(input, output, session) {
       }
      
       if (!myX %in% colnames(event.file)) {
-        myCols <- c("Participant_Id", myX, myFacet, myGroups)
+        if (myX == myFacet) {
+          myCols <- c("Participant_Id", myX)
+        } else {
+          myCols <- c("Participant_Id", myX, myFacet)
+        }
         data <- data[, myCols, with = FALSE]
         data <- unique(data)
       }

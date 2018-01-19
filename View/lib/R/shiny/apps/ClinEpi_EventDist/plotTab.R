@@ -8,14 +8,14 @@ plot <-  tabPanel("Plot", fluid = TRUE,
                )
              ),
              fluidRow(
-               column(3,
-                      selectInput(inputId = "plotChoice",
-                                  label = "Choose plot to generate:",
-                                  choices = list('Single Variable' = 'singleVar'),# 'Multi Variable' = 'groups'),
-                                  selected = "singleVar"),
-                      uiOutput("choose_groups")
-               ),
-               column(4, offset = 1,
+               #column(3,
+               #       selectInput(inputId = "plotChoice",
+               #                   label = "Choose plot to generate:",
+               #                   choices = list('Single Variable' = 'singleVar'),# 'Multi Variable' = 'groups'),
+               #                   selected = "singleVar"),
+               #       uiOutput("choose_groups")
+               #),
+               column(6,
                       column(12,
                              fluidRow(
                                uiOutput("choose_xaxis")
@@ -28,7 +28,7 @@ plot <-  tabPanel("Plot", fluid = TRUE,
                       )
                       #uiOutput("choose_range")
                ),
-               column(4,
+               column(6,
                       column(12,
                              fluidRow(
                                uiOutput("facet_type")
