@@ -5285,9 +5285,9 @@ a.thumbnail.active {
   background: #428bca ;
 }
 .irs-bar {
-  background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);
-  border-top: 1px solid #CCC ;
-  border-bottom: 1px solid #CCC ;
+  background: #428bca ;
+  border-top: 1px solid #428bca ;
+  border-bottom: 1px solid #428bca ;
 }
 .irs-bar-edge {
   background: inherit ;

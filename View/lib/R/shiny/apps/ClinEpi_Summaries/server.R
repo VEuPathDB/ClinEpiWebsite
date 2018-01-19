@@ -408,14 +408,14 @@ shinyServer(function(input, output, session) {
       if (dontUseProps) {      
         if (!myY %in% nums$source_id) {
           selectInput(inputId = "yaxis_stp1",
-                      label = "for",
+                      label = NULL,
                       choices = attrStp1List,
                       width = '100%') 
         }
       } else {
         if (!myY %in% nums$source_id) {
           selectInput(inputId = "yaxis_stp1",
-                      label = "for",
+                      label = NULL,
                       choices = attrStp1List,
                       selected = mySelected,
                       width = '100%')
@@ -553,6 +553,7 @@ shinyServer(function(input, output, session) {
           message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion" | plotType == "count") {
+            myPlot <- myPlot + geom_point()
             myPlot <- myPlot + geom_line(size = 1)
           } else if (plotType == "mean") {
             message("plotting mean")

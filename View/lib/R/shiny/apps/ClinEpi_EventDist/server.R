@@ -683,7 +683,13 @@ shinyServer(function(input, output, session) {
           data <- merge(data, outData, by = "Participant_Id", all = TRUE)
         }
       }
-      
+     
+      if (!myX %in% colnames(event.file)) {
+        myCols <- c("Participant_Id", myX, myFacet, myGroups)
+        data <- data[, myCols, with = FALSE]
+        data <- unique(data)
+      }
+ 
       data
       
     }), 2000)
