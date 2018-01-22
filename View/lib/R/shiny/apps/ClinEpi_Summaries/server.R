@@ -238,13 +238,13 @@ shinyServer(function(input, output, session) {
         if (!is.null(longitudinal)) {
           selectInput(inputId = "groupsType",
                       label = "Facet Line:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "groupsType",
                       label = "X-Axis:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         }
@@ -252,13 +252,13 @@ shinyServer(function(input, output, session) {
         if (!is.null(longitudinal)) {
           selectInput(inputId = "groupsType",
                       label = "Facet Line:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = mySelected,
                       width = '100%')
         } else {
           selectInput(inputId = "groupsType",
                       label = "X-Axis:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = mySelected,
                       width = '100%')
         }
@@ -859,6 +859,10 @@ shinyServer(function(input, output, session) {
           if (is.null(groups_stp1)) {
             go <- FALSE
           }
+        } else if (groupsType == "direct") {
+          if (is.null(myGroups)) {
+            return()
+          }
         } 
       }
       if (is.null(facetType)) {
@@ -880,9 +884,6 @@ shinyServer(function(input, output, session) {
         }
       }
       if (is.null(yaxis_stp2)) {
-        go <- FALSE
-      }
-      if (is.null(myGroups)) {    
         go <- FALSE
       }
       
@@ -1120,18 +1121,20 @@ shinyServer(function(input, output, session) {
                 }
               }
             }
+            outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+            label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = colnames(event.file))
+            message(paste("label is:", label))
+            if (any(colnames(event.file) %in% myGroups)) {
+              naToZero(plotData, "GROUPS")
+            }
+            message("have custom groups! now merge..")
+            #add makeGroups data to df and return
+            outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
+            plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
+            print("NA in groups:", any(is.na(plotData$GROUPS)))
+          } else {
+            plotData <- cbind(plotData, "GROUPS" = "All Participants")
           }
-          outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
-          label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = colnames(event.file))
-          message(paste("label is:", label))
-          if (any(colnames(event.file) %in% myGroups)) {
-            naToZero(plotData, "GROUPS")
-          }
-          message("have custom groups! now merge..")
-          #add makeGroups data to df and return
-          outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
-          plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
-          print("NA in groups:", any(is.na(plotData$GROUPS)))
         }
         plotData
       }
