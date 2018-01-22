@@ -516,7 +516,7 @@ shinyServer(function(input, output, session) {
 
       #will need to change first arg based on all possible or makeGroups
       tableData <- aggregate(as.formula(aggStr), data, FUN = function(x){length(unique(x))})
-      mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4))
+      mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
       tableData <- merge(tableData, mean, by = myFacet)
       median <- aggregate(as.formula(aggStr2), data, median)
       tableData <- merge(tableData, median, by = myFacet)
