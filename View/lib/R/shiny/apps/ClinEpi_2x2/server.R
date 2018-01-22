@@ -11,7 +11,7 @@ shinyServer(function(input, output, session) {
   attributes.file <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
-  longitudinal <- NULL
+  longitudinal.file <- NULL
   current <- NULL
   attrInfo <- NULL
   outInfo <- NULL
@@ -93,10 +93,10 @@ shinyServer(function(input, output, session) {
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
    
-    longitudinal <<- fread("../../lib/longitudinal.tab")
-    longitudinal <<- longitudinal[longitudinal$dataset_name == datasetName]  
-    longitudinal <<- setDT(longitudinal)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))), 
-                        by = setdiff(names(longitudinal), "columns")][!is.na(longitudinal$columns)]    
+    longitudinal.file <<- fread("../../lib/longitudinal.tab")
+    longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]  
+    longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))), 
+                        by = setdiff(names(longitudinal.file), "columns")][!is.na(longitudinal.file$columns)]    
 
     if (grepl("Error", prtcpnt_temp[1])){
       stop("Error: Participant file missing or unreadable!")
@@ -176,7 +176,7 @@ shinyServer(function(input, output, session) {
   output$title <- renderUI({
     singleVarDataFetcher()
 
-    current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
   
     attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
  
@@ -353,8 +353,10 @@ shinyServer(function(input, output, session) {
       #test <- propText()    
   
       #collecting inputs 
-      myTimeframe <- current$timeframe
-      longitudinal <- current$longitudinal
+      longitudinal1 <- current$var1
+      myTimeframe1 <- current$range1
+      longitudinal2 <- current$var2
+      myTimeframe2 <- current$range2
       if (is.null(attrInfo$group)) {
         message("attr group is null")
         return()
@@ -371,23 +373,29 @@ shinyServer(function(input, output, session) {
       }
       print("have attr and out info")
       #subset data
-      #which cols can be used for this will have to change. too specific right now
-      if (any(colnames(singleVarData) %in% longitudinal)) {
-        if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
-          message("subsetting data...")
+      if (!is.null(longitudinal1)) {
+        if (!is.null(myTimeframe1)) {
+          data <- subsetDataFetcher(myTimeframe1[1], myTimeframe1[2], singleVarData, longitudinal1)
+          message("subsetting data by first longitudinal variable..")
           if (nrow(data) == 0) {
-            message("data is null, returning")
+            message("subset failed, returning")
             return()
           }
-        } else {
-          print("exiting for timeline problem")
-          return()
+        }
+        if (!is.null(longitudinal2)) {
+          if (!is.null(myTimeframe2)) {
+            data <- subsetDataFetcher(myTimeframe2[1], myTimeframe2[2], data, longitudinal2)
+            message("subsetting data by second longitudinal variable..")
+            if (nrow(data) == 0) {
+              message("subset failed, returning")
+              return()
+            }
+          }
         }
       } else {
         data <- singleVarData
       }
-  
+ 
       go <- TRUE
       
       if (is.null(outInfo$group_stp1) | is.null(attrInfo$group_stp1)) {
@@ -409,13 +417,18 @@ shinyServer(function(input, output, session) {
         attr_stp4 <- attrInfo$group_stp4
   
         #could maybe make this a function just to improve readability 
-        #first thing is to save properties 
+        #first thing is to save properties
+        longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
+                                 "current$range1[1]\t", myTimeframe1[1], "\n",
+                                 "current$range1[2]\t", myTimeframe1[2], "\n",
+                                 "current$var2\t", longitudinal2, "\n",
+                                 "current$range2[1]\t", myTimeframe2[1], "\n",
+                                 "current$range2[2]\t", myTimeframe2[2], "\n") 
+  
         if (length(attr_stp1) > 1) {
           if (length(out_stp1) > 1) {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText, 
                     "attrInfo$group\t", myAttr, "\n",
                     "attrInfo$group_stp1[1]\t", attr_stp1[1], "\n",
                     "attrInfo$group_stp1[2]\t", attr_stp1[2], "\n",
@@ -431,9 +444,7 @@ shinyServer(function(input, output, session) {
                    )
           } else {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "attrInfo$group\t", myAttr, "\n",
                     "attrInfo$group_stp1[1]\t", attr_stp1[1], "\n",
                     "attrInfo$group_stp1[2]\t", attr_stp1[2], "\n",
@@ -450,9 +461,7 @@ shinyServer(function(input, output, session) {
         } else {
           if (length(out_stp1) > 1) {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "attrInfo$group\t", myAttr, "\n",
                     "attrInfo$group_stp1\t", attr_stp1, "\n",
                     "attrInfo$group_stp2\t", attr_stp2, "\n",
@@ -467,9 +476,7 @@ shinyServer(function(input, output, session) {
                    )
           } else {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "attrInfo$group\t", myAttr, "\n",
                     "attrInfo$group_stp1\t", attr_stp1, "\n",
                     "attrInfo$group_stp2\t", attr_stp2, "\n",
