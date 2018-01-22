@@ -226,11 +226,15 @@ sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
   my $rAdjustString = << 'RADJUST';
-  profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
-  profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-  profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse((grepl("not", STATUS) | grepl("patent", STATUS)), "green", "blue")));
-  profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), NA));
-  profile.df.full$FILL = as.factor(profile.df.full$FILL);
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+profile.df.full$STATUS[profile.df.full$STATUS == "Blood smear not indicated"] <- NA
+profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "1", ifelse((grepl("LAMP not done", STATUS) | grepl("patent", STATUS)), "2", "3")));
+profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("patent",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), ifelse(grepl("microscopic",STATUS),"3",NA)));
+colors <- magma(3, end = .9, begin = .3)
+#profile.df.full = transform(profile.df.full, "COLOR"=ifelse(grepl("malaria", STATUS), "6", ifelse(STATUS == 'Blood smear not indicated', "1", ifelse(grepl("LAMP positive", STATUS), "4", ifelse(STATUS == 'Asymptomatic patent parasitemia', "5", ifelse(STATUS == 'Negative blood smear and LAMP not done', "2", "3"))))))
+#profile.df.full = transform(profile.df.full, "SHAPE"=ifelse(OPT_STATUS == 'Yes', "full", "half"))
+profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
 RADJUST
 
   $profile->addAdjustProfile($rAdjustString);
