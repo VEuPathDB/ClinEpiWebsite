@@ -6,7 +6,8 @@ shinyUI(
    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
-              "#distribution{height:90vh !important;}"
+              "#distribution{height:90vh !important;}",
+              ".dataTable {border: none;}"
    ),
    tags$head(tags$style(
      HTML(".js-irs-0 .irs-line-left {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),

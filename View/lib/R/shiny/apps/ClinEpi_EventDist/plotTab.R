@@ -42,6 +42,8 @@ plot <-  tabPanel("Plot", fluid = TRUE,
                )
              ),
              hr(),
+             DT::dataTableOutput("table"),
+             hr(),
              plotlyOutput("distribution")
           )
         )

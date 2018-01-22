@@ -70,6 +70,9 @@ shinyServer(function(input, output, session) {
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if (colnames(attributes.file)[1] == 'Participant_Id') {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
         } else {
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
@@ -195,7 +198,7 @@ shinyServer(function(input, output, session) {
 
     groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
 
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
 
     titlePanel("Data Summaries")
   })
@@ -243,7 +246,7 @@ shinyServer(function(input, output, session) {
         selectInput(inputId = "facetType",
                     label = "Facet Plot:",
                     choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                    selected = "none",
+                    selected = "direct",
                     width = '100%')
       } else {
         selectInput(inputId = "facetType",
@@ -351,14 +354,33 @@ shinyServer(function(input, output, session) {
       }
       
       if (groupsType == "direct") {
-        selected <- "EUPATH_0000744"
+        selected <- "EUPATH_0000054"
       } else {
-        selected <- "EUPATH_0000704"
+        selected <- "EUPATH_0000054"
       }  
       
       return(selected)
     })
 
+    selectedFacet <- reactive({
+      if (is.null(input$facetType)) {
+        return()
+      } else {
+        facetType <- input$facetType
+      }
+
+      if (facetType == "direct") {
+        #selected <- "custom"
+        selected <- "custom"
+      } else if (facetType == "makeGroups") {
+        selected <- "EUPATH_0000054"
+      } else {
+        selected <- ""
+      }
+
+      return(selected)
+    }) 
+ 
     output$choose_yaxis <- renderUI({
       mySelected <- properties$selected[properties$input == "input$yaxis"]
 
@@ -374,7 +396,7 @@ shinyServer(function(input, output, session) {
         selectInput(inputId = "yaxis",
                     label = "Y-Axis:",
                     choices = outChoiceList,
-                    selected = "EUPATH_0000689",
+                    selected = "EUPATH_0000338",
                     width = '100%')
       } else {
         selectInput(inputId = "yaxis",
@@ -681,7 +703,10 @@ shinyServer(function(input, output, session) {
         colnames(data)[1] <- "Line"
         colnames(data) <- gsub("Participant_Id.", "# Participants: ", colnames(data))
         #give totals
-        data[, "Totals"] <- rowSums(data[, -1], na.rm=TRUE)
+        message(paste("length data:", length(data)))
+        if (length(data) > 2) {
+          data[, "Totals"] <- rowSums(data[, -1], na.rm=TRUE)
+        }
         rownames(data) <- data[,1]
         data[,1] <- NULL
         data["Totals" ,] <- colSums(data, na.rm=TRUE)

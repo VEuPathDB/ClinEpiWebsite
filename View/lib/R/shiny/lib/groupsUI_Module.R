@@ -32,7 +32,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("EUPATH_0000704"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName) {
   ns <- session$ns
 
   propUrl <- getPropertiesUrl(session)
@@ -95,11 +95,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(properties)) {
       dontUseProps <- TRUE
     } else {
-      if (!is.null(groupsType())) {
-        if (groupsTypeSelected != groupsType()) {
-          dontUseProps <- TRUE
+        if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
+          if (groupsTypeSelected != groupsType()) {
+            dontUseProps <- TRUE
+          }
         }
-      }
     }
  
     if (dontUseProps) {
@@ -147,9 +147,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       if (myGroupSelected != myGroup) {
         dontUseProps <- TRUE
       }
-      if (!is.null(groupsTypeSelected)) {
-        if (groupsType() != groupsTypeSelected & myGroup %in% dates$source_id) {
-          dontUseProps <- TRUE
+      if (!is.null(groupsTypeID)) {
+        if (!is.null(groupsTypeSelected)) {
+          if (groupsType() != groupsTypeSelected & myGroup %in% dates$source_id) {
+            dontUseProps <- TRUE
+          }
         }
       }
     }

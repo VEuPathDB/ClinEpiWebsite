@@ -62,6 +62,9 @@ shinyServer(function(input, output, session) {
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if (colnames(attributes.file)[1] == 'Participant_Id') {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
         } else {
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
@@ -175,10 +178,10 @@ shinyServer(function(input, output, session) {
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
   
-    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000704"), moduleName = "attrInfo")
+    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
  
-    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000665"), moduleName = "outInfo") 
-    print("done with modules")
+    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000054"), moduleName = "outInfo") 
+
     titlePanel("Contingency Tables")
   }) 
   
@@ -266,6 +269,7 @@ shinyServer(function(input, output, session) {
       if (is.null(data)) {
         return()
       }
+
       data$rownames <- NULL
       datatable(data, 
                 width = '100%',
@@ -579,7 +583,18 @@ shinyServer(function(input, output, session) {
         colnames(tableData) <- c(outLabel[1], outLabel[2], "Totals")
         rownames(tableData) <- c(attrLabel[1], attrLabel[2], "Totals")
         tableData$rownames <- c(attrLabel[1], attrLabel[2], "Totals")
-        print(tableData)
+
+        if (all(sort(colnames(tableData)) == c("No", "rownames", "Totals", "Yes"))) {
+          setcolorder(tableData, c("Yes", "No", "Totals", "rownames")) 
+        }
+        if (all(sort(rownames(tableData)) == c("No", "Totals", "Yes"))) {
+          setroworder(tableData, c(2,1,3))
+          rownames(tableData) <- c("Yes", "No", "Totals")
+          tableData$rownames <- c("Yes", "No", "Totals")
+        }
+        message(colnames(tableData))
+        message(rownames(tableData))
+        message(tableData)
         tableData
       } 
       

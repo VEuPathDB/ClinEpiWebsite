@@ -1,5 +1,6 @@
 require(shiny)
 require(data.table)
+require(DT)
 require(plotly)
 require(viridisLite)
 require(httr)

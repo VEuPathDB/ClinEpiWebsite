@@ -71,6 +71,9 @@ shinyServer(function(input, output, session) {
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if (colnames(attributes.file)[1] == 'Participant_Id') {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
         } else {
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
@@ -192,9 +195,9 @@ shinyServer(function(input, output, session) {
 
     current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
 
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
-    
     xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo") 
+
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
 
     titlePanel("Data Distributions")
   })
@@ -302,31 +305,13 @@ shinyServer(function(input, output, session) {
       #temporary until i figure out how to plot histograms with dates in plotly
       dates <- getDates(metadata.file)$source_id
       
-      #if (groupsType == "direct") {
-      #  if (length(dates > 0)) {
-       #   ptmp <- prtcpnt.file[, -dates, with=FALSE]
-      #  } else {
-      #    ptmp <- prtcpnt.file
-      #  }
-      #  if (house.file.exists) {
-       #   if (length(dates > 0)) {
-      #      htmp <- house.file[, -dates, with=FALSE]
-      #    } else {
-      #      htmp <- house.file
-      #    }
-       #   useData <- list(ptmp, htmp)
-       # } else {
-      #    useData <- list(ptmp)
-      #  }
-      #} else {
-        if (length(dates > 0)) {
-          stmp <- singleVarData[, -dates, with=FALSE]
-        } else {
-          stmp <- singleVarData
-        }
-        useData <- list(stmp)
-      #}  
-      
+      if (length(dates > 0)) {
+        stmp <- singleVarData[, -dates, with=FALSE]
+      } else {
+        stmp <- singleVarData
+      }
+      useData <- list(stmp)
+            
       return(useData)
     })
     
@@ -338,14 +323,33 @@ shinyServer(function(input, output, session) {
       }
       
       if (groupsType == "direct") {
-        selected <- "EUPATH_0000744"
+        selected <- "EUPATH_0000338"
       } else {
-        selected <- "EUPATH_0000704"
+        selected <- "EUPATH_0000338"
       }  
       
       return(selected)
     })
-    
+   
+    selectedFacet <- reactive({
+      if (is.null(input$facetType)) {
+        return()
+      } else {
+        facetType <- input$facetType
+      }
+
+      if (facetType == "direct") {
+        #selected <- "custom"
+        selected <- "custom"
+      } else if (facetType == "makeGroups") {
+        selected <- "EUPATH_0000054"
+      } else {
+        selected <- ""
+      }
+
+      return(selected)
+    })
+ 
     facetLabel <- reactive({
       if (is.null(input$facetType)) {
         return()
@@ -383,22 +387,6 @@ shinyServer(function(input, output, session) {
       return(useData)
     })
     
-    selectedFacet <- reactive({
-      if (is.null(input$facetType)) {
-        return()
-      } else {
-        groupsType <- input$facetType
-      }
-      
-      if (groupsType == "direct") {
-        selected <- "EUPATH_0000452"
-      } else {
-        selected <- "EUPATH_0000704"
-      }  
-      
-      return(selected)
-    })
-    
     output$distribution <- renderPlotly({
       message("render plot!")
       if (is.null(input$xaxis)) {
@@ -420,7 +408,7 @@ shinyServer(function(input, output, session) {
       } else {
         myFacet <- facetInfo$group
       }
-      facetType = input$facetType
+      facetType <- input$facetType
       #should switch to same setup as in other two.. use plotData()
       df <- plotData()
    
@@ -439,8 +427,7 @@ shinyServer(function(input, output, session) {
         xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
         xlab <- as.character(xlab[1,2])
       }
-     message(paste("colnames:", colnames(df)))
-     message(paste("taste df: ", head(df))) 
+
       myPlot <- ggplot(data = df, aes_string(x = myX))
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
@@ -472,21 +459,13 @@ shinyServer(function(input, output, session) {
         } else {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-          if(length(levels(as.factor(df[[myX]]))) < 7) {
-            if (facetType == 'direct') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
-              # scale_fill_brewer(palette = cbPalette)
-            } else if (facetType == 'makeGroups') {
-              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
-            }
-          } else {
-            if (facetType == 'direct') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
-              # scale_fill_brewer(palette = cbPalette)
-            } else if (facetType == 'makeGroups') {
-              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
-            }
+          if (facetType == 'direct') {
+            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
+            # scale_fill_brewer(palette = cbPalette)
+          } else if (facetType == 'makeGroups') {
+            myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
           }
+          myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
       }
             
@@ -511,7 +490,7 @@ shinyServer(function(input, output, session) {
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40), 
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                                    xaxis = x_list, 
                                    yaxis = y_list,
                                    legend = list(x = 100, y = .5))
@@ -519,6 +498,36 @@ shinyServer(function(input, output, session) {
       myPlotly
     })
 
+    output$table <- DT::renderDataTable({
+      data <- plotData()
+      if (is.null(data)) {
+        return()
+      }
+      myFacet <- facetInfo$group
+      myX <- xaxisInfo$group  
+ 
+      if ("FACET" %in% colnames(data)) {
+        aggStr <- "Participant_Id ~ FACET"
+        aggStr2 <- "myX ~ FACET"
+      } else {
+        aggStr <- paste0("Participant_Id ~ ", myFacet)
+        aggStr2 <- paste0("Participant_Id ~", myFacet)
+      }
+
+      #will need to change first arg based on all possible or makeGroups
+      tableData <- aggregate(as.formula(aggStr), data, FUN = function(x){length(unique(x))})
+      mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4))
+      tableData <- merge(tableData, mean, by = myFacet)
+      median <- aggregate(as.formula(aggStr2), data, median)
+      tableData <- merge(tableData, median, by = myFacet)
+      colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median")
+
+      datatable(tableData,
+                width = '100%',
+                rownames = FALSE
+      )
+    })
+    
     
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #datagrabbed through reactive expression for better control of reactive context
@@ -668,17 +677,19 @@ shinyServer(function(input, output, session) {
           data <- merge(data, outData, by = "Participant_Id", all = TRUE)
         }
       }
-     
-      if (!myX %in% colnames(event.file)) {
+    
+      if ("FACET" %in% colnames(data)) {
+        myCols <- c("Participant_Id", myX, "FACET") 
+      } else {
         if (myX == myFacet) {
           myCols <- c("Participant_Id", myX)
         } else {
           myCols <- c("Participant_Id", myX, myFacet)
         }
-        data <- data[, myCols, with = FALSE]
-        data <- unique(data)
       }
- 
+      data <- data[, myCols, with = FALSE]
+      data <- unique(data)
+
       data
       
     }), 2000)

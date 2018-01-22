@@ -65,9 +65,6 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       myMax <- max(tempDF[[selected]]) 
       mySelected <- properties$selected[properties$input == "current$longitudinal"]
       
-      message(paste("current selection:", selected))
-      message(paste("former selection:", mySelected))
-  
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
@@ -78,11 +75,9 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       }
 
       if (dontUseProps) {
-        message("making from new")
         sliderInput(ns("timeframe"), "Timeframe:",
                     min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
       } else {
-        message("making from props")
         dates <- getDates(metadata.file)
         selectedMin <- properties$selected[properties$input == "current$timeframe[1]"]
         selectedMax <- properties$selected[properties$input == "current$timeframe[2]"]
