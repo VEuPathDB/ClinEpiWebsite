@@ -401,6 +401,17 @@ shinyServer(function(input, output, session) {
       if (is.null(outInfo$group_stp1) | is.null(attrInfo$group_stp1)) {
         print("out or attr stp1 is null")
         go <- FALSE
+      } else {
+        if (outInfo$group_stp1 == 'any' | outInfo$group_stp1 == 'all') {
+          if (is.null(outInfo$group_stp2)) {
+            go <- FALSE
+          }
+        }
+        if (attrInfo$group_stp1 == 'any' | attrInfo$group_stp1 == 'all') {
+          if (is.null(attrInfo$group_stp2)) {
+            go <- FALSE
+          }
+        }
       }
      
       #once last field is populated .. GO

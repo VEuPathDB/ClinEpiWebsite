@@ -374,16 +374,19 @@ shinyServer(function(input, output, session) {
         facetType <- input$facetType
       }
       
-      #if (facetType == "direct") {
-      #  if (house.file.exists) {
-      #    useData <- list(prtcpnt.file, house.file)
-      #  } else {
-      #    useData <- list(prtcpnt.file)
-      #  }
-      #} else {
+      if (facetType == "direct") {
+        dates <- getDates(metadata.file)$source_id
+        ptmp <- prtcpnt.file[, !dates, with = FALSE]
+        if (house.file.exists) {
+          htmp <- house.file[, !dates, with = FALSE]
+          useData <- list(ptmp, htmp)
+        } else {
+          useData <- list(ptmp)
+        }
+      } else {
         useData <- list(singleVarData)
-      #}
-      
+      }     
+ 
       return(useData)
     })
     
@@ -505,22 +508,26 @@ shinyServer(function(input, output, session) {
       }
       myFacet <- facetInfo$group
       myX <- xaxisInfo$group  
- 
       if ("FACET" %in% colnames(data)) {
-        aggStr <- "Participant_Id ~ FACET"
-        aggStr2 <- "myX ~ FACET"
-      } else {
-        aggStr <- paste0("Participant_Id ~ ", myFacet)
-        aggStr2 <- paste0("Participant_Id ~", myFacet)
+        myFacet <- "FACET"
       }
+ 
+      nums <- getNums(metadata.file)$source_id
+
+      aggStr <- paste0("Participant_Id ~ ", myFacet)
+      aggStr2 <- paste0(myX, " ~", myFacet)
 
       #will need to change first arg based on all possible or makeGroups
       tableData <- aggregate(as.formula(aggStr), data, FUN = function(x){length(unique(x))})
-      mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
-      tableData <- merge(tableData, mean, by = myFacet)
-      median <- aggregate(as.formula(aggStr2), data, median)
-      tableData <- merge(tableData, median, by = myFacet)
-      colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median")
+      if (myX %in% nums) {
+        mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
+        tableData <- merge(tableData, mean, by = myFacet)
+        median <- aggregate(as.formula(aggStr2), data, median)
+        tableData <- merge(tableData, median, by = myFacet)
+        colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median")
+      } else {
+        colnames(tableData) <- c("Facets", "# Participants")
+      }
 
       datatable(tableData,
                 width = '100%',
@@ -565,13 +572,33 @@ shinyServer(function(input, output, session) {
       longitudinal1 <- current$var1
       longitudinal2 <- current$var2
  
+      if (is.null(facetType)) {
+        return()
+      } else {
+        if (facetType == "makeGroups") {
+          if (is.null(facet_stp1)) {
+            return()
+          } else {
+            if (facet_stp1 == 'any' | facet_stp1 == 'all') {
+              if (is.null(facet_stp2)) {
+                return()
+              }
+            }
+          } 
+        } else if (facetType == "direct") {
+          if (is.null(myFacet)) {
+            return()
+          }
+        } 
+      }
+
       #could maybe make this a function just to improve readability
       #first thing is to save properties 
-      if (length(facet_stp1 > 1)) {
+      if (length(facet_stp1) > 1) {
         facetText <- paste0("facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
                             "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n")
       } else {
-        facetText <- paste0("facetInfo$group\t", myFacet, "\n")
+        facetText <- paste0("facetInfo$group_stp1\t", facet_stp1, "\n")
       }      
  
       longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
@@ -584,7 +611,7 @@ shinyServer(function(input, output, session) {
       text <- paste0("input\tselected\n",
                      longitudinalText,
                      facetText,
-                     "facetInfo$group_stp1\t", facet_stp1, "\n",
+                     "facetInfo$group\t", myFacet, "\n",
                      "facetInfo$group_stp2\t", facet_stp2, "\n",
                      "facetInfo$group_stp3\t", facet_stp3, "\n",
                      "facetInfo$group_stp4\t", facet_stp4, "\n",

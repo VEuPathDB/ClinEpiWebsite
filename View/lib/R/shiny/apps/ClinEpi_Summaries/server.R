@@ -858,7 +858,13 @@ shinyServer(function(input, output, session) {
         if (groupsType == "makeGroups") {
           if (is.null(groups_stp1)) {
             go <- FALSE
-          }
+          } else {
+            if (groups_stp1 == 'any' | groups_stp1 == 'all') {
+              if (is.null(groups_stp2)) {
+                go <- FALSE
+              }
+            }
+          }         
         } else if (groupsType == "direct") {
           if (is.null(myGroups)) {
             return()

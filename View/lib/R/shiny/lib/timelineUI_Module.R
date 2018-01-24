@@ -65,9 +65,11 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     names(choiceList) <- as.vector(choices$property)
     mylist <- as.list(choiceList)
     if (all(longitudinal1$columns %in% dates)) {
-      label <- "Select Date Variable:"
+      label <- "Date Variable:"
+      label2 <- "Date Range:"
     } else {
-      label <- "Select Age Variable:"
+      label <- "Age Variable:"
+      label2 <- "Age Range:"
     } 
     
     if (is.null(properties)) {
@@ -92,7 +94,15 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       myMin <- min(tempDF[[selected]])
       myMax <- max(tempDF[[selected]]) 
       mySelected <- properties$selected[properties$input == "current$var1"]
-      
+     
+      if (all(longitudinal1$columns %in% dates)) {
+        label <- "Date Variable:"
+        label2 <- "Date Range:"
+      } else {
+        label <- "Age Variable:"
+        label2 <- "Age Range:"
+      }
+ 
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
@@ -103,7 +113,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       }
 
       if (dontUseProps) {
-        sliderInput(ns("range1"), "Range:",
+        sliderInput(ns("range1"), label2,
                     min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
       } else {
         selectedMin <- properties$selected[properties$input == "current$range1[1]"]
@@ -112,7 +122,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
           selectedMin <- as.Date(selectedMin)
           selectedMax <- as.Date(selectedMax)
         }
-        sliderInput(ns("range1"), "Range:",
+        sliderInput(ns("range1"), label2,
                     min = myMin, max = myMax, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
       }
     }
@@ -133,9 +143,11 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     mylist <- as.list(choiceList)
 
     if (all(longitudinal2$columns %in% dates)) {
-      label <- "Select Date Variable:"
+      label <- "Date Variable:"
+      label2 <- "Date Range:"
     } else {
-      label <- "Select Age Variable:"
+      label <- "Age Variable:"
+      label2 <- "Age Range:"
     } 
 
     if (is.null(properties)) {
@@ -164,6 +176,14 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       myMax <- max(tempDF[[selected]])
       mySelected <- properties$selected[properties$input == "current$var2"]
 
+      if (all(longitudinal2$columns %in% dates)) {
+        label <- "Date Variable:"
+        label2 <- "Date Range:"
+      } else {
+        label <- "Age Variable:"
+        label2 <- "Age Range:"
+      }
+
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
@@ -174,7 +194,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       }
 
       if (dontUseProps) {
-        sliderInput(ns("range2"), "Range:",
+        sliderInput(ns("range2"), label2,
                     min = myMin, max = myMax, value = c(myMin,myMax), round=TRUE, width = '100%')
       } else {
         selectedMin <- properties$selected[properties$input == "current$range2[1]"]
@@ -183,7 +203,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
           selectedMin <- as.Date(selectedMin)
           selectedMax <- as.Date(selectedMax)
         }
-        sliderInput(ns("range2"), "Range:",
+        sliderInput(ns("range2"), label2,
                     min = myMin, max = myMax, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
       }
     }  

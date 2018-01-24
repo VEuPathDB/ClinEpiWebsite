@@ -90,7 +90,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     attrChoiceList <- lapply(useData(), getUIList, metadata.file = metadata.file)
     attrChoiceList <- unlist(attrChoiceList, recursive = FALSE)
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
- 
+
     dontUseProps <- FALSE
     if (is.null(properties)) {
       dontUseProps <- TRUE
@@ -139,6 +139,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]  
 
     attrStp1List <- getUIStp1List(singleVarData, myGroup)
+    observations <- colnames(event.file)
 
     dontUseProps <- FALSE
     if (is.null(properties)) {
@@ -156,32 +157,42 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       }
     }
 
+    obs <- FALSE
     anthro <- FALSE
     if (dontUseProps) {
-      if (myGroup %in% nums$source_id) {
-        mySelected = "greaterThan"
-      } else if (myGroup %in% dates$source_id) {
-        mySelected1 = groupRange$startDate
-        mySelected2 = groupRange$endDate
+      if (myGroup %in% observations) {
+        obs <- TRUE
+        mySelected = "any"
       } else {
-        if (length(attrStp1List) == 2) {
-          if (any(attrStp1List %in% "Yes")) {
-            mySelected = "Yes"
-          } else if (any(attrStp1List %in% "TRUE")) {
-            mySelected = "TRUE"
+        if (myGroup %in% nums$source_id) {
+          mySelected = "greaterThan"
+        } else if (myGroup %in% dates$source_id) {
+          mySelected1 = groupRange$startDate
+          mySelected2 = groupRange$endDate
+        } else {
+          if (length(attrStp1List) == 2) {
+            if (any(attrStp1List %in% "Yes")) {
+              mySelected = "Yes"
+            } else if (any(attrStp1List %in% "TRUE")) {
+              mySelected = "TRUE"
+            } else {
+              mySelected = NULL
+            }
           } else {
             mySelected = NULL
           }
-        } else {
-          mySelected = NULL
         }
       }
- 
+
       if (any(colnames(tempDF) %in% "BFO_0000015")) {
         if (any(colnames(event.file) %in% myGroup) & levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
           mySelected = "delta"
           anthro <- TRUE
-        }       
+        }     
+      }
+    } else {
+      if (mySelected == 'all' | mySelected == 'any') {
+        obs <- TRUE
       }
     }
   
@@ -191,6 +202,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                       choices = list('the change in value over time selected' = 'delta', 'more than the following percent of days' = 'percentDays', "a direct comparison" = "direct"),
                       selected = "delta",
                       width = '100%')
+    } else if (obs){
+       selectInput(inputId = ns("group_stp1"),
+                   label = "are / is",
+                   choices = list("always" = "all", "ever" = "any"),
+                   selected = mySelected,
+                   width = '100%')
     } else {
       if (myGroup %in% nums$source_id) {
         selectInput(inputId = ns("group_stp1"),
@@ -230,9 +247,15 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     myStp1Val <- input$group_stp1
     myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
     mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp2")]    
+    myGroup <- input$group
+
+    nums <- getNums(metadata.file)
+    dates <- getDates(metadata.file)
+    attrStp1List <- getUIStp1List(singleVarData, myGroup)
 
     numeric <- c("lessThan", "greaterThan", "equals")
     anthro <- c("percentDays", "delta", "direct")
+    obs <- c("all", "any")
 
     dontUseProps <- FALSE
     if (is.null(properties)) {
@@ -250,13 +273,32 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         } else {
           mySelected = "greaterThan"
         }
+      } else if (myStp1Val %in% obs) {
+        if (myGroup %in% nums$source_id) {
+          mySelected = "greaterThan"
+        } else if (myGroup %in% dates$source_id) {
+          mySelected1 = groupRange$startDate
+          mySelected2 = groupRange$endDate
+        } else {
+          if (length(attrStp1List) == 2) {
+            if (any(attrStp1List %in% "Yes")) {
+              mySelected = "Yes"
+            } else if (any(attrStp1List %in% "TRUE")) {
+              mySelected = "TRUE"
+            } else {
+              mySelected = NULL
+            }
+          } else {
+            mySelected = NULL
+          }
+        }
       } else {
         if (myStp1Val %in% numeric) {
           mySelected = groupRange$mean
         }
       }
     }
-    
+
     if (myStp1Val %in% anthro) {
       if (myStp1Val == 'percentDays') {
         numericInput(inputId = ns("group_stp2"),
@@ -269,6 +311,29 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         selectInput(inputId = ns("group_stp2"),
                     label = "is",
                     choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                    selected = mySelected,
+                    width = '100%')
+      }
+    } else if (myStp1Val %in% obs) {
+      if (myGroup %in% nums$source_id) {
+        selectInput(inputId = ns("group_stp2"),
+                    label = NULL,
+                    choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
+                    selected = mySelected,
+                    width = '100%')
+      } else if (myGroup %in% dates$source_id) {
+        mySelected1 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[1]")]
+        mySelected2 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[2]")]
+        dateRangeInput(inputId = ns("group_stp2"),
+                       label = "between",
+                       start = mySelected1, end = mySelected2,
+                       min = groupRange$myMin, max = groupRange$myMax,
+                       separator = "and",
+                       startview = "year")
+      } else {
+        selectInput(inputId = ns("group_stp2"),
+                    label = NULL,
+                    choices = attrStp1List,
                     selected = mySelected,
                     width = '100%')
       }
@@ -286,15 +351,24 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(input$group_stp1)) {
       return()
     }
+    if (is.null(input$group_stp2)) {
+      return()
+    }
     if (groupsType() != "makeGroups") {
       return()
     }
     myStp1Val <- input$group_stp1
     myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
     mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp3")]
+    myStp2Val <- input$group_stp2
+
+    nums <- getNums(metadata.file)
+    dates <- getDates(metadata.file)
 
     anthro <- c("delta", "direct", "percentDays")
-    
+    numeric <- c("lessThan", "greaterThan", "equals")
+    obs <- c("all", "any")
+
     dontUseProps <- FALSE
     if (is.null(properties)) {
       dontUseProps <- TRUE
@@ -305,12 +379,18 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     }
 
     if (dontUseProps) {
-      if (myStp1Val == "percentDays") {
-        mySelected = "greaterThan"
-      } else if (myStp1Val == "direct") {
-        mySelected = groupRange$mean
+      if (myStp1Val %in% anthro) {
+        if (myStp1Val == "percentDays") {
+          mySelected = "greaterThan"
+        } else if (myStp1Val == "direct") {
+          mySelected = groupRange$mean
+        } else {
+          mySelected = -1
+        }
       } else {
-        mySelected = -1
+        if (myStp2Val %in% numeric) {
+          mySelected = groupRange$mean
+        }
       }
     }
    
@@ -327,6 +407,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       } else {
         sliderInput(ns("group_stp3"), NULL,
                     min = -20, max = 20, value = mySelected, step = .1, width = '100%')
+      }
+    } else if (myStp1Val %in% obs) {
+      if (myStp2Val %in% numeric) {
+        sliderInput(ns("group_stp3"), NULL,
+                    min = groupRange$myMin, max = groupRange$myMax, value = mySelected, step = .1, width='100%')
       }
     }
  

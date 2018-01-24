@@ -127,7 +127,9 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
   groupData <- getFinalDT(groupData, metadata.file, myGroups)
   myCols <- c("Participant_Id", myGroups)
   outData <- groupData[, myCols, with=FALSE]
-     
+
+  obs <- c("any", "all")
+
   #if anthro direct comparison do same as for number
   if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     if (groups_stp1 == "direct") {
@@ -138,6 +140,32 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
       groups_stp2 = groups_stp3
     }
   }
+
+   #this check needs to come after the other in order to avoid erroneously shifting values twice. think up better way later.
+   #if dealing with an observation, set a flag to determine if any or all option, then move up the ui
+  obsFlag = -1
+  if (groups_stp1 %in% obs) {
+    if (groups_stp1 == "any") {
+      obsFlag <- "any"
+    } else {
+      obsFlag <- "all"
+    }
+    groups_stp1 = groups_stp2
+    groups_stp2 = groups_stp3
+  }
+
+  #call either the any or the all function
+  if (obsFlag != "all") {
+    outData <- anyGroups(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+  } else {
+    outData <- allGroups(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+  }
+  
+  outData
+}
+
+anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4) {
+
   #this if statement will have to change. handle dates first
   if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
@@ -245,6 +273,7 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
     #for strings
     outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1 %in% x) {1} else {0} })
   }
+
   if (ncol(outData) > 2) {
     colnames(outData) <- c("Participant_Id", "drop", "GROUPS")
   }
@@ -258,80 +287,140 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
   outData
 }
 
+allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4) {
+
+  #this if statement will have to change. handle dates first
+  if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
+    outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
+    cols <- c("Participant_Id", "GROUPS")
+    outData <- outData[, cols, with = FALSE]
+    tempData <- aggregate(GROUPS ~ Participant_Id, outData, FUN = function(x){length(unique(x))})
+    colnames(tempData) <- c("Participant_Id", "numLevels")
+    tempData <- merge(outData, tempData, by = "Participant_Id")
+    outData <- transform(tempData, "GROUPS" = ifelse(numLevels == 1, GROUPS, 0))
+    outData <- outData[, cols, with = FALSE]
+    outData <- unique(outData)
+    message("custom groups for date")
+  #for numbers
+  } else if (groups_stp1 == "lessThan") {
+    if (is.null(groups_stp2)) {
+      return()
+    }
+    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (all(x < as.numeric(groups_stp2))) {1} else {0} })
+  } else if (groups_stp1 == "greaterThan") {
+    if (is.null(groups_stp2)) {
+      return()
+    }
+    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (all(x > as.numeric(groups_stp2))) {1} else {0} })
+  } else if (groups_stp1 == "equals") {
+    if (is.null(groups_stp2)) {
+      return()
+    }
+    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (all(x == as.numeric(groups_stp2))) {1} else {0} })
+  }  else {
+    #for strings
+    aggStr <- paste0(myGroups, " ~ Participant_Id")
+    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){all(x == groups_stp1)})
+    colnames(outData) <- c("Participant_Id", "GROUPS")
+    outData <- transform(outData, "GROUPS" = ifelse(GROUPS == TRUE, 1, 0))
+  }
+
+  if (ncol(outData) > 2) {
+    colnames(outData) <- c("Participant_Id", "drop", "GROUPS")
+  }
+  
+  outData <- as.data.table(outData)
+  #dtop dtop
+  if (any(colnames(outData) %in% "drop")) {
+    outData$drop <- NULL
+  }
+  
+  outData
+}
+
+
 #this make appropriate labels for groups created in function above    
-makeGroupLabel <- function(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list){
+makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list){
   numeric <- c("lessThan", "greaterThan", "equals")
   anthro <- c("percentDays", "delta", "direct")
   label <- vector()
-     
-  displayName <- metadata.file$property[metadata.file$source_id == myFacet]
-  if (facet_stp1 %in% numeric ){
-    if (facet_stp1 == "greaterThan") {
-      label[1] <- paste0(displayName, " > ", facet_stp2)
-      label[2] <- paste0(displayName, " <= ", facet_stp2)
-    } else if (facet_stp1 == "lessThan") {
-      label[1] <- paste0(displayName, " < ", facet_stp2)
-      label[2] <- paste0(displayName, " >= ", facet_stp2)
+  obs <- c("any", "all")   
+ 
+  obsFlag = ""
+  if (groups_stp1 %in% obs) {
+    if (groups_stp1 == "any") {
+      obsFlag <- "Any"
     } else {
-      label[1] <- paste0(displayName, " = ", facet_stp2)
-      label[2] <- paste0(displayName, " != ", facet_stp2)
+      obsFlag <- "All"
     }
-  } else if (facet_stp1 %in% anthro) {
-    if (facet_stp1 == "direct") {
-      if (facet_stp2 == "lessThan") {
-        label[1] <- paste0(displayName, " < ", facet_stp3)
-        label[2] <- paste0(displayName, " >= ", facet_stp3)
-      } else if (facet_stp2 == "greaterThan") {
-        label[1] <- paste0(displayName, " > ", facet_stp3)
-        label[2] <- paste0(displayName, " <= ", facet_stp3)
+    groups_stp1 = groups_stp2
+    groups_stp2 = groups_stp3
+  } 
+ 
+  displayName <- metadata.file$property[metadata.file$source_id == myGroups]
+  if (groups_stp1 %in% numeric ){
+    if (groups_stp1 == "greaterThan") {
+      label[1] <- paste0(obsFlag, " ", displayName, " > ", groups_stp2)
+      label[2] <- paste0(obsFlag, " ", displayName, " <= ", groups_stp2)
+    } else if (groups_stp1 == "lessThan") {
+      label[1] <- paste0(obsFlag, " ", displayName, " < ", groups_stp2)
+      label[2] <- paste0(obsFlag, " ", displayName, " >= ", groups_stp2)
+    } else {
+      label[1] <- paste0(obsFlag, " ", displayName, " = ", groups_stp2)
+      label[2] <- paste0(obsFlag, " ", displayName, " != ", groups_stp2)
+    }
+  } else if (groups_stp1 %in% anthro) {
+    if (groups_stp1 == "direct") {
+      if (groups_stp2 == "lessThan") {
+        label[1] <- paste0(displayName, " < ", groups_stp3)
+        label[2] <- paste0(displayName, " >= ", groups_stp3)
+      } else if (groups_stp2 == "greaterThan") {
+        label[1] <- paste0(displayName, " > ", groups_stp3)
+        label[2] <- paste0(displayName, " <= ", groups_stp3)
       } else {
-        label[1] <- paste0(displayName, " = ", facet_stp3)
-        label[2] <- paste0(displayName, " != ", facet_stp3)
+        label[1] <- paste0(displayName, " = ", groups_stp3)
+        label[2] <- paste0(displayName, " != ", groups_stp3)
       }
-    } else if (facet_stp1 == "delta") {
-      if (facet_stp2 == "lessThan") {
-        label[1] <- paste0("Change in ", displayName, " over time < ", facet_stp3)
-        label[2] <- paste0("Change in ", displayName, " over time >= ", facet_stp3)
-      } else if (facet_stp2 == "greaterThan") {
-        label[1] <- paste0("Change in ", displayName, " over time > ", facet_stp3)
-        label[2] <- paste0("Change in ", displayName, " over time <= ", facet_stp3)
+    } else if (groups_stp1 == "delta") {
+      if (groups_stp2 == "lessThan") {
+        label[1] <- paste0("Change in ", displayName, " over time < ", groups_stp3)
+        label[2] <- paste0("Change in ", displayName, " over time >= ", groups_stp3)
+      } else if (groups_stp2 == "greaterThan") {
+        label[1] <- paste0("Change in ", displayName, " over time > ", groups_stp3)
+        label[2] <- paste0("Change in ", displayName, " over time <= ", groups_stp3)
       } else {
-        label[1] <- paste0("Change in ", displayName, " over time = ", facet_stp3)
-        label[2] <- paste0("Change in ", displayName, " over time != ", facet_stp3)
+        label[1] <- paste0("Change in ", displayName, " over time = ", groups_stp3)
+        label[2] <- paste0("Change in ", displayName, " over time != ", groups_stp3)
       }
     } else {
-      if (facet_stp3 == "lessThan") {
-        label[1] <- paste0(displayName, " < ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-        label[2] <- paste0(displayName, " >= ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-      } else if (facet_stp3 == "greaterThan") {
-        label[1] <- paste0(displayName, " > ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-        label[2] <- paste0(displayName, " <= ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
+      if (groups_stp3 == "lessThan") {
+        label[1] <- paste0(displayName, " < ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+        label[2] <- paste0(displayName, " >= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+      } else if (groups_stp3 == "greaterThan") {
+        label[1] <- paste0(displayName, " > ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+        label[2] <- paste0(displayName, " <= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
       } else {
-        label[1] <- paste0(displayName, " = ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
-        label[2] <- paste0(displayName, " != ", facet_stp4, " for more than ", facet_stp1, "% of days monitored")
+        label[1] <- paste0(displayName, " = ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+        label[2] <- paste0(displayName, " != ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
       }
     }
   } else {
-    if (!any(c("POSIXct", "Date") %in% class(facet_stp1))) {
-      label[1] <- facet_stp1
-      if (label[1] == "Yes") {
+    if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
+      label[1] <- paste(obsFlag, groups_stp1)
+      if (label[1] == paste0(obsFlag, " Yes")) {
         label[2] <- "No"
-      } else if (label[1] == "No") {
+      } else if (label[1] == paste0(obsFlag, " No")) {
         label[2] <- "Yes"
-      } else if (label[1] == "True") {
+      } else if (label[1] == paste0(obsFlag, " True")) {
         label[2] <- "False"
-      } else if (label[1] == "False") {
+      } else if (label[1] == paste0(obsFlag, " False")) {
         label[2] <- "True"
       } else {
-        if (myFacet %in% event.list) {
-          label[2] <- paste0("No ", facet_stp1)
-        } else {
-          label[2] <- paste0("Not ", facet_stp1)
-        }
+          label[2] <- paste0("Not ", label[1])
       }
     } else {
-      label[1] <- "Within Date Range"
-      label[2] <- "Outside Date Range"
+      label[1] <- paste0(obsFlag, " within date range")
+      label[2] <- paste0(obsFlag, " outside date range")
     }
   }
   label
