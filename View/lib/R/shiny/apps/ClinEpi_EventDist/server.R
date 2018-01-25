@@ -592,29 +592,13 @@ shinyServer(function(input, output, session) {
         } 
       }
 
-      #could maybe make this a function just to improve readability
       #first thing is to save properties 
-      if (length(facet_stp1) > 1) {
-        facetText <- paste0("facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
-                            "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n")
-      } else {
-        facetText <- paste0("facetInfo$group_stp1\t", facet_stp1, "\n")
-      }      
- 
-      longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
-                                 "current$range1[1]\t", myTimeframe1[1], "\n",
-                                 "current$range1[2]\t", myTimeframe1[2], "\n",
-                                 "current$var2\t", longitudinal2, "\n",
-                                 "current$range2[1]\t", myTimeframe2[1], "\n",
-                                 "current$range2[2]\t", myTimeframe2[2], "\n")
+      longitudinalText <- longitudinalText(longitudinal1, myTimeframe1, longitudinal2, myTimeframe2)
+      facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
 
       text <- paste0("input\tselected\n",
                      longitudinalText,
                      facetText,
-                     "facetInfo$group\t", myFacet, "\n",
-                     "facetInfo$group_stp2\t", facet_stp2, "\n",
-                     "facetInfo$group_stp3\t", facet_stp3, "\n",
-                     "facetInfo$group_stp4\t", facet_stp4, "\n",
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
                      "input$xaxis\t", xType

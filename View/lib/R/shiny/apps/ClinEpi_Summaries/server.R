@@ -899,102 +899,22 @@ shinyServer(function(input, output, session) {
         #may not need to do the splitting on pipes. grepl will still return true for it.
         #should have natozero before this for non-anthro events?? so an NA for diarrhea -> 0 ?? 
 
-        #could maybe make this a function just to improve readability 
         #first thing is to save properties 
-        longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
-                                 "current$range1[1]\t", myTimeframe1[1], "\n",
-                                 "current$range1[2]\t", myTimeframe1[2], "\n",
-                                 "current$var2\t", longitudinal2, "\n",
-                                 "current$range2[1]\t", myTimeframe2[1], "\n",
-                                 "current$range2[2]\t", myTimeframe2[2], "\n",
-                                 "input$xaxisVar\t", input$xaxisVar, "\n")
+        longitudinalText <- longitudinalText(longitudinal1, myTimeframe1, longitudinal2, myTimeframe2)
+        facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+        groupsText <- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
 
-
-        if (length(facet_stp1) > 1) {
-          if (length(groups_stp1) > 1) {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "facetInfo$group\t", myFacet, "\n",
-                    "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
-                    "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
-                    "facetInfo$group_stp2\t", facet_stp2, "\n",
-                    "facetInfo$group_stp3\t", facet_stp3, "\n",
-                    "facetInfo$group_stp4\t", facet_stp4, "\n",
-                    "groupInfo$group\t", myGroups, "\n",
-                    "groupInfo$group_stp1[1]\t", groups_stp1[1], "\n",
-                    "groupInfo$group_stp1[2]\t", groups_stp1[2], "\n",
-                    "groupInfo$group_stp2\t", groups_stp2, "\n",
-                    "groupInfo$group_stp3\t", groups_stp3, "\n",
-                    "groupInfo$group_stp4\t", groups_stp4, "\n",
-                    "input$groupsType\t", groupsType, "\n",
-                    "input$facetType\t", facetType, "\n",
-                    "input$yaxis\t", myY, "\n",
-                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
-                    "input$yaxis_stp2\t", yaxis_stp2
+        text <- paste0("input\tselected\n",
+                       longitudinalText,
+                       facetText,
+                       groupsText,
+                       "input$xaxisVar\t", input$xaxisVar, "\n",
+                       "input$groupsType\t", groupsType, "\n",
+                       "input$facetType\t", facetType, "\n",
+                       "input$yaxis\t", myY, "\n",
+                       "input$yaxis_stp1\t", yaxis_stp1, "\n",
+                       "input$yaxis_stp2\t", yaxis_stp2
                    )
-          } else {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "facetInfo$group\t", myFacet, "\n",
-                    "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
-                    "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
-                    "facetInfo$group_stp2\t", facet_stp2, "\n",
-                    "facetInfo$group_stp3\t", facet_stp3, "\n",
-                    "facetInfo$group_stp4\t", facet_stp4, "\n",
-                    "groupInfo$group\t", myGroups, "\n",
-                    "groupInfo$group_stp1\t", groups_stp1, "\n",
-                    "groupInfo$group_stp2\t", groups_stp2, "\n",
-                    "groupInfo$group_stp3\t", groups_stp3, "\n",
-                    "groupInfo$group_stp4\t", groups_stp4, "\n",
-                    "input$groupsType\t", groupsType, "\n",
-                    "input$facetType\t", facetType, "\n",
-                    "input$yaxis\t", myY, "\n",
-                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
-                    "input$yaxis_stp2\t", yaxis_stp2
-                   )
-          }
-        } else {
-          if (length(groups_stp1) > 1) {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "facetInfo$group\t", myFacet, "\n",
-                    "facetInfo$group_stp1\t", facet_stp1, "\n",
-                    "facetInfo$group_stp2\t", facet_stp2, "\n",
-                    "facetInfo$group_stp3\t", facet_stp3, "\n",
-                    "facetInfo$group_stp4\t", facet_stp4, "\n",
-                    "groupInfo$group\t", myGroups, "\n",
-                    "groupInfo$group_stp1[1]\t", groups_stp1[1], "\n",
-                    "groupInfo$group_stp1[2]\t", groups_stp1[2], "\n",
-                    "groupInfo$group_stp2\t", groups_stp2, "\n",
-                    "groupInfo$group_stp3\t", groups_stp3, "\n",
-                    "groupInfo$group_stp4\t", groups_stp4, "\n",
-                    "input$groupsType\t", groupsType, "\n",
-                    "input$facetType\t", facetType, "\n",
-                    "input$yaxis\t", myY, "\n",
-                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
-                    "input$yaxis_stp2\t", yaxis_stp2
-                   )
-          } else {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "facetInfo$group\t", myFacet, "\n",
-                    "facetInfo$group_stp1\t", facet_stp1, "\n",
-                    "facetInfo$group_stp2\t", facet_stp2, "\n",
-                    "facetInfo$group_stp3\t", facet_stp3, "\n",
-                    "facetInfo$group_stp4\t", facet_stp4, "\n",
-                    "groupInfo$group\t", myGroups, "\n",
-                    "groupInfo$group_stp1\t", groups_stp1, "\n",
-                    "groupInfo$group_stp2\t", groups_stp2, "\n",
-                    "groupInfo$group_stp3\t", groups_stp3, "\n",
-                    "groupInfo$group_stp4\t", groups_stp4, "\n",
-                    "input$groupsType\t", groupsType, "\n",
-                    "input$facetType\t", facetType, "\n",
-                    "input$yaxis\t", myY, "\n",
-                    "input$yaxis_stp1\t", yaxis_stp1, "\n",
-                    "input$yaxis_stp2\t", yaxis_stp2
-                   )
-          }
-        }
 
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)

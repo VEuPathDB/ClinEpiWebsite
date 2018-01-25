@@ -1,6 +1,46 @@
 ### all clinepi specific functions b/c rely on data and/or metadata to be formatted consistently
 
 
+longitudinalText <- function(longitudinal1, myTimeframe1, longitudinal2, myTimeframe2) {
+  longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
+                             "current$range1[1]\t", myTimeframe1[1], "\n",
+                             "current$range1[2]\t", myTimeframe1[2], "\n",
+                             "current$var2\t", longitudinal2, "\n",
+                             "current$range2[1]\t", myTimeframe2[1], "\n",
+                             "current$range2[2]\t", myTimeframe2[2], "\n")
+
+  longitudinalText
+}
+
+groupText <- function(moduleName, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4) {
+  if (length(groups_stp2) > 1) {
+    groupsStp2Text <- ""
+    for (i in seq(length(groups_stp2))) {
+      groupsStp2Text <- paste0(groupsStp2Text,
+      moduleName, "$group_stp2\t", groups_stp2[i], "\n")
+    }
+  } else {
+    groupsStp2Text <- paste0(moduleName, "$group_stp2\t", groups_stp2, "\n")
+  }
+
+  if (length(groups_stp1) > 1) {
+    groupsText <- paste0(moduleName, "$group\t", myGroups, "\n",
+                         moduleName, "$group_stp1[1]\t", groups_stp1[1], "\n",
+                         moduleName, "$group_stp1[2]\t", groups_stp1[2], "\n",
+                         groupsStp2Text,
+                         moduleName, "$group_stp3\t", groups_stp3, "\n",
+                         moduleName, "$group_stp4\t", groups_stp4, "\n")
+  } else {
+    groupsText <- paste0(moduleName, "$group\t", myGroups, "\n",
+                         moduleName, "$group_stp1\t", groups_stp1, "\n",
+                         groupsStp2Text,
+                         moduleName, "$group_stp3\t", groups_stp3, "\n",
+                         moduleName, "$group_stp4\t", groups_stp4, "\n")
+  }
+
+  groupsText
+}
+
 subsetDataFetcher <- function(min, max, data, col){
 
   #this version maled specific.

@@ -427,80 +427,16 @@ shinyServer(function(input, output, session) {
         attr_stp3 <- attrInfo$group_stp3
         attr_stp4 <- attrInfo$group_stp4
   
-        #could maybe make this a function just to improve readability 
         #first thing is to save properties
-        longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
-                                 "current$range1[1]\t", myTimeframe1[1], "\n",
-                                 "current$range1[2]\t", myTimeframe1[2], "\n",
-                                 "current$var2\t", longitudinal2, "\n",
-                                 "current$range2[1]\t", myTimeframe2[1], "\n",
-                                 "current$range2[2]\t", myTimeframe2[2], "\n") 
-  
-        if (length(attr_stp1) > 1) {
-          if (length(out_stp1) > 1) {
-            text <- paste0("input\tselected\n",
-                    longitudinalText, 
-                    "attrInfo$group\t", myAttr, "\n",
-                    "attrInfo$group_stp1[1]\t", attr_stp1[1], "\n",
-                    "attrInfo$group_stp1[2]\t", attr_stp1[2], "\n",
-                    "attrInfo$group_stp2\t", attr_stp2, "\n",
-                    "attrInfo$group_stp3\t", attr_stp3, "\n",
-                    "attrInfo$group_stp4\t", attr_stp4, "\n",
-                    "outInfo$group\t", myOut, "\n",
-                    "outInfo$group_stp1[1]\t", out_stp1[1], "\n",
-                    "outInfo$group_stp1[2]\t", out_stp1[2], "\n",
-                    "outInfo$group_stp2\t", out_stp2, "\n",
-                    "outInfo$group_stp3\t", out_stp3, "\n",
-                    "outInfo$group_stp4\t", out_stp4
-                   )
-          } else {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "attrInfo$group\t", myAttr, "\n",
-                    "attrInfo$group_stp1[1]\t", attr_stp1[1], "\n",
-                    "attrInfo$group_stp1[2]\t", attr_stp1[2], "\n",
-                    "attrInfo$group_stp2\t", attr_stp2, "\n",
-                    "attrInfo$group_stp3\t", attr_stp3, "\n",
-                    "attrInfo$group_stp4\t", attr_stp4, "\n",
-                    "outInfo$group\t", myOut, "\n",
-                    "outInfo$group_stp1\t", out_stp1, "\n",
-                    "outInfo$group_stp2\t", out_stp2, "\n",
-                    "outInfo$group_stp3\t", out_stp3, "\n",
-                    "outInfo$group_stp4\t", out_stp4
-                   )
-          }
-        } else {
-          if (length(out_stp1) > 1) {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "attrInfo$group\t", myAttr, "\n",
-                    "attrInfo$group_stp1\t", attr_stp1, "\n",
-                    "attrInfo$group_stp2\t", attr_stp2, "\n",
-                    "attrInfo$group_stp3\t", attr_stp3, "\n",
-                    "attrInfo$group_stp4\t", attr_stp4, "\n",
-                    "outInfo$group\t", myOut, "\n",
-                    "outInfo$group_stp1[1]\t", out_stp1[1], "\n",
-                    "outInfo$group_stp1[2]\t", out_stp1[2], "\n",
-                    "outInfo$group_stp2\t", out_stp2, "\n",
-                    "outInfo$group_stp3\t", out_stp3, "\n",
-                    "outInfo$group_stp4\t", out_stp4
-                   )
-          } else {
-            text <- paste0("input\tselected\n",
-                    longitudinalText,
-                    "attrInfo$group\t", myAttr, "\n",
-                    "attrInfo$group_stp1\t", attr_stp1, "\n",
-                    "attrInfo$group_stp2\t", attr_stp2, "\n",
-                    "attrInfo$group_stp3\t", attr_stp3, "\n",
-                    "attrInfo$group_stp4\t", attr_stp4, "\n",
-                    "outInfo$group\t", myOut, "\n",
-                    "outInfo$group_stp1\t", out_stp1, "\n",
-                    "outInfo$group_stp2\t", out_stp2, "\n",
-                    "outInfo$group_stp3\t", out_stp3, "\n",
-                    "outInfo$group_stp4\t", out_stp4
-                   )
-          }
-        }
+        longitudinalText <- longitudinalText(longitudinal1, myTimeframe1, longitudinal2, myTimeframe2)
+        attrText <- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+        outText <- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)  
+
+        text <- paste0("input\tselected\n",
+                       longitudinalText,
+                       attrText,
+                       outText
+                      )
 
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)   
