@@ -331,11 +331,16 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                        separator = "and",
                        startview = "year")
       } else {
-        selectInput(inputId = ns("group_stp2"),
+        #for obs vairs that are strings, want a multiplick that has a max of one less than the total choices
+        maxInputs <- length(attrStp1List) -1
+        selectizeInput(inputId = ns("group_stp2"),
                     label = NULL,
                     choices = attrStp1List,
                     selected = mySelected,
-                    width = '100%')
+                    width = '100%',
+                    multiple = TRUE,
+                    options = list(maxItems = maxInputs,
+                                   placeholder = '-Selected Items Will Appear Here-'))
       }
     } else {
       if (myStp1Val %in% numeric) {
