@@ -15,7 +15,7 @@ shinyServer(function(input, output, session) {
   house.file.exists <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
-  longitudinal <- NULL
+  longitudinal.file <- NULL
   current <- NULL
   facetInfo <- NULL
   groupInfo <- NULL
@@ -69,9 +69,12 @@ shinyServer(function(input, output, session) {
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if (colnames(attributes.file)[1] == 'Participant_Id') {
-          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Participants", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
         } else {
-          metadata.file <<- rbind(metadata.file, list("custom", "User Defined Observations", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
       } 
 
@@ -98,10 +101,10 @@ shinyServer(function(input, output, session) {
     prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))   
-    longitudinal <<- fread("../../lib/longitudinal.tab")
-    longitudinal <<- longitudinal[longitudinal$dataset_name == datasetName]
-    longitudinal <<- setDT(longitudinal)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
-                        by = setdiff(names(longitudinal), "columns")][!is.na(longitudinal$columns)]   
+    longitudinal.file <<- fread("../../lib/longitudinal.tab")
+    longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
+    longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
+                        by = setdiff(names(longitudinal.file), "columns")][!is.na(longitudinal.file$columns)]   
 
     if (grepl("Error", prtcpnt_temp[1])){
       stop("Error: Participant file missing or unreadable!")
@@ -191,30 +194,57 @@ shinyServer(function(input, output, session) {
   output$title <- renderUI({
     singleVarDataFetcher()
 
-    current <<- callModule(timeline, "timeline", singleVarData, longitudinal, metadata.file)
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
 
     groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
 
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000452"), groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
 
     titlePanel("Data Summaries")
   })
+
+    output$xaxis_var <- renderUI({
+      if (is.null(current$var2)) {
+        return()
+      }
+
+      if (is.null(properties)) {
+        radioButtons(inputId = "xaxisVar",
+                     label = "X-Axis:",
+                     choices = list("My Date Variable" = "dateVar", "My Age Variable" = "ageVar"),
+                     selected = "dateVar",
+                     inline = TRUE,
+                     width = '100%')
+      } else {
+        radioButtons(inputId = "xaxisVar",
+                     label = "X-Axis:",
+                     choices = list("My Date Variable" = "dateVar", "My Age Variable" = "ageVar"),
+                     selected = properties$selected[properties$input == "input$xaxisVar"],
+                     inline = TRUE,
+                     width = '100%')
+      }
+    })
   
     output$groups_type <- renderUI({
-      longitudinal <- current$longitudinal
+      longitudinal <- current$var1
+      if (!is.null(input$xaxisVar)) {
+        if (input$xaxisVar == "ageVar") {
+          longitudinal <- current$var2
+        }
+      }
       mySelected <- properties$selected[properties$input == "input$groupsType"]
 
       if (is.null(properties)) {
         if (!is.null(longitudinal)) {
           selectInput(inputId = "groupsType",
                       label = "Facet Line:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "groupsType",
                       label = "X-Axis:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         }
@@ -222,13 +252,13 @@ shinyServer(function(input, output, session) {
         if (!is.null(longitudinal)) {
           selectInput(inputId = "groupsType",
                       label = "Facet Line:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = mySelected,
                       width = '100%')
         } else {
           selectInput(inputId = "groupsType",
                       label = "X-Axis:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups"),
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = mySelected,
                       width = '100%')
         }
@@ -243,7 +273,7 @@ shinyServer(function(input, output, session) {
         selectInput(inputId = "facetType",
                     label = "Facet Plot:",
                     choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                    selected = "none",
+                    selected = "direct",
                     width = '100%')
       } else {
         selectInput(inputId = "facetType",
@@ -300,7 +330,12 @@ shinyServer(function(input, output, session) {
         } else {
           groupsType <- input$groupsType
         }
-        longitudinal <- current$longitudinal
+        longitudinal <- current$var1
+        if (!is.null(input$xaxisVar)) {
+          if (input$xaxisVar == "ageVar") {
+            longitudinal <- current$var2
+          }
+        }
       
         if (!is.null(longitudinal)) {
           if (groupsType == "direct") {
@@ -351,14 +386,33 @@ shinyServer(function(input, output, session) {
       }
       
       if (groupsType == "direct") {
-        selected <- "EUPATH_0000744"
+        selected <- "EUPATH_0000054"
       } else {
-        selected <- "EUPATH_0000704"
+        selected <- "EUPATH_0000054"
       }  
       
       return(selected)
     })
 
+    selectedFacet <- reactive({
+      if (is.null(input$facetType)) {
+        return()
+      } else {
+        facetType <- input$facetType
+      }
+
+      if (facetType == "direct") {
+        #selected <- "custom"
+        selected <- "custom"
+      } else if (facetType == "makeGroups") {
+        selected <- "EUPATH_0000054"
+      } else {
+        selected <- ""
+      }
+
+      return(selected)
+    }) 
+ 
     output$choose_yaxis <- renderUI({
       mySelected <- properties$selected[properties$input == "input$yaxis"]
 
@@ -374,7 +428,7 @@ shinyServer(function(input, output, session) {
         selectInput(inputId = "yaxis",
                     label = "Y-Axis:",
                     choices = outChoiceList,
-                    selected = "EUPATH_0000689",
+                    selected = "EUPATH_0000338",
                     width = '100%')
       } else {
         selectInput(inputId = "yaxis",
@@ -408,14 +462,14 @@ shinyServer(function(input, output, session) {
       if (dontUseProps) {      
         if (!myY %in% nums$source_id) {
           selectInput(inputId = "yaxis_stp1",
-                      label = "for",
+                      label = NULL,
                       choices = attrStp1List,
                       width = '100%') 
         }
       } else {
         if (!myY %in% nums$source_id) {
           selectInput(inputId = "yaxis_stp1",
-                      label = "for",
+                      label = NULL,
                       choices = attrStp1List,
                       selected = mySelected,
                       width = '100%')
@@ -431,7 +485,12 @@ shinyServer(function(input, output, session) {
         myY <- input$yaxis
       }
       nums <- getNums(metadata.file)
-      longitudinal <- current$longitudinal
+      longitudinal <- current$var1
+      if (!is.null(input$xaxisVar)) {
+        if (input$xaxisVar == "ageVar") {
+          longitudinal <- current$var2
+        }
+      }
       myYSelected <- properties$selected[properties$input == "input$yaxis"]
       mySelected <- properties$selected[properties$input == "input$yaxis_stp2"]      
 
@@ -512,7 +571,13 @@ shinyServer(function(input, output, session) {
       } else {
         plotType <- input$yaxis_stp2
       }
-      longitudinal <- current$longitudinal
+      longitudinal <- current$var1
+      if (!is.null(input$xaxisVar)) {
+        xaxisVar <- input$xaxisVar
+        if (xaxisVar == "ageVar") {
+          longitudinal <- current$var2
+        }
+      } 
       
       dates <- getDates(metadata.file)
         #get data from plotData here
@@ -527,7 +592,11 @@ shinyServer(function(input, output, session) {
         #temp placeholder for checking if data has time vars for x axis
         if (!is.null(longitudinal)) {
           #define axis labels here
-          xlab <- "Time"
+          if (xaxisVar == "ageVar") {
+            xlab = "Age"
+          } else {
+            xlab = "Time"
+          }
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
           if (plotType == "proportion") {
             ylab <- "Proportion"
@@ -549,10 +618,11 @@ shinyServer(function(input, output, session) {
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
           myPlot <- myPlot + theme_bw()
-          myPlot <- myPlot + labs(y = ylab, x = xlab)
+          myPlot <- myPlot + labs(y = "", x = "")
           message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion" | plotType == "count") {
+            myPlot <- myPlot + geom_point()
             myPlot <- myPlot + geom_line(size = 1)
           } else if (plotType == "mean") {
             message("plotting mean")
@@ -658,10 +728,10 @@ shinyServer(function(input, output, session) {
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
         #myPlotly <- ggplotly(myPlot)
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-        myPlotly <- layout(myPlotly, margin = list(l = 100, r = 0, b = 150, t = 100),
+        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = list(x = .1, y = 100))
+                                     legend = list(x = 100, y = .5))
         
         myPlotly
       
@@ -680,7 +750,10 @@ shinyServer(function(input, output, session) {
         colnames(data)[1] <- "Line"
         colnames(data) <- gsub("Participant_Id.", "# Participants: ", colnames(data))
         #give totals
-        data[, "Totals"] <- rowSums(data[, -1], na.rm=TRUE)
+        message(paste("length data:", length(data)))
+        if (length(data) > 2) {
+          data[, "Totals"] <- rowSums(data[, -1], na.rm=TRUE)
+        }
         rownames(data) <- data[,1]
         data[,1] <- NULL
         data["Totals" ,] <- colSums(data, na.rm=TRUE)
@@ -702,7 +775,12 @@ shinyServer(function(input, output, session) {
         data$Group[nrow(data)] <- "Totals"
       }
     
-      longitudinal <- current$longitudinal
+      longitudinal <- current$var1
+      if (!is.null(input$xaxisVar)) {
+        if (input$xaxisVar == "ageVar") {
+          longitudinal <- current$var2
+        }
+      }
       #temp placeholder for checking if data has time vars for x axis
       if (!is.null(longitudinal)) {
         names(data)[names(data) == 'Line'] <- 'X-Axis'
@@ -720,8 +798,16 @@ shinyServer(function(input, output, session) {
     tableData <- debounce(reactive({
       
       #collecting inputs 
-      longitudinal <- current$longitudinal
-      myTimeframe <- current$timeframe
+      longitudinal1 <- current$var1
+      myTimeframe1 <- current$range1
+      longitudinal2 <- current$var2
+      myTimeframe2 <- current$range2
+      longitudinal <- current$var1
+      if (!is.null(input$xaxisVar)) {
+        if (input$xaxisVar == "ageVar") {
+          longitudinal <- current$var2
+        }
+      }
       groupsType <- input$groupsType
       facetType <- input$facetType
       myFacet <- facetInfo$group
@@ -740,18 +826,24 @@ shinyServer(function(input, output, session) {
       yaxis_stp1 <- input$yaxis_stp1
       message("have all inputs for plotData")
       #subset data
-      #which cols can be used for this will have to change. too specific right now
-      if (!is.null(longitudinal)) {
-        if (!is.null(myTimeframe)) {
-          data <- subsetDataFetcher(myTimeframe[1], myTimeframe[2], singleVarData, longitudinal)
-          message("subsetting data..")
+      if (!is.null(longitudinal1)) {
+        if (!is.null(myTimeframe1)) {
+          data <- subsetDataFetcher(myTimeframe1[1], myTimeframe1[2], singleVarData, longitudinal1)
+          message("subsetting data by first longitudinal variable..")
           if (nrow(data) == 0) {
-            message("data is null, returning")
+            message("subset failed, returning")
             return()
           }
-        } else {
-          print("timeline input is null")
-          return()
+        }
+        if (!is.null(longitudinal2)) {
+          if (!is.null(myTimeframe2)) {
+            data <- subsetDataFetcher(myTimeframe2[1], myTimeframe2[2], data, longitudinal2)
+            message("subsetting data by second longitudinal variable..")
+            if (nrow(data) == 0) {
+              message("subset failed, returning")
+              return()
+            }
+          }
         }
       } else {
         data <- singleVarData
@@ -766,6 +858,16 @@ shinyServer(function(input, output, session) {
         if (groupsType == "makeGroups") {
           if (is.null(groups_stp1)) {
             go <- FALSE
+          } else {
+            if (groups_stp1 == 'any' | groups_stp1 == 'all') {
+              if (is.null(groups_stp2)) {
+                go <- FALSE
+              }
+            }
+          }         
+        } else if (groupsType == "direct") {
+          if (is.null(myGroups)) {
+            return()
           }
         } 
       }
@@ -790,9 +892,6 @@ shinyServer(function(input, output, session) {
       if (is.null(yaxis_stp2)) {
         go <- FALSE
       }
-      if (is.null(myGroups)) {    
-        go <- FALSE
-      }
       
       #once last field is populated .. GO
       if (go) {
@@ -802,12 +901,19 @@ shinyServer(function(input, output, session) {
 
         #could maybe make this a function just to improve readability 
         #first thing is to save properties 
+        longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
+                                 "current$range1[1]\t", myTimeframe1[1], "\n",
+                                 "current$range1[2]\t", myTimeframe1[2], "\n",
+                                 "current$var2\t", longitudinal2, "\n",
+                                 "current$range2[1]\t", myTimeframe2[1], "\n",
+                                 "current$range2[2]\t", myTimeframe2[2], "\n",
+                                 "input$xaxisVar\t", input$xaxisVar, "\n")
+
+
         if (length(facet_stp1) > 1) {
           if (length(groups_stp1) > 1) {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "facetInfo$group\t", myFacet, "\n",
                     "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
                     "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
@@ -828,9 +934,7 @@ shinyServer(function(input, output, session) {
                    )
           } else {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "facetInfo$group\t", myFacet, "\n",
                     "facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
                     "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n",
@@ -852,9 +956,7 @@ shinyServer(function(input, output, session) {
         } else {
           if (length(groups_stp1) > 1) {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "facetInfo$group\t", myFacet, "\n",
                     "facetInfo$group_stp1\t", facet_stp1, "\n",
                     "facetInfo$group_stp2\t", facet_stp2, "\n",
@@ -874,9 +976,7 @@ shinyServer(function(input, output, session) {
                    )
           } else {
             text <- paste0("input\tselected\n",
-                    "current$longitudinal\t", longitudinal, "\n",
-                    "current$timeframe[1]\t", myTimeframe[1], "\n",
-                    "current$timeframe[2]\t", myTimeframe[2], "\n",
+                    longitudinalText,
                     "facetInfo$group\t", myFacet, "\n",
                     "facetInfo$group_stp1\t", facet_stp1, "\n",
                     "facetInfo$group_stp2\t", facet_stp2, "\n",
@@ -980,9 +1080,9 @@ shinyServer(function(input, output, session) {
             #add makeGroups data to df and return
             colnames(outData) <- c("Participant_Id", "FACET")
             #will need a var called label that changes based on what the facet steps are. the below only works for strings.
-            if (any(colnames(event.file) %in% myFacet)) {
-              naToZero(outData, "FACET")
-            }
+            #if (any(colnames(event.file) %in% myFacet)) {
+             # naToZero(outData, "FACET")
+            #}
             message(paste("levels facet:", levels(as.factor(outData$FACET))))
             outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
            # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
@@ -1027,18 +1127,20 @@ shinyServer(function(input, output, session) {
                 }
               }
             }
+            outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+            label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = colnames(event.file))
+            message(paste("label is:", label))
+            if (any(colnames(event.file) %in% myGroups)) {
+              naToZero(plotData, "GROUPS")
+            }
+            message("have custom groups! now merge..")
+            #add makeGroups data to df and return
+            outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
+            plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
+            print("NA in groups:", any(is.na(plotData$GROUPS)))
+          } else {
+            plotData <- cbind(plotData, "GROUPS" = "All Participants")
           }
-          outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
-          label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = colnames(event.file))
-          message(paste("label is:", label))
-          if (any(colnames(event.file) %in% myGroups)) {
-            naToZero(plotData, "GROUPS")
-          }
-          message("have custom groups! now merge..")
-          #add makeGroups data to df and return
-          outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
-          plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
-          print("NA in groups:", any(is.na(plotData$GROUPS)))
         }
         plotData
       }
@@ -1047,10 +1149,8 @@ shinyServer(function(input, output, session) {
     }), 2000)
       
     plotData <- reactive({  
-      message("just before tableData call")
         plotData <- tableData()
         if (is.null(plotData)) {
-          message("oh no! tableData returned null!")
           return()
         } else {
           #collecting inputs .. i think these are the only ones i need here.. well see
@@ -1063,9 +1163,8 @@ shinyServer(function(input, output, session) {
           }
           yaxis_stp1 <- input$yaxis_stp1
           
-          strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
+          strings <- getStrings(metadata.file)
         
-        message("and format rest of data .. being lazy and not including custom messages with each step :(")
         #prepare for return
         
         #determine necessary column id vectors before start
@@ -1106,7 +1205,10 @@ shinyServer(function(input, output, session) {
         if (myY %in% strings$source_id) {
           #will have to replace all instances of myY with 1 and all else with 0 before can sum
           plotData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp1, 1, 0))
-          mergeData <- aggregate(as.formula(aggStr1), plotData, sum)
+          #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
+          tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, sum)
+          tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
+          mergeData <- aggregate(as.formula(aggStr1), tempData, sum) 
           if (yaxis_stp2 == "proportion") {
             groupSum <- as.data.table(aggregate(as.formula(aggStr2), plotData, FUN = function(x){length(unique(x))}))
             colnames(groupSum) <- sumCols

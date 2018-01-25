@@ -11,6 +11,9 @@ plot <-      tabPanel("Plot", fluid = TRUE,
                    column(4,
                           column(12,
                                  fluidRow(
+                                   uiOutput("xaxis_var")
+                                 ),
+                                 fluidRow(
                                    uiOutput("choose_yaxis")
                                  ),
                                  fluidRow(
@@ -19,7 +22,7 @@ plot <-      tabPanel("Plot", fluid = TRUE,
                                  fluidRow(
                                    uiOutput("yaxis_stp2")
                                  )
-                          )
+                          ) 
                    ),
                    column(4,
                           column(12,
@@ -30,7 +33,7 @@ plot <-      tabPanel("Plot", fluid = TRUE,
                           column(12,
                                   fluidRow(
                                     customGroupsUI("group", colWidth = 12)
-                                  )
+                                 )
                           )
                    ),
                    column(4,

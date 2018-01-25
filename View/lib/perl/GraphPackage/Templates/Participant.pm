@@ -226,11 +226,12 @@ sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
   my $rAdjustString = << 'RADJUST';
-  profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
-  profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-  profile.df.full = transform(profile.df.full, "COLOR"=ifelse(OPT_STATUS == 'Yes', "red", ifelse((grepl("not", STATUS) | grepl("patent", STATUS)), "green", "blue")));
-  profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("parasitemia",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), NA));
-  profile.df.full$FILL = as.factor(profile.df.full$FILL);
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "0", ifelse(OPT_STATUS == 'Yes', "1", ifelse((grepl("LAMP not done", STATUS) | grepl("patent", STATUS)), "2", "3"))));
+profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("patent",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), ifelse(grepl("microscopic",STATUS),"3",NA)));
+colors <- magma(3, end = .9, begin = .55555)
+profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
 RADJUST
 
   $profile->addAdjustProfile($rAdjustString);
