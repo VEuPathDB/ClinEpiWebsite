@@ -270,8 +270,22 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- tempTable
     colnames(outData) <- c("Participant_Id", "GROUPS")
   }  else {
+    mergeData <- NULL
     #for strings
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1 %in% x) {1} else {0} })
+    for (i in seq(length(groups_stp1))) {
+      tempData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
+      colnames(tempData) <- c("Participant_Id", "drop", "GROUPS")
+      tempData$drop <- NULL
+      if (is.null(mergeData)) {
+        mergeData <- tempData
+      } else {
+        colnames(mergeData) <- c("Participant_Id", "PrevGroup")
+        mergeData <- merge(mergeData, tempData, by = "Participant_Id")
+        mergeData <- transform(mergeData, "GROUPS" = ifelse(PrevGroup == 1 | GROUPS == 1, 1, 0))
+        mergeData$PrevGroup <- NULL 
+      }
+    }
+    outData <- mergeData
   }
 
   if (ncol(outData) > 2) {
@@ -320,7 +334,7 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   }  else {
     #for strings
     aggStr <- paste0(myGroups, " ~ Participant_Id")
-    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){all(x == groups_stp1)})
+    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(groups_stp1), all(sort(levels(as.factor(x))) == sort(groups_stp1)), FALSE) })
     colnames(outData) <- c("Participant_Id", "GROUPS")
     outData <- transform(outData, "GROUPS" = ifelse(GROUPS == TRUE, 1, 0))
   }
@@ -406,17 +420,22 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
     }
   } else {
     if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
-      label[1] <- paste(obsFlag, groups_stp1)
-      if (label[1] == paste0(obsFlag, " Yes")) {
-        label[2] <- "No"
-      } else if (label[1] == paste0(obsFlag, " No")) {
-        label[2] <- "Yes"
-      } else if (label[1] == paste0(obsFlag, " True")) {
-        label[2] <- "False"
-      } else if (label[1] == paste0(obsFlag, " False")) {
-        label[2] <- "True"
+      if (length(groups_stp1) == 1) { 
+        label[1] <- paste(obsFlag, groups_stp1)
+        if (label[1] == paste0(obsFlag, " Yes")) {
+          label[2] <- "No"
+        } else if (label[1] == paste0(obsFlag, " No")) {
+          label[2] <- "Yes"
+        } else if (label[1] == paste0(obsFlag, " True")) {
+          label[2] <- "False"
+        } else if (label[1] == paste0(obsFlag, " False")) {
+          label[2] <- "True"
+        } else {
+            label[2] <- paste0("Not ", label[1])
+        }
       } else {
-          label[2] <- paste0("Not ", label[1])
+        label[1] <- paste(obsFlag, "Observations Matching Selected Variables")
+        label[2] <- paste("Not", obsFlag, "Observations Matching Selected Variables")
       }
     } else {
       label[1] <- paste0(obsFlag, " within date range")
