@@ -2,3 +2,5 @@
 ---
 product: ClinEpiDB
 modelconfig_modelName: clinEpiModel
+modelprop:
+  FACEBOOK_URL: https://www.facebook.com/ClinEpiDB
