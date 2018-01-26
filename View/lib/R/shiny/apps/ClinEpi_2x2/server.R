@@ -17,11 +17,10 @@ shinyServer(function(input, output, session) {
   outInfo <- NULL
   attribute.file <- NULL
   propUrl <- NULL
+  longitudinal1 <- NULL
+  longitudinal2 <- NULL
 
   filesFetcher <- reactive({
- 
-  #not sure if i need properties here, or just in the module
-  #also not sure which vars should be scopes to the page, rather than the function
   if (is.null(propUrl)) {
     propUrl <<- getPropertiesUrl(session)
   }
@@ -169,6 +168,20 @@ shinyServer(function(input, output, session) {
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
+
+    nums <- getNums(metadata.file)$source_id
+    if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+      numTimelines <- 1
+    } else {
+      numTimelines <- 2
+    }
+    if (numTimelines == 1) {
+      longitudinal1 <<- longitudinal.file$columns[1]
+      longitudinal2 <<- NULL
+    } else {
+      longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns[1]
+      longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns[1]
+    }
 
     singleVarData
   }
@@ -353,9 +366,7 @@ shinyServer(function(input, output, session) {
       #test <- propText()    
   
       #collecting inputs 
-      longitudinal1 <- current$var1
       myTimeframe1 <- current$range1
-      longitudinal2 <- current$var2
       myTimeframe2 <- current$range2
       if (is.null(attrInfo$group)) {
         message("attr group is null")
@@ -428,7 +439,7 @@ shinyServer(function(input, output, session) {
         attr_stp4 <- attrInfo$group_stp4
   
         #first thing is to save properties
-        longitudinalText <- longitudinalText(longitudinal1, myTimeframe1, longitudinal2, myTimeframe2)
+        longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
         attrText <- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
         outText <- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)  
 

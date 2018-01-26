@@ -21,7 +21,9 @@ shinyServer(function(input, output, session) {
   groupInfo <- NULL
   attribute.file <- NULL
   propUrl <- NULL
-  properties <- NULL  
+  properties <- NULL
+  longitudinal1 <- NULL
+  longitudinal2 <- NULL
 
   filesFetcher <- reactive({
 
@@ -187,6 +189,20 @@ shinyServer(function(input, output, session) {
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
+    nums <- getNums(metadata.file)$source_id
+    if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+      numTimelines <- 1
+    } else {
+      numTimelines <- 2
+    }
+    if (numTimelines == 1) {
+      longitudinal1 <<- longitudinal.file$columns
+      longitudinal2 <<- NULL
+    } else {
+      longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
+      longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
+    }
+
     singleVarData
   }
   
@@ -204,7 +220,7 @@ shinyServer(function(input, output, session) {
   })
 
     output$xaxis_var <- renderUI({
-      if (is.null(current$var2)) {
+      if (is.null(longitudinal2)) {
         return()
       }
 
@@ -226,10 +242,10 @@ shinyServer(function(input, output, session) {
     })
   
     output$groups_type <- renderUI({
-      longitudinal <- current$var1
+      longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
         if (input$xaxisVar == "ageVar") {
-          longitudinal <- current$var2
+          longitudinal <- longitudinal2
         }
       }
       mySelected <- properties$selected[properties$input == "input$groupsType"]
@@ -330,10 +346,10 @@ shinyServer(function(input, output, session) {
         } else {
           groupsType <- input$groupsType
         }
-        longitudinal <- current$var1
+        longitudinal <- longitudinal1
         if (!is.null(input$xaxisVar)) {
           if (input$xaxisVar == "ageVar") {
-            longitudinal <- current$var2
+            longitudinal <- longitudinal2
           }
         }
       
@@ -416,9 +432,18 @@ shinyServer(function(input, output, session) {
     output$choose_yaxis <- renderUI({
       mySelected <- properties$selected[properties$input == "input$yaxis"]
 
-      #this list should contain anything from events file
-      if (event.file.exists) {
-        useData <- event.file
+      #strings should have any vs all and picklist.
+     
+      longitudinal <- longitudinal1
+      if (!is.null(input$xaxisVar)) {
+        if (input$xaxisVar == "ageVar") {
+          longitudinal <- longitudinal2
+        }
+      }
+      dates <- getDates(metadata.file)$source_id
+
+      if (!is.null(longitudinal)) {
+        useData <- event.file[, !dates, with=FALSE]
       } else {
         useData <- singleVarData
       }
@@ -459,40 +484,88 @@ shinyServer(function(input, output, session) {
         }
       }      
 
-      if (dontUseProps) {      
+      if (dontUseProps) {
         if (!myY %in% nums$source_id) {
           selectInput(inputId = "yaxis_stp1",
-                      label = NULL,
-                      choices = attrStp1List,
-                      width = '100%') 
+                   label = "are / is",
+                   choices = list("always" = "all", "ever" = "any"),
+                   selected = mySelected,
+                   width = '100%')
         }
       } else {
         if (!myY %in% nums$source_id) {
           selectInput(inputId = "yaxis_stp1",
-                      label = NULL,
-                      choices = attrStp1List,
-                      selected = mySelected,
-                      width = '100%')
+                   label = "are / is",
+                   choices = list("always" = "all", "ever" = "any"),
+                   selected = "any",
+                   width = '100%')
         }
       }
-      
+
     })
-    
+   
     output$yaxis_stp2 <- renderUI({
+      if (is.null(input$yaxis)) {
+        return()
+      }
+      myY <- input$yaxis
+      myYSelected <- properties$selected[properties$input == "input$yaxis"]
+      mySelected <- properties$selected[properties$input == "input$yaxis_stp2"]
+
+      attrStp1List <- getUIStp1List(singleVarData, myY)
+      nums <- getNums(metadata.file)
+
+      dontUseProps <- FALSE
+      if (is.null(properties)) {
+        dontUseProps <- TRUE
+      } else {
+        if (myY != myYSelected) {
+          dontUseProps = TRUE
+        }
+      }
+
+      maxInputs <- length(attrStp1List)
+      if (dontUseProps) {
+        if (!myY %in% nums$source_id) {
+          selectizeInput(inputId = "yaxis_stp2",
+                    label = NULL,
+                    choices = attrStp1List,
+                    selected = "EUPATH_0000338",
+                    width = '100%',
+                    multiple = TRUE,
+                    options = list(maxItems = maxInputs,
+                                   placeholder = '-Selected Items Will Appear Here-'))
+        }
+      } else {
+        if (!myY %in% nums$source_id) {
+          selectizeInput(inputId = "yaxis_stp2",
+                    label = NULL,
+                    choices = attrStp1List,
+                    selected = mySelected,
+                    width = '100%',
+                    multiple = TRUE,
+                    options = list(maxItems = maxInputs,
+                                   placeholder = '-Selected Items Will Appear Here-'))
+        }
+      }
+
+    })
+ 
+    output$yaxis_stp3 <- renderUI({
       if (is.null(input$yaxis)) {
         return()
       } else {
         myY <- input$yaxis
       }
       nums <- getNums(metadata.file)
-      longitudinal <- current$var1
+      longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
         if (input$xaxisVar == "ageVar") {
-          longitudinal <- current$var2
+          longitudinal <- longitudinal2
         }
       }
       myYSelected <- properties$selected[properties$input == "input$yaxis"]
-      mySelected <- properties$selected[properties$input == "input$yaxis_stp2"]      
+      mySelected <- properties$selected[properties$input == "input$yaxis_stp3"]      
 
       dontUseProps <- FALSE
       if (is.null(properties)) {
@@ -506,7 +579,7 @@ shinyServer(function(input, output, session) {
       if (dontUseProps) {
         if (myY %in% nums$source_id) {
           if (!is.null(longitudinal)) {
-            radioButtons(inputId = "yaxis_stp2",
+            radioButtons(inputId = "yaxis_stp3",
                          label = "Display as:",
                          choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
                          selected = "smooth",
@@ -514,7 +587,7 @@ shinyServer(function(input, output, session) {
                          inline = TRUE)
           } else {
             #later think up better way. shouldnt show something with only one option. but this is a required input later on. will need if statements below instead.
-            radioButtons(inputId = "yaxis_stp2",
+            radioButtons(inputId = "yaxis_stp3",
                          label = "Display as:",
                          choices = list("Mean" = "mean"),
                          selected = "mean",
@@ -522,10 +595,10 @@ shinyServer(function(input, output, session) {
                          inline = TRUE)
           }
         } else {
-          if (is.null(input$yaxis_stp1)) {
+          if (is.null(input$yaxis_stp2)) {
             return()
           }
-          radioButtons(inputId = "yaxis_stp2",
+          radioButtons(inputId = "yaxis_stp3",
                        label = "Display as:",
                        choices = list("Count" = "count", "Proportion" = "proportion"),
                        selected = "proportion",
@@ -535,7 +608,7 @@ shinyServer(function(input, output, session) {
       } else {
         if (myY %in% nums$source_id) {
           if (!is.null(longitudinal)) {
-            radioButtons(inputId = "yaxis_stp2",
+            radioButtons(inputId = "yaxis_stp3",
                          label = "Display as:",
                          choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
                          selected = mySelected,
@@ -543,7 +616,7 @@ shinyServer(function(input, output, session) {
                          inline = TRUE)
           } else {
             #later think up better way. shouldnt show something with only one option. but this is a required input later on. will need if statements below instead.
-            radioButtons(inputId = "yaxis_stp2",
+            radioButtons(inputId = "yaxis_stp3",
                          label = "Display as:",
                          choices = list("Mean" = "mean"),
                          selected = mySelected,
@@ -551,10 +624,10 @@ shinyServer(function(input, output, session) {
                          inline = TRUE)
           }
         } else {
-          if (is.null(input$yaxis_stp1)) {
+          if (is.null(input$yaxis_stp2)) {
             return()
           }
-          radioButtons(inputId = "yaxis_stp2",
+          radioButtons(inputId = "yaxis_stp3",
                        label = "Display as:",
                        choices = list("Count" = "count", "Proportion" = "proportion"),
                        selected = mySelected,
@@ -566,16 +639,16 @@ shinyServer(function(input, output, session) {
     })
     
     output$plot <- renderPlotly({
-      if (is.null(input$yaxis_stp2)) {
+      if (is.null(input$yaxis_stp3)) {
         return()
       } else {
-        plotType <- input$yaxis_stp2
+        plotType <- input$yaxis_stp3
       }
-      longitudinal <- current$var1
+      longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
         xaxisVar <- input$xaxisVar
         if (xaxisVar == "ageVar") {
-          longitudinal <- current$var2
+          longitudinal <- longitudinal2
         }
       } 
       
@@ -775,14 +848,14 @@ shinyServer(function(input, output, session) {
         data$Group[nrow(data)] <- "Totals"
       }
     
-      longitudinal <- current$var1
+      longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
         if (input$xaxisVar == "ageVar") {
-          longitudinal <- current$var2
+          longitudinal <- longitudinal2
         }
       }
       #temp placeholder for checking if data has time vars for x axis
-      if (!is.null(longitudinal)) {
+      if (is.null(longitudinal)) {
         names(data)[names(data) == 'Line'] <- 'X-Axis'
       } 
 
@@ -798,14 +871,12 @@ shinyServer(function(input, output, session) {
     tableData <- debounce(reactive({
       
       #collecting inputs 
-      longitudinal1 <- current$var1
       myTimeframe1 <- current$range1
-      longitudinal2 <- current$var2
       myTimeframe2 <- current$range2
-      longitudinal <- current$var1
+      longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
         if (input$xaxisVar == "ageVar") {
-          longitudinal <- current$var2
+          longitudinal <- longitudinal2
         }
       }
       groupsType <- input$groupsType
@@ -813,13 +884,16 @@ shinyServer(function(input, output, session) {
       myFacet <- facetInfo$group
       myY <- input$yaxis
       yaxis_stp2 <- input$yaxis_stp2
+      yaxis_stp3 <- input$yaxis_stp3
       myGroups <- groupInfo$group
       #grab optional inputs
       groups_stp1 <- groupInfo$group_stp1
+      message(paste("groups stp1:", groups_stp1))
       groups_stp3 <- groupInfo$group_stp3
       groups_stp4 <- groupInfo$group_stp4
       groups_stp2 <- groupInfo$group_stp2
       facet_stp1 <- facetInfo$group_stp1
+      message(paste("facet stp1:", facet_stp1))
       facet_stp3 <- facetInfo$group_stp3
       facet_stp4 <- facetInfo$group_stp4
       facet_stp2 <- facetInfo$group_stp2
@@ -874,9 +948,19 @@ shinyServer(function(input, output, session) {
       if (is.null(facetType)) {
         go <- FALSE
       } else {
-        if (facetType != "none") {
-          if (is.null(myFacet)) {
+        if (facetType == "makeGroups") {
+          if (is.null(facet_stp1)) {
             go <- FALSE
+          } else {
+            if (facet_stp1 == 'any' | facet_stp1 == 'all') {
+              if (is.null(facet_stp2)) {
+                go <- FALSE
+              }
+            }
+          }
+        } else if (facetType == "direct") {
+          if (is.null(myFacet)) {
+            return()
           }
         }
       }
@@ -884,12 +968,12 @@ shinyServer(function(input, output, session) {
         go <- FALSE
       } else {
         if (myY %in% strings$source_id) {
-          if (is.null(yaxis_stp1)) {
+          if (is.null(yaxis_stp2)) {
             go <- FALSE
           }
         }
       }
-      if (is.null(yaxis_stp2)) {
+      if (is.null(yaxis_stp3)) {
         go <- FALSE
       }
       
@@ -900,10 +984,21 @@ shinyServer(function(input, output, session) {
         #should have natozero before this for non-anthro events?? so an NA for diarrhea -> 0 ?? 
 
         #first thing is to save properties 
-        longitudinalText <- longitudinalText(longitudinal1, myTimeframe1, longitudinal2, myTimeframe2)
+        longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
         facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
         groupsText <- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
 
+        #this needs revision since stp2 could have multiple values
+        if (length(yaxis_stp2) > 1) {
+          yaxisStp2Text <- ""
+          for (i in seq(length(yaxis_stp2))) {
+            yaxisStp2Text <- paste0(yaxisStp2Text,
+            "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
+          }
+        } else {
+          yaxisStp2Text <- paste0("input$group_stp2\t", groups_stp2, "\n")
+        }
+ 
         text <- paste0("input\tselected\n",
                        longitudinalText,
                        facetText,
@@ -913,7 +1008,8 @@ shinyServer(function(input, output, session) {
                        "input$facetType\t", facetType, "\n",
                        "input$yaxis\t", myY, "\n",
                        "input$yaxis_stp1\t", yaxis_stp1, "\n",
-                       "input$yaxis_stp2\t", yaxis_stp2
+                       yaxisStp2Text,
+                       "input$yaxis_stp3\t", yaxis_stp3
                    )
 
         PUT(propUrl, body = "")
@@ -974,6 +1070,7 @@ shinyServer(function(input, output, session) {
           anthro <- c("percentDays", "delta", "direct")
           if (facetType != "none") {
             if (is.null(facet_stp1)) {
+              message("facet stp1 is null.. returning")
               return()
             } else {
               if (facet_stp1 %in% numeric) {
@@ -1028,6 +1125,7 @@ shinyServer(function(input, output, session) {
           anthro <- c("percentDays", "delta", "direct")
           if (groupsType != "none") {
             if (is.null(groups_stp1)) {
+              message("groups stp1 is null... returning")
               return()
             } else {
               if (groups_stp1 %in% numeric) {
@@ -1076,12 +1174,13 @@ shinyServer(function(input, output, session) {
           #collecting inputs .. i think these are the only ones i need here.. well see
           myY <- input$yaxis
           message(paste("my y from plotData:", myY))
-          if (is.null(input$yaxis_stp2)) {
+          if (is.null(input$yaxis_stp3)) {
             return()
           } else {
-            yaxis_stp2 <- input$yaxis_stp2
+            yaxis_stp3 <- input$yaxis_stp3
           }
           yaxis_stp1 <- input$yaxis_stp1
+          yaxis_stp2 <- input$yaxis_stp2
           
           strings <- getStrings(metadata.file)
         
@@ -1123,13 +1222,32 @@ shinyServer(function(input, output, session) {
         }
         
         if (myY %in% strings$source_id) {
-          #will have to replace all instances of myY with 1 and all else with 0 before can sum
-          plotData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp1, 1, 0))
-          #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
-          tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, sum)
-          tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
-          mergeData <- aggregate(as.formula(aggStr1), tempData, sum) 
-          if (yaxis_stp2 == "proportion") {
+          mergeData <- NULL
+          if (yaxis_stp1 == "any") {
+            #will have to replace all instances of myY with 1 and all else with 0 before can sum
+            for (i in seq(length(yaxis_stp2))) {
+              plotData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
+              #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
+              tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, sum)
+              tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
+              #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
+              if (is.null(mergeData)) {
+                mergeData <- tempData
+              } else {
+                names(tempData)[names(tempData) == "YAXIS"] <- "prevY"
+                cols <- c("Participant_Id", "prevY")
+                tempData <- tempData[, cols]
+                mergeData <- merge(mergeData, tempData, by = "Participant_Id")
+                mergeData <- transform(mergeData, "YAXIS" = ifelse(prevY == 1 | YAXIS == 1, 1, 0))
+                mergeData$prevY <- NULL
+              }
+            }
+          } else {
+              mergeData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) })
+              mergeData <- transform(mergeData, "YAXIS" = ifelse(YAXIS == TRUE, 1, 0))
+          }
+          mergeData <- aggregate(as.formula(aggStr1), mergeData, sum) 
+          if (yaxis_stp3 == "proportion") {
             groupSum <- as.data.table(aggregate(as.formula(aggStr2), plotData, FUN = function(x){length(unique(x))}))
             colnames(groupSum) <- sumCols
             mergeData <- as.data.table(mergeData)
@@ -1139,7 +1257,7 @@ shinyServer(function(input, output, session) {
             mergeData$SUM <- NULL
           }
         }
-        if (yaxis_stp2 == "smooth" | yaxis_stp2 == "mean") {
+        if (yaxis_stp3 == "smooth" | yaxis_stp3 == "mean") {
           plotData$Participant_Id <- NULL
           plotData <- unique(plotData)
         } else {

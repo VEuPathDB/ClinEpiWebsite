@@ -21,6 +21,9 @@ plot <-      tabPanel("Plot", fluid = TRUE,
                                  ),
                                  fluidRow(
                                    uiOutput("yaxis_stp2")
+                                 ),
+                                 fluidRow(
+                                   uiOutput("yaxis_stp3")
                                  )
                           ) 
                    ),
