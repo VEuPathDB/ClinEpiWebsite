@@ -88,7 +88,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       tempDF <- completeDT(data, selected)
       myMin <- min(tempDF[[selected]])
       myMax <- max(tempDF[[selected]]) 
-      mySelected <- properties$selected[properties$input == "current$var1"]
+      #mySelected <- properties$selected[properties$input == "current$var1"]
      
       if (length(longitudinal1$columns) == 1) {
         label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])
@@ -103,10 +103,10 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
-      } else {
-        if (selected != mySelected) {
-          dontUseProps <- TRUE
-        }
+      #} else {
+       # if (selected != mySelected) {
+       #   dontUseProps <- TRUE
+       # }
       }
 
       if (dontUseProps) {
@@ -171,7 +171,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       tempDF <- completeDT(data, selected)
       myMin <- min(tempDF[[selected]])
       myMax <- max(tempDF[[selected]])
-      mySelected <- properties$selected[properties$input == "current$var2"]
+      #mySelected <- properties$selected[properties$input == "current$var2"]
 
       if (length(longitudinal2$columns) == 1) {
         label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal2$columns[1]])
@@ -186,10 +186,10 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
-      } else {
-        if (selected != mySelected) {
-          dontUseProps <- TRUE
-        }
+      #} else {
+       # if (selected != mySelected) {
+       #   dontUseProps <- TRUE
+        #}
       }
 
       if (dontUseProps) {
