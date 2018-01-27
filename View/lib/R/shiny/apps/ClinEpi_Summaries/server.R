@@ -935,7 +935,13 @@ shinyServer(function(input, output, session) {
           } else {
             if (groups_stp1 == 'any' | groups_stp1 == 'all') {
               if (is.null(groups_stp2)) {
-                go <- FALSE
+                return()
+              } else {
+                if (groups_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+                  if (is.null(groups_stp3)) {
+                    return()
+                  }
+                }
               }
             }
           }         
@@ -954,8 +960,14 @@ shinyServer(function(input, output, session) {
           } else {
             if (facet_stp1 == 'any' | facet_stp1 == 'all') {
               if (is.null(facet_stp2)) {
-                go <- FALSE
-              }
+                return()
+              } else {
+                if (facet_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+                  if (is.null(facet_stp3)) {
+                    return()
+                  }
+                }
+              }         
             }
           }
         } else if (facetType == "direct") {

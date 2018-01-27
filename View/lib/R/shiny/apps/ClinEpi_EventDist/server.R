@@ -607,6 +607,12 @@ shinyServer(function(input, output, session) {
             if (facet_stp1 == 'any' | facet_stp1 == 'all') {
               if (is.null(facet_stp2)) {
                 return()
+              } else {
+                if (facet_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+                  if (is.null(facet_stp3)) {
+                    return()
+                  }
+                }
               }
             }
           } 

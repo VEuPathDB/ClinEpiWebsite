@@ -415,12 +415,24 @@ shinyServer(function(input, output, session) {
       } else {
         if (outInfo$group_stp1 == 'any' | outInfo$group_stp1 == 'all') {
           if (is.null(outInfo$group_stp2)) {
-            go <- FALSE
+            return()
+          } else {
+            if (outInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+              if (is.null(outInfo$group_stp3)) {
+                return()
+              }
+            }
           }
         }
         if (attrInfo$group_stp1 == 'any' | attrInfo$group_stp1 == 'all') {
           if (is.null(attrInfo$group_stp2)) {
-            go <- FALSE
+            return()
+          } else {
+            if (attrInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+              if (is.null(attrInfo$group_stp3)) {
+                return()
+              }
+            }
           }
         }
       }
