@@ -1226,9 +1226,9 @@ shinyServer(function(input, output, session) {
           if (yaxis_stp1 == "any") {
             #will have to replace all instances of myY with 1 and all else with 0 before can sum
             for (i in seq(length(yaxis_stp2))) {
-              plotData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
+              tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
-              tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, sum)
+              tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), tempData, sum)
               tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
               #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
@@ -1240,6 +1240,9 @@ shinyServer(function(input, output, session) {
                 mergeData <- merge(mergeData, tempData, by = "Participant_Id")
                 mergeData <- transform(mergeData, "YAXIS" = ifelse(prevY == 1 | YAXIS == 1, 1, 0))
                 mergeData$prevY <- NULL
+                #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
+                mergeData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), mergeData, sum)
+                mergeData <- transform(mergeData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
               }
             }
           } else {
