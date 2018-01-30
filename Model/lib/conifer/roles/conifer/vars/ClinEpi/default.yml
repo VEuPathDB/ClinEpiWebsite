@@ -4,3 +4,4 @@ product: ClinEpiDB
 modelconfig_modelName: clinEpiModel
 modelprop:
   FACEBOOK_URL: https://www.facebook.com/ClinEpiDB
+  TWITTER_URL: https://twitter.com/ClinEpiDB
