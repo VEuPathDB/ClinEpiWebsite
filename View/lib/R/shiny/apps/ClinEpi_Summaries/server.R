@@ -489,7 +489,7 @@ shinyServer(function(input, output, session) {
           selectInput(inputId = "yaxis_stp1",
                    label = "are / is",
                    choices = list("always" = "all", "ever" = "any"),
-                   selected = mySelected,
+                   selected = "any",
                    width = '100%')
         }
       } else {
@@ -497,7 +497,7 @@ shinyServer(function(input, output, session) {
           selectInput(inputId = "yaxis_stp1",
                    label = "are / is",
                    choices = list("always" = "all", "ever" = "any"),
-                   selected = "any",
+                   selected = mySelected,
                    width = '100%')
         }
       }
