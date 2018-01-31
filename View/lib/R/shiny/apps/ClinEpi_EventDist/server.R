@@ -23,6 +23,8 @@ shinyServer(function(input, output, session) {
   propUrl <- NULL
   properties <- NULL
   plotChoice <- 'singleVar'
+  longitudinal1 <- NULL
+  longitudinal2 <- NULL
 
   filesFetcher <- reactive({
 
@@ -186,6 +188,20 @@ shinyServer(function(input, output, session) {
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
+
+    nums <- getNums(metadata.file)$source_id
+    if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+      numTimelines <- 1
+    } else {
+      numTimelines <- 2
+    }
+    if (numTimelines == 1) {
+      longitudinal1 <<- longitudinal.file$columns[1]
+      longitudinal2 <<- NULL
+    } else {
+      longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns[1]
+      longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns[1]
+    }
 
     singleVarData
   }
@@ -506,27 +522,38 @@ shinyServer(function(input, output, session) {
       if (is.null(data)) {
         return()
       }
-      myFacet <- facetInfo$group
+      if (input$facetType == "none") {
+        myFacet <- "none"
+      } else {
+        myFacet <- facetInfo$group
+      }
       myX <- xaxisInfo$group  
       if ("FACET" %in% colnames(data)) {
         myFacet <- "FACET"
       }
  
       nums <- getNums(metadata.file)$source_id
-
-      aggStr <- paste0("Participant_Id ~ ", myFacet)
-      aggStr2 <- paste0(myX, " ~", myFacet)
-
-      #will need to change first arg based on all possible or makeGroups
-      tableData <- aggregate(as.formula(aggStr), data, FUN = function(x){length(unique(x))})
-      if (myX %in% nums) {
-        mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
-        tableData <- merge(tableData, mean, by = myFacet)
-        median <- aggregate(as.formula(aggStr2), data, median)
-        tableData <- merge(tableData, median, by = myFacet)
-        colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median")
+ 
+      if (myFacet == "none") {
+        tableData <- data.table("Facet" = "All", "# Participants" = length(unique(data$Participant_Id)))
+        if (myX %in% nums) {
+          tableData <- cbind(tableData, "Mean" = round(mean(data[[myX]], na.rm = TRUE),4))
+          tableData <- cbind(tableData, "Median" = median(data[[myX]], na.rm = TRUE))
+        }
       } else {
-        colnames(tableData) <- c("Facets", "# Participants")
+        aggStr <- paste0("Participant_Id ~ ", myFacet)
+        aggStr2 <- paste0(myX, " ~", myFacet)
+        #will need to change first arg based on all possible or makeGroups
+        tableData <- aggregate(as.formula(aggStr), data, FUN = function(x){length(unique(x))})
+        if (myX %in% nums) {
+          mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
+          tableData <- merge(tableData, mean, by = myFacet)
+          median <- aggregate(as.formula(aggStr2), data, median)
+          tableData <- merge(tableData, median, by = myFacet)
+          colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median")
+        } else {
+          colnames(tableData) <- c("Facets", "# Participants")
+        }
       }
 
       datatable(tableData,
@@ -569,8 +596,6 @@ shinyServer(function(input, output, session) {
       myGroups <- input$groups
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
-      longitudinal1 <- current$var1
-      longitudinal2 <- current$var2
  
       if (is.null(facetType)) {
         return()
@@ -582,6 +607,12 @@ shinyServer(function(input, output, session) {
             if (facet_stp1 == 'any' | facet_stp1 == 'all') {
               if (is.null(facet_stp2)) {
                 return()
+              } else {
+                if (facet_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+                  if (is.null(facet_stp3)) {
+                    return()
+                  }
+                }
               }
             }
           } 
@@ -592,29 +623,13 @@ shinyServer(function(input, output, session) {
         } 
       }
 
-      #could maybe make this a function just to improve readability
       #first thing is to save properties 
-      if (length(facet_stp1) > 1) {
-        facetText <- paste0("facetInfo$group_stp1[1]\t", facet_stp1[1], "\n",
-                            "facetInfo$group_stp1[2]\t", facet_stp1[2], "\n")
-      } else {
-        facetText <- paste0("facetInfo$group_stp1\t", facet_stp1, "\n")
-      }      
- 
-      longitudinalText <- paste0("current$var1\t", longitudinal1, "\n",
-                                 "current$range1[1]\t", myTimeframe1[1], "\n",
-                                 "current$range1[2]\t", myTimeframe1[2], "\n",
-                                 "current$var2\t", longitudinal2, "\n",
-                                 "current$range2[1]\t", myTimeframe2[1], "\n",
-                                 "current$range2[2]\t", myTimeframe2[2], "\n")
+      longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
+      facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
 
       text <- paste0("input\tselected\n",
                      longitudinalText,
                      facetText,
-                     "facetInfo$group\t", myFacet, "\n",
-                     "facetInfo$group_stp2\t", facet_stp2, "\n",
-                     "facetInfo$group_stp3\t", facet_stp3, "\n",
-                     "facetInfo$group_stp4\t", facet_stp4, "\n",
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
                      "input$xaxis\t", xType
@@ -689,7 +704,7 @@ shinyServer(function(input, output, session) {
         if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
           data[[myFacet]] <- cut(data[[myFacet]],4)
         }
-      } else {
+      } else if (facetType == "makeGroups") {
         numeric <- c("lessThan", "greaterThan", "equals")
         anthro <- c("percentDays", "delta", "direct")
         if (facetType != "none") {
@@ -722,10 +737,10 @@ shinyServer(function(input, output, session) {
         }
       }
     
-      if ("FACET" %in% colnames(data)) {
+      if (facetType == "makeGroups") {
         myCols <- c("Participant_Id", myX, "FACET") 
       } else {
-        if (myX == myFacet) {
+        if (myX == myFacet | myFacet == "none") {
           myCols <- c("Participant_Id", myX)
         } else {
           myCols <- c("Participant_Id", myX, myFacet)

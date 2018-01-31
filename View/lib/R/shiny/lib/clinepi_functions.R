@@ -1,6 +1,51 @@
 ### all clinepi specific functions b/c rely on data and/or metadata to be formatted consistently
 
 
+longitudinalText <- function(myTimeframe1, myTimeframe2) {
+  longitudinalText <- paste0("current$range1[1]\t", myTimeframe1[1], "\n",
+                             "current$range1[2]\t", myTimeframe1[2], "\n",
+                             "current$range2[1]\t", myTimeframe2[1], "\n",
+                             "current$range2[2]\t", myTimeframe2[2], "\n")
+
+  longitudinalText
+}
+
+groupText <- function(moduleName, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4) {
+  if (length(groups_stp2) > 1) {
+    groupsStp2Text <- ""
+    for (i in seq(length(groups_stp2))) {
+      groupsStp2Text <- paste0(groupsStp2Text,
+      moduleName, "$group_stp2\t", groups_stp2[i], "\n")
+    }
+  } else {
+    groupsStp2Text <- paste0(moduleName, "$group_stp2\t", groups_stp2, "\n")
+  }
+
+  if (length(groups_stp1) > 1) {
+    #check if date or strings
+    if (all(isDate(groups_stp1))) {
+      groupsStp1Text <- paste0(moduleName, "$group_stp1[1]\t", groups_stp1[1], "\n",
+                               moduleName, "$group_stp1[2]\t", groups_stp1[2], "\n")
+    } else {
+      groupsStp1Text <- ""
+      for (i in seq(length(groups_stp1))) {
+        groupsStp1Text <- paste0(groupsStp1Text,
+        moduleName, "$group_stp1\t", groups_stp1[i], "\n")
+      }
+    }
+  } else {
+    groupsStp1Text <- paste0(moduleName, "$group_stp1\t", groups_stp1, "\n")
+  }
+
+    groupsText <- paste0(moduleName, "$group\t", myGroups, "\n",
+                         groupsStp1Text,
+                         groupsStp2Text,
+                         moduleName, "$group_stp3\t", groups_stp3, "\n",
+                         moduleName, "$group_stp4\t", groups_stp4, "\n")
+
+  groupsText
+}
+
 subsetDataFetcher <- function(min, max, data, col){
 
   #this version maled specific.
@@ -270,8 +315,22 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- tempTable
     colnames(outData) <- c("Participant_Id", "GROUPS")
   }  else {
+    mergeData <- NULL
     #for strings
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1 %in% x) {1} else {0} })
+    for (i in seq(length(groups_stp1))) {
+      tempData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
+      colnames(tempData) <- c("Participant_Id", "drop", "GROUPS")
+      tempData$drop <- NULL
+      if (is.null(mergeData)) {
+        mergeData <- tempData
+      } else {
+        colnames(mergeData) <- c("Participant_Id", "PrevGroup")
+        mergeData <- merge(mergeData, tempData, by = "Participant_Id")
+        mergeData <- transform(mergeData, "GROUPS" = ifelse(PrevGroup == 1 | GROUPS == 1, 1, 0))
+        mergeData$PrevGroup <- NULL 
+      }
+    }
+    outData <- mergeData
   }
 
   if (ncol(outData) > 2) {
@@ -320,7 +379,7 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   }  else {
     #for strings
     aggStr <- paste0(myGroups, " ~ Participant_Id")
-    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){all(x == groups_stp1)})
+    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(groups_stp1), all(sort(levels(as.factor(x))) == sort(groups_stp1)), FALSE) })
     colnames(outData) <- c("Participant_Id", "GROUPS")
     outData <- transform(outData, "GROUPS" = ifelse(GROUPS == TRUE, 1, 0))
   }
@@ -406,17 +465,22 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
     }
   } else {
     if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
-      label[1] <- paste(obsFlag, groups_stp1)
-      if (label[1] == paste0(obsFlag, " Yes")) {
-        label[2] <- "No"
-      } else if (label[1] == paste0(obsFlag, " No")) {
-        label[2] <- "Yes"
-      } else if (label[1] == paste0(obsFlag, " True")) {
-        label[2] <- "False"
-      } else if (label[1] == paste0(obsFlag, " False")) {
-        label[2] <- "True"
+      if (length(groups_stp1) == 1) { 
+        label[1] <- paste(obsFlag, groups_stp1)
+        if (label[1] == paste0(obsFlag, " Yes")) {
+          label[2] <- "No"
+        } else if (label[1] == paste0(obsFlag, " No")) {
+          label[2] <- "Yes"
+        } else if (label[1] == paste0(obsFlag, " True")) {
+          label[2] <- "False"
+        } else if (label[1] == paste0(obsFlag, " False")) {
+          label[2] <- "True"
+        } else {
+            label[2] <- paste0("Not ", label[1])
+        }
       } else {
-          label[2] <- paste0("Not ", label[1])
+        label[1] <- paste(obsFlag, "Observations Matching Selected Variables")
+        label[2] <- paste("Not", obsFlag, "Observations Matching Selected Variables")
       }
     } else {
       label[1] <- paste0(obsFlag, " within date range")

@@ -1,7 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { isAllowedAccess, getStudyAccessLevel } from './DataRestrictionUtils';
 import DataRestrictionModal from './DataRestrictionModal';
+import { isAllowedAccess } from './DataRestrictionUtils';
 
 class DataRestrictionDaemon extends React.Component {
   constructor (props) {
@@ -11,26 +12,27 @@ class DataRestrictionDaemon extends React.Component {
       studyId: null,
       action: null
     };
-    this.componentDidMount = this.componentDidMount.bind(this);
+    this.getStudy = this.getStudy.bind(this);
     this.showModal = this.showModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.getStudyById = this.getStudyById.bind(this);
-    this.getStudy = this.getStudy.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
     this.handleRestriction = this.handleRestriction.bind(this);
   }
 
   componentDidMount () {
-    document.addEventListener('DataRestricted', this.handleRestriction);
+    document.addEventListener('DataRestricted', ({ detail }) => this.handleRestriction(detail));
   }
 
-  handleRestriction ({ detail }) {
+  handleRestriction ({ studyId, action, event }) {
     const { user } = this.props;
-    const { studyId, action, event } = detail;
     const study = this.getStudyById(studyId);
-    if (!study || isAllowedAccess({ user, action, study })) return;
+    const permitted = isAllowedAccess({ user, action, study });
+    if (!study || permitted) return;
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
     };
     this.showModal({ studyId, action });
   }
@@ -65,15 +67,28 @@ class DataRestrictionDaemon extends React.Component {
   render () {
     const study = this.getStudy();
     const { isVisible, action } = this.state;
-    return (
+    const { siteConfig, actions, user } = this.props;
+    const { showLoginForm } = actions;
+    const { webAppUrl } = siteConfig;
+
+    return !study ? null : (
       <DataRestrictionModal
+        user={user}
         study={study}
         action={action}
         when={isVisible}
+        webAppUrl={webAppUrl}
         onClose={this.closeModal}
+        showLoginForm={showLoginForm}
       />
     );
   }
+};
+
+DataRestrictionDaemon.propTypes = {
+  user: PropTypes.object.isRequired,
+  siteConfig: PropTypes.object.isRequired,
+  actions: PropTypes.object.isRequired
 };
 
 export default DataRestrictionDaemon;

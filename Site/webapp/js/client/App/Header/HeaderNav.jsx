@@ -8,6 +8,7 @@ import menuItems from 'Client/data/menuItems';
 
 import { Events, BodyLayer } from 'mesa';
 import { IconAlt as Icon } from 'wdk-client/Components';
+import { formatReleaseDate } from 'ebrc-client/util/formatters';
 
 class HeaderNav extends React.Component {
   constructor (props) {
@@ -34,7 +35,7 @@ class HeaderNav extends React.Component {
   }
 
   onScroll () {
-    const threshold = 170;
+    const threshold = 98;
     const { pageYOffset } = window;
     const { stickyHeaderVisible } = this.state;
     if (pageYOffset >= threshold && !stickyHeaderVisible)
@@ -92,7 +93,11 @@ class HeaderNav extends React.Component {
           </h1>
           <p>
             Clinical Epidemiology Resources <br />
-            <small><code>Prototype</code> Release {buildNumber} {' :: '} {releaseDate}</small>
+            <small>
+              {/* <code>Prototype</code>  */}
+              Release {buildNumber} &nbsp; &nbsp;
+              {formatReleaseDate(releaseDate, 'm d y')}
+            </small>
           </p>
         </stack>
       </row>
@@ -144,24 +149,28 @@ class HeaderNav extends React.Component {
     const StickyHeader = this.renderStickyHeader;
 
     return (
-      <div className="row HeaderNav">
-        {!stickyHeaderVisible ? null : (
-          <BodyLayer>
-            <StickyHeader />
-          </BodyLayer>
-        )}
-        <Branding siteConfig={siteConfig} />
-        <div className="HeaderNav-Switch">
-          <row className="HeaderNav-Primary">
-            <SiteMenu items={mainMenu} config={siteConfig} />
-          </row>
+      <div className="HeaderNav-Wrapper">
+        <div className="row HeaderNav">
+          {!stickyHeaderVisible ? null : (
+            <BodyLayer>
+              <StickyHeader />
+            </BodyLayer>
+          )}
+          <Branding siteConfig={siteConfig} />
+          <div className="HeaderNav-Switch">
+            <row className="HeaderNav-Primary">
+              <SiteMenu items={mainMenu} config={siteConfig} />
+            </row>
 
-          <row className="HeaderNav-Secondary">
-            <IconMenu items={iconMenu} />
-            <UserMenu webAppUrl={webAppUrl} actions={actions} user={user} />
-          </row>
+            <row className="HeaderNav-Secondary">
+              <IconMenu items={iconMenu} />
+              <UserMenu webAppUrl={webAppUrl} actions={actions} user={user} />
+            </row>
+          </div>
+          <a href="http://eupathdb.org/eupathdb/" target="_blank">
+            <img src={webAppUrl + '/images/partofeupath.png'} id="EuPathLogo" />
+          </a>
         </div>
-        <img src={webAppUrl + '/images/partofeupath.png'} id="EuPathLogo" />
       </div>
     );
   }

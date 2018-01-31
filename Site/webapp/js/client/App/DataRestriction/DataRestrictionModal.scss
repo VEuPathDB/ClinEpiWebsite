@@ -1,3 +1,7 @@
+.DataRestrictionModal-Wrapper {
+  pointer-events: all;
+  background-color: rgba(0, 0, 0, 0.8);
+}
 .DataRestrictionModal {
   background-color: white;
   flex: 0 0 auto;
@@ -23,6 +27,13 @@
     line-height: 1.6em;
   }
   button.btn {
-    margin: 0 auto;
+  }
+
+  .DataRestrictionModal-Buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-end;
+    width: 100%;
   }
 }
