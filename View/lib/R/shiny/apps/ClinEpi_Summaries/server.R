@@ -190,17 +190,20 @@ shinyServer(function(input, output, session) {
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
-    if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
-      numTimelines <- 1
-    } else {
-      numTimelines <- 2
-    }
-    if (numTimelines == 1) {
-      longitudinal1 <<- longitudinal.file$columns
-      longitudinal2 <<- NULL
-    } else {
-      longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
-      longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
+
+    if (!nrow(longitudinal.file) == 0) {
+      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+        numTimelines <- 1
+      } else {
+        numTimelines <- 2
+      }
+      if (numTimelines == 1) {
+        longitudinal1 <<- longitudinal.file$columns
+        longitudinal2 <<- NULL
+      } else {
+        longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
+        longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
+      }
     }
 
     singleVarData
