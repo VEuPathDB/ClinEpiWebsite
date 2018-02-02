@@ -86,11 +86,11 @@ shinyServer(function(input, output, session) {
   singleVarDataFetcher <- function(){
     filesFetcher()
 
-    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+    model.prop <- fread("../../../../../../config/Gates/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
 
     #this temporary until i figure how i'm supposed to do it. 
     #will also need to be able to identify one dataset from another, and which to grab.
-    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
+    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "Gates")
     contents <- list.files(mirror.dir)
     builds <- contents[grepl("build-", contents)]
     num <- sort(builds)[length(builds)]

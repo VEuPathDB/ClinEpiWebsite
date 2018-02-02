@@ -1,24 +1,34 @@
 [
   {
+    "type": "participants",
+    "studyId": "DS_841a9f5259",
+    "appUrl": "/im.do?s=e7098b187c6e603a",
+    "description": "Multi-step strategy that finds cases who are less than 24 months of age that are only positive for Giardia and reported a duration of diarrhea more than than 3 days."
+  },
+  {
     "type": "households",
+    "disabled": true,
     "studyId": "DS_0ad509829e",
     "appUrl": "/im.do?s=0e8a6a438aacb3c5",
     "description": "Households containing two children <= 5 observed for at least 365 days, one who had 0 malaria diagnoses and another who had at least 1 malaria diagnosis / yr during observation."
   },
   {
     "type": "participants",
+    "disabled": true,
     "studyId": "DS_0ad509829e",
     "appUrl": "/im.do?s=c8b23711dca1ca2e",
     "description": "For calendar years 2012-2013, find all Children aged 2-10 who were observed at least 365 days and live in households where <= 5 mosquitoes were collected on average in 2012-13 and had at least 2 malaria=yes visits / year. Of those, how many had at least one asymptomatic visit in that time frame."
   },
   {
     "type": "Observations",
+    "disabled": true,
     "studyId": "DS_0ad509829e",
     "appUrl": "/im.do?s=1e3dde358477482a",
     "description": "Finds the middle visit of three consecutive asymptomatic visits among children where a pbmc sample is available from the middle visit"
   },
   {
     "type": "participants",
+    "disabled": true,
     "studyId": "DS_0ad509829e",
     "appUrl": "/im.do?s=c801a6398e7f11a3",
     "description": "For calendar years 2012-2013, find all Children aged 2-10 who were observed at least 180 days in that time period and live in households where >= 10 mosquitoes were collected on average in 2012-13 but who had 0 malaria=yes visits / year. Of those, how many had at least one asymptomatic visit in that time frame."
