@@ -6,6 +6,24 @@
     "description": "Multi-step strategy that finds cases who are less than 24 months of age that are only positive for Giardia and reported a duration of diarrhea more than than 3 days."
   },
   {
+    "type": "participants",
+    "studyId": "DS_841a9f5259",
+    "appUrl": "/im.do?s=d30d5e1e6fa40640",
+    "description": "Giardia positive controls, normal at baseline, who have <-2 HAZ @60 Day Follow-Up"
+  },
+  {
+    "type": "participants",
+    "studyId": "DS_841a9f5259",
+    "appUrl": "/im.do?s=94dfcd0c58562794",
+    "description": "Giardia + Cases who have a Giardia - Control"
+  },
+  {
+    "type": "participants",
+    "studyId": "DS_841a9f5259",
+    "appUrl": "/im.do?s=8c524607fa2f0016",
+    "description": "Multi-step strategy that returns Case participants who were only positive for Giardia and no other pathogen and had a diarrhea duration of less than 4 days. Step 1: Selects cases less than 24 months of age who are Giardia positive Step 2: Removes all cases who are positive for any other pathogen Step 3: Selects those with duration less than 4 days."
+  },
+  {
     "type": "households",
     "disabled": true,
     "studyId": "DS_0ad509829e",
@@ -19,7 +37,7 @@
     "appUrl": "/im.do?s=c8b23711dca1ca2e",
     "description": "For calendar years 2012-2013, find all Children aged 2-10 who were observed at least 365 days and live in households where <= 5 mosquitoes were collected on average in 2012-13 and had at least 2 malaria=yes visits / year. Of those, how many had at least one asymptomatic visit in that time frame."
   },
-  {
+  { 
     "type": "Observations",
     "disabled": true,
     "studyId": "DS_0ad509829e",
