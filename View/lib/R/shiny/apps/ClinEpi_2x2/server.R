@@ -19,6 +19,7 @@ shinyServer(function(input, output, session) {
   propUrl <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  project.id <- NULL
 
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
@@ -40,6 +41,7 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+      project.id <<- attributes.file$project_id[1]
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
     }
@@ -74,7 +76,7 @@ shinyServer(function(input, output, session) {
   singleVarDataFetcher <- function(){
     filesFetcher()
 
-    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+    model.prop <- fread(paste0("../../../../../../config/", project.id, "/model.prop"), sep = "=", header = FALSE, blank.lines.skip = TRUE)
 
     #this temporary until i figure how i'm supposed to do it. 
     #will also need to be able to identify one dataset from another, and which to grab.

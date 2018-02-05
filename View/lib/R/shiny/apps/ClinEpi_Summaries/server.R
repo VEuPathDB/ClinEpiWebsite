@@ -24,6 +24,7 @@ shinyServer(function(input, output, session) {
   properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  project.id <- NULL
 
   filesFetcher <- reactive({
 
@@ -50,7 +51,9 @@ shinyServer(function(input, output, session) {
       stop("Error: Attributes file missing or unreadable!")
     } else {
       attributes.file <<- attribute_temp
+      colnames(attributes.file)
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+      project.id <<- attributes.file$project_id[1]
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
     }
@@ -86,7 +89,7 @@ shinyServer(function(input, output, session) {
   singleVarDataFetcher <- function(){
     filesFetcher()
 
-    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+    model.prop <- fread(paste0("../../../../../../config/", project.id, "/model.prop"), sep = "=", header = FALSE, blank.lines.skip = TRUE)
 
     #this temporary until i figure how i'm supposed to do it. 
     #will also need to be able to identify one dataset from another, and which to grab.
@@ -886,6 +889,7 @@ shinyServer(function(input, output, session) {
       facetType <- input$facetType
       myFacet <- facetInfo$group
       myY <- input$yaxis
+      yaxis_stp1 <- input$yaxis_stp1
       yaxis_stp2 <- input$yaxis_stp2
       yaxis_stp3 <- input$yaxis_stp3
       myGroups <- groupInfo$group
@@ -1011,7 +1015,7 @@ shinyServer(function(input, output, session) {
             "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
           }
         } else {
-          yaxisStp2Text <- paste0("input$group_stp2\t", groups_stp2, "\n")
+          yaxisStp2Text <- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
         }
  
         text <- paste0("input\tselected\n",
@@ -1244,7 +1248,7 @@ shinyServer(function(input, output, session) {
               tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
               tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), tempData, sum)
-              tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
+              tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
               #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
                 mergeData <- tempData
