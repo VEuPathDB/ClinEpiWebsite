@@ -91,8 +91,6 @@ shinyServer(function(input, output, session) {
     
     model.prop <- fread(paste0("../../../../../../config/", project.id, "/model.prop"), sep = "=", header = FALSE, blank.lines.skip = TRUE)
 
-    #this temporary until i figure how i'm supposed to do it. 
-    #will also need to be able to identify one dataset from another, and which to grab.
     mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
     contents <- list.files(mirror.dir)
     builds <- contents[grepl("build-", contents)]
@@ -120,7 +118,7 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
 
-      if ('Participant_Id' %in% colnames(attributes.file)[1]) {
+      if ('Participant_Id' %in% colnames(attributes.file)) {
         prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
         naToZero(prtcpnt.file, col = "custom")
         prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
