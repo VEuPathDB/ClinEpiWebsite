@@ -19,7 +19,7 @@ shinyServer(function(input, output, session) {
   current <- NULL
   facetInfo <- NULL
   groupInfo <- NULL
-  attribute.file <- NULL
+  attributes.file <- NULL
   propUrl <- NULL
   properties <- NULL
   longitudinal1 <- NULL
@@ -38,7 +38,7 @@ shinyServer(function(input, output, session) {
     }
     message(paste("propUrl:", propUrl))
 
-    if (is.null(attribute.file)) {
+    if (is.null(attributes.file)) {
 
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
@@ -51,11 +51,11 @@ shinyServer(function(input, output, session) {
       stop("Error: Attributes file missing or unreadable!")
     } else {
       attributes.file <<- attribute_temp
-      colnames(attributes.file)
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
       project.id <<- attributes.file$project_id[1]
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
+      message(head(attributes.file))
     }
 
       if (grepl("Error", metadata_temp[1])){
@@ -73,11 +73,14 @@ shinyServer(function(input, output, session) {
 
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        if (colnames(attributes.file)[1] == 'Participant_Id') {
+        message(colnames(attributes.file))
+        message('Participant_Id' %in% colnames(attributes.file))
+        if ('Participant_Id' %in% colnames(attributes.file)) {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
+          message(metadata.file[metadata.file$property %in% 'Search Results'])
         } else {
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
@@ -119,7 +122,7 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
 
-      if (colnames(attributes.file)[1] == 'Participant_Id') {
+      if ('Participant_Id' %in% colnames(attributes.file)) {
         prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
         naToZero(prtcpnt.file, col = "custom")
         prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
@@ -145,7 +148,7 @@ shinyServer(function(input, output, session) {
       setkey(event.file, Participant_Id)
 
       #merge attributes column onto data table
-      if (colnames(attributes.file)[1] == 'Observation_Id') {
+      if ('Observation_Id' %in% colnames(attributes.file)) {
         event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
         naToZero(event.file, col = "custom")
         event.file$custom[event.file$custom == 0] <<- "Not Selected"

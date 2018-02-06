@@ -19,7 +19,7 @@ shinyServer(function(input, output, session) {
   current <- NULL
   facetInfo <- NULL
   xaxisInfo <- NULL
-  attribute.file <- NULL  
+  attributes.file <- NULL  
   propUrl <- NULL
   properties <- NULL
   plotChoice <- 'singleVar'
@@ -39,7 +39,7 @@ shinyServer(function(input, output, session) {
     }
     message(paste("propUrl:", propUrl))
     
-    if (is.null(attribute.file)) {
+    if (is.null(attributes.file)) {
 
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
@@ -73,7 +73,7 @@ shinyServer(function(input, output, session) {
 
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        if (colnames(attributes.file)[1] == 'Participant_Id') {
+        if ('Participant_Id' %in% colnames(attributes.file)) {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
@@ -120,7 +120,7 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
 
-      if (colnames(attributes.file)[1] == 'Participant_Id') {
+      if ('Participant_Id' %in% colnames(attributes.file)[1]) {
         prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
         naToZero(prtcpnt.file, col = "custom")
         prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
@@ -145,7 +145,7 @@ shinyServer(function(input, output, session) {
       names(event.file)[names(event.file) == 'NAME'] <<- 'Observation_Id'
 
       #merge attributes column onto data table
-      if (colnames(attributes.file)[1] == 'Observation_Id') {
+      if ('Observation_Id' %in% colnames(attributes.file)) {
         event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
         naToZero(event.file, col = "custom")
         event.file$custom[event.file$custom == 0] <<- "Not Selected"
