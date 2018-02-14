@@ -1085,7 +1085,9 @@ shinyServer(function(input, output, session) {
           if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
             message("bin facet cause its numeric")
             if (length(levels(as.factor(plotData$FACET))) >= 4) {
-              plotData$FACET <- ggplot2::cut_number(plotData$FACET, 3)
+              plotData$FACET <- rcut_number(plotData$FACET, 3)
+            } else {
+              plotData$FACET <- as.factor(plotData$FACET)
             }
           }
         } else {
@@ -1136,11 +1138,9 @@ shinyServer(function(input, output, session) {
           if (myGroups %in% nums$source_id | myGroups %in% dates$source_id) {
             if (length(levels(as.factor(plotData$GROUPS))) >= 4) {
               message("need to bin dates")
-              hold <- try(ggplot2::cut_number(plotData$GROUPS, 4))
-              message(paste("test binning:", levels(as.factor(hold))))
-              if (!grepl("Error", hold[1])){
-                plotData$GROUPS <- hold
-              }
+              plotData$GROUPS <- rcut_number(plotData$GROUPS)
+            } else {
+              plotData$GROUPS <- as.factor(plotData$GROUPS)
             } 
           }
         } else {
