@@ -15,10 +15,11 @@ shinyServer(function(input, output, session) {
   current <- NULL
   attrInfo <- NULL
   outInfo <- NULL
-  attribute.file <- NULL
+  attributes.file <- NULL
   propUrl <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  project.id <- NULL
 
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
@@ -26,7 +27,7 @@ shinyServer(function(input, output, session) {
   }
   message(paste("propUrl:", propUrl))
 
-  if (is.null(attribute.file)) {
+  if (is.null(attributes.file)) {
 
     attribute_temp <- try(fread(
     	getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
@@ -40,6 +41,7 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+      project.id <<- attributes.file$project_id[1]
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
     }
@@ -59,7 +61,7 @@ shinyServer(function(input, output, session) {
         
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        if (colnames(attributes.file)[1] == 'Participant_Id') {
+        if ('Participant_Id' %in% colnames(attributes.file)) {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
@@ -74,7 +76,7 @@ shinyServer(function(input, output, session) {
   singleVarDataFetcher <- function(){
     filesFetcher()
 
-    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+    model.prop <- fread(paste0("../../../../../../config/", project.id, "/model.prop"), sep = "=", header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
 
     #this temporary until i figure how i'm supposed to do it. 
     #will also need to be able to identify one dataset from another, and which to grab.
@@ -105,7 +107,7 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
 
-      if (colnames(attributes.file)[1] == 'Participant_Id') {
+      if ('Participant_Id' %in% colnames(attributes.file)) {
         prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
         naToZero(prtcpnt.file, col = "custom")
         prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
@@ -131,7 +133,7 @@ shinyServer(function(input, output, session) {
       setkey(event.file, Participant_Id)
 
       #merge attributes column onto data table
-      if (colnames(attributes.file)[1] == 'Observation_Id') {
+      if ('Observation_Id' %in% colnames(attributes.file)) {
         event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
         naToZero(event.file, col = "custom")
         event.file$custom[event.file$custom == 0] <<- "Not Selected"
@@ -170,17 +172,19 @@ shinyServer(function(input, output, session) {
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
-    if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
-      numTimelines <- 1
-    } else {
-      numTimelines <- 2
-    }
-    if (numTimelines == 1) {
-      longitudinal1 <<- longitudinal.file$columns[1]
-      longitudinal2 <<- NULL
-    } else {
-      longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns[1]
-      longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns[1]
+    if (!nrow(longitudinal.file) == 0) {
+      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+        numTimelines <- 1
+      } else {
+        numTimelines <- 2
+      } 
+      if (numTimelines == 1) {
+        longitudinal1 <<- longitudinal.file$columns[1]
+        longitudinal2 <<- NULL
+      } else {
+        longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns[1]
+        longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns[1]
+      }
     }
 
     singleVarData

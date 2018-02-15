@@ -18,26 +18,25 @@
 
 <record>
   <attribute name="headline">ClinEpiDB 1 Released</attribute>
-  <attribute name="date">7 Sep 2017 13:00</attribute>
-  <attribute name="tag">microbiome_3_release</attribute>
+  <attribute name="date">8 Feb 2018 13:00</attribute>
+  <attribute name="tag">clinepidb_1_release</attribute>
   <attribute name="category">release</attribute>
   <attribute name="item">
     <![CDATA[
-      <p><strong>We are pleased to announce the release of MicrobiomeDB 3</strong></p>
+      <p><strong>We are pleased to announce the first release of ClinEpiDB</strong></p>
       <section>
-        <h3><b>No New data in this release</b></h3>
+        <h3><b>This release of ClinEpiDB contains data from the Program for Resistance, Immunology, Surveillance and Modeling of Malaria in Uganda (PRISM) study. PRISM is the dedicated East Africa International Center of Excellence for Malaria Research. The data presented here include the longitudinal cohort and entomological surveillance components of the PRISM study.</b></h3>
       </section>
       <section>
-        <h3><b>New features in this release</b></h3>
+        <h3><b>New Features in this Release</b></h3>
         <ul>
-        <li>The alpha diversity app has been updated to better handle longitudinal data.  A linear model fit is applied to the data, allowing users to compare alpha divesity trends over time between two covariates.
-        <li>The beta diversity app has been modified to improve the calculation and display of large numbers of samples.  In addition, users can now map both point color and shape to sample details.
-        <li>A new correlation app has been added, bringing the total number of apps in the analysis tools section to five.  This 'Corr' app allows users to visualize Spearman's correlation and statistics between taxa and categorical variables, or between the categorical variables themselves.
+        <li>The contingency table app allows you to create 2x2 contingency tables of different categorical variables or allows you to create categorical variables from continuous measurements. Here you can explore the relationship between two variables.
+        <li>The data summary app for longitudinal datasets, allows you to plot summary information, similar to a box-and-whisker plot for variables over time. The timeline(s) allow you to filter by time periods and age groups of interest.
+        <li>The Distributions app allows you to visualize histograms of available variables and then facet or stratify these distributions by additional variablaes.
         </ul>
       </section>
       <section>
         <aside>
-           Note: Our bimonthly database releases incorporate new data and correct old data when necessary. Changes in annotation and new experimental data may slightly alter your search results by increasing or decreasing the number of hits. When search parameters change with a new release, we invalidate (Ø) the search and ask you to rerun it. When sample IDs are updated or removed, we map the old IDs to the new ones, remove the old IDs from your Basket, and leave your Favorites page alone. 
         </aside>
       </section>
     ]]>

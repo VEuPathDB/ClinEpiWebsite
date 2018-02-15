@@ -1,46 +1,35 @@
+import { emitRestriction as emit, getIdFromRecordClassName } from 'Client/App/DataRestriction/DataRestrictionUtils';
+
 wdk.namespace('wdk.dataRestriction', (ns, $) => {
-
-  function getIdFromRecordClass (recordClass) {
-    if (typeof recordClass !== 'string') return null;
-    if (recordClass.length > 13) recordClass = recordClass.slice(0, 13);
-    const result = recordClass.match(/^DS_[^_]+/g);
-    return result === null
-      ? null
-      : result[0];
-  };
-
-  function emit (action, details) {
-    const detail = Object.assign({}, details, { action });
-    const event = new CustomEvent('DataRestricted', { detail });
-    document.dispatchEvent(event);
-  };
-
-  // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
   ns.restrictionController = (element) => {
     const { recordClass, restrictionType } = element.data();
-    const studyId = getIdFromRecordClass(recordClass);
-
-    const isResultsPage = element.children('.Results_Div').length !== 0;
-    if (isResultsPage) {
-      emit('results', { studyId });
-      return;
-    }
+    const studyId = getIdFromRecordClassName(recordClass);
+    const elements = { rawEl: element, jqEl: $(element) };
+    console.info('RestrictionController initialized:', { recordClass, restrictionType, elements });
 
     const isSearchPage = restrictionType && restrictionType === 'search';
     if (isSearchPage) {
       setTimeout(() => emit('search', { studyId }), 0);
-      return;
+    }
+
+    const isResultsPage = element.children('.Results_Div').length !== 0;
+    if (isResultsPage) {
+      emit('results', { studyId });
     }
 
     const analysisTiles = element.find('.analysis-selector');
-    analysisTiles.each((index, tile) => ns.analysisTileController($(tile), studyId));
+    if (analysisTiles) analysisTiles.each((index, tile) => {
+      ns.analysisTileController($(tile), studyId)
+    });
 
-    const pagingTables = element.find('.paging-table');
-    pagingTables.each((index, table) => ns.pagingController($(table), studyId));
+    const pagingTables = element.children('.paging-table');
+    if (pagingTables) pagingTables.each((index, table) => {
+      ns.pagingController($(table), studyId)
+    });
 
     const downloadButton = element.find('a.step-download-link');
-    ns.downloadLinkController(downloadButton, studyId);
+    if (downloadButton) ns.downloadLinkController(downloadButton, studyId);
   };
 
   ns.analysisTileController = (element, studyId) => {

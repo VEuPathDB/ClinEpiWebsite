@@ -19,11 +19,12 @@ shinyServer(function(input, output, session) {
   current <- NULL
   facetInfo <- NULL
   groupInfo <- NULL
-  attribute.file <- NULL
+  attributes.file <- NULL
   propUrl <- NULL
   properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  project.id <- NULL
 
   filesFetcher <- reactive({
 
@@ -37,7 +38,7 @@ shinyServer(function(input, output, session) {
     }
     message(paste("propUrl:", propUrl))
 
-    if (is.null(attribute.file)) {
+    if (is.null(attributes.file)) {
 
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
@@ -51,8 +52,10 @@ shinyServer(function(input, output, session) {
     } else {
       attributes.file <<- attribute_temp
       names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+      project.id <<- attributes.file$project_id[1]
       #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
       attributes.file <<- cbind(attributes.file, custom = "Selected")
+      message(head(attributes.file))
     }
 
       if (grepl("Error", metadata_temp[1])){
@@ -70,11 +73,14 @@ shinyServer(function(input, output, session) {
 
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        if (colnames(attributes.file)[1] == 'Participant_Id') {
+        message(colnames(attributes.file))
+        message('Participant_Id' %in% colnames(attributes.file))
+        if ('Participant_Id' %in% colnames(attributes.file)) {
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
+          message(metadata.file[metadata.file$property %in% 'Search Results'])
         } else {
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
@@ -86,7 +92,7 @@ shinyServer(function(input, output, session) {
   singleVarDataFetcher <- function(){
     filesFetcher()
 
-    model.prop <- fread("../../../../../../config/ClinEpiDB/model.prop", sep = "=", header = FALSE, blank.lines.skip = TRUE)
+    model.prop <- fread(paste0("../../../../../../config/", project.id, "/model.prop"), sep = "=", header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
 
     #this temporary until i figure how i'm supposed to do it. 
     #will also need to be able to identify one dataset from another, and which to grab.
@@ -116,7 +122,7 @@ shinyServer(function(input, output, session) {
       names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
       setkey(prtcpnt.file, Participant_Id)
 
-      if (colnames(attributes.file)[1] == 'Participant_Id') {
+      if ('Participant_Id' %in% colnames(attributes.file)) {
         prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
         naToZero(prtcpnt.file, col = "custom")
         prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
@@ -142,7 +148,7 @@ shinyServer(function(input, output, session) {
       setkey(event.file, Participant_Id)
 
       #merge attributes column onto data table
-      if (colnames(attributes.file)[1] == 'Observation_Id') {
+      if ('Observation_Id' %in% colnames(attributes.file)) {
         event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
         naToZero(event.file, col = "custom")
         event.file$custom[event.file$custom == 0] <<- "Not Selected"
@@ -184,23 +190,27 @@ shinyServer(function(input, output, session) {
     }
 
     metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
-    
+    message(tail(metadata.file))
+    message(colnames(attributes.file))
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
-    if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
-      numTimelines <- 1
-    } else {
-      numTimelines <- 2
-    }
-    if (numTimelines == 1) {
-      longitudinal1 <<- longitudinal.file$columns
-      longitudinal2 <<- NULL
-    } else {
-      longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
-      longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
+
+    if (!nrow(longitudinal.file) == 0) {
+      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+        numTimelines <- 1
+      } else {
+        numTimelines <- 2
+      }
+      if (numTimelines == 1) {
+        longitudinal1 <<- longitudinal.file$columns
+        longitudinal2 <<- NULL
+      } else {
+        longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
+        longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
+      }
     }
 
     singleVarData
@@ -883,6 +893,7 @@ shinyServer(function(input, output, session) {
       facetType <- input$facetType
       myFacet <- facetInfo$group
       myY <- input$yaxis
+      yaxis_stp1 <- input$yaxis_stp1
       yaxis_stp2 <- input$yaxis_stp2
       yaxis_stp3 <- input$yaxis_stp3
       myGroups <- groupInfo$group
@@ -1008,7 +1019,7 @@ shinyServer(function(input, output, session) {
             "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
           }
         } else {
-          yaxisStp2Text <- paste0("input$group_stp2\t", groups_stp2, "\n")
+          yaxisStp2Text <- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
         }
  
         text <- paste0("input\tselected\n",
@@ -1074,7 +1085,9 @@ shinyServer(function(input, output, session) {
           if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
             message("bin facet cause its numeric")
             if (length(levels(as.factor(plotData$FACET))) >= 4) {
-              plotData$FACET <- ggplot2::cut_number(plotData$FACET, 3)
+              plotData$FACET <- rcut_number(plotData$FACET, 3)
+            } else {
+              plotData$FACET <- as.factor(plotData$FACET)
             }
           }
         } else {
@@ -1125,11 +1138,9 @@ shinyServer(function(input, output, session) {
           if (myGroups %in% nums$source_id | myGroups %in% dates$source_id) {
             if (length(levels(as.factor(plotData$GROUPS))) >= 4) {
               message("need to bin dates")
-              hold <- try(ggplot2::cut_number(plotData$GROUPS, 4))
-              message(paste("test binning:", levels(as.factor(hold))))
-              if (!grepl("Error", hold[1])){
-                plotData$GROUPS <- hold
-              }
+              plotData$GROUPS <- rcut_number(plotData$GROUPS)
+            } else {
+              plotData$GROUPS <- as.factor(plotData$GROUPS)
             } 
           }
         } else {
@@ -1241,7 +1252,7 @@ shinyServer(function(input, output, session) {
               tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
               tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), tempData, sum)
-              tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
+              tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
               #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
                 mergeData <- tempData

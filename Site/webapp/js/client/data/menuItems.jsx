@@ -43,8 +43,17 @@ export default function menuItems (siteConfig) {
             appUrl: '/showApplication.do?tab=public_strat'
           },
           {
+            text: 'Welcome To ClinEpiDB (video)',
+            url: 'https://www.youtube.com/watch?v=535PcFrBH8M',
+            title: 'View the ClinEpiDB Introductory video.'
+          },
+          {
+            text: 'Tutorials',
+            appUrl: '/showXmlDataContent.do?name=XmlQuestions.Tutorials'
+          },
+          {
             text: 'Data Access & Use Policy',
-            url: '/documents/CE_DataAccessUsePolicy_Rev1.pdf'
+            url: '/documents/CE_DataAccessUsePolicy_Rev2.pdf'
           },
           ...socialLinks
         ]

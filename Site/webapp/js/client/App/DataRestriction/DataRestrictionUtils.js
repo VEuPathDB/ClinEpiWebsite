@@ -5,14 +5,14 @@ export const accessLevels = {
   },
   protected: {
     loginRequired: ['paginate'],
-    approvalRequired: ['download']
+    approvalRequired: ['download', 'downloadPage']
   },
   private: {
-    approvalRequired: [ 'search', 'results', 'paginate', 'analysis', 'download']
+    approvalRequired: [ 'search', 'results', 'paginate', 'analysis', 'download', 'downloadPage']
   }
 };
 
-export const strictActions = [ 'search', 'results' ];
+export const strictActions = [ 'search', 'results', 'downloadPage' ];
 
 // Getters!   =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -37,6 +37,7 @@ export function getActionVerb (action) {
       return 'view search results';
     case 'paginate':
       return 'see more than 25 results';
+    case 'downloadPage':
     case 'download':
       return 'download data';
     default:
@@ -93,6 +94,8 @@ export function isAllowedAccess ({ user, action, study }) {
   return true;
 };
 
+
+
 export function disableRestriction () {
   sessionStorage.setItem('restriction_override', true);
 }
@@ -106,3 +109,18 @@ window._enableRestriction = enableRestriction;
 export function isActionStrict (action) {
   return strictActions.includes(action);
 }
+
+export function getIdFromRecordClassName (recordClass) {
+  if (typeof recordClass !== 'string') return null;
+  if (recordClass.length > 13) recordClass = recordClass.slice(0, 13);
+  const result = recordClass.match(/^DS_[^_]+/g);
+  return result === null
+    ? null
+    : result[0];
+};
+
+export function emitRestriction (action, details = {}) {
+  const detail = Object.assign({}, details, { action });
+  const event = new CustomEvent('DataRestricted', { detail });
+  document.dispatchEvent(event);
+};
