@@ -44,8 +44,9 @@ class Showcase extends React.Component {
     const { handleFilter } = this;
     const { filteredItems } = this.state;
     const { content, prefix } = this.props;
-    const { title, viewAllUrl, filters, contentType, items, description } = content;
+    const { title, viewAllUrl, viewAllAppUrl, filters, contentType, items, description } = content;
     const cards = this.getListRenderer(contentType, { list: filteredItems, prefix });
+    
 
     return (
       <stack className="wdk-Showcase">
@@ -56,7 +57,11 @@ class Showcase extends React.Component {
           </box>
           <box className="wdk-Showcase-HeadingControls">
             {!filters ? null : <ShowcaseFilter filters={filters} onFilter={handleFilter} items={items} />}
-            {!viewAllUrl ? null : <a href={viewAllUrl}><button className="ViewAll">View All <Icon fa="angle-double-right" /></button></a>}
+            {!viewAllUrl && !viewAllAppUrl ? null : (
+              <a href={viewAllAppUrl ? prefix + viewAllAppUrl : viewAllUrl}>
+                <button className="ViewAll">View All <Icon fa="angle-double-right" /></button>
+              </a>
+            )}
           </box>
         </row>
         <row className="wdk-Showcase-ContentRow">
