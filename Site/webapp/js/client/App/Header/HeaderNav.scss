@@ -113,7 +113,7 @@ $red: #DD314E;
   font-weight: 300;
   font-family: 'Exo 2';
 
-  a, &:link, &:visited, &:hover {
+  a, a:link, a:visited, a:hover {
     color: $red;
     text-decoration: none;
     transition: all 0.5s;
