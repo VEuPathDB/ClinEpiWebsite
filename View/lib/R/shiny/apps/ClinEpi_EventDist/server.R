@@ -95,6 +95,7 @@ shinyServer(function(input, output, session) {
     contents <- list.files(mirror.dir)
     builds <- contents[grepl("build-", contents)]
     num <- sort(builds)[length(builds)]
+    num <- 'build-1'
     #get datasetName
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
