@@ -399,23 +399,24 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
 
 
 #this make appropriate labels for groups created in function above    
-makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list){
+makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list, useGroup = FALSE){
   numeric <- c("lessThan", "greaterThan", "equals")
   anthro <- c("percentDays", "delta", "direct")
   label <- vector()
   obs <- c("any", "all")   
  
   obsFlag = ""
-  if (groups_stp1 %in% obs) {
-    if (groups_stp1 == "any") {
-      obsFlag <- "Any"
-    } else {
-      obsFlag <- "All"
+  if (!is.null(groups_stp1)) {
+    if (groups_stp1 %in% obs) {
+      if (groups_stp1 == "any") {
+        obsFlag <- "Any"
+      } else {
+        obsFlag <- "All"
+      }
+      groups_stp1 = groups_stp2
+      groups_stp2 = groups_stp3
     }
-    groups_stp1 = groups_stp2
-    groups_stp2 = groups_stp3
-  } 
- 
+    
   displayName <- metadata.file$property[metadata.file$source_id == myGroups]
   if (groups_stp1 %in% numeric ){
     if (groups_stp1 == "greaterThan") {
@@ -479,13 +480,30 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
             label[2] <- paste0("Not ", label[1])
         }
       } else {
-        label[1] <- paste(obsFlag, "Observations Matching Selected Variables")
-        label[2] <- paste("Not", obsFlag, "Observations Matching Selected Variables")
+        for (i in groups_stp1) {
+          if (length(label) == 0) {
+            label[1] <- paste(obsFlag, "Observations Matching:", i)
+            label[2] <- paste("Not", obsFlag, "Observations Matching:", i)
+          } else {
+            label[1] <- paste0(label[1], ", ", i)
+            label[2] <- paste0(label[2], ", ", i)
+          }
+        }
       }
     } else {
-      label[1] <- paste0(obsFlag, " within date range")
-      label[2] <- paste0(obsFlag, " outside date range")
+      label[1] <- paste0(obsFlag, " observations between ", groups_stp1[1], " and ", groups_stp1[2])
+      label[2] <- paste0("Not ", obsFlag, " observations between ", groups_stp1[1], " and ", groups_stp1[2])
     }
+  }   
+
+  if (useGroup) {
+    prefix <- metadata.file$property[metadata.file$source_id == myGroups]
+    label[1] <- paste0(prefix, ": ", label[1])
+    label[2] <- paste0(prefix, ": ", label[2])
   }
+  } else {
+    label <- metadata.file$property[metadata.file$source_id == myGroups]
+  }
+
   label
 }

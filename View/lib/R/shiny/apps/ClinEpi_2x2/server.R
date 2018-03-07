@@ -228,9 +228,12 @@ shinyServer(function(input, output, session) {
         df$Variable1 <- c(rows[1], rows[1], rows[2], rows[2])
         df$Variable2 <- factor(df$Variable2, levels = c(cols[1], cols[2]))
         df$Variable1 <- factor(df$Variable1, levels = c(rows[1], rows[2]))
-        
+       
+        var1 <- attrInfo$group
+        var2 <- outInfo$group
+ 
         #define axis labels here
-        xlab <- ""
+        xlab <- metadata.file$property[metadata.file$source_id == var2]
         ylab <- "Proportion"
         
         #determine width of bars for outcome
@@ -250,7 +253,7 @@ shinyServer(function(input, output, session) {
         myPlot <- myPlot + geom_bar(stat = "identity", position = "fill")
         #myPlot <- myPlot + scale_fill_manual(values = c("#32baba", "#e26c6c"))
         #myPlot <- myPlot + scale_fill_manual(values = plasma(2))
-        myPlot <- myPlot + scale_fill_manual(values = viridis(2, begin = .25, end = .75))
+        myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(2, begin = .25, end = .75))
         
         x_list <- list(
           title = paste0(c(rep("\n", 3),
@@ -272,7 +275,13 @@ shinyServer(function(input, output, session) {
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot)
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 30, t = 40), 
+        legend.title <- metadata.file$property[metadata.file$source_id == var1]
+        legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
+        myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
+                                    x=1.02, xanchor = "left",
+                                    y=.7, yanchor = "bottom",
+                                    legendtitle=TRUE, showarrow=FALSE)
+        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 60, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
                                      legend = list(x = 100, y = .5))

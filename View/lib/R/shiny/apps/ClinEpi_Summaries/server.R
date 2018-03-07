@@ -675,21 +675,26 @@ shinyServer(function(input, output, session) {
         #temp placeholder for checking if data has time vars for x axis
         if (!is.null(longitudinal)) {
           #define axis labels here
-          if (xaxisVar == "ageVar") {
+          xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
+          if (xAxisType == "number") {
             xlab = "Age"
           } else {
             xlab = "Time"
           }
-          #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
+         
+          ylab <- makeGroupLabel(input$yaxis, metadata.file, input$yaxis_stp1, input$yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+          message(ylab)
           if (plotType == "proportion") {
-            ylab <- "Proportion"
+            ylab <- paste("Proportion where", ylab)
           } else if (plotType == "count") {
-            ylab <- "Count"
+            ylab <- paste("Count where", ylab)
           } else {
-            ylab <- "Mean"
+            ylab <- paste("Mean where", ylab)
             df$YAXIS <- as.numeric(df$YAXIS)
           }
-          
+          ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
+          message(ylab)
+ 
           #format xaxis ticks
           if (!longitudinal %in% dates$source_id) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
@@ -727,11 +732,11 @@ shinyServer(function(input, output, session) {
           
           #find num colors needed
           if (numColors > 2) { 
-            myPlot <- myPlot + scale_color_manual(values = viridis(numColors))
+            myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors))
           } else if (numColors == 2) {
-            myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .25, end = .75))
+            myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .25, end = .75))
           } else {
-            myPlot <- myPlot + scale_color_manual(values = viridis(numColors, begin = .5))
+            myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
           }
 
           if (longitudinal %in% dates$source_id) {
@@ -744,15 +749,18 @@ shinyServer(function(input, output, session) {
           #define axis labels here
           xlab <- ""
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
+          ylab <- makeGroupLabel(input$yaxis, metadata.file, input$yaxis_stp1, input$yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+          message(ylab)
           if (plotType == "proportion") {
-            ylab <- "Proportion"
+            ylab <- paste("Proportion where", ylab)
           } else if (plotType == "count") {
-            ylab <- "Count"
+            ylab <- paste("Count where", ylab)
           } else {
-            ylab <- "Mean"
+            ylab <- paste("Mean where", ylab)
             df$YAXIS <- as.numeric(df$YAXIS)
           }
-          
+          ylab <- gsub('(.{1,45})(\\s|$)', '\\1\n', ylab)
+          message(ylab)
           df$XAXIS <- as.factor(df$XAXIS) 
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, fill = XAXIS))
@@ -774,13 +782,13 @@ shinyServer(function(input, output, session) {
 
           #find num colors needed
           if (numColors > 2) { 
-            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors))
+            myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors))
           } else if (numColors == 2) {
             
-            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .25, end = .75))
+            myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors, begin = .25, end = .75))
           } else {
             
-            myPlot <- myPlot + scale_fill_manual(values = viridis(numColors, begin = .5))
+            myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors, begin = .5))
           }
 
         }
@@ -809,7 +817,13 @@ shinyServer(function(input, output, session) {
         )
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
-        #myPlotly <- ggplotly(myPlot)
+        legend.title <- groupInfo$group
+        legend.title <- metadata.file$property[metadata.file$source_id == legend.title]
+        legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
+        myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
+                                    x=1.02, xanchor = "left",
+                                    y=.3, yanchor = "bottom",
+                                    legendtitle=TRUE, showarrow=FALSE)
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                                      xaxis = x_list, 
@@ -1082,6 +1096,7 @@ shinyServer(function(input, output, session) {
         nums <- getNums(metadata.file)
         dates <- getDates(metadata.file)
         if (any(colnames(plotData) %in% "FACET")) {
+          displayLabel <- metadata.file$property[metadata.file$source_id == myFacet]
           if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
             message("bin facet cause its numeric")
             if (length(levels(as.factor(plotData$FACET))) >= 4) {
@@ -1090,6 +1105,7 @@ shinyServer(function(input, output, session) {
               plotData$FACET <- as.factor(plotData$FACET)
             }
           }
+          plotData$FACET <- paste0(displayLabel, ": ", plotData$FACET)
         } else {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")
@@ -1116,7 +1132,7 @@ shinyServer(function(input, output, session) {
               }
             }
             outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-            label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
+            label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file), useGroup=TRUE)
             message(paste("label is:", label))
             message("have custom facet! now merge..")
             #add makeGroups data to df and return

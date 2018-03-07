@@ -706,6 +706,8 @@ shinyServer(function(input, output, session) {
         if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
           data[[myFacet]] <- cut(data[[myFacet]],4)
         }
+        displayLabel <- metadata.file$property[metadata.file$source_id == myFacet]
+        data[[myFacet]] <- paste0(displayLabel, ": ", data[[myFacet]])  
       } else if (facetType == "makeGroups") {
         numeric <- c("lessThan", "greaterThan", "equals")
         anthro <- c("percentDays", "delta", "direct")
@@ -731,7 +733,7 @@ shinyServer(function(input, output, session) {
             }
           }
           outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
+          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file), useGroup = TRUE)
           #add makeGroups data to df and return
           colnames(outData) <- c("Participant_Id", "FACET")
           outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
