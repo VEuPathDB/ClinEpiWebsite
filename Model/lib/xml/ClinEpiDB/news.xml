@@ -25,7 +25,7 @@
     <![CDATA[
       <div style="font-size:130%"><i>We are pleased to announce the first release of ClinEpiDB</i></div>
       <section>
-        <h3><b>This release of ClinEpiDB contains data from the Program for Resistance, Immunology, Surveillance and Modeling of Malaria in Uganda (PRISM) study. PRISM is the dedicated East Africa International Center of Excellence for Malaria Research. The data presented here include the longitudinal cohort and entomological surveillance components of the <a href="/a/app/record/dataset/DS_0ad509829e">PRISM study</a>.</b></h3>
+        <h3><b>This release of ClinEpiDB contains data from the Program for Resistance, Immunology, Surveillance and Modeling of Malaria in Uganda (PRISM) study. PRISM is the dedicated East Africa International Center of Excellence for Malaria Research. The data presented here include the longitudinal cohort and entomological surveillance components of the <a href="/ce/app/record/dataset/DS_0ad509829e">PRISM study</a>.</b></h3>
       </section>
       <section>
         <h4><b>New Features in this Release</b></h4>
