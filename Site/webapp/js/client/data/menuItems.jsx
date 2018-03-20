@@ -48,6 +48,10 @@ export default function menuItems (siteConfig) {
             target: '_blank'
           },
           {
+            text: 'PDF Tutorial',
+            url: '/documents/ClinEpiDBTutorial1.pdf'
+          },
+          {
             text: 'Data Access & Use Policy',
             url: '/documents/CE_DataAccessUsePolicy_Rev2.pdf'
           },
