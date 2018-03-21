@@ -541,6 +541,9 @@ shinyServer(function(input, output, session) {
         if (myX %in% nums) {
           tableData <- cbind(tableData, "Mean" = round(mean(data[[myX]], na.rm = TRUE),4))
           tableData <- cbind(tableData, "Median" = median(data[[myX]], na.rm = TRUE))
+          tableData <- cbind(tableData, "Range" = paste(min(data[[myX]], na.rm = TRUE), "-", max(data[[myX]], na.rm = TRUE)))
+          tableData <- cbind(tableData, "SD" = round(sd(data[[myX]], na.rm = TRUE),4))
+          tableData <- cbind(tableData, "IQR" = round(IQR(data[[myX]], na.rm = TRUE),4))
         }
       } else {
         aggStr <- paste0("Participant_Id ~ ", myFacet)
@@ -552,15 +555,30 @@ shinyServer(function(input, output, session) {
           tableData <- merge(tableData, mean, by = myFacet)
           median <- aggregate(as.formula(aggStr2), data, median)
           tableData <- merge(tableData, median, by = myFacet)
-          colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median")
+          range <- aggregate(as.formula(aggStr2), data, FUN = function(x){paste(min(data[[myX]], na.rm = TRUE), "-", max(data[[myX]], na.rm = TRUE))})
+          tableData <- merge(tableData, range, by = myFacet)
+          mySD <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(sd(x),4)})
+          tableData <- merge(tableData, mySD, by = myFacet)
+          myIQR <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(IQR(x),4)})
+          tableData <- merge(tableData, myIQR, by = myFacet)
+          colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median", "Range", "SD", "IQR")
         } else {
           colnames(tableData) <- c("Facets", "# Participants")
         }
       }
 
+      if (length(colnames(tableData)) == 7) {
+        myTargets <- c(1,2,3,4,5,6)
+      } else {
+        myTargets <- c(1)
+      }
+
       datatable(tableData,
                 width = '100%',
-                rownames = FALSE
+                rownames = FALSE,
+                options = list(
+                  columnDefs = list(list(className = 'dt-right', targets = myTargets))
+                )
       )
     })
     
