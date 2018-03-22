@@ -20,6 +20,7 @@ shinyServer(function(input, output, session) {
   longitudinal1 <- NULL
   longitudinal2 <- NULL
   project.id <- NULL
+  isParticipant <- NULL
 
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
@@ -62,11 +63,13 @@ shinyServer(function(input, output, session) {
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if ('Participant_Id' %in% colnames(attributes.file)) {
+          isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
         } else {
+          isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
       }
@@ -197,11 +200,12 @@ shinyServer(function(input, output, session) {
   
     attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
  
-    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000054"), moduleName = "outInfo") 
+    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo") 
 
     titlePanel("Contingency Tables")
   }) 
-  
+ 
+
     output$plot <- renderPlotly({
       print("about to render plot")
         tableData <- plotData()

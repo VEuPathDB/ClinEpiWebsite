@@ -26,6 +26,7 @@ shinyServer(function(input, output, session) {
   longitudinal1 <- NULL
   longitudinal2 <- NULL
   project.id <- NULL
+  isParticipant <- NULL
 
   filesFetcher <- reactive({
 
@@ -74,11 +75,13 @@ shinyServer(function(input, output, session) {
         #add user defined group
         #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if ('Participant_Id' %in% colnames(attributes.file)) {
+          isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
         } else {
+          isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
         }
       }     
@@ -288,11 +291,19 @@ shinyServer(function(input, output, session) {
       mySelected <- properties$selected[properties$input == "input$facetType"]
 
       if (is.null(properties)) {
-        selectInput(inputId = "facetType",
-                    label = "Facet:",
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                    selected = "direct",
-                    width = '100%')
+        if (isParticipant) {
+          selectInput(inputId = "facetType",
+                      label = "Facet:",
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      selected = "direct",
+                      width = '100%')
+        } else {
+          selectInput(inputId = "facetType",
+                      label = "Facet:",
+                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      selected = "makeGroups",
+                      width = '100%')
+        }
       } else {
         selectInput(inputId = "facetType",
                     label = "Facet:",
@@ -360,7 +371,11 @@ shinyServer(function(input, output, session) {
         #selected <- "custom"
         selected <- "custom"
       } else if (facetType == "makeGroups") {
-        selected <- "EUPATH_0000054"
+        if (isParticipant) {
+          selected <- "EUPATH_0000054"
+        } else {
+          selected <- "custom"
+        }
       } else {
         selected <- ""
       }
