@@ -54,6 +54,7 @@ help <- tabPanel("Help", fluid = TRUE,
                    tags$li("httr: 1.3.1"),
                    tags$li("plotly: 4.7.1"),
                    tags$li("shiny: 1.0.5"),
+                   tags$li("tidyr: 0.7.1"),
                    tags$li("viridisLite: 0.2.0")
                  )
                )
