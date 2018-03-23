@@ -102,7 +102,8 @@ shinyServer(function(input, output, session) {
     mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
     contents <- list.files(mirror.dir)
     builds <- contents[grepl("build-", contents)]
-    num <- sort(builds)[length(builds)]
+    #num <- sort(builds)[length(builds)]
+    num <- 'build-1'
     #get datasetName
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
@@ -221,14 +222,16 @@ shinyServer(function(input, output, session) {
   
   #ui stuffs
   output$title <- renderUI({
-    singleVarDataFetcher()
-
-    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
-
-    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
-
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
-
+    withProgress(message = 'Loading...', value = 0, style = "old", {
+      singleVarDataFetcher()
+      incProgress(.45)
+      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      incProgress(.15)
+      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
+      incProgress(.25)
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      incProgress(.15)
+    })
     titlePanel("Data Summaries")
   })
 

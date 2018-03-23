@@ -97,7 +97,8 @@ shinyServer(function(input, output, session) {
     mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
     contents <- list.files(mirror.dir)
     builds <- contents[grepl("build-", contents)]
-    num <- sort(builds)[length(builds)]
+    #num <- sort(builds)[length(builds)]
+    num <- 'build-1'
     #get datasetName
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
@@ -212,14 +213,16 @@ shinyServer(function(input, output, session) {
   }
   
   output$title <- renderUI({
-    singleVarDataFetcher()
-
-    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
-
-    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo") 
-
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
-
+    withProgress(message = 'Loading...', value = 0, style = "old", {
+      singleVarDataFetcher()
+      incProgress(.45)
+      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      incProgress(.15)
+      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo")
+      incProgress(.25)
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      incProgress(.15)
+    })
     titlePanel("Data Distributions")
   })
   
@@ -700,8 +703,11 @@ shinyServer(function(input, output, session) {
           }
         }
         col = 'groups'
-        data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-                            by = setdiff(names(data), eval(col))][!is.na(eval(col))]
+        #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
+        #                    by = setdiff(names(data), eval(col))][!is.na(eval(col))]
+        if (any(grepl("|", data[[col]], fixed=TRUE))) {
+          data <- separate_rows(data, col, sep = "[|]+")
+        }
       } else {
         data <- singleVarData
         #subset data
@@ -726,8 +732,11 @@ shinyServer(function(input, output, session) {
           }
         }
         if (myX %in% strings$source_id) {
-          data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-                              by = setdiff(names(data), eval(myX))][!is.na(eval(myX))]
+          #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
+          #                    by = setdiff(names(data), eval(myX))][!is.na(eval(myX))]
+          if (any(grepl("|", data[[myX]], fixed=TRUE))) {
+            data <- separate_rows(data, myX, sep = "[|]+")
+          }
         }
       }
      

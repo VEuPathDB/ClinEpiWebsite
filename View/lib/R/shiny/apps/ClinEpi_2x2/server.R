@@ -86,7 +86,8 @@ shinyServer(function(input, output, session) {
     mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB") 
     contents <- list.files(mirror.dir)
     builds <- contents[grepl("build-", contents)]
-    num <- sort(builds)[length(builds)]
+    #num <- sort(builds)[length(builds)]
+    num <- 'build-1'
     #get datasetName
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
@@ -194,14 +195,16 @@ shinyServer(function(input, output, session) {
   }
  
   output$title <- renderUI({
-    singleVarDataFetcher()
-
-    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
-  
-    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
- 
-    outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo") 
-
+    withProgress(message = 'Loading...', value = 0, style = "old", {
+      singleVarDataFetcher()
+      incProgress(.45)
+      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      incProgress(.15)
+      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, useData = reactive(list(singleVarData)), singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
+      incProgress(.25)
+      outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo")
+      incProgress(.15)
+    })
     titlePanel("Contingency Tables")
   }) 
  

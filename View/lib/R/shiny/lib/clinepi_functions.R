@@ -113,7 +113,8 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, addNo
 
   #limit by minLevels and maxLevels
   temp <- as.vector(choices$source_id)
-  boolean <- sapply(data[ , (temp), with=FALSE ], function(x) {(length(levels(as.factor(x))) <= maxLevels & length(levels(as.factor(x))) >= minLevels)})
+  #boolean <- sapply(data[ , (temp), with=FALSE ], function(x) {(length(levels(as.factor(x))) <= maxLevels & length(levels(as.factor(x))) >= minLevels)})
+  boolean <- sapply(data[, (temp), with = FALSE], function(x) {(uniqueN(x) <= maxLevels & uniqueN(x) >= minLevels)})
   choices <- choices[match(names(boolean), choices$source_id),]
   choices <- choices[as.vector(boolean),]
 
@@ -139,8 +140,11 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, addNo
 getUIStp1List <- function(data, col){
 
   tempDF <- completeDT(data, col)
-  data <- setDT(tempDF)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-                      by = setdiff(names(tempDF), eval(col))][!is.na(eval(col))]
+  #data <- setDT(tempDF)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
+  #                    by = setdiff(names(tempDF), eval(col))][!is.na(eval(col))]
+  if (any(grepl("|", data[[col]], fixed=TRUE))) {
+    data <- separate_rows(tempDF, col, sep = "[|]+")
+  }
 
   levels <- levels(as.factor(data[[col]]))
 }
@@ -151,8 +155,11 @@ getFinalDT <- function(data, metadata.file, col){
   strings <- getStrings(metadata.file)
    
   if (col %in% strings$source_id) {
-    data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-                          by = setdiff(names(data), eval(col))][!is.na(eval(col))]
+    #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
+    #                      by = setdiff(names(data), eval(col))][!is.na(eval(col))]
+    if (any(grepl("|", data[[col]], fixed=TRUE))) {
+      data <- separate_rows(tempDF, col, sep = "[|]+")
+    }
   }
        
   data
