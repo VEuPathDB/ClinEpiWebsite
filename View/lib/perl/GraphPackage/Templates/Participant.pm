@@ -31,6 +31,7 @@ sub init {
   my $eventDur = $self->getEventDur();
   my $status = $self->getStatus();
   my $optStatus =  $self->getOptStatus();
+  my $sampleInfo = $self->getSampleInfo();
   my $tblPrefix = $self->getDatasetId();
   $tblPrefix =~ s/DS_/D/g;
 
@@ -147,9 +148,9 @@ sub init {
                              });
     if ($status eq 'EUPATH_0000704') {
       if ($subtitle eq '') {
-        $subtitle = "points = micro+";
+        $subtitle = "dots = pathogen+";
       } else {
-        $subtitle = $subtitle . "; points = micro+";
+        $subtitle = $subtitle . "; dots = pathogen+";
       }
     }
     }
@@ -160,19 +161,36 @@ sub init {
                           });
   }
 
-  if (!defined $yAxis && !defined $eventStart && !defined $status) {
-    die "No data was provided to plot. Must provide 'yAxis', 'eventStart' or 'status' in arguments.";
+  my @nodeMetadataSampleInfo;
+  my $countSampleCols = 0;
+  if (defined $sampleInfo) {
+    for my $row (@{$sampleInfo}) {
+      $nodeMetadataSampleInfo[$countSampleCols] =  ({
+                                                     Id => $self->getId(),
+                                                     contXAxis => $xAxis,
+                                                     sampleInfo => $row,
+                                                     tblPrefix => $tblPrefix,
+                                                   });
+      $countSampleCols++;
+    }
   }
 
+  if (!defined $yAxis && !defined $eventStart && !defined $status && !defined $sampleInfo) {
+    die "No data was provided to plot. Must provide 'yAxis', 'eventStart', 'status' or 'sampleInfo' in arguments.";
+  }
+
+#print STDERR Dumper(\@nodeMetadata);
+print STDERR Dumper(\@nodeMetadataSampleInfo);
 #TODO will eventually need for loop in this file (mimic the one in expression.pm) to allow plot parts
-  my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus);
+  my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus, \@nodeMetadataSampleInfo);
   my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
   
   $line->setProfileSets($participantProfile);
   $line->setXaxisLabel($xLabel);
   $line->setYaxisLabel($yLabel);
-  $line->setSubtitle($subtitle);
+  #$line->setSubtitle($subtitle);
 
+  #should probably switch this to use viridis or something
   my @colorOptions = ( "#56B4E9", "#CC79A7", "#0072B2", "#009E73", "#F0E442", "#999999", "#E69F00");
   $count--;
   #TODO add a check here that count is not outside bounds of colorOptions and let it reuse colorOptions if it is. 
@@ -204,17 +222,35 @@ sub init {
 
 1;
 
-package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_841a9f5259;
+#maled
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_121f2c2f02;
 use vars qw( @ISA );
 @ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
 use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
-#anything to add or override put it here
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+profile.df.full$DURATION[profile.df.full$DURATION == '0 day(s)'] <- NA
+profile.df.full$ID[profile.df.full$STATUS == 'No'] <- NA
+profile.df.full$STATUS <- profile.df.full$ID
+profile.df.full$ID <- NULL
+
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+  $profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
+  $profile->setEventDurLegend("Diarrhea");
+  $profile->setStatusLegend("Pathogen +");
+
+}
 
 1;
 
+#icemr
 package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_0ad509829e;
 use vars qw( @ISA );
 @ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
