@@ -35,43 +35,6 @@ sub init {
   my $tblPrefix = $self->getDatasetId();
   $tblPrefix =~ s/DS_/D/g;
 
-  my $subtitle = "red lines = +/- 2 sd";
-  my $yLabel = "Weight for Height Z-score";
-  my @legendLabel = [];
-  if (@{$yAxis}) {
-    if (scalar @{$yAxis} > 1) {
-      #specific for now. i think about it again later since this already needs so much work.
-      $yLabel = "Z-score";
-    } elsif ($yAxis->[0] eq 'EUPATH_0000732') {
-      $yLabel = "Weight";
-      $subtitle = "";
-    } elsif ($yAxis->[0] eq 'EUPATH_0000719') {
-      $yLabel = "Length";
-      $subtitle = "";
-    } elsif ($yAxis->[0] eq 'EUPATH_0000682') {
-      $yLabel = "Head Circum for Age Z-score";
-    } elsif ($yAxis->[0] eq 'EUPATH_0000689') {
-      $yLabel = "Height for Age Z-score";
-    } elsif ($yAxis->[0] eq 'EUPATH_0000733') {
-      $yLabel = "Weight for Age Z-score";
-    } elsif ($yAxis->[0] eq 'EUPATH_0000662') {
-      $yLabel = "BMI for Age Z-score";
-    } elsif ($yAxis->[0] ne 'EUPATH_0000734') {
-      warn "This option is not yet recognized. Y-axis label will need to be established in Participant.pm template.";
-    }
-  } else {
-    $yLabel = "";
-    $subtitle = "";
-  }
-
-  my $xLabel = "Age in Days";
-
-  if ($xAxis eq 'EUPATH_0000091') {
-    $xLabel = "Date of Visit";
-  } elsif ($xAxis ne 'EUPATH_0000644') {
-    warn "This option is not yet recognized. X-axis label will need to be established in Participant.pm template.";
-  }
-
   my @nodeMetadata;
   my $count = 0;
   if (defined $yAxis) {
@@ -82,22 +45,6 @@ sub init {
                                  yAxis => $row,
                                  tblPrefix => $tblPrefix,
                                });
-    $legendLabel[$count] = "Weight for Height Z-score";
-    if ($row eq 'EUPATH_0000682') {
-      $legendLabel[$count] = "Head Circum for Age Z-score";
-    } elsif ($row eq 'EUPATH_0000732') {
-      $legendLabel[$count] = "Weight";
-    } elsif ($row eq 'EUPATH_0000719') {
-      $legendLabel[$count] = "Length";
-    } elsif ($row eq 'EUPATH_0000689') {
-      $legendLabel[$count] = "Height for Age Z-score";
-    } elsif ($row eq 'EUPATH_0000733') {
-      $legendLabel[$count] = "Weight for Age Z-score";
-    } elsif ($row eq 'EUPATH_0000662') {
-      $legendLabel[$count] = "BMI for Age Z-score";
-    } elsif ($row ne 'EUPATH_0000734') {
-      warn "This option is not yet recognized. Legend label will need to be established in Participant.pm template.";
-    } 
       $count++;
     }
   } else {
@@ -115,13 +62,6 @@ sub init {
                             eventDur => $eventDur,
                             tblPrefix => $tblPrefix
                           });
-    if ($eventDur eq 'EUPATH_0000665') {
-      if ($subtitle eq '') {
-        $subtitle = "bars = diarrhea";
-      } else {
-        $subtitle = $subtitle . "; bars = diarrhea";
-      }
-    }
   } else {
     $nodeMetadataEvent = ({
                             Id => $self->getId(),
@@ -146,13 +86,6 @@ sub init {
                                status => $status,
                                tblPrefix => $tblPrefix,
                              });
-    if ($status eq 'EUPATH_0000704') {
-      if ($subtitle eq '') {
-        $subtitle = "dots = pathogen+";
-      } else {
-        $subtitle = $subtitle . "; dots = pathogen+";
-      }
-    }
     }
   } else {
     $nodeMetadataStatus = ({
@@ -179,39 +112,10 @@ sub init {
     die "No data was provided to plot. Must provide 'yAxis', 'eventStart', 'status' or 'sampleInfo' in arguments.";
   }
 
-#print STDERR Dumper(\@nodeMetadata);
-print STDERR Dumper(\@nodeMetadataSampleInfo);
-#TODO will eventually need for loop in this file (mimic the one in expression.pm) to allow plot parts
   my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus, \@nodeMetadataSampleInfo);
   my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
-  
+ 
   $line->setProfileSets($participantProfile);
-  $line->setXaxisLabel($xLabel);
-  $line->setYaxisLabel($yLabel);
-  #$line->setSubtitle($subtitle);
-
-  #should probably switch this to use viridis or something
-  my @colorOptions = ( "#56B4E9", "#CC79A7", "#0072B2", "#009E73", "#F0E442", "#999999", "#E69F00");
-  $count--;
-  #TODO add a check here that count is not outside bounds of colorOptions and let it reuse colorOptions if it is. 
-  my @colors = @colorOptions[0..$count];
-  if (defined $eventStart) {
-    $colors[$count+1] = "#000099";
-  }
-  if (defined $status) {
-    if (defined $eventStart) {
-      $colors[$count+2] = "#000099";
-    } else {
-      $colors[$count+1] = "#000099";
-    }
-  }
-
-  if (@colors) {
-    $line->setColors(\@colors);
-  }
-  if (@legendLabel) {
-    $line->setLegendLabels(\@legendLabel);
-  }
 
   $self->finalProfileAdjustments($line);
   $self->setGraphObjects($line);
@@ -238,13 +142,18 @@ profile.df.full$DURATION[profile.df.full$DURATION == '0 day(s)'] <- NA
 profile.df.full$ID[profile.df.full$STATUS == 'No'] <- NA
 profile.df.full$STATUS <- profile.df.full$ID
 profile.df.full$ID <- NULL
+#profile.df.full$LEGEND <- as.factor(profile.df.full$YLABEL)
 
 RADJUST
+  my $colorValues = "c(\"Length/height-for-age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode in days\" = \"#000099\", \"Vibrio\" = \"#FF0000FF\", \"Taenia sp.\" = \"#FF3500FF\", \"A. lumbricoides\" = \"#FF6A00FF\", \"Adenovirus\" = \"#FF9E00FF\", \"Aeromonas\" = \"#FFD300FF\", \"Astrovirus\" = \"#F6FF00FF\", \"Balantidium coli\" = \"#C1FF00FF\", \"C. mesnili\" = \"#8DFF00FF\", \"Cyclospora\" = \"#58FF00FF\", \"E. histolytica\" = \"#23FF00FF\", \"E. nana\" = \"#00FF12FF\", \"E. vermicularis\" = \"#00FF46FF\", \"EAEC\" = \"#00FF7BFF\", \"EIEC\" = \"#00FFB0FF\", \"EPEC\" = \"#00FFE5FF\", \"ETEC\" = \"#00E5FFFF\", \"Entamoeba coli\" = \"#00B0FFFF\", \"H. diminuta\" = \"#007BFFFF\", \"H. nana\" = \"#0046FFFF\", \"Hookworm\" = \"#0012FFFF\", \"I. butschilii\" = \"#2300FFFF\", \"Norovirus\" = \"#5800FFFF\", \"Rotavirus\" = \"#8D00FFFF\", \"S. stercoralis\" = \"#C100FFFF\", \"Salmonella\" = \"#F600FFFF\", \"Schistosoma\" = \"#FF00D3FF\", \"Shigella\" = \"#FF009EFF\", \"T. trichiura\" = \"#FF006AFF\", \"Yersinia enterocolitica\" = \"#FF0035FF\")";
+  my $breaks = "c(\"Length/height-for-age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\")";
 
   $profile->addAdjustProfile($rAdjustString);
   $profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
   $profile->setEventDurLegend("Diarrhea");
   $profile->setStatusLegend("Pathogen +");
+  $profile->setColorVals($colorValues);
+  $profile->setCustomBreaks($breaks);
 
 }
 
