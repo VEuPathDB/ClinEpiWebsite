@@ -56,20 +56,27 @@ sub init {
   my $prtcpntTable = $tblPrefix . "Participants";
   my $ioTable = $tblPrefix . "PANIO";
   my $obsTable = $tblPrefix . "Observations";
+  my $ontologyTable = $tblPrefix . "Ontology";
 
   $Self->setSql(<<Sql);
 
-select pa.name as LEGEND
+select m.ONTOLOGY_TERM_NAME as LEGEND
   , ea.$yAxis as VALUE
   , ea.$contXAxis as NAME
+  , m.ONTOLOGY_TERM_NAME as YLABEL
+  , mt.ONTOLOGY_TERM_NAME as XLABEL
 -- profile_file is participant id
 from apidbtuning.$prtcpntTable pa
    , apidbtuning.$ioTable io
    , apidbtuning.$obsTable ea
+   , apidbtuning.$ontologyTable m
+   , apidbtuning.$ontologyTable mt 
 where pa.name = \'<<Id>>\'
 and pa.pan_id = io.input_pan_id 
 and io.OUTPUT_PAN_ID = ea.PAN_ID
 and ea.$yAxis is not null
+and m.ONTOLOGY_TERM_SOURCE_ID = \'$yAxis\'
+and mt.ONTOLOGY_TERM_SOURCE_ID = \'$contXAxis\'
 order by $contXAxis 
 
 Sql

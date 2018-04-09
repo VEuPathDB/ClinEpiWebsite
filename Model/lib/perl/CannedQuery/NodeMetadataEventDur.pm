@@ -56,10 +56,11 @@ sub init {
   my $prtcpntTable = $tblPrefix . "Participants";
   my $ioTable = $tblPrefix . "PANIO";
   my $obsTable = $tblPrefix . "Observations";
+  my $ontologyTable = $tblPrefix . "Ontology";
 
   $Self->setSql(<<Sql);
 
-select pa.name as LEGEND
+select m.ONTOLOGY_TERM_NAME as LEGEND
   , ea.$eventStart as START_DATE
 --this next to appease lineplot
   , ea.$eventStart as NAME
@@ -69,10 +70,12 @@ select pa.name as LEGEND
 from apidbtuning.$prtcpntTable pa
    , apidbtuning.$ioTable io
    , apidbtuning.$obsTable ea
+   , apidbtuning.$ontologyTable m
 where pa.name = \'<<Id>>\'
 and pa.pan_id = io.input_pan_id 
 and io.OUTPUT_PAN_ID = ea.PAN_ID
 and ea.$eventDur is not null
+and m.ONTOLOGY_TERM_SOURCE_ID = \'$eventDur\'
 order by $eventStart
 
 Sql

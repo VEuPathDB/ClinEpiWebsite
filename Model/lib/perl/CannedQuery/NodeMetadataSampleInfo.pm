@@ -61,7 +61,7 @@ sub init {
 
   $Self->setSql(<<Sql);
 
-select pa.NAME as LEGEND
+select m.ONTOLOGY_TERM_NAME as LEGEND
   , m.ONTOLOGY_TERM_NAME as ID
   , sa.$sampleInfo as STATUS
   , ea.$contXAxis as NAME
