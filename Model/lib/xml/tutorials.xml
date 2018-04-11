@@ -34,7 +34,7 @@
 
 
 
-<record>
+  <record>
        <attribute name="title">Exploring ClinEpiDB</attribute>
        <attribute name="description">Have a guided tour around this new website dedicated to Epidemiology studies.</attribute>
        <attribute name="uid">1</attribute>
@@ -46,12 +46,30 @@
            <attribute name="fileName.flv">>unavailable</attribute>
            <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
            <attribute name="duration">3 min</attribute>
-           <attribute name="size">4 mb</attribute>
+           <attribute name="size">Mar 18, 2018</attribute>
          </row>
        </table>
-   </record>
+  </record>
 
 
+
+
+  <record>
+       <attribute name="title">Searching in ClinEpiDB</attribute>
+       <attribute name="description"></attribute>
+       <attribute name="uid">1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.mov">unavailable</attribute>
+           <attribute name="fileName.avi">unavailable</attribute>
+           <attribute name="fileName.flv">>unavailable</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
+           <attribute name="duration">3 min</attribute>
+           <attribute name="size">Apr 11, 2018</attribute>
+         </row>
+       </table>
+  </record>
 
 
  </xmlAnswer>
