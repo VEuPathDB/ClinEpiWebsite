@@ -35,8 +35,8 @@
 
 
   <record>
-       <attribute name="title">Exploring ClinEpiDB</attribute>
-       <attribute name="description">Have a guided tour around this new website dedicated to Epidemiology studies.</attribute>
+       <attribute name="title">Accessing ClinEpiDB data and exploring via the filters</attribute>
+       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
        <attribute name="uid">1</attribute>
        <table name="files">
         <row>
@@ -55,8 +55,8 @@
 
 
   <record>
-       <attribute name="title">Searching in ClinEpiDB</attribute>
-       <attribute name="description"></attribute>
+       <attribute name="title">Exploring search results</attribute>
+       <attribute name="description">This tutorial explains how to use dynamic tabular outputs and column visualization tools to explore your search results or download the data for further analysis.</attribute>
        <attribute name="uid">1</attribute>
        <table name="files">
         <row>
