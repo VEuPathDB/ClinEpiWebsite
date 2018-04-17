@@ -55,8 +55,8 @@
 
 
   <record>
-       <attribute name="title">Exploring search results</attribute>
-       <attribute name="description">This tutorial explains how to use dynamic tabular outputs and column visualization tools to explore your search results or download the data for further analysis.</attribute>
+       <attribute name="title">ClinEpiDB search results</attribute>
+       <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
        <attribute name="uid">1</attribute>
        <table name="files">
         <row>
