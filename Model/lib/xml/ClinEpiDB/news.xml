@@ -17,6 +17,30 @@
 
 
 <record>
+  <attribute name="headline">ClinEpiDB 2 Released</attribute>
+  <attribute name="date">26 Apr 2018 13:00</attribute>
+  <attribute name="tag">clinepidb_2_release</attribute>
+  <attribute name="category">release</attribute>
+  <attribute name="item">
+    <![CDATA[
+      <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 2</i></div>
+      <section>
+        <h4><b>New Features in this Release</b></h4>
+        <ul>
+        <li>A <a href="https://eupathdb.org/tutorials/ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf"><b> new tutorial</b> </a> explains the options ClinEpiDB provides to explore results after performing a search. These include the dynamic tabular outputs, column visualization tools, and data download options.
+        <li>In the Distributions app we have added automatically generated summary statistics: mean, median, range, SD (standard deviation) & interquartile range (IQR)
+        <li>Improvements to our axis labels in our analysis apps
+        <li>Implementation of indicators of available data. Filters are now annotated with eg. 1 of 44,508 Observations have no data provided for this filter.
+        <li>Improvements to Active Filters summary popup describing more clearly filter selections, especially in the Related Observations step.
+        </ul>
+      </section>
+      <section>        <h4><b>No new Data in this Release</b></h4>
+      </section>
+    ]]>
+  </attribute>
+</record>
+
+<record>
   <attribute name="headline">ClinEpiDB 1 Released</attribute>
   <attribute name="date">16 Feb 2018 13:00</attribute>
   <attribute name="tag">clinepidb_1_release</attribute>
