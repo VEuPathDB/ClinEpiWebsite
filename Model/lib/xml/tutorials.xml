@@ -55,7 +55,7 @@
 
 
   <record>
-       <attribute name="title">ClinEpiDB search results</attribute>
+       <attribute name="title">Exploring search results</attribute>
        <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
        <attribute name="uid">1</attribute>
        <table name="files">
