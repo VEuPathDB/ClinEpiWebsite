@@ -26,6 +26,7 @@ shinyServer(function(input, output, session) {
   longitudinal2 <- NULL
   project.id <- NULL
   isParticipant <- NULL
+  model.prop <- NULL
 
   filesFetcher <- reactive({
 
@@ -47,17 +48,27 @@ shinyServer(function(input, output, session) {
       metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
           ))
- 
+      model.prop_temp <- try(fread(
+        getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
+        sep="=", header=FALSE, fill=TRUE))
+
+      if (grepl("Error", model.prop_temp[1])){
+        stop("Error: model.prop file missing or unreadable!")
+      } else {
+        #not sure if we'll need to do anything else here yet
+        model.prop <<- model.prop_temp
+      }
+      
       if (grepl("Error", attribute_temp[1])){
-      stop("Error: Attributes file missing or unreadable!")
-    } else {
-      attributes.file <<- attribute_temp
-      names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
-      project.id <<- attributes.file$project_id[1]
-      #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
-      attributes.file <<- cbind(attributes.file, custom = "Selected")
-      message(head(attributes.file))
-    }
+        stop("Error: Attributes file missing or unreadable!")
+      } else {
+        attributes.file <<- attribute_temp
+        names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+        project.id <<- attributes.file$project_id[1]
+        #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
+        attributes.file <<- cbind(attributes.file, custom = "Selected")
+        message(head(attributes.file))
+      }
 
       if (grepl("Error", metadata_temp[1])){
         stop("Error: Metadata file missing or unreadable!")
@@ -95,16 +106,9 @@ shinyServer(function(input, output, session) {
   singleVarDataFetcher <- function(){
     filesFetcher()
 
-    model.prop <- fread(paste0("../../../../../../config/", project.id, "/model.prop"), sep = "=", header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
-
-    #this temporary until i figure how i'm supposed to do it. 
-    #will also need to be able to identify one dataset from another, and which to grab.
+    #build up mirror.dir path
     mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
-    contents <- list.files(mirror.dir)
-    builds <- contents[grepl("build-", contents)]
-    #num <- sort(builds)[length(builds)]
-    num <- 'build-1'
-    #get datasetName
+    num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber']) 
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
     datasetName <- colnames(custom.props)
