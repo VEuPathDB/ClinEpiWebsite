@@ -186,7 +186,7 @@ RADJUST
   $profile->setDefaultXMax($xmax);
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
-
+  $profile->setXaxisLabel("Date");
 }
 
 1;
