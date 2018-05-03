@@ -159,7 +159,7 @@ RADJUST
 
 1;
 
-#icemr
+#icemr prism
 package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_0ad509829e;
 use vars qw( @ISA );
 @ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
@@ -175,8 +175,8 @@ profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y
 profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
 profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "0", ifelse(OPT_STATUS == 'Yes', "1", ifelse((grepl("LAMP not done", STATUS) | grepl("patent", STATUS)), "2", "3"))));
 profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("patent",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), ifelse(grepl("microscopic",STATUS),"3",NA)));
-colors <- magma(3, end = .9, begin = .55555)
 profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
+profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.df.full$OPT_STATUS)
 RADJUST
 
   $profile->addAdjustProfile($rAdjustString);
@@ -187,6 +187,40 @@ RADJUST
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
+  $profile->setColorVals("c(\"0\" = \"black\", \"1\" = \"#CD4071FF\", \"2\" = \"#FA7C5EFF\", \"3\" = \"#FECE91FF\")");
+}
+
+1;
+
+#icemr india
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_f6c59e88c1;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+profile.df.full = transform(profile.df.full, "COLOR"=ifelse(test = (STATUS == "Illness other than malaria" | STATUS == "Asymptomatic malaria"), yes = "1", no = ifelse(STATUS == "No illness", "0", "2")))
+profile.df.full = transform(profile.df.full, "FILL"= ifelse(STATUS == "Asymptomatic malaria", "1", ifelse(STATUS == "Severe malaria", "2", NA)))
+profile.df.full$TOOLTIP = profile.df.full$STATUS
+
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+  $profile->setForceNoLines(1);
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2015-03-31";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2012-12-01";
+  $profile->setDefaultXMax($xmax);
+  $profile->setDefaultXMin($xmin);
+  $profile->setTimeline('TRUE');
+  $profile->setXaxisLabel("Date");
+  $profile->setColorVals("c(\"0\" = \"black\", \"2\" = \"#B63679FF\", \"1\" = \"#FECE91FF\")");
 }
 
 1;
