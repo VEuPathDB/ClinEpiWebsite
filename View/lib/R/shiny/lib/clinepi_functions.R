@@ -48,21 +48,6 @@ groupText <- function(moduleName, myGroups, groups_stp1, groups_stp2, groups_stp
 
 subsetDataFetcher <- function(min, max, data, col){
 
-  #this version maled specific.
-  #eupath_0000743 is last date observed. so the below doesnt include prtcpnts who drop out before the max day set
-  #this inner if statement temporary (hopefully) until we sort the root of the problem. events table has data up to ageday 745, but prtcpnt file says no observations past 732
-  #if (any(colnames(data) %in% "EUPATH_0000743")) {
-  #  grabMe <- length(levels(as.factor(data$EUPATH_0000743)))
-  #  maxDay <- levels(as.factor(data$EUPATH_0000743))[grabMe]
-  #  if (max > maxDay) {
-  #    tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max]
-  #  } else {
-   #   tempDF <- data[data$EUPATH_0000644 >= min & data$EUPATH_0000644 <= max & data$EUPATH_0000743 >= max]
-   # }
-  #} else {
-  #  tempDF <- data
-  #}
- 
   tempDF <- data[data[[col]] >= min & data[[col]] <= max] 
  
   tempDF
@@ -94,47 +79,110 @@ getDropList <- function(){
   c("EUPATH_0000644", "BFO_0000015", "EUPATH_0000702", "OBI_0100051")
 }
 
-#makes named list containing source_ids and display names for ui
-#can limit what gets returned by limiting what cols are in data  
-#can also provide list of data frames to grab cols from i.e. data = list(df1, df2)
-getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, addNone = FALSE) {
+  
+#this is a bit slow right now because were working with a list of lists and if its possible to vectorize rather than use for loops idk how yet.
+getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, selected = NULL, subList = NULL, include=c("all")) {
   drop <- getDropList()
-
+  
   colnames <- colnames(data)
   colnames <- setdiff(colnames, drop)
-
-  #get display names from metadata
+  
   choices <- subset(metadata.file, source_id %in% colnames)
+  #print(choices)
+  #here remove from choices anything where category not in include param, unless param is 'all'
+  #could alternatively assume if include is NULL to use everything
+  if (length(include) > 1) {
+    if (all(include != "all")) {
+      choices <- choices[choices$category %in% include,]
+    } else {
+      stop("parameter 'include' of getUIList can either be 'all' or a character vector of categories..")
+    }
+  } else {
+    if (include != "all") {
+      choices <- choices[choices$category %in% include,]
+    }
+  }
+
   if (nrow(choices) == 0) {
     return()
   }
   choicesNumeric <- subset(choices, type %in% "number")
- # choicesDates <- subset(choices, type %in% "date")
+  
+    if (is.null(subList)) {
+      roots <- as.list(metadata.file$property[metadata.file$parent == "null"])
+      if (is.null(roots)) {
+        message("No roots in ontology file..")
+      } else {
+        names(roots) <- roots
+        roots <- getUIList(data = data, subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, selected = selected, include = include)
+      }
+      return(roots)
+    } else {
+      #find children
+      subList <- lapply(subList, FUN = function(x){
+                                                 temp <- as.list(metadata.file$property[metadata.file$parent == x])
+                                                 names(temp) <- temp
+                                                 temp <- getUIList(data = data, subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, selected = selected, include = include)
+                                               })
 
-  #limit by minLevels and maxLevels
-  temp <- as.vector(choices$source_id)
-  #boolean <- sapply(data[ , (temp), with=FALSE ], function(x) {(length(levels(as.factor(x))) <= maxLevels & length(levels(as.factor(x))) >= minLevels)})
-  boolean <- sapply(data[, (temp), with = FALSE], function(x) {(uniqueN(x) <= maxLevels & uniqueN(x) >= minLevels)})
-  choices <- choices[match(names(boolean), choices$source_id),]
-  choices <- choices[as.vector(boolean),]
+      #this case is a leaf, so return no children
+      if (length(subList) == 0) {
+        return("")
+      }
+      
+      #remove leaves/ children of subList not in df
+      if (any(subList == "")) {
+        myLeaves <- subList == ""
+        if (!all(subList[myLeaves] %in% choices$property)) {
+          subList[subList == "" & !names(subList) %in% choices$property] <- NULL
+          if (length(subList) == 0) {
+            return("")
+          } 
+        }
+      }
+      #if not a leaf then disable selection if not in data
+      if (!all(names(subList) %in% choices$property)) {
+        myNodesToDisable <- !(names(subList) %in% choices$property)
+        for (i in 1:length(myNodesToDisable)) {
+          if (myNodesToDisable[i] == TRUE) {
+            attr(subList[[i]], "stdisabled") <- TRUE
+          }
+        }
+      }
 
-  #add numbers back in, sort alphabetically and convert df to named list
-  choices <- rbind(choices, choicesNumeric)#, choicesDates)
-  choices <- unique(choices)
-  myorder <- sort(choices$property)
-  choices <- choices[match(myorder, choices$property),]
-  if (addNone) {
-    choiceList <- as.vector(c("none", choices$source_id))
-    names(choiceList) <- as.vector(c("None", choices$property))
-  } else {
-    choiceList <- as.vector(choices$source_id)
-    names(choiceList) <- as.vector(choices$property)
-  }
-  mylist <- as.list(choiceList)
+      #check if number and if not then set disabled if outside min/maxLevels
+      #double check cause this should remove household id and isnt
+      if (!all(names(subList) %in% choicesNumeric$property)) {
+        for (i in 1:length(subList)) {
+          mySourceId <- metadata.file$source_id[metadata.file$property == names(subList)[i]]
+          if (mySourceId %in% choices$source_id) {
+            if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
+              #print(length(subList[[i]]))
+              #print(mySourceId)
+              if (length(subList[[i]]) == 0) {
+                subList[[i]] <- NULL
+              } else {
+                attr(subList[[i]], "stdisabled") <- TRUE
+              }
+            }
+          }
+        }
+      }
 
-  mylist
+      #set default selected value if passed one
+      #if (!is.null(selected)) {
+      #  for (i in 1:length(subList)) {
+      #    if (metadata.file$source_id[metadata.file$property == names(subList)[i]] == selected) {
+      #      attr(subList[[i]], "stselected") <- TRUE
+      #    } 
+      #  }
+      #}
+      
+      #print(subList)
+      return(subList)
+    }
 }
-   
+ 
 #this ui will be different from above one(s)
 #returns all values for a column, can probably just pass singleVarData as data param
 getUIStp1List <- function(data, col){

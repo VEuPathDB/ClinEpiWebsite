@@ -2,12 +2,21 @@
 
 shinyUI(
   fluidPage(
+    useShinyjs(),
+    extendShinyjs(text="shinyjs.virtualBodyClick = function(){$(\"body\").trigger(\"click\")}", functions=c("virtualBodyClick")),
     theme = "cerulean.css",
     tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
               ".dataTable {border: none;}"
     ),
+   tags$style(type = 'text/css', ".btn-default{width: 100%;}"),
+   tags$style(type = 'text/css', ".btn .caret{position: relative; color: black; border-top: 5px solid; border-left: 5px solid transparent; border-right: 5px solid transparent;}"),
+   tags$style(type = 'text/css', ".caret{position: absolute; top: 50%; margin-top: 8px; float: right}"),
+   tags$style(".treeContainer { height: 400px; overflow-y: scroll; }"),
+   tags$style(type = "text/css", ".jstree-default .jstree-search { color: #428bca; }"),
+   tags$style(type = 'text/css', ".btn, .btn:hover {background: #ffffff; text-align:left; border-color: #cccccc; padding: 6px 12px;}"),
+   tags$head(includeScript("../../lib/jstree.js")),
     tags$head(tags$style(
       HTML("input[type='search']:disabled {visibility:hidden}"),
       HTML(".js-irs-0 .irs-line-left {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),

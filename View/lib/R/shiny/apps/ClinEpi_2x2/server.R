@@ -22,6 +22,8 @@ shinyServer(function(input, output, session) {
   project.id <- NULL
   isParticipant <- NULL
   model.prop <- NULL
+  getMyAttr <- reactiveValues()
+  getMyOut <- reactiveValues()
 
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
@@ -65,23 +67,20 @@ shinyServer(function(input, output, session) {
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
         
-        #check for unique display names in metdata file.
-        if (length(unique(metadata.file$property)) != nrow(metadata.file)) {
-          true <- duplicated(metadata.file$property) | duplicated(metadata.file$property, fromLast = TRUE)
-          metadata.file <<- transform(metadata.file, "property" = ifelse(true, paste0(property, ", ", parent), property))
-        }
-        
-        #add user defined group
-        #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
-          metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
-          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
-          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
-          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
-        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Participants", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
+          } else {
           isParticipant <<- FALSE
-          metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Observations", "string", "Search Results", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Observation"))
         }
       }
     }
@@ -173,10 +172,11 @@ message(mirror.dir)
     }
 
     #remove unnecessary metadata info
-    metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
+    #metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
 
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
+    dates <- dates[dates %in% colnames(singleVarData)]
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
@@ -204,14 +204,52 @@ message(mirror.dir)
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, useData = reactive(list(singleVarData)), singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
+      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
       incProgress(.25)
-      outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), useData = reactive(list(singleVarData)), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo")
+      outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo")
       incProgress(.15)
     })
     titlePanel("Contingency Tables")
   }) 
  
+    observeEvent(attrInfo$group, {
+      if (length(get_selected(attrInfo$group, format="names")) == 0) {
+        return(NULL)
+      }
+      nextAttr <- metadata.file$source_id[metadata.file$property == get_selected(attrInfo$group, format="names")[1][[1]]][1]
+
+      if (is.null(getMyAttr$val)) {
+        getMyAttr$val <- nextAttr
+      } else if (getMyAttr$val != nextAttr) {
+        getMyAttr$val <- nextAttr
+      }
+    })
+
+    observeEvent(outInfo$group, {
+      if (length(get_selected(outInfo$group, format="names")) == 0) {
+        return(NULL)
+      }
+      nextOut <- metadata.file$source_id[metadata.file$property == get_selected(outInfo$group, format="names")[1][[1]]][1]
+
+      if (is.null(getMyOut$val)) {
+        getMyOut$val <- nextOut
+      } else if (getMyOut$val != nextOut) {
+        getMyOut$val <- nextOut
+      }
+    })
+
+    #tried to wrap these three into one observer and it broke.. look again later
+    observeEvent(getMyAttr$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+
+    observeEvent(getMyOut$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
 
     output$plot <- renderPlotly({
       print("about to render plot")
@@ -240,8 +278,8 @@ message(mirror.dir)
         df$Variable2 <- factor(df$Variable2, levels = c(cols[1], cols[2]))
         df$Variable1 <- factor(df$Variable1, levels = c(rows[1], rows[2]))
        
-        var1 <- attrInfo$group
-        var2 <- outInfo$group
+        var1 <- getMyAttr$val
+        var2 <- getMyOut$val 
  
         #define axis labels here
         xlab <- metadata.file$property[metadata.file$source_id == var2]
@@ -392,19 +430,19 @@ message(mirror.dir)
       #collecting inputs 
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
-      if (is.null(attrInfo$group)) {
+      if (is.null(getMyAttr$val)) {
         message("attr group is null")
         return()
       } else {
         message("setting myAttr")
-        myAttr <- attrInfo$group
+        myAttr <- getMyAttr$val
       }
-      if (is.null(outInfo$group)) {
+      if (is.null(getMyOut$val)) {
         print("out group is null")
         return()
       } else {
         print("setting myOut")
-        myOut <- outInfo$group
+        myOut <- getMyOut$val
       }
       print("have attr and out info")
       #subset data

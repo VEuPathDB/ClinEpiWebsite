@@ -32,7 +32,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, useData, singleVarData, event.file, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, event.file, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName) {
   ns <- session$ns
 
   propUrl <- getPropertiesUrl(session)
@@ -43,9 +43,13 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   }   
  
   groupRange <- reactiveValues()
-  
+  getMyGroups <- reactiveValues() 
+ 
   setGroupVals <- reactive({
-    myGroup <- input$group
+    if(is.null(getMyGroups$val)) {
+      return()
+    }
+    myGroup <- getMyGroups$val
     print(paste("myGroup:", myGroup))
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
@@ -80,15 +84,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
   
   #make sure ranges are updated when attr or out change
-  observeEvent(input$group, setGroupVals())
+  observeEvent(getMyGroups$val, setGroupVals())
   
-  output$choose_group <- renderUI({
+  output$group <- renderTree({
     if (groupsType() != "makeGroups" & groupsType() != "direct") {
       return()
     }
-    
-    attrChoiceList <- lapply(useData(), getUIList, metadata.file = metadata.file)
-    attrChoiceList <- unlist(attrChoiceList, recursive = FALSE)
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
 
     dontUseProps <- FALSE
@@ -103,31 +104,83 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     }
  
     if (dontUseProps) {
-      selectInput(inputId = ns("group"),
-                  label = groupLabel(),
-                  choices = attrChoiceList,
-                  selected = selected(),
-                  width = '100%')
+      mySelected = selected()
     } else {
-      selectInput(inputId = ns("group"),
-                  label = groupLabel(),
-                  choices = attrChoiceList,
-                  selected = properties$selected[properties$input == paste0(moduleName, "$group")],
-                  width = '100%')
+      mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
     }
+
+    #change this to use include arg
+    #figure why passed args dont seem to work?
+    if (groupsType() == "makeGroups") {
+      #attrChoiceList <- lapply(useData(), getUIList, metadata.file = metadata.file, selected = mySelected)
+      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, selected = mySelected, include = include())
+    } else {
+      #attrChoiceList <- lapply(useData(), FUN = function(x) {getUIList(x, metadata.file = metadata.file, maxLevels = 12, selected = mySelected)})
+      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, selected = mySelected, include = include(), maxLevels = 12)
+    }
+    
+    attrChoiceList
 
   })
   
+  output$choose_group <- renderUI({
+    if (groupsType() != "makeGroups" & groupsType() != "direct") {
+      return()
+    }
+    
+    myGroupBtnLabel <- getGroupBtnLabel()
+    
+    tagList(
+      div(
+        div(
+          tags$b(groupLabel()),
+          style="margin-bottom: 5px;"
+        ),
+        dropdownButton(label=myGroupBtnLabel, 
+                       status = "default", 
+                       tags$div(
+                         class = "treeContainer",
+                         shinyTree(ns("group"), search = TRUE)
+                       )),
+        style="margin-bottom: 10px"
+      )
+    )
+  })
+
+  observeEvent(input$group, {
+    if (length(get_selected(input$group, format="names")) == 0) {
+      return(NULL)
+    }
+    nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(input$group, format="names")[1][[1]]][1]
+    
+    if (is.null(getMyGroups$val)) {
+      getMyGroups$val <- nextGroup
+    } else if (getMyGroups$val != nextGroup) {
+      getMyGroups$val <- nextGroup
+    }
+  })
+  
+  getGroupBtnLabel <- reactive({
+    myGroup <- getMyGroups$val
+    
+    if (is.null(myGroup)) {
+      label <- "Please select one"
+    } else {
+      label <- metadata.file$property[metadata.file$source_id == myGroup]
+    }
+    
+    label
+  })
+
   output$choose_stp1 <- renderUI({
-    print(paste("in choose_stp1:", input$group))
-    if (is.null(input$group)) {
+    if (is.null(getMyGroups$val)) {
       return()
     }
  
     if (groupsType() != "makeGroups") {
       return()
     }
-    myGroup <- input$group
+    myGroup <- getMyGroups$val
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
     
@@ -260,7 +313,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     myStp1Val <- input$group_stp1
     myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
     mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp2")]    
-    myGroup <- input$group
+    myGroup <- getMyGroups$val 
 
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)

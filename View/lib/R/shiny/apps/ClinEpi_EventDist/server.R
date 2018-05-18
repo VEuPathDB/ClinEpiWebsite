@@ -25,9 +25,10 @@ shinyServer(function(input, output, session) {
   plotChoice <- 'singleVar'
   longitudinal1 <- NULL
   longitudinal2 <- NULL
-  project.id <- NULL
   isParticipant <- NULL
   model.prop <- NULL
+  getMyX <- reactiveValues()
+  getMyFacet <- reactiveValues()
 
   filesFetcher <- reactive({
 
@@ -65,8 +66,6 @@ shinyServer(function(input, output, session) {
       } else {
         attributes.file <<- attribute_temp
         names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
-        project.id <<- attributes.file$project_id[1]
-        #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
         attributes.file <<- cbind(attributes.file, custom = "Selected")
       }
 
@@ -77,23 +76,20 @@ shinyServer(function(input, output, session) {
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
 
-        #check for unique display names in metdata file.
-        if (length(unique(metadata.file$property)) != nrow(metadata.file)) {
-          true <- duplicated(metadata.file$property) | duplicated(metadata.file$property, fromLast = TRUE)
-          metadata.file <<- transform(metadata.file, "property" = ifelse(true, paste0(property, ", ", parent), property))
-        }
-
-        #add user defined group
-        #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
-          metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
-          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
-          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
-          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
-        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Participants", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
+          } else {
           isParticipant <<- FALSE
-          metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Observations", "string", "Search Results", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Observation"))
         }
       }     
  
@@ -193,10 +189,11 @@ shinyServer(function(input, output, session) {
       house.file.exists <<- FALSE
     }
 
-    metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
+    #metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
     
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
+    dates <- dates[dates %in% colnames(singleVarData)]
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
@@ -224,9 +221,9 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo")
+      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo")
       incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
       incProgress(.15)
     })
     titlePanel("Data Distributions")
@@ -350,7 +347,7 @@ shinyServer(function(input, output, session) {
       }
       useData <- list(stmp)
             
-      return(useData)
+      return(c("all"))
     })
     
     selectedGroup <- reactive({
@@ -418,20 +415,61 @@ shinyServer(function(input, output, session) {
       
       if (facetType == "direct") {
         dates <- getDates(metadata.file)$source_id
-        ptmp <- prtcpnt.file[, !dates, with = FALSE]
+        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
         if (house.file.exists) {
-          htmp <- house.file[, !dates, with = FALSE]
-          useData <- list(ptmp, htmp)
+          #htmp <- house.file[, !dates, with = FALSE]
+          include <- c("Participant", "Household")
         } else {
-          useData <- list(ptmp)
+          include <- c("Participant")
         }
       } else {
-        useData <- list(singleVarData)
+        include <- c("all")
       }     
  
-      return(useData)
+      return(include)
     })
     
+    observeEvent(xaxisInfo$group, {
+      if (length(get_selected(xaxisInfo$group, format="names")) == 0) {
+        return(NULL)
+      }
+      nextX <- metadata.file$source_id[metadata.file$property == get_selected(xaxisInfo$group, format="names")[1][[1]]][1]
+
+      if (is.null(getMyX$val)) {
+        getMyX$val <- nextX
+      } else if (getMyX$val != nextX) {
+        getMyX$val <- nextX
+      }
+    })
+
+    observeEvent(facetInfo$group, {
+      if (length(get_selected(facetInfo$group, format="names")) == 0) {
+        return(NULL)
+      }
+      nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
+
+      if (is.null(getMyFacet$val)) {
+        getMyFacet$val <- nextFacet
+        print("resetting myFacet")
+      } else if (getMyFacet$val != nextFacet) {
+        getMyFacet$val <- nextFacet
+        print("resetting myFacet")
+      }
+    })
+
+    #tried to wrap these three into one observer and it broke.. look again later
+    observeEvent(getMyX$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+
+    observeEvent(getMyFacet$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+
     output$distribution <- renderPlotly({
       message("render plot!")
       if (is.null(input$xaxis)) {
@@ -442,16 +480,16 @@ shinyServer(function(input, output, session) {
       }
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
-        if (is.null(xaxisInfo$group)) {
+        if (is.null(getMyX$val)) {
           return()
         } else {
-          myX <- xaxisInfo$group
+          myX <- getMyX$val
         }
       }
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- facetInfo$group
+        myFacet <- getMyFacet$val
       }
       facetType <- input$facetType
       #should switch to same setup as in other two.. use plotData()
@@ -551,9 +589,9 @@ shinyServer(function(input, output, session) {
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- facetInfo$group
+        myFacet <- getMyFacet$val
       }
-      myX <- xaxisInfo$group  
+      myX <- getMyX$val
       if ("FACET" %in% colnames(data)) {
         myFacet <- "FACET"
       }
@@ -621,16 +659,16 @@ shinyServer(function(input, output, session) {
       xType <- input$xaxis
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
-        if (is.null(xaxisInfo$group)) {
+        if (is.null(getMyX$val)) {
           return()
         } else {
-          myX <- xaxisInfo$group
+          myX <- getMyX$val
         }
       }
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- facetInfo$group
+        myFacet <- getMyFacet$val
       }
       facet_stp1 <- facetInfo$group_stp1
       facet_stp3 <- facetInfo$group_stp3

@@ -24,9 +24,14 @@ shinyServer(function(input, output, session) {
   properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  #check next three, not sure they need to be here
   project.id <- NULL
   isParticipant <- NULL
   model.prop <- NULL
+  getMyY <- reactiveValues()
+  getMyGroups <- reactiveValues()
+  getMyFacet <- reactiveValues()
+  legendTitle <- NULL
 
   filesFetcher <- reactive({
 
@@ -67,7 +72,7 @@ shinyServer(function(input, output, session) {
         project.id <<- attributes.file$project_id[1]
         #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
         attributes.file <<- cbind(attributes.file, custom = "Selected")
-        message(head(attributes.file))
+        #message(head(attributes.file))
       }
 
       if (grepl("Error", metadata_temp[1])){
@@ -77,26 +82,20 @@ shinyServer(function(input, output, session) {
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
 
-        #check for unique display names in metdata file.
-        if (length(unique(metadata.file$property)) != nrow(metadata.file)) {
-          true <- duplicated(metadata.file$property) | duplicated(metadata.file$property, fromLast = TRUE)
-          metadata.file <<- transform(metadata.file, "property" = ifelse(true, paste0(property, ", ", parent), property))
-        }
-
-        #add user defined group
-        #metadata.file <<- rbind(metadata.file, list("search_weight", "Strategy Step 1", "string", "none"))
-        message(colnames(attributes.file))
-        message('Participant_Id' %in% colnames(attributes.file))
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
-          metadata.file <<- rbind(metadata.file, list("custom", "Participant Search Results", "string", "none"))
-          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles from Search Results", "number", "none"))
-          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year from Search Results", "number", "none"))
-          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations from Search Results", "number", "none"))
-          message(metadata.file[metadata.file$property %in% 'Search Results'])
-        } else {
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Participants", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
+          } else {
           isParticipant <<- FALSE
-          metadata.file <<- rbind(metadata.file, list("custom", "Observation Search Results", "string", "none"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Observations", "string", "Search Results", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Observation"))
         }
       } 
 
@@ -197,11 +196,12 @@ shinyServer(function(input, output, session) {
       house.file.exists <<- FALSE
     }
 
-    metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
-    message(tail(metadata.file))
-    message(colnames(attributes.file))
+    #metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
+    #message(tail(metadata.file))
+    #message(colnames(attributes.file))
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
+    dates <- dates[dates %in% colnames(singleVarData)]
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
@@ -231,9 +231,9 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, useData = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
+      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
       incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, useData = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
       incProgress(.15)
     })
     titlePanel("Data Summaries")
@@ -345,6 +345,7 @@ shinyServer(function(input, output, session) {
       return(label)
     })
     
+#TODO figure how to remove dates. (and why we're doing this...)
     facetData <- reactive({
       if (is.null(input$facetType)) {
         return()
@@ -354,18 +355,18 @@ shinyServer(function(input, output, session) {
       
       if (facetType == "direct") {
         dates <- getDates(metadata.file)$source_id
-        ptmp <- prtcpnt.file[, !dates, with = FALSE]
+        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
         if (house.file.exists) {
-          htmp <- house.file[, !dates, with = FALSE]
-          useData <- list(ptmp, htmp)
+          #htmp <- house.file[, !dates, with = FALSE]
+          include <- c("Participant", "Household")
         } else {
-          useData <- list(ptmp)
+          include <- c("Participant")
         }
       } else {
-        useData <- list(singleVarData)
+        include <- c("all")
       }
       
-      return(useData)
+      return(include)
     })
     
     groupLabel <- reactive({
@@ -397,7 +398,8 @@ shinyServer(function(input, output, session) {
         
         return(label)
     })
-    
+   
+#figure how to remove dates 
     groupData <- reactive({
       if (is.null(input$groupsType)) {
         return()
@@ -405,21 +407,20 @@ shinyServer(function(input, output, session) {
         groupsType <- input$groupsType
       }
   
-      #can't remember why we arent using events here....  
       if (groupsType == "direct") {
         dates <- getDates(metadata.file)$source_id
-        ptmp <- prtcpnt.file[, !dates, with = FALSE]
+        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
         if (house.file.exists) {
-          htmp <- house.file[, !dates, with = FALSE]
-          useData <- list(ptmp, htmp)
+          #htmp <- house.file[, !dates, with = FALSE]
+          include <- c("Participant", "Household")
         } else {
-          useData <- list(ptmp)
+          include <- c("Participant")
         }
       } else {
-        useData <- list(singleVarData)
+        include <- c("all")
       }  
       
-      return(useData)
+      return(include)
     })
     
     selectedGroup <- reactive({
@@ -460,8 +461,40 @@ shinyServer(function(input, output, session) {
 message("selected Facet:", selected)
       return(selected)
     }) 
- 
-    output$choose_yaxis <- renderUI({
+  
+    observeEvent(groupInfo$group, {
+      if (length(get_selected(groupInfo$group, format="names")) == 0) {
+        return(NULL)
+      }
+      nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(groupInfo$group, format="names")[1][[1]]][1]
+      
+      if (is.null(getMyGroups$val)) {
+        getMyGroups$val <- nextGroup
+        legendTitle <<- nextGroup
+        print("resetting myGroups")
+      } else if (getMyGroups$val != nextGroup) {
+        getMyGroups$val <- nextGroup
+        legendTitle <<- nextGroup
+        print("resetting myGroups")
+      }
+    })
+
+    observeEvent(facetInfo$group, {
+      if (length(get_selected(facetInfo$group, format="names")) == 0) {
+        return(NULL)
+      }
+      nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
+      
+      if (is.null(getMyFacet$val)) {
+        getMyFacet$val <- nextFacet
+        print("resetting myFacet")
+      } else if (getMyFacet$val != nextFacet) {
+        getMyFacet$val <- nextFacet
+        print("resetting myFacet")
+      }
+    })
+
+    output$yaxis <- renderTree({
       mySelected <- properties$selected[properties$input == "input$yaxis"]
 
       #strings should have any vs all and picklist.
@@ -475,32 +508,93 @@ message("selected Facet:", selected)
       dates <- getDates(metadata.file)$source_id
 
       if (!is.null(longitudinal)) {
-        useData <- event.file[, !dates, with=FALSE]
+        include <- c("Observation")
       } else {
-        useData <- singleVarData
+        include <- c("all")
       }
-      outChoiceList <- getUIList(useData, metadata.file)
-      
+
       if (is.null(properties)) {
-        selectInput(inputId = "yaxis",
-                    label = "Y-Axis:",
-                    choices = outChoiceList,
-                    selected = "EUPATH_0000338",
-                    width = '100%')
+        selected = "EUPATH_0000689"
       } else {
-        selectInput(inputId = "yaxis",
-                    label = "Y-Axis:",
-                    choices = outChoiceList,
-                    selected = mySelected,
-                    width = '100%')
+        selected = mySelected
       }
+      #TODO figure how to remove dates
+      outChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, selected = selected, include = include)
+      #print(outChoiceList)
+      outChoiceList
+    })
+
+    output$choose_yaxis <- renderUI({
+      myLabel <- getYaxisLabel()
+      
+      tagList(
+        div(
+          div(
+            tags$b("Y-Axis:"),
+            style="margin-bottom: 5px;"
+          ),
+          dropdownButton(label=myLabel, 
+                         status = "default", 
+                         tags$div(
+                           class = "treeContainer",
+                           shinyTree("yaxis", search = TRUE)
+                         )),
+          style="margin-bottom: 10px"
+        )
+      )
+    })
+
+    getYaxisLabel <- reactive({
+      myY <- getMyY$val
+      
+      if (is.null(myY)) {
+        label <- "Please select one"
+      } else {
+        label <- metadata.file$property[metadata.file$source_id == myY]
+      }
+      
+      label
     })
     
+    observeEvent(input$yaxis, {
+      if (length(get_selected(input$yaxis, format="names")) == 0) {
+        return(NULL)
+      }
+      nextY <- metadata.file$source_id[metadata.file$property == get_selected(input$yaxis, format="names")[1][[1]]][1]
+      
+      if (is.null(getMyY$val)) {
+        getMyY$val <- nextY
+        print("resetting myY")
+      } else if (getMyY$val != nextY) {
+        getMyY$val <- nextY
+        print("resetting myY")
+      }
+    })
+
+    #tried to wrap these three into one observer and it broke.. look again later
+    observeEvent(getMyY$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+    
+    observeEvent(getMyGroups$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+    
+    observeEvent(getMyFacet$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+  
     output$yaxis_stp1 <- renderUI({
-      if (is.null(input$yaxis)) {
+      if (is.null(getMyY$val)) {
         return()
       }
-      myY <- input$yaxis
+      myY <- getMyY$val
       myYSelected <- properties$selected[properties$input == "input$yaxis"]
       mySelected <- properties$selected[properties$input == "input$yaxis_stp1"]
 
@@ -537,10 +631,10 @@ message("selected Facet:", selected)
     })
    
     output$yaxis_stp2 <- renderUI({
-      if (is.null(input$yaxis)) {
+      if (is.null(getMyY$val)) {
         return()
       }
-      myY <- input$yaxis
+      myY <- getMyY$val
       myYSelected <- properties$selected[properties$input == "input$yaxis"]
       mySelected <- properties$selected[properties$input == "input$yaxis_stp2"]
 
@@ -584,10 +678,10 @@ message("selected Facet:", selected)
     })
  
     output$yaxis_stp3 <- renderUI({
-      if (is.null(input$yaxis)) {
+      if (is.null(getMyY$val)) {
         return()
       } else {
-        myY <- input$yaxis
+        myY <- getMyY$val
       }
       nums <- getNums(metadata.file)
       longitudinal <- longitudinal1
@@ -839,8 +933,7 @@ message("selected Facet:", selected)
         )
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
-        legend.title <- groupInfo$group
-        legend.title <- metadata.file$property[metadata.file$source_id == legend.title]
+        legend.title <- metadata.file$property[metadata.file$source_id == legendTitle]
         legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
         myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
                                     x=1.02, xanchor = "left",
@@ -927,12 +1020,12 @@ message("selected Facet:", selected)
       }
       groupsType <- input$groupsType
       facetType <- input$facetType
-      myFacet <- facetInfo$group
-      myY <- input$yaxis
+      myFacet <- getMyFacet$val
+      myY <- getMyY$val
       yaxis_stp1 <- input$yaxis_stp1
       yaxis_stp2 <- input$yaxis_stp2
       yaxis_stp3 <- input$yaxis_stp3
-      myGroups <- groupInfo$group
+      myGroups <- getMyGroups$val 
       #grab optional inputs
       groups_stp1 <- groupInfo$group_stp1
       message(paste("groups stp1:", groups_stp1))
@@ -1233,7 +1326,7 @@ message("selected Facet:", selected)
           return()
         } else {
           #collecting inputs .. i think these are the only ones i need here.. well see
-          myY <- input$yaxis
+          myY <- getMyY$val
           message(paste("my y from plotData:", myY))
           if (is.null(input$yaxis_stp3)) {
             return()
