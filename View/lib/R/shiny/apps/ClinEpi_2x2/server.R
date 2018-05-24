@@ -17,6 +17,7 @@ shinyServer(function(input, output, session) {
   outInfo <- NULL
   attributes.file <- NULL
   propUrl <- NULL
+  properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
   project.id <- NULL
@@ -28,6 +29,11 @@ shinyServer(function(input, output, session) {
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
     propUrl <<- getPropertiesUrl(session)
+    properties <<- try(fread(propUrl))
+
+    if (grepl("Error", properties)) {
+      properties <<- NULL
+    }
   }
   message(paste("propUrl:", propUrl))
 
@@ -205,36 +211,44 @@ message(mirror.dir)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
       attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
+      if (is.null(properties)) {
+        getMyAttr$val <- 'EUPATH_0000338'
+      } else {
+        getMyAttr$val <- properties$selected[properties$input == "attrInfo$group"]
+      }
       incProgress(.25)
       outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo")
+      if (is.null(properties)) {
+        getMyOut$val <- "custom"
+      } else {
+        getMyOut$val <- properties$selected[properties$input == "outInfo$group"]
+      }
       incProgress(.15)
     })
     titlePanel("Contingency Tables")
   }) 
  
     observeEvent(attrInfo$group, {
-      if (length(get_selected(attrInfo$group, format="names")) == 0) {
-        return(NULL)
-      }
-      nextAttr <- metadata.file$source_id[metadata.file$property == get_selected(attrInfo$group, format="names")[1][[1]]][1]
+      if (length(get_selected(attrInfo$group, format="names")) != 0) {
+        nextAttr <- metadata.file$source_id[metadata.file$property == get_selected(attrInfo$group, format="names")[1][[1]]][1]
 
-      if (is.null(getMyAttr$val)) {
-        getMyAttr$val <- nextAttr
-      } else if (getMyAttr$val != nextAttr) {
-        getMyAttr$val <- nextAttr
+        if (is.null(getMyAttr$val)) {
+          getMyAttr$val <- nextAttr
+        } else if (getMyAttr$val != nextAttr) {
+          getMyAttr$val <- nextAttr
+        }
       }
     })
 
     observeEvent(outInfo$group, {
-      if (length(get_selected(outInfo$group, format="names")) == 0) {
-        return(NULL)
-      }
-      nextOut <- metadata.file$source_id[metadata.file$property == get_selected(outInfo$group, format="names")[1][[1]]][1]
+      if (length(get_selected(outInfo$group, format="names")) != 0) {
+        nextOut <- metadata.file$source_id[metadata.file$property == get_selected(outInfo$group, format="names")[1][[1]]][1]
 
-      if (is.null(getMyOut$val)) {
-        getMyOut$val <- nextOut
-      } else if (getMyOut$val != nextOut) {
-        getMyOut$val <- nextOut
+        if (is.null(getMyOut$val)) {
+          getMyOut$val <- nextOut
+        } else if (getMyOut$val != nextOut) {
+          getMyOut$val <- nextOut
+        }
       }
     })
 

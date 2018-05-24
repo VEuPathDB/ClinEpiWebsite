@@ -85,17 +85,17 @@ shinyServer(function(input, output, session) {
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Participants", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Dynamic Attributes", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
           } else {
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Observations", "string", "Search Results", "Observation"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
         }
       } 
 
@@ -232,8 +232,18 @@ shinyServer(function(input, output, session) {
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
       groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
+      if (is.null(properties)) {
+        getMyGroups$val <- "EUPATH_0000054"
+      } else {
+        getMyGroups$val <- properties$selected[properties$input == "groupInfo$group"]
+      }
       incProgress(.25)
       facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      if (is.null(properties)) {
+        getMyFacet$val <- "custom"
+      } else {
+        getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
+      }
       incProgress(.15)
     })
     titlePanel("Data Summaries")
@@ -356,12 +366,12 @@ shinyServer(function(input, output, session) {
       if (facetType == "direct") {
         dates <- getDates(metadata.file)$source_id
         #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if (house.file.exists) {
+        #if (house.file.exists) {
           #htmp <- house.file[, !dates, with = FALSE]
           include <- c("Participant", "Household")
-        } else {
-          include <- c("Participant")
-        }
+        #} else {
+        #  include <- c("Participant")
+        #}
       } else {
         include <- c("all")
       }
@@ -458,46 +468,35 @@ shinyServer(function(input, output, session) {
       } else {
         selected <- ""
       }
-message("selected Facet:", selected)
+#message("selected Facet:", selected)
       return(selected)
     }) 
-  
+ 
     observeEvent(groupInfo$group, {
-      if (length(get_selected(groupInfo$group, format="names")) == 0) {
-        return(NULL)
-      }
-      nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(groupInfo$group, format="names")[1][[1]]][1]
-      
-      if (is.null(getMyGroups$val)) {
-        getMyGroups$val <- nextGroup
-        legendTitle <<- nextGroup
-        print("resetting myGroups")
-      } else if (getMyGroups$val != nextGroup) {
-        getMyGroups$val <- nextGroup
-        legendTitle <<- nextGroup
-        print("resetting myGroups")
+      if (length(get_selected(groupInfo$group, format="names")) != 0) {
+        nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(groupInfo$group, format="names")[1][[1]]][1]
+
+        if (is.null(getMyGroups$val)) {
+          getMyGroups$val <- nextGroup
+        } else if (getMyGroups$val != nextGroup) {
+          getMyGroups$val <- nextGroup
+        }
       }
     })
 
     observeEvent(facetInfo$group, {
-      if (length(get_selected(facetInfo$group, format="names")) == 0) {
-        return(NULL)
-      }
-      nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
-      
-      if (is.null(getMyFacet$val)) {
-        getMyFacet$val <- nextFacet
-        print("resetting myFacet")
-      } else if (getMyFacet$val != nextFacet) {
-        getMyFacet$val <- nextFacet
-        print("resetting myFacet")
+      if (length(get_selected(facetInfo$group, format="names")) != 0) {
+        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
+message("nextFacet: ", nextFacet)
+        if (is.null(getMyFacet$val)) {
+          getMyFacet$val <- nextFacet
+        } else if (getMyFacet$val != nextFacet) {
+          getMyFacet$val <- nextFacet
+        }
       }
     })
 
     output$yaxis <- renderTree({
-      mySelected <- properties$selected[properties$input == "input$yaxis"]
-
-      #strings should have any vs all and picklist.
      
       longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
@@ -505,7 +504,6 @@ message("selected Facet:", selected)
           longitudinal <- longitudinal2
         }
       }
-      dates <- getDates(metadata.file)$source_id
 
       if (!is.null(longitudinal)) {
         include <- c("Observation")
@@ -513,14 +511,8 @@ message("selected Facet:", selected)
         include <- c("all")
       }
 
-      if (is.null(properties)) {
-        selected = "EUPATH_0000689"
-      } else {
-        selected = mySelected
-      }
-      #TODO figure how to remove dates
-      outChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, selected = selected, include = include)
-      #print(outChoiceList)
+      outChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, include = include)
+      
       outChoiceList
     })
 
@@ -548,7 +540,13 @@ message("selected Facet:", selected)
       myY <- getMyY$val
       
       if (is.null(myY)) {
-        label <- "Please select one"
+        if (is.null(properties)) {
+          label <- "Please select one"
+        } else {
+          myYSourceId <- properties$selected[properties$input == "input$yaxis"]
+          label <- metadata.file$property[metadata.file$source_id == myYSourceId]
+          getMyY$val <- myYSourceId
+        }
       } else {
         label <- metadata.file$property[metadata.file$source_id == myY]
       }
@@ -557,17 +555,16 @@ message("selected Facet:", selected)
     })
     
     observeEvent(input$yaxis, {
-      if (length(get_selected(input$yaxis, format="names")) == 0) {
-        return(NULL)
-      }
-      nextY <- metadata.file$source_id[metadata.file$property == get_selected(input$yaxis, format="names")[1][[1]]][1]
+      if (length(get_selected(input$yaxis, format="names")) != 0) {
+        nextY <- metadata.file$source_id[metadata.file$property == get_selected(input$yaxis, format="names")[1][[1]]][1]
       
-      if (is.null(getMyY$val)) {
-        getMyY$val <- nextY
-        print("resetting myY")
-      } else if (getMyY$val != nextY) {
-        getMyY$val <- nextY
-        print("resetting myY")
+        if (is.null(getMyY$val)) {
+          getMyY$val <- nextY
+          print("resetting myY")
+        } else if (getMyY$val != nextY) {
+          getMyY$val <- nextY
+          print("resetting myY")
+        }
       }
     })
 
@@ -933,8 +930,12 @@ message("selected Facet:", selected)
         )
         
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
-        legend.title <- metadata.file$property[metadata.file$source_id == legendTitle]
-        legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
+        if (is.null(legendTitle)) {
+          legend.title <- "All"
+        } else {
+          legend.title <- metadata.file$property[metadata.file$source_id == legendTitle]
+          legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
+        }
         myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
                                     x=1.02, xanchor = "left",
                                     y=.3, yanchor = "bottom",

@@ -81,14 +81,18 @@ getDropList <- function(){
 
   
 #this is a bit slow right now because were working with a list of lists and if its possible to vectorize rather than use for loops idk how yet.
-getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, selected = NULL, subList = NULL, include=c("all")) {
+getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subList = NULL, include=c("all")) {
   drop <- getDropList()
   
   colnames <- colnames(data)
   colnames <- setdiff(colnames, drop)
   
   choices <- subset(metadata.file, source_id %in% colnames)
-  #print(choices)
+  #temporary until i can figure how to allow plotting of dates. 
+  #will probably need to manually bin them in any place we would allowl plotly to automatically bin nums
+  #then remember in those cases to set the labels accurately
+  choices <- subset(choices, !type %in% "date")  
+
   #here remove from choices anything where category not in include param, unless param is 'all'
   #could alternatively assume if include is NULL to use everything
   if (length(include) > 1) {
@@ -106,15 +110,15 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, selec
   if (nrow(choices) == 0) {
     return()
   }
-  choicesNumeric <- subset(choices, type %in% "number")
-  
+  choicesNumeric <- subset(choices, type %in% "number") 
+
     if (is.null(subList)) {
       roots <- as.list(metadata.file$property[metadata.file$parent == "null"])
       if (is.null(roots)) {
         message("No roots in ontology file..")
       } else {
         names(roots) <- roots
-        roots <- getUIList(data = data, subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, selected = selected, include = include)
+        roots <- getUIList(data = data, subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
       }
       return(roots)
     } else {
@@ -122,14 +126,14 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, selec
       subList <- lapply(subList, FUN = function(x){
                                                  temp <- as.list(metadata.file$property[metadata.file$parent == x])
                                                  names(temp) <- temp
-                                                 temp <- getUIList(data = data, subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, selected = selected, include = include)
+                                                 temp <- getUIList(data = data, subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
                                                })
 
       #this case is a leaf, so return no children
       if (length(subList) == 0) {
         return("")
       }
-      
+     
       #remove leaves/ children of subList not in df
       if (any(subList == "")) {
         myLeaves <- subList == ""
@@ -139,7 +143,22 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, selec
             return("")
           } 
         }
-      }
+        myLeaves <- subList == ""
+        if (length(subList[myLeaves] != 0)) {
+          if (length(myLeaves) != length(unique(names(subList[myLeaves])))) {
+            leaves <- subList[subList == ""]
+            leaves <- as.list(unique(names(leaves)))
+            names(leaves) <- leaves
+            leaves[1:length(leaves)] <- ""
+            notLeaves <- subList[subList != ""]
+            subList <- c(leaves, notLeaves)
+            if (length(subList) == 0) {
+              return("")
+            }
+          }
+        }
+      }    
+
       #if not a leaf then disable selection if not in data
       if (!all(names(subList) %in% choices$property)) {
         myNodesToDisable <- !(names(subList) %in% choices$property)
@@ -169,16 +188,6 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, selec
         }
       }
 
-      #set default selected value if passed one
-      #if (!is.null(selected)) {
-      #  for (i in 1:length(subList)) {
-      #    if (metadata.file$source_id[metadata.file$property == names(subList)[i]] == selected) {
-      #      attr(subList[[i]], "stselected") <- TRUE
-      #    } 
-      #  }
-      #}
-      
-      #print(subList)
       return(subList)
     }
 }

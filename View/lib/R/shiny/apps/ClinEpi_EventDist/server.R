@@ -222,8 +222,18 @@ shinyServer(function(input, output, session) {
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
       xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo")
+      if (is.null(properties)) {
+        getMyX$val <- selectedGroup()
+      } else {
+        getMyX$val <- properties$selected[properties$input == "xaxisInfo$group"]
+      }
       incProgress(.25)
       facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      if (is.null(properties)) {
+        getMyFacet$val <- selectedFacet()
+      } else {
+        getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
+      }
       incProgress(.15)
     })
     titlePanel("Data Distributions")
@@ -430,30 +440,28 @@ shinyServer(function(input, output, session) {
     })
     
     observeEvent(xaxisInfo$group, {
-      if (length(get_selected(xaxisInfo$group, format="names")) == 0) {
-        return(NULL)
-      }
-      nextX <- metadata.file$source_id[metadata.file$property == get_selected(xaxisInfo$group, format="names")[1][[1]]][1]
+      if (length(get_selected(xaxisInfo$group, format="names")) != 0) {
+        nextX <- metadata.file$source_id[metadata.file$property == get_selected(xaxisInfo$group, format="names")[1][[1]]][1]
 
-      if (is.null(getMyX$val)) {
-        getMyX$val <- nextX
-      } else if (getMyX$val != nextX) {
-        getMyX$val <- nextX
+        if (is.null(getMyX$val)) {
+          getMyX$val <- nextX
+        } else if (getMyX$val != nextX) {
+          getMyX$val <- nextX
+        }
       }
     })
 
     observeEvent(facetInfo$group, {
-      if (length(get_selected(facetInfo$group, format="names")) == 0) {
-        return(NULL)
-      }
-      nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
+      if (length(get_selected(facetInfo$group, format="names")) != 0) {
+        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
 
-      if (is.null(getMyFacet$val)) {
-        getMyFacet$val <- nextFacet
-        print("resetting myFacet")
-      } else if (getMyFacet$val != nextFacet) {
-        getMyFacet$val <- nextFacet
-        print("resetting myFacet")
+        if (is.null(getMyFacet$val)) {
+          getMyFacet$val <- nextFacet
+          print("resetting myFacet")
+        } else if (getMyFacet$val != nextFacet) {
+          getMyFacet$val <- nextFacet
+          print("resetting myFacet")
+        }
       }
     })
 

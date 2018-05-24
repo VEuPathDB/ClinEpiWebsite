@@ -90,33 +90,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (groupsType() != "makeGroups" & groupsType() != "direct") {
       return()
     }
-    groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
-
-    dontUseProps <- FALSE
-    if (is.null(properties)) {
-      dontUseProps <- TRUE
-    } else {
-        if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
-          if (groupsTypeSelected != groupsType()) {
-            dontUseProps <- TRUE
-          }
-        }
-    }
- 
-    if (dontUseProps) {
-      mySelected = selected()
-    } else {
-      mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
-    }
-
-    #change this to use include arg
-    #figure why passed args dont seem to work?
+    
     if (groupsType() == "makeGroups") {
-      #attrChoiceList <- lapply(useData(), getUIList, metadata.file = metadata.file, selected = mySelected)
-      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, selected = mySelected, include = include())
+      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, include = include())
     } else {
-      #attrChoiceList <- lapply(useData(), FUN = function(x) {getUIList(x, metadata.file = metadata.file, maxLevels = 12, selected = mySelected)})
-      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, selected = mySelected, include = include(), maxLevels = 12)
+      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, include = include(), maxLevels = 12)
     }
     
     attrChoiceList
@@ -148,23 +126,43 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
 
   observeEvent(input$group, {
-    if (length(get_selected(input$group, format="names")) == 0) {
-      return(NULL)
-    }
-    nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(input$group, format="names")[1][[1]]][1]
+    if (length(get_selected(input$group, format="names")) != 0) {
+      nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(input$group, format="names")[1][[1]]][1]
     
-    if (is.null(getMyGroups$val)) {
-      getMyGroups$val <- nextGroup
-    } else if (getMyGroups$val != nextGroup) {
-      getMyGroups$val <- nextGroup
+      if (is.null(getMyGroups$val)) {
+        getMyGroups$val <- nextGroup
+      } else if (getMyGroups$val != nextGroup) {
+        getMyGroups$val <- nextGroup
+      }
     }
   })
   
   getGroupBtnLabel <- reactive({
     myGroup <- getMyGroups$val
-    
+   
+    groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
+
+      dontUseProps <- FALSE
+      if (is.null(properties)) {
+        dontUseProps <- TRUE
+      } else {
+          if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
+            if (groupsTypeSelected != groupsType()) {
+              dontUseProps <- TRUE
+            }
+          }
+      }
+
+      if (dontUseProps) {
+        mySelected = selected()
+      } else {
+        mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
+      }
+
     if (is.null(myGroup)) {
-      label <- "Please select one"
+      label <- metadata.file$property[metadata.file$source_id == mySelected]
+      getMyGroups$val <- mySelected
+      #label <- "Please select one"
     } else {
       label <- metadata.file$property[metadata.file$source_id == myGroup]
     }
