@@ -76,17 +76,17 @@ shinyServer(function(input, output, session) {
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Participants", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Dynamic Attributes", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
           } else {
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Observations", "string", "Search Results", "Observation"))
-          metadata.file <<- rbind(metadata.file, list("custom", "Search Results", "string", "null", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
         }
       }
     }
@@ -210,7 +210,7 @@ message(mirror.dir)
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = reactive("EUPATH_0000338"), moduleName = "attrInfo")
+      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = selectedAttr, moduleName = "attrInfo")
       if (is.null(properties)) {
         getMyAttr$val <- 'EUPATH_0000338'
       } else {
@@ -227,7 +227,23 @@ message(mirror.dir)
     })
     titlePanel("Contingency Tables")
   }) 
- 
+
+  selectedAttr <- reactive({
+    if ("EUPATH_0000338" %in% colnames(singleVarData)) {
+      selected <- "EUPATH_0000338"
+    } else {
+        temp <- metadata.file
+        myCols <- colnames(singleVarData)
+        temp <- temp[temp$source_id %in% myCols]
+        parents <- temp$parent
+        leaves <- temp[!temp$property %in% parents]
+        leaves <- leaves[order(leaves$property),]
+        leaves <- leaves$source_id
+        selected <- leaves[1]
+    }
+    return(selected)
+  })
+  
     observeEvent(attrInfo$group, {
       if (length(get_selected(attrInfo$group, format="names")) != 0) {
         nextAttr <- metadata.file$source_id[metadata.file$property == get_selected(attrInfo$group, format="names")[1][[1]]][1]
