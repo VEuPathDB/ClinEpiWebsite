@@ -402,7 +402,23 @@ shinyServer(function(input, output, session) {
         selected <- "custom"
       } else if (facetType == "makeGroups") {
         if (isParticipant) {
-          selected <- "EUPATH_0000054"
+          if ("EUPATH_0000054" %in% colnames(singleVarData)) {
+            selected <- "EUPATH_0000054"
+          } else {
+            include <- facetData()
+            if (include != "all") {
+              temp <- metadata.file[metadata.file$category %in% include]
+            } else {
+              temp <- metadata.file
+            }
+            myCols <- colnames(singleVarData)
+            temp <- temp[temp$source_id %in% myCols]
+            parents <- temp$parent
+            leaves <- temp[!temp$property %in% parents]
+            leaves <- leaves[order(leaves$property),]
+            leaves <- leaves$source_id
+            selected <- leaves[1]
+          }
         } else {
           selected <- "custom"
         }
