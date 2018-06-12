@@ -212,7 +212,7 @@ message(mirror.dir)
       incProgress(.15)
       attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = selectedAttr, moduleName = "attrInfo")
       if (is.null(properties)) {
-        getMyAttr$val <- 'EUPATH_0000338'
+        getMyAttr$val <- selectedAttr()
       } else {
         getMyAttr$val <- properties$selected[properties$input == "attrInfo$group"]
       }

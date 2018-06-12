@@ -233,7 +233,7 @@ shinyServer(function(input, output, session) {
       incProgress(.15)
       groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
       if (is.null(properties)) {
-        getMyGroups$val <- "EUPATH_0000054"
+        getMyGroups$val <- selectedGroup()
       } else {
         getMyGroups$val <- properties$selected[properties$input == "groupInfo$group"]
       }
