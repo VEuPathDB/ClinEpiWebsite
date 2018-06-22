@@ -145,7 +145,7 @@ profile.df.full$ID <- NULL
 #profile.df.full$LEGEND <- as.factor(profile.df.full$YLABEL)
 
 RADJUST
-  my $colorValues = "c(\"Length/height-for-age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode in days\" = \"#000099\", \"Vibrio\" = \"#FF0000FF\", \"Taenia sp.\" = \"#FF3500FF\", \"A. lumbricoides\" = \"#FF6A00FF\", \"Adenovirus\" = \"#FF9E00FF\", \"Aeromonas\" = \"#FFD300FF\", \"Astrovirus\" = \"#F6FF00FF\", \"Balantidium coli\" = \"#C1FF00FF\", \"C. mesnili\" = \"#8DFF00FF\", \"Cyclospora\" = \"#58FF00FF\", \"E. histolytica\" = \"#23FF00FF\", \"E. nana\" = \"#00FF12FF\", \"E. vermicularis\" = \"#00FF46FF\", \"EAEC\" = \"#00FF7BFF\", \"EIEC\" = \"#00FFB0FF\", \"EPEC\" = \"#00FFE5FF\", \"ETEC\" = \"#00E5FFFF\", \"Entamoeba coli\" = \"#00B0FFFF\", \"H. diminuta\" = \"#007BFFFF\", \"H. nana\" = \"#0046FFFF\", \"Hookworm\" = \"#0012FFFF\", \"I. butschilii\" = \"#2300FFFF\", \"Norovirus\" = \"#5800FFFF\", \"Rotavirus\" = \"#8D00FFFF\", \"S. stercoralis\" = \"#C100FFFF\", \"Salmonella\" = \"#F600FFFF\", \"Schistosoma\" = \"#FF00D3FF\", \"Shigella\" = \"#FF009EFF\", \"T. trichiura\" = \"#FF006AFF\", \"Yersinia enterocolitica\" = \"#FF0035FF\")";
+  my $colorValues = "c(\"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode, days\" = \"#000099\", \"Vibrio, bacteriology\" = \"#FF0000FF\", \"Taenia sp., microscopy\" = \"#FF3500FF\", \"A. lumbricoides, microscopy\" = \"#FF6A00FF\", \"Adenovirus, ELISA\" = \"#FF9E00FF\", \"Aeromonas, bacteriology\" = \"#FFD300FF\", \"Astrovirus, ELISA\" = \"#F6FF00FF\", \"Balantidium coli, microscopy\" = \"#C1FF00FF\", \"C. mesnili, microscopy\" = \"#8DFF00FF\", \"Cyclospora, microscopy\" = \"#58FF00FF\", \"E. histolytica, microscopy\" = \"#23FF00FF\", \"E. nana, microscopy\" = \"#00FF12FF\", \"E. vermicularis, microscopy\" = \"#00FF46FF\", \"aatA or aaiC EAEC, PCR\" = \"#00FF7BFF\", \"ipaH EIEC, PCR\" = \"#00FFB0FF\", \"eae and bfpA EPEC, PCR\" = \"#00FFE5FF\", \"ST or LT ETEC, PCR\" = \"#00E5FFFF\", \"Entamoeba coli, microscopy\" = \"#00B0FFFF\", \"H. diminuta, microscopy\" = \"#007BFFFF\", \"H. nana, microscopy\" = \"#0046FFFF\", \"Hookworm, microscopy\" = \"#0012FFFF\", \"I. butschilii, microscopy\" = \"#2300FFFF\", \"Norovirus, RT-PCR\" = \"#5800FFFF\", \"Rotavirus, ELISA\" = \"#8D00FFFF\", \"S. stercoralis, microscopy\" = \"#C100FFFF\", \"Salmonella, bacteriology\" = \"#F600FFFF\", \"Schistosoma, microscopy\" = \"#FF00D3FF\", \"Shigella, bacteriology\" = \"#FF009EFF\", \"T. trichiura, microscopy\" = \"#FF006AFF\", \"Yersinia enterocolitica, microscopy\" = \"#FF0035FF\")";
   my $breaks = "c(\"Length/height-for-age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\")";
 
   $profile->addAdjustProfile($rAdjustString);
@@ -188,6 +188,7 @@ RADJUST
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
   $profile->setColorVals("c(\"0\" = \"black\", \"1\" = \"#CD4071FF\", \"2\" = \"#FA7C5EFF\", \"3\" = \"#FECE91FF\")");
+  #$profile->setHorizontalLegend('TRUE');
 }
 
 1;
@@ -221,6 +222,7 @@ RADJUST
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
   $profile->setColorVals("c(\"0\" = \"black\", \"2\" = \"#B63679FF\", \"1\" = \"#FECE91FF\")");
+  #$profile->setHorizontalLegend('TRUE');
 }
 
 1;
