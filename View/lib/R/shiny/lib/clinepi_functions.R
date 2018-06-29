@@ -174,7 +174,7 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
       if (!all(names(subList) %in% choicesNumeric$property)) {
         for (i in 1:length(subList)) {
           mySourceId <- metadata.file$source_id[metadata.file$property == names(subList)[i]]
-          if (mySourceId %in% choices$source_id) {
+          if (mySourceId %in% choices$source_id & mySourceId %in% choicesNumeric$source_id) {
             if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
               #print(length(subList[[i]]))
               #print(mySourceId)
