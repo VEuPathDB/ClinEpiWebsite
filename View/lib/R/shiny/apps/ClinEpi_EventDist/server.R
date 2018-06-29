@@ -828,7 +828,7 @@ shinyServer(function(input, output, session) {
       #for handling facets, this works for direct. need if statement
       if (facetType == "direct") {
         if (myFacet %in% nums$source_id | myFacet %in% dates$source_id) {
-          data[[myFacet]] <- cut(data[[myFacet]],4)
+          data[[myFacet]] <- rcut_number(data[[myFacet]],4)
         }
         displayLabel <- metadata.file$property[metadata.file$source_id == myFacet]
         data[[myFacet]] <- paste0(displayLabel, ": ", data[[myFacet]])  
