@@ -25,12 +25,13 @@ shinyServer(function(input, output, session) {
   model.prop <- NULL
   getMyAttr <- reactiveValues()
   getMyOut <- reactiveValues()
+  prtcpntView <- reactiveValues()
+  prtcpntView$val <- TRUE
 
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
-    propUrl <<- getPropertiesUrl(session)
-    properties <<- try(fread(propUrl))
-
+     propUrl <<- getPropertiesUrl(session)
+     properties <- try(fread(propUrl))
     if (grepl("Error", properties)) {
       properties <<- NULL
     }
@@ -40,14 +41,14 @@ shinyServer(function(input, output, session) {
   if (is.null(attributes.file)) {
 
     attribute_temp <- try(fread(
-    	getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
         na.strings = c("N/A", "na", "")))
     metadata_temp <- try(fread(
         getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
         na.strings = c("N/A", "na", "")))
     model.prop_temp <- try(fread(
         getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
-        sep="=", header=FALSE, fill=TRUE))         
+        sep="=", header=FALSE, fill=TRUE))
 
     if (grepl("Error", model.prop_temp[1])){
       stop("Error: model.prop file missing or unreadable!")
@@ -72,7 +73,7 @@ shinyServer(function(input, output, session) {
         metadata.file <<- metadata_temp
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
-        
+      
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
@@ -87,7 +88,7 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
-        }
+        }  
       }
     }
   })
@@ -102,11 +103,11 @@ shinyServer(function(input, output, session) {
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
-message(mirror.dir)
+#message(mirror.dir)
     prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
-    event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
-   
+    event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))  
+ 
     longitudinal.file <<- fread("../../lib/longitudinal.tab")
     longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]  
     longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))), 
@@ -172,13 +173,6 @@ message(mirror.dir)
     } else {
       singleVarData <<- merge1
     }
-    
-    if (any(colnames(singleVarData) %in% "EUPATH_0000644")) {
-      setkey(singleVarData, EUPATH_0000644)
-    }
-
-    #remove unnecessary metadata info
-    #metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
 
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
@@ -210,14 +204,14 @@ message(mirror.dir)
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = selectedAttr, moduleName = "attrInfo")
+      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, event.file = event.file, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyAttr$val <- selectedAttr()
       } else {
         getMyAttr$val <- properties$selected[properties$input == "attrInfo$group"]
       }
       incProgress(.25)
-      outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo")
+      outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, event.file = event.file, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyOut$val <- "custom"
       } else {
@@ -227,6 +221,30 @@ message(mirror.dir)
     })
     titlePanel("Contingency Tables")
   }) 
+ 
+  output$prtcpntViewSwitch <- renderUI({
+    if (isParticipant != TRUE) {
+      tagList(
+        div(
+          radioButtons(inputId = "prtcpntViewSwitch",
+                      label = NULL,
+                      choiceNames = c("Participant View", "Observation View"),
+                      choiceValues = c(TRUE, FALSE),
+                      selected = "FALSE",
+                      inline = TRUE),
+          style = "position:absolute;right:1em;"
+        )
+      )
+    }
+  })
+
+  observeEvent(input$prtcpntViewSwitch, {
+    if (input$prtcpntViewSwitch == "TRUE" | input$prtcpntViewSwitch == TRUE) {
+      prtcpntView$val <- TRUE
+    } else {
+      prtcpntView$val <- FALSE
+    }
+  })
 
   selectedAttr <- reactive({
     if ("EUPATH_0000338" %in% colnames(singleVarData)) {
@@ -243,7 +261,7 @@ message(mirror.dir)
     }
     return(selected)
   })
-  
+
     observeEvent(attrInfo$group, {
       if (length(get_selected(attrInfo$group, format="names")) != 0) {
         nextAttr <- metadata.file$source_id[metadata.file$property == get_selected(attrInfo$group, format="names")[1][[1]]][1]
@@ -281,6 +299,18 @@ message(mirror.dir)
       js$virtualBodyClick();
     })
 
+    aggKey <- reactive({
+      myPrtcpntView <- prtcpntView$val
+      
+      if (prtcpntView == TRUE) {
+        aggKey <- c("Participant_Id")
+      } else {
+        aggKey <- c("Participant_Id", longitudinal1)
+      }
+      
+      return(aggKey)
+    })
+    
     output$plot <- renderPlotly({
       print("about to render plot")
         tableData <- plotData()
@@ -437,7 +467,7 @@ message(mirror.dir)
       odds.ratio <- c(OR, paste(ORlo, "-", ORhi))
       relative.risk <- c(RR, paste(RRlo, "-", RRhi))
       p.val <- c(p, "N/A")
-      stats <- data.table("p-value" = p.val, "Odds Ratio" = odds.ratio, "Relative Risk" = relative.risk)
+      stats <- data.table("p-value" = p.val, "Odds Ratio" = as.character(odds.ratio), "Relative Risk" = as.character(relative.risk))
       rownames(stats) <- c("Statistics", "95% Confidence Interval")
       
       datatable(stats, 
@@ -559,7 +589,9 @@ message(mirror.dir)
         #get attr col
         attrData <- completeDT(data, myAttr)
         attrData <- getFinalDT(attrData, metadata.file, myAttr)
-        myCols <- c("Participant_Id", myAttr)
+        #myCols <- c("Participant_Id", myAttr)
+        aggKey <- aggKey()
+        myCols <- c(aggKey, myAttr)
         attrData <- attrData[, myCols, with=FALSE]
         
         numeric <- c("lessThan", "greaterThan", "equals")
@@ -585,15 +617,17 @@ message(mirror.dir)
           }
         }
         message("in plotData()")
-        attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+        attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4, aggKey)
         attrLabel <- makeGroupLabel(myAttr, metadata.file, attr_stp1, attr_stp2, attr_stp3, attr_stp4, colnames(event.file))
-        colnames(attrData) <- c("Participant_Id", "Attribute")
+        #colnames(attrData) <- c("Participant_Id", "Attribute")
+        colnames(attrData) <- c(aggKey, "Attribute")
        print(attrData)
         #get outcome data
         #may not need to do the splitting on pipes. grepl will still return true for it.
         outData <- completeDT(data, myOut)
         outData <- getFinalDT(outData, metadata.file, myOut)
-        myCols <- c("Participant_Id", myOut)
+        #myCols <- c("Participant_Id", myOut)
+        myCols <- c(aggKey, myOut)
         outData <- outData[, myCols, with=FALSE]
         
         if (is.null(out_stp1) | is.null(myOut)) {
@@ -617,12 +651,14 @@ message(mirror.dir)
             }
           }
         
-        outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4)
+        outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4, aggKey)
         outLabel <- makeGroupLabel(myOut, metadata.file, out_stp1, out_stp2, out_stp3, out_stp4, colnames(event.file))
-        colnames(outData) <- c("Participant_Id", "Outcome")
+        #colnames(outData) <- c("Participant_Id", "Outcome")
+        colnames(outData) <- c(aggKey, "Outcome")
         print(outData)
         #merge on participant id an1d keep all prtcpnts.
-        data <- merge(attrData, outData, by = "Participant_Id", all = TRUE)
+        #data <- merge(attrData, outData, by = "Participant_Id", all = TRUE)
+        data <- merge(attrData, outData, by = aggKey, all = TRUE)
         #replace NA with 0, essentially assuming that no reporting is negative reporting
         naToZero(data)
         

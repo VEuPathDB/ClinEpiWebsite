@@ -32,16 +32,23 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, event.file, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, event.file, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = NULL) {
   ns <- session$ns
 
-  propUrl <- getPropertiesUrl(session)
+  propUrl <- "https://dcallan.clinepidb.org:443/ce.dcallan/service/users/221248430/steps/100005220/analyses/100001990/properties?accessToken=092e13cc862e4159"
   properties <- try(fread(propUrl))
 
   if (grepl("Error", properties)) {
     properties <- NULL
   }   
- 
+
+  obsView <- FALSE
+  if (!is.null(prtcpntView())) {
+    if (!prtcpntView() == TRUE) {
+      obsView <- TRUE
+    } 
+  } 
+
   groupRange <- reactiveValues()
   getMyGroups <- reactiveValues() 
  
@@ -162,6 +169,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(myGroup)) {
       label <- metadata.file$property[metadata.file$source_id == mySelected]
       getMyGroups$val <- mySelected
+      if (is.null(label)) {
+        label <- mySelected
+      }
       #label <- "Please select one"
     } else {
       label <- metadata.file$property[metadata.file$source_id == myGroup]
@@ -211,7 +221,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     obs <- FALSE
     anthro <- FALSE
     if (dontUseProps) {
-      if (myGroup %in% observations) {
+      if (myGroup %in% observations & !obsView) {
         obs <- TRUE
         mySelected = "any"
       } else {
@@ -280,13 +290,13 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         maxInputs <- length(attrStp1List) -1
         if (maxInputs == 1) {
           selectInput(inputId = ns("group_stp1"),
-                      label = NULL,
+                      label = "are / is",
                       choices = attrStp1List,
                       selected = mySelected,
                       width = '100%')
         } else {
           selectizeInput(inputId = ns("group_stp1"),
-                    label = NULL,
+                    label = "are / is",
                     choices = attrStp1List,
                     selected = mySelected,
                     width = '100%',
@@ -301,7 +311,10 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
   
   output$choose_stp2 <- renderUI ({
-    if (is.null(input$group_stp1) | input$group_stp1 == "") {
+    if (is.null(input$group_stp1)) {
+       return()
+    }
+    if (input$group_stp1 == "") {
       return()
     }
     if (groupsType() != "makeGroups") {

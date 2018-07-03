@@ -35,6 +35,7 @@ shinyUI(
      HTML(".js-irs-1 .irs-bar-edge {background: inherit; border: inherit;}")
    )),
    uiOutput("title"),
+   uiOutput("prtcpntViewSwitch"),
    tabsetPanel(
      plot,
      help

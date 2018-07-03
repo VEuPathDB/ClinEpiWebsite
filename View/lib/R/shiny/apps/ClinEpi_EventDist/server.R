@@ -29,13 +29,13 @@ shinyServer(function(input, output, session) {
   model.prop <- NULL
   getMyX <- reactiveValues()
   getMyFacet <- reactiveValues()
+  prtcpntView <- reactiveValues()
+  prtcpntView$val <- TRUE
 
   filesFetcher <- reactive({
-
     if (is.null(propUrl)) {
       propUrl <<- getPropertiesUrl(session)
-      properties <<- try(fread(propUrl))
-
+      properties <- try(fread(propUrl))
       if (grepl("Error", properties)) {
         properties <<- NULL
       }
@@ -43,39 +43,41 @@ shinyServer(function(input, output, session) {
     message(paste("propUrl:", propUrl))
     
     if (is.null(attributes.file)) {
-
+      
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
         na.strings = c("N/A", "na", "")))
       metadata_temp <- try(fread(
-        getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
-        na.strings = c("N/A", "na", "")))
+          getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
+          ))
       model.prop_temp <- try(fread(
         getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
-        sep="=", header=FALSE, fill=TRUE))
-
+        sep="=", header=FALSE, fill=TRUE))     
+ 
       if (grepl("Error", model.prop_temp[1])){
         stop("Error: model.prop file missing or unreadable!")
       } else {
         #not sure if we'll need to do anything else here yet
         model.prop <<- model.prop_temp
       }
-
+      
       if (grepl("Error", attribute_temp[1])){
         stop("Error: Attributes file missing or unreadable!")
       } else {
         attributes.file <<- attribute_temp
         names(attributes.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(attributes.file)))
+        project.id <<- attributes.file$project_id[1]
+        #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
         attributes.file <<- cbind(attributes.file, custom = "Selected")
       }
-
+      
       if (grepl("Error", metadata_temp[1])){
         stop("Error: Metadata file missing or unreadable!")
       } else {
         metadata.file <<- metadata_temp
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
-
+      
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
@@ -90,9 +92,8 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
-        }
-      }     
- 
+        }  
+      }
     }
   })
   
@@ -100,13 +101,13 @@ shinyServer(function(input, output, session) {
     filesFetcher()
     
     #build up mirror.dir path
-    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
+    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB") 
     num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber'])
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
-
+    #message(mirror.dir)
     prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
@@ -221,14 +222,14 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo")
+      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyX$val <- selectedGroup()
       } else {
         getMyX$val <- properties$selected[properties$input == "xaxisInfo$group"]
       }
       incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- selectedFacet()
       } else {
@@ -238,7 +239,31 @@ shinyServer(function(input, output, session) {
     })
     titlePanel("Data Distributions")
   })
-  
+ 
+  output$prtcpntViewSwitch <- renderUI({
+    if (isParticipant != TRUE) {
+      tagList(
+        div(
+          radioButtons(inputId = "prtcpntViewSwitch",
+                      label = NULL,
+                      choiceNames = c("Participant View", "Observation View"),
+                      choiceValues = c(TRUE, FALSE),
+                      selected = "FALSE",
+                      inline = TRUE),
+          style = "position:absolute;right:1em;"
+        )
+      )
+    }
+  })
+
+  observeEvent(input$prtcpntViewSwitch, {
+    if (input$prtcpntViewSwitch == "TRUE" | input$prtcpntViewSwitch == TRUE) {
+      prtcpntView$val <- TRUE
+    } else {
+      prtcpntView$val <- FALSE
+    }
+  })
+ 
     output$choose_groups <- renderUI({
       if (is.null(input$xaxis)) {
         return()
@@ -367,7 +392,7 @@ shinyServer(function(input, output, session) {
         groupsType <- input$xaxis
       }
       
-      if ("EUPATH_0000338" %in% colnames(singleVarData)) {
+      if ("EUPATH_0000338" %in% metadata.file$source_id) {
         selected <- "EUPATH_0000338"
       } else {
         include <- groupData()
@@ -382,8 +407,6 @@ shinyServer(function(input, output, session) {
         leaves <- temp[!temp$property %in% parents]
         leaves <- leaves[order(leaves$property),]
         leaves <- leaves$source_id
-        print(leaves)
-        print(paste("first leaf: ", leaves[1]))
         selected <- leaves[1]
       }  
       
@@ -508,6 +531,18 @@ shinyServer(function(input, output, session) {
       js$virtualBodyClick();
     })
 
+    aggKey <- reactive({
+      myPrtcpntView <- prtcpntView$val
+      
+      if (myPrtcpntView == TRUE) {
+        aggKey <- c("Participant_Id")
+      } else {
+        aggKey <- c("Participant_Id", longitudinal1)
+      }
+      
+      return(aggKey)
+    })
+    
     output$distribution <- renderPlotly({
       message("render plot!")
       if (is.null(input$xaxis)) {
@@ -635,9 +670,20 @@ shinyServer(function(input, output, session) {
       }
  
       nums <- getNums(metadata.file)$source_id
+      myPrtcpntView <- prtcpntView$val
+      if (myPrtcpntView == TRUE) {
+        colLabel <- "# Participants"
+        colVal <- length(unique(data$Participant_Id))
+        countFun <- function(x) {length(unique(x))}
+      } else {
+        colLabel <- "# Observations"
+        colVal <- nrow(data)
+        aggStr <- myFacet
+        countFun <- function(x) {length(x)}
+      }
  
       if (myFacet == "none") {
-        tableData <- data.table("Facet" = "All", "# Participants" = length(unique(data$Participant_Id)))
+        tableData <- data.table("Facet" = "All", colLabel = colVal)
         if (myX %in% nums) {
           tableData <- cbind(tableData, "Mean" = round(mean(data[[myX]], na.rm = TRUE),4))
           tableData <- cbind(tableData, "Median" = median(data[[myX]], na.rm = TRUE))
@@ -647,9 +693,9 @@ shinyServer(function(input, output, session) {
         }
       } else {
         aggStr <- paste0("Participant_Id ~ ", myFacet)
-        aggStr2 <- paste0(myX, " ~", myFacet)
+        aggStr2 <- paste0(myX, " ~ ", myFacet)
         #will need to change first arg based on all possible or makeGroups
-        tableData <- aggregate(as.formula(aggStr), data, FUN = function(x){length(unique(x))})
+        tableData <- aggregate(as.formula(aggStr), data, FUN = countFun)
         if (myX %in% nums) {
           mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
           tableData <- merge(tableData, mean, by = myFacet)
@@ -661,9 +707,9 @@ shinyServer(function(input, output, session) {
           tableData <- merge(tableData, mySD, by = myFacet)
           myIQR <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(IQR(x),4)})
           tableData <- merge(tableData, myIQR, by = myFacet)
-          colnames(tableData) <- c("Facets", "# Participants", "Mean", "Median", "Range", "SD", "IQR")
+          colnames(tableData) <- c("Facets", colLabel, "Mean", "Median", "Range", "SD", "IQR")
         } else {
-          colnames(tableData) <- c("Facets", "# Participants")
+          colnames(tableData) <- c("Facets", colLabel)
         }
       }
 
@@ -856,26 +902,29 @@ shinyServer(function(input, output, session) {
               }
             }
           }
-          outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file), useGroup = TRUE)
+          aggKey <- aggKey()
+          outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4, aggKey)
+          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
           #add makeGroups data to df and return
-          colnames(outData) <- c("Participant_Id", "FACET")
+          colnames(outData) <- c(aggKey, "FACET")
           outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
-          data <- merge(data, outData, by = "Participant_Id", all = TRUE)
+          data <- merge(data, outData, by = aggKey, all = TRUE)
         }
       }
-    
-      if (facetType == "makeGroups") {
-        myCols <- c("Participant_Id", myX, "FACET") 
-      } else {
-        if (myX == myFacet | myFacet == "none") {
-          myCols <- c("Participant_Id", myX)
+      
+      if (prtcpntView$val == TRUE) {
+        if (facetType == "makeGroups") {
+          myCols <- c("Participant_Id", myX, "FACET") 
         } else {
-          myCols <- c("Participant_Id", myX, myFacet)
+          if (myX == myFacet | myFacet == "none") {
+            myCols <- c("Participant_Id", myX)
+          } else {
+            myCols <- c("Participant_Id", myX, myFacet)
+          }
         }
+        data <- data[, myCols, with = FALSE]
+        data <- unique(data)
       }
-      data <- data[, myCols, with = FALSE]
-      data <- unique(data)
 
       data
       

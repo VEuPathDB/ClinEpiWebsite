@@ -32,21 +32,21 @@ shinyServer(function(input, output, session) {
   getMyGroups <- reactiveValues()
   getMyFacet <- reactiveValues()
   legendTitle <- NULL
+  prtcpntView <- reactiveValues()
+  prtcpntView$val <- TRUE
 
   filesFetcher <- reactive({
-
     if (is.null(propUrl)) {
       propUrl <<- getPropertiesUrl(session)
-      properties <<- try(fread(propUrl))
-
+      properties <- try(fread(propUrl))
       if (grepl("Error", properties)) {
         properties <<- NULL
       }
     }
     message(paste("propUrl:", propUrl))
-
+    
     if (is.null(attributes.file)) {
-
+      
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
         na.strings = c("N/A", "na", "")))
@@ -55,8 +55,8 @@ shinyServer(function(input, output, session) {
           ))
       model.prop_temp <- try(fread(
         getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
-        sep="=", header=FALSE, fill=TRUE))
-
+        sep="=", header=FALSE, fill=TRUE))     
+ 
       if (grepl("Error", model.prop_temp[1])){
         stop("Error: model.prop file missing or unreadable!")
       } else {
@@ -72,16 +72,15 @@ shinyServer(function(input, output, session) {
         project.id <<- attributes.file$project_id[1]
         #names(attributes.file)[names(attributes.file) == 'Search_Weight'] <<- 'search_weight'
         attributes.file <<- cbind(attributes.file, custom = "Selected")
-        #message(head(attributes.file))
       }
-
+      
       if (grepl("Error", metadata_temp[1])){
         stop("Error: Metadata file missing or unreadable!")
       } else {
         metadata.file <<- metadata_temp
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
-
+      
         if ('Participant_Id' %in% colnames(attributes.file)) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
@@ -96,26 +95,26 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
-        }
-      } 
-
+        }  
+      }
     }
   })
   
   singleVarDataFetcher <- function(){
     filesFetcher()
-
+    
     #build up mirror.dir path
-    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
-    num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber']) 
+    mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB") 
+    num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber'])
     custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
-
+    #message(mirror.dir)
     prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
     house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
     event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))   
+ 
     longitudinal.file <<- fread("../../lib/longitudinal.tab")
     longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
     longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
@@ -196,9 +195,6 @@ shinyServer(function(input, output, session) {
       house.file.exists <<- FALSE
     }
 
-    #metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
-    #message(tail(metadata.file))
-    #message(colnames(attributes.file))
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     dates <- dates[dates %in% colnames(singleVarData)]
@@ -231,14 +227,14 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo")
+      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyGroups$val <- selectedGroup()
       } else {
         getMyGroups$val <- properties$selected[properties$input == "groupInfo$group"]
       }
       incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo")
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- "custom"
       } else {
@@ -247,6 +243,30 @@ shinyServer(function(input, output, session) {
       incProgress(.15)
     })
     titlePanel("Data Summaries")
+  })
+
+  output$prtcpntViewSwitch <- renderUI({
+    if (isParticipant != TRUE) {
+      tagList(
+        div(
+          radioButtons(inputId = "prtcpntViewSwitch",
+                      label = NULL,
+                      choiceNames = c("Participant View", "Observation View"),
+                      choiceValues = c(TRUE, FALSE),
+                      selected = "FALSE",
+                      inline = TRUE),
+          style = "position:absolute;right:1em;"
+        )
+      )
+    }
+  })
+
+  observeEvent(input$prtcpntViewSwitch, {
+    if (input$prtcpntViewSwitch == "TRUE" | input$prtcpntViewSwitch == TRUE) {
+      prtcpntView$val <- TRUE
+    } else {
+      prtcpntView$val <- FALSE
+    }
   })
 
     output$xaxis_var <- renderUI({
@@ -456,8 +476,8 @@ shinyServer(function(input, output, session) {
         leaves <- leaves[order(leaves$property),]
         leaves <- leaves$source_id
         selected <- leaves[1]
-      }  
-      
+      }     
+ 
       return(selected)
     })
 
@@ -473,7 +493,7 @@ shinyServer(function(input, output, session) {
         selected <- "custom"
       } else if (facetType == "makeGroups") {
         if (isParticipant) {
-          if ("EUPATH_0000054" %in% colnames(singleVarData)) {  
+          if ("EUPATH_0000054" %in% colnames(singleVarData)) {
             selected <- "EUPATH_0000054"
           } else {
             include <- facetData()
@@ -489,7 +509,7 @@ shinyServer(function(input, output, session) {
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
             selected <- leaves[1]
-          } 
+          }
         } else {
           selected <- "custom"
         }
@@ -620,12 +640,13 @@ message("nextFacet: ", nextFacet)
         return()
       }
       myY <- getMyY$val
+      myPrtcpntView <- prtcpntView$val
       myYSelected <- properties$selected[properties$input == "input$yaxis"]
       mySelected <- properties$selected[properties$input == "input$yaxis_stp1"]
 
       attrStp1List <- getUIStp1List(singleVarData, myY)
       nums <- getNums(metadata.file)
-
+      
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
@@ -635,23 +656,51 @@ message("nextFacet: ", nextFacet)
         }
       }      
 
-      if (dontUseProps) {
-        if (!myY %in% nums$source_id) {
-          selectInput(inputId = "yaxis_stp1",
-                   label = "are / is",
-                   choices = list("always" = "all", "ever" = "any"),
-                   selected = "any",
-                   width = '100%')
+      if (myPrtcpntView == TRUE) {
+        if (dontUseProps) {
+          if (!myY %in% nums$source_id) {
+            selectInput(inputId = "yaxis_stp1",
+                        label = "are / is",
+                        choices = list("always" = "all", "ever" = "any"),
+                        selected = "any",
+                        width = '100%')
+          }
+        } else {
+          if (!myY %in% nums$source_id) {
+            selectInput(inputId = "yaxis_stp1",
+                        label = "are / is",
+                        choices = list("always" = "all", "ever" = "any"),
+                        selected = mySelected,
+                        width = '100%')
+          }
         }
       } else {
-        if (!myY %in% nums$source_id) {
-          selectInput(inputId = "yaxis_stp1",
-                   label = "are / is",
-                   choices = list("always" = "all", "ever" = "any"),
-                   selected = mySelected,
-                   width = '100%')
+        maxInputs <- length(attrStp1List)
+        if (dontUseProps) {
+          if (!myY %in% nums$source_id) {
+            selectizeInput(inputId = "yaxis_stp1",
+                           label = "are / is",
+                           choices = attrStp1List,
+                           selected = "EUPATH_0000338",
+                           width = '100%',
+                           multiple = TRUE,
+                           options = list(maxItems = maxInputs,
+                                          placeholder = '-Selected Items Will Appear Here-'))
+          }
+        } else {
+          if (!myY %in% nums$source_id) {
+            selectizeInput(inputId = "yaxis_stp1",
+                           label = "are / is",
+                           choices = attrStp1List,
+                           selected = mySelected,
+                           width = '100%',
+                           multiple = TRUE,
+                           options = list(maxItems = maxInputs,
+                                          placeholder = '-Selected Items Will Appear Here-'))
+          }
         }
       }
+      
 
     })
    
@@ -660,6 +709,8 @@ message("nextFacet: ", nextFacet)
         return()
       }
       myY <- getMyY$val
+      myPrtcpntView <- prtcpntView$val
+      
       myYSelected <- properties$selected[properties$input == "input$yaxis"]
       mySelected <- properties$selected[properties$input == "input$yaxis_stp2"]
 
@@ -674,30 +725,32 @@ message("nextFacet: ", nextFacet)
           dontUseProps = TRUE
         }
       }
-
-      maxInputs <- length(attrStp1List)
-      if (dontUseProps) {
-        if (!myY %in% nums$source_id) {
-          selectizeInput(inputId = "yaxis_stp2",
-                    label = NULL,
-                    choices = attrStp1List,
-                    selected = "EUPATH_0000338",
-                    width = '100%',
-                    multiple = TRUE,
-                    options = list(maxItems = maxInputs,
-                                   placeholder = '-Selected Items Will Appear Here-'))
-        }
-      } else {
-        if (!myY %in% nums$source_id) {
-          selectizeInput(inputId = "yaxis_stp2",
-                    label = NULL,
-                    choices = attrStp1List,
-                    selected = mySelected,
-                    width = '100%',
-                    multiple = TRUE,
-                    options = list(maxItems = maxInputs,
-                                   placeholder = '-Selected Items Will Appear Here-'))
-        }
+ 
+      if(myPrtcpntView == TRUE) {
+        maxInputs <- length(attrStp1List)
+        if (dontUseProps) {
+          if (!myY %in% nums$source_id) {
+            selectizeInput(inputId = "yaxis_stp2",
+                           label = NULL,
+                           choices = attrStp1List,
+                           selected = "EUPATH_0000338",
+                           width = '100%',
+                           multiple = TRUE,
+                           options = list(maxItems = maxInputs,
+                                          placeholder = '-Selected Items Will Appear Here-'))
+          }
+        } else {
+          if (!myY %in% nums$source_id) {
+            selectizeInput(inputId = "yaxis_stp2",
+                           label = NULL,
+                           choices = attrStp1List,
+                           selected = mySelected,
+                           width = '100%',
+                           multiple = TRUE,
+                           options = list(maxItems = maxInputs,
+                                          placeholder = '-Selected Items Will Appear Here-'))
+          }
+        } 
       }
 
     })
@@ -746,9 +799,16 @@ message("nextFacet: ", nextFacet)
                          inline = TRUE)
           }
         } else {
-          if (is.null(input$yaxis_stp2)) {
-            return()
+          if (prtcpntView$val == TRUE) {
+            if (is.null(input$yaxis_stp2)) {
+              return()
+            } 
+          } else {
+            if (is.null(input$yaxis_stp1)) {
+              return()
+            }
           }
+          
           radioButtons(inputId = "yaxis_stp3",
                        label = "Display as:",
                        choices = list("Count" = "count", "Proportion" = "proportion"),
@@ -775,8 +835,14 @@ message("nextFacet: ", nextFacet)
                          inline = TRUE)
           }
         } else {
-          if (is.null(input$yaxis_stp2)) {
-            return()
+          if (prtcpntView$val == TRUE) {
+            if (is.null(input$yaxis_stp2)) {
+              return()
+            } 
+          } else {
+            if (is.null(input$yaxis_stp1)) {
+              return()
+            }
           }
           radioButtons(inputId = "yaxis_stp3",
                        label = "Display as:",
@@ -787,6 +853,18 @@ message("nextFacet: ", nextFacet)
         }
       }
       
+    })
+    
+    aggKey <- reactive({
+      myPrtcpntView <- prtcpntView$val
+      
+      if (myPrtcpntView == TRUE) {
+        aggKey <- c("Participant_Id")
+      } else {
+        aggKey <- c("Participant_Id", longitudinal1)
+      }
+      
+      return(aggKey)
     })
     
     output$plot <- renderPlotly({
@@ -823,7 +901,14 @@ message("nextFacet: ", nextFacet)
             xlab = "Time"
           }
          
-          ylab <- makeGroupLabel(input$yaxis, metadata.file, input$yaxis_stp1, input$yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+          yaxis_stp1 <- input$yaxis_stp1
+          yaxis_stp2 <- input$yaxis_stp2
+          if (prtcpntView$val != TRUE) {
+            yaxis_stp2 <- input$yaxis_stp1
+            yaxis_stp1 <- "any"
+          }
+          
+          ylab <- makeGroupLabel(input$yaxis, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
           message(ylab)
           if (plotType == "proportion") {
             ylab <- paste("Proportion where", ylab)
@@ -889,8 +974,14 @@ message("nextFacet: ", nextFacet)
           # if y axis is numeric box plots otherwise bar pltos.
           #define axis labels here
           xlab <- ""
+          yaxis_stp1 <- input$yaxis_stp1
+          yaxis_stp2 <- input$yaxis_stp2
+          if (prtcpntView$val != TRUE) {
+            yaxis_stp2 <- input$yaxis_stp1
+            yaxis_stp1 <- "any"
+          }
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
-          ylab <- makeGroupLabel(input$yaxis, metadata.file, input$yaxis_stp1, input$yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+          ylab <- makeGroupLabel(input$yaxis, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
           message(ylab)
           if (plotType == "proportion") {
             ylab <- paste("Proportion where", ylab)
@@ -984,12 +1075,21 @@ message("nextFacet: ", nextFacet)
         return()
       } 
       
+      myPrtcpntView <- prtcpntView$val
+      if (myPrtcpntView == TRUE) {
+        countFun <- function(x){ length(unique(x)) }
+        colName <- "# Participants: "
+      } else {
+        countFun <- function(x){ length(x) }
+        colName <- "# Observations: "
+      }
+      
       #and still need to remove duplicates across time.
       if (any(colnames(data) %in% "FACET")) {
-        data <- reshape(aggregate(Participant_Id ~ FACET + GROUPS, data, FUN = function(x){ length(unique(x)) } ), 
+        data <- reshape(aggregate(Participant_Id ~ FACET + GROUPS, data, FUN = countFun ), 
                         timevar = "FACET", idvar = "GROUPS", v.names = "Participant_Id", direction = "wide")
         colnames(data)[1] <- "Line"
-        colnames(data) <- gsub("Participant_Id.", "# Participants: ", colnames(data))
+        colnames(data) <- gsub("Participant_Id.", colName, colnames(data))
         #give totals
         message(paste("length data:", length(data)))
         if (length(data) > 2) {
@@ -1000,8 +1100,8 @@ message("nextFacet: ", nextFacet)
         data["Totals" ,] <- colSums(data, na.rm=TRUE)
         data <- cbind("Line" = rownames(data), data)
       } else {
-        data <- aggregate(Participant_Id ~ GROUPS, data, FUN = function(x){ length(unique(x)) } )
-        colnames(data) <- c("Line", "# Participants")
+        data <- aggregate(Participant_Id ~ GROUPS, data, countFun )
+        colnames(data) <- c("Line", colName)
         #totals
         levels(data$Line) <- c(levels(as.factor(data$Line)),"Totals")
         data <- rbind(data, c("Totals", sum(data[, -1])))
@@ -1053,6 +1153,12 @@ message("nextFacet: ", nextFacet)
       myY <- getMyY$val
       yaxis_stp1 <- input$yaxis_stp1
       yaxis_stp2 <- input$yaxis_stp2
+      message("orig stp2", yaxis_stp2)
+      if (prtcpntView$val != TRUE) {
+        yaxis_stp2 <- input$yaxis_stp1
+        yaxis_stp1 <- "any"
+        message("changed stp2", yaxis_stp2)
+      }
       yaxis_stp3 <- input$yaxis_stp3
       myGroups <- getMyGroups$val 
       #grab optional inputs
@@ -1148,6 +1254,8 @@ message("nextFacet: ", nextFacet)
       if (is.null(myY)) {
         go <- FALSE
       } else {
+        message("tested stp2" ,yaxis_stp2)
+        print(yaxis_stp1)
         if (myY %in% strings$source_id) {
           if (is.null(yaxis_stp2)) {
             go <- FALSE
@@ -1200,32 +1308,34 @@ message("nextFacet: ", nextFacet)
         plotData <- completeDT(data, myY)
         plotData <- getFinalDT(plotData, metadata.file, myY)
         
+        aggKey <- aggKey()
+        
         if (!is.null(longitudinal)) {
-          myCols <- c("Participant_Id", myY, longitudinal)
+          myCols <- c(aggKey, myY, longitudinal)
           tempData <- plotData[, myCols, with=FALSE] 
-          colnames(tempData) <- c("Participant_Id", "YAXIS", "XAXIS")
+          colnames(tempData) <- c(aggKey, "YAXIS", "XAXIS")
         } else {
-          myCols <- c("Participant_Id", myY)
+          myCols <- c(aggKey, myY)
           tempData <- plotData[, myCols, with=FALSE] 
-          colnames(tempData) <- c("Participant_Id", "YAXIS")
+          colnames(tempData) <- c(aggKey, "YAXIS")
         }
         
         if (groupsType == "direct") {
           message("groups is direct")
-          myCols <- c("Participant_Id", myGroups)
+          myCols <- c(aggKey, myGroups)
           groupData <- plotData[, myCols, with=FALSE]
           groupData <- unique(groupData)
-          colnames(groupData) <- c("Participant_Id", "GROUPS")
-          tempData <- merge(tempData, groupData, by = "Participant_Id")
+          colnames(groupData) <- c(aggKey, "GROUPS")
+          tempData <- merge(tempData, groupData, by = aggKey)
         } 
         
         if (facetType == "direct") {
           message("facet is direct")
-          myCols <- c("Participant_Id", myFacet)
+          myCols <- c(aggKey, myFacet)
           facetData <- plotData[, myCols, with=FALSE]
           facetData <- unique(facetData)
-          colnames(facetData) <- c("Participant_Id", "FACET")
-          tempData <- merge(tempData, facetData, by = "Participant_Id")
+          colnames(facetData) <- c(aggKey, "FACET")
+          tempData <- merge(tempData, facetData, by = aggKey)
         } 
         
         plotData <- tempData
@@ -1275,12 +1385,12 @@ message("nextFacet: ", nextFacet)
                 }
               }
             }
-            outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+            outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4, aggKey)
             label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file), useGroup=TRUE)
             message(paste("label is:", label))
             message("have custom facet! now merge..")
             #add makeGroups data to df and return
-            colnames(outData) <- c("Participant_Id", "FACET")
+            colnames(outData) <- c(aggKey, "FACET")
             #will need a var called label that changes based on what the facet steps are. the below only works for strings.
             #if (any(colnames(event.file) %in% myFacet)) {
              # naToZero(outData, "FACET")
@@ -1289,7 +1399,7 @@ message("nextFacet: ", nextFacet)
             outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
            # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
             message(paste("levels facet:", levels(as.factor(outData$FACET))))
-            plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
+            plotData <- merge(plotData, outData, by = aggKey, all = TRUE)
             message(paste("levels facet:", levels(as.factor(plotData$FACET))))
           }
         }
@@ -1328,7 +1438,7 @@ message("nextFacet: ", nextFacet)
                 }
               }
             }
-            outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+            outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey)
             label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = colnames(event.file))
             message(paste("label is:", label))
             if (any(colnames(event.file) %in% myGroups)) {
@@ -1337,10 +1447,14 @@ message("nextFacet: ", nextFacet)
             message("have custom groups! now merge..")
             #add makeGroups data to df and return
             outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
-            plotData <- merge(plotData, outData, by = "Participant_Id", all = TRUE)
+            plotData <- merge(plotData, outData, by = aggKey, all = TRUE)
             print("NA in groups:", any(is.na(plotData$GROUPS)))
           } else {
-            plotData <- cbind(plotData, "GROUPS" = "All Participants")
+            if (prtcpntView$val == TRUE) {
+              plotData <- cbind(plotData, "GROUPS" = "All Participants")
+            } else {
+              plotData <- cbind(plotData, "GROUPS" = "All Observations")
+            }
           }
         }
         plotData
@@ -1364,9 +1478,13 @@ message("nextFacet: ", nextFacet)
           }
           yaxis_stp1 <- input$yaxis_stp1
           yaxis_stp2 <- input$yaxis_stp2
+          if (prtcpntView$val != TRUE) {
+            yaxis_stp2 <- input$yaxis_stp1
+            yaxis_stp1 <- "any"
+          }
           
           strings <- getStrings(metadata.file)
-        
+          aggKey <- aggKey()
         #prepare for return
         
         #determine necessary column id vectors before start
@@ -1376,14 +1494,14 @@ message("nextFacet: ", nextFacet)
             aggStr2 <- "Participant_Id ~ GROUPS + FACET"
             sumCols <- c("GROUPS", "FACET", "SUM")
             mergeBy <- c("GROUPS", "FACET")
-            dropCols <- c("Participant_Id", "YAXIS")
+            dropCols <- c(aggKey, "YAXIS")
             mergeBy2 <- c("GROUPS", "XAXIS", "FACET")
           } else {
             aggStr1 <- "YAXIS ~ GROUPS + FACET"
             aggStr2 <- "Participant_Id ~ GROUPS + FACET"
             sumCols <- c("GROUPS", "FACET", "SUM")
             mergeBy <- c("GROUPS", "FACET")
-            dropCols <- c("Participant_Id", "YAXIS")
+            dropCols <- c(aggKey, "YAXIS")
             mergeBy2 <- c("GROUPS", "FACET")
           }
         } else {
@@ -1392,49 +1510,70 @@ message("nextFacet: ", nextFacet)
             aggStr2 <- "Participant_Id ~ GROUPS"
             sumCols <- c("GROUPS", "SUM")
             mergeBy <- c("GROUPS")
-            dropCols <- c("Participant_Id", "YAXIS")
+            dropCols <- c(aggKey, "YAXIS")
             mergeBy2 <- c("GROUPS", "XAXIS")  
           } else {
             aggStr1 <- "YAXIS ~ GROUPS"
             aggStr2 <- "Participant_Id ~ GROUPS"
             sumCols <- c("GROUPS", "SUM")
             mergeBy <- c("GROUPS")
-            dropCols <- c("Participant_Id", "YAXIS")
+            dropCols <- c(aggKey, "YAXIS")
             mergeBy2 <- c("GROUPS")
           }
+        }
+          
+        myPrtcpntView <- prtcpntView$val
+        if (myPrtcpntView == TRUE) {
+          aggStr3 <- aggStr1
+          aggStr1 <- paste0(aggStr1, " + Participant_Id")
+          countFun <- function(x) {length(unique(x))}
+        } else {
+          aggStr3 <- aggStr1
+          aggStr1 <- paste0(aggStr1, " + " , paste(aggKey, collapse = " + "))
+          countFun <- function(x) {length(x)}
         }
         
         if (myY %in% strings$source_id) {
           mergeData <- NULL
-          if (yaxis_stp1 == "any") {
+          if (yaxis_stp1 == "any" | prtcpntView == FALSE) {
             #will have to replace all instances of myY with 1 and all else with 0 before can sum
             for (i in seq(length(yaxis_stp2))) {
               tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
-              tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), tempData, sum)
+              tempData <- aggregate(as.formula(aggStr1), tempData, sum)
+              print(unique(tempData$YAXIS))
               tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
+              print(unique(tempData$YAXIS))
               #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
                 mergeData <- tempData
               } else {
                 names(tempData)[names(tempData) == "YAXIS"] <- "prevY"
-                cols <- c("Participant_Id", "prevY")
+                print(colnames(tempData))
+                cols <- c(aggKey, "prevY")
                 tempData <- tempData[, cols]
-                mergeData <- merge(mergeData, tempData, by = "Participant_Id")
+                print(unique(tempData$prevY))
+                print(unique(mergeData$YAXIS))
+                mergeData <- merge(mergeData, tempData, by = aggKey)
+                print(unique(mergeData$YAXIS))
                 mergeData <- transform(mergeData, "YAXIS" = ifelse(prevY == 1 | YAXIS == 1, 1, 0))
+                print(unique(mergeData$YAXIS))
                 mergeData$prevY <- NULL
                 #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
-                mergeData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), mergeData, sum)
-                mergeData <- transform(mergeData, "YAXIS"=ifelse(YAXIS > 1, 1, 0))
+                mergeData <- aggregate(as.formula(aggStr1), mergeData, sum)
+                mergeData <- transform(mergeData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0)) 
               }
             }
           } else {
-              mergeData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) })
+              mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) })
               mergeData <- transform(mergeData, "YAXIS" = ifelse(YAXIS == TRUE, 1, 0))
           }
-          mergeData <- aggregate(as.formula(aggStr1), mergeData, sum) 
+          mergeData <- aggregate(as.formula(aggStr3), mergeData, sum)
+          print(head(mergeData))
           if (yaxis_stp3 == "proportion") {
-            groupSum <- as.data.table(aggregate(as.formula(aggStr2), plotData, FUN = function(x){length(unique(x))}))
+            print(unique(mergeData$YAXIS))
+            groupSum <- as.data.table(aggregate(as.formula(aggStr2), plotData, FUN = countFun))
+            print(unique(mergeData$YAXIS))
             colnames(groupSum) <- sumCols
             mergeData <- as.data.table(mergeData)
             mergeData <- merge(mergeData, groupSum, by = mergeBy)
@@ -1449,6 +1588,8 @@ message("nextFacet: ", nextFacet)
         } else {
           plotData <- plotData[, -dropCols, with=FALSE]
           plotData <- unique(plotData)
+          print(unique(mergeData$YAXIS))
+          print(mergeBy2)
           plotData <- merge(plotData, mergeData, by = mergeBy2)
         }
         plotData <- unique(plotData)

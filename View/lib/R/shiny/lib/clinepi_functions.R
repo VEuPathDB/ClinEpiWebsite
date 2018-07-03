@@ -174,7 +174,7 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
       if (!all(names(subList) %in% choicesNumeric$property)) {
         for (i in 1:length(subList)) {
           mySourceId <- metadata.file$source_id[metadata.file$property == names(subList)[i]]
-          if (mySourceId %in% choices$source_id & mySourceId %in% choicesNumeric$source_id) {
+          if (mySourceId %in% choices$source_id & !mySourceId %in% choicesNumeric$source_id) {
             if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
               #print(length(subList[[i]]))
               #print(mySourceId)
@@ -224,7 +224,7 @@ getFinalDT <- function(data, metadata.file, col){
 }
     
 #this takes inputs passed to it and creates subsets of data based on those inputs
-makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4){
+makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey = c("Participant_Id")){
   #realistically should check for nulls before calling, but just in case
   if (is.null(groups_stp1)) {
     message("groups stp1 is null!! returning")
@@ -234,7 +234,8 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
   #get group data for make groups option
   groupData <- completeDT(data, myGroups)
   groupData <- getFinalDT(groupData, metadata.file, myGroups)
-  myCols <- c("Participant_Id", myGroups)
+  #myCols <- c("Participant_Id", myGroups)
+  myCols <- c(aggKey, myGroups)
   outData <- groupData[, myCols, with=FALSE]
 
   obs <- c("any", "all")
@@ -263,9 +264,10 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
     groups_stp2 = groups_stp3
   }
 
-  #call either the any or the all function
+  #call either the any/ever or the all/always function
   if (obsFlag != "all") {
-    outData <- anyGroups(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+    #aggKey only necessary for obsToggle and will always run this through any
+    outData <- anyGroups(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey)
   } else {
     outData <- allGroups(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
   }
@@ -273,12 +275,13 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
   outData
 }
 
-anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4) {
-
+anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey) {
+  aggStr <- paste(myGroups, "~", paste(aggKey, collapse=" + "))
   #this if statement will have to change. handle dates first
   if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
-    cols <- c("Participant_Id", "GROUPS")
+    #cols <- c("Participant_Id", "GROUPS")
+    cols <- c(aggKey, "GROUPS")
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
     message("custom groups for date")
@@ -287,18 +290,18 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
+    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
   } else if (groups_stp1 == "greaterThan") {
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
+    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
   } else if (groups_stp1 == "equals") {
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
-    #for change over time  
+    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
+    #for change over time, maled  
   } else if (groups_stp1 == "delta") {
     if(is.null(groups_stp3)) {
       return()
@@ -307,9 +310,9 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- getFinalDT(outData, metadata.file, myGroups)
     myCols <- c("Participant_Id", "EUPATH_0000644", myGroups)
     outData <- outData[, myCols, with=FALSE]
-    #should start an empty table here to add values in as i go through the loop
+    
     tempTable <- NULL
-    #do the below for each participant. think i need for loop. :( but will see if i can think up better way.
+   
     prtcpnts <- levels(as.factor(outData$Participant_Id))
     for (i in prtcpnts) {
       currData <- subset(outData, outData$Participant_Id %in% i)
@@ -350,6 +353,7 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     #edit outdata so the merge with attr data works..
     outData <- tempTable
     colnames(outData) <- c("Participant_Id", "GROUPS")
+    #also maled, but wonder if this could be generalized
   } else if (groups_stp1 == "percentDays") {
     if (is.null(groups_stp4)) {
       return()
@@ -382,14 +386,14 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     mergeData <- NULL
     #for strings
     for (i in seq(length(groups_stp1))) {
-      tempData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
-      colnames(tempData) <- c("Participant_Id", "drop", "GROUPS")
+      tempData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
+      colnames(tempData) <- c(aggKey, "GROUPS")
       tempData$drop <- NULL
       if (is.null(mergeData)) {
         mergeData <- tempData
       } else {
-        colnames(mergeData) <- c("Participant_Id", "PrevGroup")
-        mergeData <- merge(mergeData, tempData, by = "Participant_Id")
+        colnames(mergeData) <- c(aggKey, "PrevGroup")
+        mergeData <- merge(mergeData, tempData, by = aggKey)
         mergeData <- transform(mergeData, "GROUPS" = ifelse(PrevGroup == 1 | GROUPS == 1, 1, 0))
         mergeData$PrevGroup <- NULL 
       }
@@ -398,7 +402,7 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   }
 
   if (ncol(outData) > 2) {
-    colnames(outData) <- c("Participant_Id", "drop", "GROUPS")
+    colnames(outData) <- c(aggKey, "GROUPS")
   }
   
   outData <- as.data.table(outData)
