@@ -57,7 +57,7 @@
   <record>
        <attribute name="title">Exploring search results</attribute>
        <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
-       <attribute name="uid">1</attribute>
+       <attribute name="uid">2</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -67,6 +67,23 @@
            <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
            <attribute name="duration">3 min</attribute>
            <attribute name="size">Apr 11, 2018</attribute>
+         </row>
+       </table>
+  </record>
+
+ <record>
+       <attribute name="title">Interacting with and visualizing data: Shiny Apps</attribute>
+       <attribute name="description">Interacting with and visualizing data: Shiny Apps</attribute>
+       <attribute name="uid">3</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.mov">unavailable</attribute>
+           <attribute name="fileName.avi">unavailable</attribute>
+           <attribute name="fileName.flv">>unavailable</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial3ShinyApp_osh_dh2-2.pdf</attribute>
+           <attribute name="duration">3 min</attribute>
+           <attribute name="size">Jul 5, 2018</attribute>
          </row>
        </table>
   </record>
