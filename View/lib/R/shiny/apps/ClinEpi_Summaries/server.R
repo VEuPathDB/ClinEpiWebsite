@@ -235,7 +235,7 @@ shinyServer(function(input, output, session) {
       }
       
       sliderInput(inputId = "xaxis_stp2",
-                  min = 1,
+                  min = 2,
                   max = 40,
                   value = 24,
                   step = 1,
