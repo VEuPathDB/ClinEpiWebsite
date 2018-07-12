@@ -1,5 +1,4 @@
-help <- tabPanel("Help", fluid = TRUE,
-          fluidPage(
+help <- tabItem(tabName = "help",
             h4("Overview"),
             #h5(
               p("This Shiny app allows you to look at the distribution of any variable in the dataset. There are several drop-down boxes near the top. They allow you to set the X axis or facet the plot by any variable of interest. While faceting the plot, you can choose to make your own groups based on a selected variable or to use all possible groups for that variable. If the dataset is longitudinal, you will also see at least one timeline across the top of the application, allowing you to filter by time periods and/or age groups of interest. Below, you will see a table and the plot appear. The table will indicate the number of participants belonging to each facet, and if the X axis variable you selected is numeric, will also provide some summary information on that facet. If you update your selections in the menus the table and plot will both update automatically."),
@@ -26,12 +25,7 @@ help <- tabPanel("Help", fluid = TRUE,
                   tags$li("httr: 1.3.1"),
                   tags$li("plotly: 4.7.1"),
                   tags$li("shiny: 1.0.5"),
-                  tags$li("shinyjs: 0.9.1"),
-                  tags$li("shinyTree: TODO"),
-                  tags$li("tidyr: 0.7.1"),
                   tags$li("viridisLite: 0.2.0")
                 )
-              )
-            #)
           ) 
         )

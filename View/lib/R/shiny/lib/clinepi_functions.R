@@ -46,9 +46,9 @@ groupText <- function(moduleName, myGroups, groups_stp1, groups_stp2, groups_stp
   groupsText
 }
 
-subsetDataFetcher <- function(min, max, data, col){
+subsetDataFetcher <- function(min, max, myData, col){
 
-  tempDF <- data[data[[col]] >= min & data[[col]] <= max] 
+  tempDF <- myData[myData[[col]] >= min & myData[[col]] <= max] 
  
   tempDF
 }
@@ -174,14 +174,17 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
       if (!all(names(subList) %in% choicesNumeric$property)) {
         for (i in 1:length(subList)) {
           mySourceId <- metadata.file$source_id[metadata.file$property == names(subList)[i]]
-          if (mySourceId %in% choices$source_id & !mySourceId %in% choicesNumeric$source_id) {
-            if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
-              #print(length(subList[[i]]))
-              #print(mySourceId)
-              if (length(subList[[i]]) == 0) {
-                subList[[i]] <- NULL
-              } else {
-                attr(subList[[i]], "stdisabled") <- TRUE
+          mySourceId <- unique(mySourceId)
+          if (mySourceId %in% choices$source_id) {
+            if (!mySourceId %in% choicesNumeric$source_id) {
+              if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
+                #print(length(subList[[i]]))
+                #print(mySourceId)
+                if (length(subList[[i]]) == 0) {
+                  subList[[i]] <- NULL
+                } else {
+                  attr(subList[[i]], "stdisabled") <- TRUE
+                }  
               }
             }
           }
@@ -215,7 +218,7 @@ getFinalDT <- function(data, metadata.file, col){
     #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
     #                      by = setdiff(names(data), eval(col))][!is.na(eval(col))]
     if (any(grepl("|", data[[col]], fixed=TRUE))) {
-      data <- separate_rows(tempDF, col, sep = "[|]+")
+      data <- separate_rows(data, col, sep = "[|]+")
     }
   }
        

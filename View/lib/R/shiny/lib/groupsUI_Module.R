@@ -32,7 +32,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, event.file, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = NULL) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = NULL) {
   ns <- session$ns
 
   propUrl <- "https://dcallan.clinepidb.org:443/ce.dcallan/service/users/221248430/steps/100005220/analyses/100001990/properties?accessToken=092e13cc862e4159"
@@ -65,7 +65,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       data <- singleVarData
       tempDF <- completeDT(data, myGroup)
       
-      if (any(colnames(event.file) %in% myGroup) & any(colnames(tempDF) %in% "BFO_0000015")) {
+      if ("BFO_0000015" %in% colnames(tempDF)) {
         if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
           groupRange$myMin = 0
         }
@@ -97,7 +97,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (groupsType() != "makeGroups" & groupsType() != "direct") {
       return()
     }
-    
+ 
     if (groupsType() == "makeGroups") {
       attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, include = include())
     } else {
@@ -109,11 +109,17 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
   
   output$choose_group <- renderUI({
+    if (is.null(groupsType())) {
+      return()
+    }
     if (groupsType() != "makeGroups" & groupsType() != "direct") {
       return()
     }
     
     myGroupBtnLabel <- getGroupBtnLabel()
+    if (is.null(myGroupBtnLabel)) {
+      return()
+    }
     
     tagList(
       div(
@@ -154,8 +160,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         dontUseProps <- TRUE
       } else {
           if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
-            if (groupsTypeSelected != groupsType()) {
-              dontUseProps <- TRUE
+            if (!is.null(groupsTypeSelected)) {
+              if (groupsTypeSelected != groupsType()) {
+                dontUseProps <- TRUE
+              }
+            } else {
+              return() 
             }
           }
       }
@@ -200,7 +210,8 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]  
 
     attrStp1List <- getUIStp1List(singleVarData, myGroup)
-    observations <- colnames(event.file)
+    observations <- metadata.file$source_id[metadata.file$category == "Observation"]
+    observations <- observations[observations %in% colnames(singleVarData)]
 
     dontUseProps <- FALSE
     if (is.null(properties)) {
@@ -246,7 +257,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       }
 
       if (any(colnames(tempDF) %in% "BFO_0000015")) {
-        if (any(colnames(event.file) %in% myGroup) & levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
+        if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
           mySelected = "delta"
           anthro <- TRUE
         }     

@@ -7,28 +7,24 @@ require(viridisLite)
 
 shinyServer(function(input, output, session) {
   
-  event.file <- NULL
-  event.file.exists <- NULL
-  prtcpnt.file <- NULL
-  house.file <- NULL
-  house.file.exists <- NULL
   metadata.file <- NULL
   singleVarData <- NULL
   longitudinal.file <- NULL
   prevFacet <- NULL
   current <- NULL
   facetInfo <- NULL
+  facet2Info <- NULL
   xaxisInfo <- NULL
   attributes.file <- NULL  
   propUrl <- NULL
   properties <- NULL
-  plotChoice <- 'singleVar'
   longitudinal1 <- NULL
   longitudinal2 <- NULL
   isParticipant <- NULL
   model.prop <- NULL
   getMyX <- reactiveValues()
   getMyFacet <- reactiveValues()
+  getMyFacet2 <- reactiveValues()
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
 
@@ -52,7 +48,7 @@ shinyServer(function(input, output, session) {
           ))
       model.prop_temp <- try(fread(
         getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
-        sep="=", header=FALSE, fill=TRUE))     
+        sep="=", header=FALSE, fill=TRUE))
  
       if (grepl("Error", model.prop_temp[1])){
         stop("Error: model.prop file missing or unreadable!")
@@ -108,90 +104,24 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    prtcpnt_temp <- try(fread(paste0(mirror.dir,"shiny_participants.txt"), na.strings = c("N/A", "na", "")))
-    house_temp <- try(fread(paste0(mirror.dir, "shiny_households.txt"), na.strings = c("N/A", "na", "")))
-    event_temp <- try(fread(paste0(mirror.dir, "shiny_obsevations.txt"), na.strings = c("N/A", "na", "")))
+    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
+    
+    if ('Participant_Id' %in% colnames(attributes.file)) {
+      singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
+      naToZero(singleVarData, col = "custom")
+      singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
+    }
+    if ('Observation_Id' %in% colnames(attributes.file)) {
+      singleVarData <<- merge(singleVarData, attributes.file, by = "Observation_Id", all = TRUE)
+      naToZero(singleVarData, col = "custom")
+      singleVarData$custom[singleVarData$custom == 0] <<- "Not Selected"
+    }
 
     longitudinal.file <<- fread("../../lib/longitudinal.tab")
     longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
     longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
                         by = setdiff(names(longitudinal.file), "columns")][!is.na(longitudinal.file$columns)]
  
-    if (grepl("Error", prtcpnt_temp[1])){
-      stop("Error: Participant file missing or unreadable!")
-    } else {
-      prtcpnt.file <<- prtcpnt_temp
-      names(prtcpnt.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(prtcpnt.file)))
-      names(prtcpnt.file)[names(prtcpnt.file) == 'SOURCE_ID'] <<- 'Participant_Id'
-      setkey(prtcpnt.file, Participant_Id)
-
-      if ('Participant_Id' %in% colnames(attributes.file)) {
-        prtcpnt.file <<- merge(prtcpnt.file, attributes.file, by = "Participant_Id", all = TRUE)
-        naToZero(prtcpnt.file, col = "custom")
-        prtcpnt.file$custom[prtcpnt.file$custom == 0] <<- "Not Selected"
-      }
-    }
-
-    if (grepl("Error", house_temp[1])){
-      message("Warning: Household file not found or unreadable.")
-    } else {
-      house.file <<- house_temp
-      names(house.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(house.file)))
-      names(house.file)[names(house.file) == 'SOURCE_ID'] <<- 'Participant_Id'
-      setkey(house.file, Participant_Id)
-    }
-
-    if (grepl("Error", event_temp[1])){
-      message("Warning: Events file not found or unreadable.")
-    } else {
-      event.file <<- event_temp
-      names(event.file) <<-  gsub(" ", "_", gsub("\\[|\\]", "", names(event.file)))
-      names(event.file)[names(event.file) == 'SOURCE_ID'] <<- 'Participant_Id'
-      names(event.file)[names(event.file) == 'NAME'] <<- 'Observation_Id'
-
-      #merge attributes column onto data table
-      if ('Observation_Id' %in% colnames(attributes.file)) {
-        event.file <<- merge(event.file, attributes.file, by = "Observation_Id", all = TRUE)
-        naToZero(event.file, col = "custom")
-        event.file$custom[event.file$custom == 0] <<- "Not Selected"
-      }
-      #naToZero(singleVarData, col = "search_weight")
-    }
-
-    #remove non-unique column names and merge them to one data table to return
-    drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
-    #consider moving drop to event.file TODO
-    prtcpnt.file <<- prtcpnt.file[, (drop):=NULL]
-    
-    if (exists("event.file")) {
-      if (!is.null(event.file) & nrow(event.file) > 1) {
-        merge1 <- merge(event.file, prtcpnt.file, by = "Participant_Id")
-        event.file.exists <<- TRUE
-      } else {
-        merge1 <- prtcpnt.file
-        event.file.exists <<- FALSE
-      }
-    } else {
-      merge1 <- prtcpnt.file
-      event.file.exists <<- FALSE
-    }
-    
-    if (exists("house.file")) {
-      if (!is.null(house.file) & nrow(house.file) > 1) {
-        house.file <<- house.file[, -(drop), with = FALSE]
-        singleVarData <<- merge(merge1, house.file, by = "Participant_Id")
-        house.file.exists <<- TRUE
-      } else {
-        singleVarData <<- merge1
-        house.file.exists <<- FALSE
-      }
-    } else {
-      singleVarData <<- merge1
-      house.file.exists <<- FALSE
-    }
-
-    #metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(singleVarData), ]
-    
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
     dates <- dates[dates %in% colnames(singleVarData)]
@@ -216,43 +146,44 @@ shinyServer(function(input, output, session) {
     singleVarData
   }
   
-  output$title <- renderUI({
+  output$title <- renderText({
     withProgress(message = 'Loading...', value = 0, style = "old", {
       singleVarDataFetcher()
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, event.file = event.file, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo", prtcpntView = reactive(prtcpntView$val))
+      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyX$val <- selectedGroup()
       } else {
         getMyX$val <- properties$selected[properties$input == "xaxisInfo$group"]
       }
       incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, event.file = event.file, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- selectedFacet()
       } else {
         getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
       }
+      facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
+      if (is.null(properties)) {
+        getMyFacet2$val <- selectedFacet2()
+      } else {
+        getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
+      }
       incProgress(.15)
     })
-    titlePanel("Data Distributions")
+    c("Data Distributions")
   })
  
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
-      tagList(
-        div(
           radioButtons(inputId = "prtcpntViewSwitch",
                       label = NULL,
                       choiceNames = c("Participant View", "Observation View"),
                       choiceValues = c(TRUE, FALSE),
                       selected = "FALSE",
-                      inline = TRUE),
-          style = "position:absolute;right:1em;"
-        )
-      )
+                      inline = TRUE)
     }
   })
 
@@ -263,69 +194,24 @@ shinyServer(function(input, output, session) {
       prtcpntView$val <- FALSE
     }
   })
- 
-    output$choose_groups <- renderUI({
-      if (is.null(input$xaxis)) {
-        return()
-      }
-      myX <- input$xaxis
-      
-      if (plotChoice == 'groups'){
-        if (myX == 'zscore') {
-          groupsSubset <- metadata.file[grep("z-score", metadata.file$property), ]
-          cols <- groupsSubset$source_id
-          useData <- singleVarData[, cols, with = FALSE]
-        } else {
-          if (event.file.exists) {
-            useData <- event.file
-          } else {
-            useData <- singleVarData
-          }
-        }
-        groupsChoiceList <- getUIList(useData, metadata.file)
-        if (myX == 'zscore') {
-          selectList <- c('EUPATH_0000734', 'EUPATH_0000689')
-        } else {
-          selectList <- c('EUPATH_0000689')
-        }
-        
-        #TODO change to selectize input
-        dropdownButton(
-          label = "Click here to select groups", status = "default",
-          checkboxGroupInput("groups",
-                             "Groups:", 
-                             choiceNames  = names(groupsChoiceList),
-                             choiceValues = unname(groupsChoiceList),
-                             selected = selectList)
-        )
-      }
-    })
     
    output$choose_xaxis <- renderUI({
       
-      if (plotChoice == 'groups') {
-        #getXList(plotChoice)
-        selectInput(inputId = "xaxis",
-                    label = "X-Axis:",
-                    choices = list('Z-score' = 'zscore', 'Age in Days' = 'ageDays'),
-                    selected = 'zscore') 
-      } else {
         mySelected <- properties$selected[properties$input == "input$xaxis"]
         
         if (is.null(properties)) {
           selectInput(inputId = "xaxis",
-                      label = "X-Axis:",
+                      label = NULL,
                       choices = c("All possible" = "direct"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "xaxis",
-                      label = "X-Axis:",
+                      label = NULL,
                       choices = c("All possible" = "direct"),
                       selected = mySelected,
                       width = '100%')
         }
-      }
     })
     
     output$facet_type <- renderUI({
@@ -334,20 +220,38 @@ shinyServer(function(input, output, session) {
       if (is.null(properties)) {
         if (isParticipant) {
           selectInput(inputId = "facetType",
-                      label = "Facet:",
+                      label = NULL,
                       choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "facetType",
-                      label = "Facet:",
+                      label = NULL,
                       choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "makeGroups",
                       width = '100%')
         }
       } else {
         selectInput(inputId = "facetType",
-                    label = "Facet:",
+                    label = NULL,
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = mySelected,
+                    width = '100%')
+      }
+    })
+    
+    output$facet2_type <- renderUI({
+      mySelected <- properties$selected[properties$input == "input$facet2Type"]
+      
+      if (is.null(properties)) {
+        selectInput(inputId = "facet2Type",
+                    label = NULL,
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = "none",
+                    width = '100%')
+      } else {
+        selectInput(inputId = "facet2Type",
+                    label = NULL,
                     choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                     selected = mySelected,
                     width = '100%')
@@ -479,7 +383,7 @@ shinyServer(function(input, output, session) {
       if (facetType == "direct") {
         dates <- getDates(metadata.file)$source_id
         #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if (house.file.exists) {
+        if ("Household" %in% metadata.file$category) {
           #htmp <- house.file[, !dates, with = FALSE]
           include <- c("Participant", "Household")
         } else {
@@ -489,6 +393,85 @@ shinyServer(function(input, output, session) {
         include <- c("all")
       }     
  
+      return(include)
+    })
+    
+    selectedFacet2 <- reactive({
+      if (is.null(input$facet2Type)) {
+        return()
+      } else {
+        facet2Type <- input$facet2Type
+      }
+      
+      if (facet2Type == "direct") {
+        #selected <- "custom"
+        selected <- "custom"
+      } else if (facet2Type == "makeGroups") {
+        if (isParticipant) {
+          if ("EUPATH_0000054" %in% colnames(singleVarData)) {
+            selected <- "EUPATH_0000054"
+          } else {
+            include <- facet2Data()
+            if (include != "all") {
+              temp <- metadata.file[metadata.file$category %in% include]
+            } else {
+              temp <- metadata.file
+            }
+            myCols <- colnames(singleVarData)
+            temp <- temp[temp$source_id %in% myCols]
+            parents <- temp$parent
+            leaves <- temp[!temp$property %in% parents]
+            leaves <- leaves[order(leaves$property),]
+            leaves <- leaves$source_id
+            selected <- leaves[1]
+          }
+        } else {
+          selected <- "custom"
+        }
+      } else {
+        selected <- ""
+      }
+      
+      return(selected)
+    })
+    
+    facet2Label <- reactive({
+      if (is.null(input$facet2Type)) {
+        return()
+      } else {
+        facet2Type <- input$facet2Type
+      }
+      
+      label = ""
+      if (facet2Type == "direct") {
+        label <- "facets for"
+      } else if (facet2Type != "none") {
+        label <- "facet where:"
+      }
+      
+      return(label)
+    })
+    
+    facet2Data <- reactive({
+      if (is.null(input$facet2Type)) {
+        return()
+      } else {
+        facet2Type <- input$facet2Type
+      }
+      
+      if (facet2Type == "direct") {
+        dates <- getDates(metadata.file)$source_id
+        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
+        if ("Household" %in% metadata.file$category) {
+          #htmp <- house.file[, !dates, with = FALSE]
+          include <- c("Participant", "Household")
+        } else {
+          include <- c("Participant")
+        }
+      } else {
+        include <- c("all")
+      }     
+      
       return(include)
     })
     
@@ -517,6 +500,20 @@ shinyServer(function(input, output, session) {
         }
       }
     })
+    
+    observeEvent(facet2Info$group, {
+      if (length(get_selected(facet2Info$group, format="names")) != 0) {
+        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facet2Info$group, format="names")[1][[1]]][1]
+        
+        if (is.null(getMyFacet2$val)) {
+          getMyFacet2$val <- nextFacet
+          print("resetting myFacet2")
+        } else if (getMyFacet2$val != nextFacet) {
+          getMyFacet2$val <- nextFacet
+          print("resetting myFacet2")
+        }
+      }
+    })
 
     #tried to wrap these three into one observer and it broke.. look again later
     observeEvent(getMyX$val, {
@@ -526,6 +523,12 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(getMyFacet$val, {
+      #execute javascript to virtually click outside the dropdown
+      print("clicking!!!!!!!!!!!")
+      js$virtualBodyClick();
+    })
+    
+    observeEvent(getMyFacet2$val, {
       #execute javascript to virtually click outside the dropdown
       print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();
@@ -543,12 +546,192 @@ shinyServer(function(input, output, session) {
       return(aggKey)
     })
     
+    output$individualPlot_stp1 <- renderUI({
+      if (is.null(input$facetType)) {
+        return()
+      }
+      if (input$facetType == "none") {
+        myFacet <- "none"
+      } else {
+        myFacet <- getMyFacet$val
+      }
+      facetType <- input$facetType
+      
+      if (myFacet == "none") {
+        return()
+      }
+      
+      #TODO try to save this globally and reactively have it update?? cause right now its called in three different places..
+      df <- plotData()
+      if (facetType == "makeGroups") {
+        myFacet <- "FACET"
+      }
+      facetVals <- unique(df[,myFacet, with=FALSE])
+      facetVals <- unlist(facetVals)
+      names(facetVals) <- facetVals
+      
+      #TODO remember to save this ui param as well
+      mySelected <- c("abc")
+       
+      selectInput(inputId = "individualPlot_stp1",
+                  label = "Facet Plot (1) value:",
+                  choices = facetVals,
+                  selected = mySelected)
+    })
+    
+    output$individualPlot_stp2 <- renderUI({
+      if (is.null(input$facet2Type)) {
+        return()
+      }
+      if (input$facet2Type == "none") {
+        myFacet2 <- "none"
+      } else {
+        myFacet2 <- getMyFacet2$val
+      }
+      facet2Type <- input$facet2Type
+      
+      if (myFacet2 == "none") {
+        return()
+      }
+      
+      #TODO try to save this globally and reactively have it update?? cause right now its called in three different places..
+      df <- plotData()
+      if (facet2Type == "makeGroups") {
+        myFacet2 <- "FACET2"
+      }
+      facet2Vals <- unique(df[,myFacet2, with=FALSE])
+      facet2Vals <- unlist(facet2Vals)
+      names(facet2Vals) <- facet2Vals
+      
+      #TODO remember to save this ui param as well
+      mySelected <- c("abc")
+      
+      selectInput(inputId = "individualPlot_stp2",
+                  label = "Facet Plot (2) value:",
+                  choices = facet2Vals,
+                  selected = mySelected)
+    })
+    
+    output$individual_distribution <- renderPlotly({
+      if (is.null(input$xaxis)) {
+        return()
+      }
+      if (is.null(input$facetType)) {
+        return()
+      }
+      if (is.null(input$facet2Type)) {
+        return()
+      }
+      if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
+        return()
+      }
+      myX <- input$xaxis
+      if (myX == "direct" | myX == "makeGroups") {
+        if (is.null(getMyX$val)) {
+          return()
+        } else {
+          myX <- getMyX$val
+        }
+      }
+      if (input$facetType == "none") {
+        myFacet <- "none"
+      } else {
+        myFacet <- getMyFacet$val
+        if (is.null(input$individualPlot_stp1)) {
+          return()
+        }
+      }
+      facetType <- input$facetType
+      if (input$facet2Type == "none") {
+        myFacet2 <- "none"
+      } else {
+        myFacet2 <- getMyFacet2$val
+        if (is.null(input$individualPlot_stp2)) {
+          return()
+        }
+      }
+      facet2Type <- input$facet2Type
+      iPlot_stp1 <- input$individualPlot_stp1
+      iPlot_stp2 <- input$individualPlot_stp2
+
+      if (facetType == "makeGroups") {
+        myFacet <- "FACET"
+      }
+      if (facet2Type == "makeGroups") {
+        myFacet2 <- "FACET2"
+      }
+      
+      nums <- getNums(metadata.file)
+      dates <- getDates(metadata.file)
+      
+      if (myX == 'ageDays') {
+        xlab <- "Age in Days"
+      } else if (myX == 'zscore') {
+        xlab <- "Z-score"
+      } else {
+        xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
+        xlab <- as.character(xlab[1,2])
+      }
+     
+      df <- plotData()
+      df <- completeDT(df, myX)
+
+      if (!is.null(iPlot_stp1)) {
+        keep <- c(df[, myFacet, with=FALSE] == iPlot_stp1)
+        df <- df[keep,]
+      }
+      if (!is.null(iPlot_stp2)) {
+        keep2 <- c(df[, myFacet2, with=FALSE] == iPlot_stp2)
+        df <- df[keep2,]
+      }
+        
+      myPlot <- ggplot(data = df, aes_string(x = myX))
+      myPlot <- myPlot + theme_bw()
+      myPlot <- myPlot + labs(y = "", x = "")
+      
+      if ((myX %in% nums$source_id | myX %in% dates$source_id) & myX != myFacet) {
+        myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
+      } else {
+        myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
+        myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+      }
+      
+      x_list <- list(
+        title = paste0(c(rep("\n", 3),
+                         rep(" ", 10),
+                         xlab,
+                         rep(" ", 10)),
+                       collapse = ""),
+        size = 14
+      )
+      y_list <- list(
+        title = paste0(c(rep(" ", 10),
+                         "Count",
+                         rep(" ", 10),
+                         "\n"),
+                       collapse = ""),
+        size = 14
+      ) 
+      
+      myPlotly <- ggplotly(myPlot, tooltip = c("text"))
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
+                         xaxis = x_list, 
+                         yaxis = y_list,
+                         legend = list(x = 100, y = .5))
+      
+      myPlotly
+    })
+    
     output$distribution <- renderPlotly({
       message("render plot!")
       if (is.null(input$xaxis)) {
         return()
       }
       if (is.null(input$facetType)) {
+        return()
+      }
+      if (is.null(input$facet2Type)) {
         return()
       }
       myX <- input$xaxis
@@ -565,6 +748,12 @@ shinyServer(function(input, output, session) {
         myFacet <- getMyFacet$val
       }
       facetType <- input$facetType
+      if (input$facet2Type == "none") {
+        myFacet2 <- "none"
+      } else {
+        myFacet2 <- getMyFacet2$val
+      }
+      facet2Type <- input$facet2Type
       #should switch to same setup as in other two.. use plotData()
       df <- plotData()
    
@@ -588,42 +777,65 @@ shinyServer(function(input, output, session) {
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
       
-      if (plotChoice == 'groups') {
-        #myPlot <- myPlot + geom_tooltip(aes(fill = groups, y = .3 * ..count.., tooltip=groups), alpha = .2, real.geom=geom_histogram)  
-        myPlot <- myPlot + geom_density(aes(fill = groups, y = .3 * ..count.., text = paste0("Group: ", group , "<br>", "Count: ", .3 * ..count..)), alpha = .2) 
-        #myPlot <- myPlot + scale_y_continuous(formatter = function(x) format(10 ^ x))
-        if (length(levels(as.factor(df$groups))) > 12) {
-          myPlot <- myPlot + theme(legend.position="none")
-        }
-        if (facetType == 'direct') {
-          myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
-           # scale_fill_brewer(palette = cbPalette)
-        } else if (facetType == 'makeGroups') {
-          myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
-        }
-      } else {
         #consider when facetType is makeGroups to use geom_density instead ??
         if ((myX %in% nums$source_id | myX %in% dates$source_id) & myX != myFacet) {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
-          if (facetType == 'direct') {
-            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
-            # scale_fill_brewer(palette = cbPalette)
-          } else if (facetType == 'makeGroups') {
-            myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
+        
+          if (facetType == "none" & facet2Type != "none") {
+            myFacet <- myFacet2
+            facetType <- facet2Type
+            facet2Type <- "none"
           }
+          print(facetType)
+          print(facet2Type)
+          if (facet2Type == "none") {
+            if (facetType == 'direct') {
+              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
+              # scale_fill_brewer(palette = cbPalette)
+            } else if (facetType == 'makeGroups') {
+              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
+            }
+          } else {
+            if (facetType == "makeGroups") {
+              myFacet <- "FACET"
+            }
+            if (facet2Type == "makeGroups") {
+              myFacet2 <- "FACET2"
+            }
+            print(reformulate(myFacet,myFacet2))
+            myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
+          }
+          
         } else {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-          if (facetType == 'direct') {
-            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
-            # scale_fill_brewer(palette = cbPalette)
-          } else if (facetType == 'makeGroups') {
-            myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
+          if (facetType == "none" & facet2Type != "none") {
+            myFacet <- myFacet2
+            facetType <- facet2Type
+            facet2Type <- "none"
+          }
+          print(facetType)
+          print(facet2Type)
+          if (facet2Type == "none") {
+            if (facetType == 'direct') {
+              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1) 
+              # scale_fill_brewer(palette = cbPalette)
+            } else if (facetType == 'makeGroups') {
+              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
+            }
+          } else {
+            if (facetType == "makeGroups") {
+              myFacet <- "FACET"
+            }
+            if (facet2Type == "makeGroups") {
+              myFacet2 <- "FACET2"
+            }
+            print(reformulate(myFacet,myFacet2))
+            myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
           }
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
-      }
             
       message(paste("c'est fini"))
      
@@ -653,10 +865,10 @@ shinyServer(function(input, output, session) {
       
       myPlotly
     })
-
-    output$table <- DT::renderDataTable({
-      data <- plotData()
-      if (is.null(data)) {
+    
+    observeEvent(plotData(), {
+      plotData <- plotData()
+      if (is.null(plotData)) {
         return()
       }
       if (input$facetType == "none") {
@@ -664,68 +876,117 @@ shinyServer(function(input, output, session) {
       } else {
         myFacet <- getMyFacet$val
       }
+      if (input$facet2Type == "none") {
+        myFacet2 <- "none"
+      } else {
+        myFacet2 <- getMyFacet2$val
+      }
       myX <- getMyX$val
       if ("FACET" %in% colnames(data)) {
         myFacet <- "FACET"
       }
- 
-      nums <- getNums(metadata.file)$source_id
+      if ("FACET2" %in% colnames(data)) {
+        myFacet2 <- "FACET2"
+      }
       myPrtcpntView <- prtcpntView$val
-      if (myPrtcpntView == TRUE) {
-        colLabel <- "# Participants"
-        colVal <- length(unique(data$Participant_Id))
-        countFun <- function(x) {length(unique(x))}
-      } else {
-        colLabel <- "# Observations"
-        colVal <- nrow(data)
-        aggStr <- myFacet
-        countFun <- function(x) {length(x)}
-      }
- 
-      if (myFacet == "none") {
-        tableData <- data.table("Facet" = "All", colLabel = colVal)
-        if (myX %in% nums) {
-          tableData <- cbind(tableData, "Mean" = round(mean(data[[myX]], na.rm = TRUE),4))
-          tableData <- cbind(tableData, "Median" = median(data[[myX]], na.rm = TRUE))
-          tableData <- cbind(tableData, "Range" = paste(min(data[[myX]], na.rm = TRUE), "-", max(data[[myX]], na.rm = TRUE)))
-          tableData <- cbind(tableData, "SD" = round(sd(data[[myX]], na.rm = TRUE),4))
-          tableData <- cbind(tableData, "IQR" = round(IQR(data[[myX]], na.rm = TRUE),4))
-        }
-      } else {
-        aggStr <- paste0("Participant_Id ~ ", myFacet)
-        aggStr2 <- paste0(myX, " ~ ", myFacet)
-        #will need to change first arg based on all possible or makeGroups
-        tableData <- aggregate(as.formula(aggStr), data, FUN = countFun)
-        if (myX %in% nums) {
-          mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
-          tableData <- merge(tableData, mean, by = myFacet)
-          median <- aggregate(as.formula(aggStr2), data, median)
-          tableData <- merge(tableData, median, by = myFacet)
-          range <- aggregate(as.formula(aggStr2), data, FUN = function(x){paste(min(data[[myX]], na.rm = TRUE), "-", max(data[[myX]], na.rm = TRUE))})
-          tableData <- merge(tableData, range, by = myFacet)
-          mySD <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(sd(x),4)})
-          tableData <- merge(tableData, mySD, by = myFacet)
-          myIQR <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(IQR(x),4)})
-          tableData <- merge(tableData, myIQR, by = myFacet)
-          colnames(tableData) <- c("Facets", colLabel, "Mean", "Median", "Range", "SD", "IQR")
+
+      if (myFacet2 != "none") {
+        if (myFacet != "none") {
+          dt_len <- uniqueN(plotData[, myFacet2, with=FALSE])
+          dt_list <- unique(plotData[, myFacet2, with=FALSE]) 
         } else {
-          colnames(tableData) <- c("Facets", colLabel)
+          myFacet <- myFacet2
+          myFacet2 <- "none"
+          dt_len <- 1
+          dt_list <- NULL
         }
-      }
-
-      if (length(colnames(tableData)) == 7) {
-        myTargets <- c(1,2,3,4,5,6)
       } else {
-        myTargets <- c(1)
+        dt_len <- 1
+        dt_list <- NULL
       }
-
-      datatable(tableData,
-                width = '100%',
-                rownames = FALSE,
-                options = list(
-                  columnDefs = list(list(className = 'dt-right', targets = myTargets))
-                )
-      )
+      
+      nums <- getNums(metadata.file)
+      dates <- getDates(metadata.file)
+      
+      createUI <- function(id, data, facets) {
+        
+        if (myPrtcpntView == TRUE) {
+          colLabel <- "# Participants"
+          colVal <- length(unique(data$Participant_Id))
+          countFun <- function(x) {length(unique(x))}
+        } else {
+          colLabel <- "# Observations"
+          colVal <- nrow(data)
+          aggStr <- myFacet
+          countFun <- function(x) {length(x)}
+        }
+        
+        if (myFacet == "none") {
+          tableData <- data.table("Facet" = "All", colLabel = colVal)
+          if (myX %in% nums) {
+            tableData <- cbind(tableData, "Mean" = round(mean(data[[myX]], na.rm = TRUE),4))
+            tableData <- cbind(tableData, "Median" = median(data[[myX]], na.rm = TRUE))
+            tableData <- cbind(tableData, "Range" = paste(min(data[[myX]], na.rm = TRUE), "-", max(data[[myX]], na.rm = TRUE)))
+            tableData <- cbind(tableData, "SD" = round(sd(data[[myX]], na.rm = TRUE),4))
+            tableData <- cbind(tableData, "IQR" = round(IQR(data[[myX]], na.rm = TRUE),4))
+          }
+        } else {
+          aggStr <- paste0("Participant_Id ~ ", myFacet)
+          aggStr2 <- paste0(myX, " ~ ", myFacet)
+          #will need to change first arg based on all possible or makeGroups
+          tableData <- aggregate(as.formula(aggStr), data, FUN = countFun)
+          if (myX %in% nums) {
+            mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
+            tableData <- merge(tableData, mean, by = myFacet)
+            median <- aggregate(as.formula(aggStr2), data, median)
+            tableData <- merge(tableData, median, by = myFacet)
+            range <- aggregate(as.formula(aggStr2), data, FUN = function(x){paste(min(data[[myX]], na.rm = TRUE), "-", max(data[[myX]], na.rm = TRUE))})
+            tableData <- merge(tableData, range, by = myFacet)
+            mySD <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(sd(x),4)})
+            tableData <- merge(tableData, mySD, by = myFacet)
+            myIQR <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(IQR(x),4)})
+            tableData <- merge(tableData, myIQR, by = myFacet)
+            colnames(tableData) <- c("Facets", colLabel, "Mean", "Median", "Range", "SD", "IQR")
+          } else {
+            colnames(tableData) <- c("Facets", colLabel)
+          }
+        }
+        
+        if (length(colnames(tableData)) == 7) {
+          myTargets <- c(1,2,3,4,5,6)
+        } else {
+          myTargets <- c(1)
+        }
+       
+        if (length(facets) > 0) {
+          myCaption <- paste("Facet(s):",paste(facets, collapse = " and "))
+        } else {
+          myCaption <- ""
+        }
+         
+        output[[id]] <- DT::renderDataTable(datatable(tableData,
+                                                      caption = myCaption,
+                                                      width = '100%',
+                                                      rownames = FALSE,
+                                                      options = list(
+                                                        columnDefs = list(list(className = 'dt-right', targets = myTargets))
+                                                      )
+        ))
+      }
+     
+      output$dt <- renderUI({
+        lapply(1:dt_len, function(i) {
+          id <- paste0("dt", i)
+          if (!is.null(dt_list)) {
+            keep <- c(plotData[, myFacet2, with=FALSE] == c(dt_list[i]))
+            facets <- c(dt_list[i])
+            data <- plotData[keep,]
+          } else {
+            data <- plotData
+          }
+          createUI(id, data, facets)
+        })
+      })
     })
     
     
@@ -740,6 +1001,7 @@ shinyServer(function(input, output, session) {
         return()
       }
       facetType <- input$facetType
+      facet2Type <- input$facet2Type
       xType <- input$xaxis
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
@@ -759,6 +1021,16 @@ shinyServer(function(input, output, session) {
       facet_stp4 <- facetInfo$group_stp4
       facet_stp2 <- facetInfo$group_stp2
       prevFacet <<- myFacet
+      if (input$facet2Type == "none") {
+        myFacet2 <- "none"
+      } else {
+        myFacet2 <- getMyFacet2$val
+      }
+      facet2_stp1 <- facet2Info$group_stp1
+      facet2_stp3 <- facet2Info$group_stp3
+      facet2_stp4 <- facet2Info$group_stp4
+      facet2_stp2 <- facet2Info$group_stp2
+      prevFacet2 <<- myFacet2
       myGroups <- input$groups
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
@@ -788,14 +1060,42 @@ shinyServer(function(input, output, session) {
           }
         } 
       }
+      
+      if (is.null(facet2Type)) {
+        return()
+      } else {
+        if (facet2Type == "makeGroups") {
+          if (is.null(facet2_stp1)) {
+            return()
+          } else {
+            if (facet2_stp1 == 'any' | facet2_stp1 == 'all') {
+              if (is.null(facet2_stp2)) {
+                return()
+              } else {
+                if (facet2_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+                  if (is.null(facet2_stp3)) {
+                    return()
+                  }
+                }
+              }
+            }
+          } 
+        } else if (facet2Type == "direct") {
+          if (is.null(myFacet2)) {
+            return()
+          }
+        } 
+      }
 
       #first thing is to save properties 
       longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
       facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+      facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
 
       text <- paste0("input\tselected\n",
                      longitudinalText,
                      facetText,
+                     facet2Text,
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
                      "input$xaxis\t", xType
@@ -805,38 +1105,7 @@ shinyServer(function(input, output, session) {
       PUT(propUrl, body = text)
 
       strings <- subset(metadata.file, metadata.file$type == "string", "source_id")
-      if (plotChoice == 'groups') {
-        data <- groupsDataFetcher(myGroups, myX)
-        #subset data
-        #which cols can be used for this will have to change. too specific right now
-        #maybe change prev longitudinal var to longitudinal.file so can check if one of these if statements needs to be met
-        if (!is.null(longitudinal1)) {
-          if (!is.null(myTimeframe1)) {
-            data <- subsetDataFetcher(myTimeframe1[1], myTimeframe1[2], data, longitudinal1)
-            message("subsetting data by first longitudinal variable..")
-            if (nrow(data) == 0) {
-              message("subset failed, returning")
-              return()
-            }
-          }
-          if (!is.null(longitudinal2)) {
-            if (!is.null(myTimeframe2)) {
-              data <- subsetDataFetcher(myTimeframe2[1], myTimeframe2[2], data, longitudinal2)
-              message("subsetting data by second longitudinal variable..")
-              if (nrow(data) == 0) {
-                message("subset failed, returning")
-                return()
-              }
-            }
-          }
-        }
-        col = 'groups'
-        #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-        #                    by = setdiff(names(data), eval(col))][!is.na(eval(col))]
-        if (any(grepl("|", data[[col]], fixed=TRUE))) {
-          data <- separate_rows(data, col, sep = "[|]+")
-        }
-      } else {
+      
         data <- singleVarData
         #subset data
         if (!is.null(longitudinal1)) {
@@ -866,7 +1135,6 @@ shinyServer(function(input, output, session) {
             data <- separate_rows(data, myX, sep = "[|]+")
           }
         }
-      }
      
       nums <- getNums(metadata.file)
       dates <- getDates(metadata.file)      
@@ -904,7 +1172,9 @@ shinyServer(function(input, output, session) {
           }
           aggKey <- aggKey()
           outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4, aggKey)
-          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = colnames(event.file))
+          observations <- metadata.file$source_id[metadata.file$category == "Observation"]
+          observations <- observations[observations %in% colnames(singleVarData)]
+          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = observations)
           #add makeGroups data to df and return
           colnames(outData) <- c(aggKey, "FACET")
           outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
@@ -912,16 +1182,66 @@ shinyServer(function(input, output, session) {
         }
       }
       
+      if (facet2Type == "direct") {
+        if (myFacet2 %in% nums$source_id | myFacet2 %in% dates$source_id) {
+          data[[myFacet2]] <- rcut_number(data[[myFacet2]],4)
+        }
+        displayLabel <- metadata.file$property[metadata.file$source_id == myFacet2]
+        data[[myFacet2]] <- paste0(displayLabel, ": ", data[[myFacet2]])  
+      } else if (facet2Type == "makeGroups") {
+        numeric <- c("lessThan", "greaterThan", "equals")
+        anthro <- c("percentDays", "delta", "direct")
+        if (facet2Type != "none") {
+          if (is.null(facet2_stp1)) {
+            return()
+          } else {
+            if (facet2_stp1 %in% numeric) {
+              if (is.null(facet2_stp2)) {
+                return()
+              }
+            }
+            if (facet2_stp1 %in% anthro) {
+              if (facet2_stp1 == "percentDays") {
+                if (is.null(facet2_stp4)) {
+                  return()
+                }
+              } else {
+                if (is.null(facet2_stp3)) {
+                  return()
+                }
+              }
+            }
+          }
+          aggKey <- aggKey()
+          outData <- makeGroups(data, metadata.file, myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4, aggKey)
+          observations <- metadata.file$source_id[metadata.file$category == "Observation"]
+          observations <- observations[observations %in% colnames(singleVarData)]
+          label <- makeGroupLabel(myFacet2, metadata.file, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4, event.list = observations)
+          #add makeGroups data to df and return
+          colnames(outData) <- c(aggKey, "FACET2")
+          outData <- transform(outData, "FACET2" = ifelse(as.numeric(FACET2) == 0, label[2], label[1]))
+          data <- merge(data, outData, by = aggKey, all = TRUE)
+        }
+      }
+      
       if (prtcpntView$val == TRUE) {
         if (facetType == "makeGroups") {
-          myCols <- c("Participant_Id", myX, "FACET") 
-        } else {
-          if (myX == myFacet | myFacet == "none") {
-            myCols <- c("Participant_Id", myX)
-          } else {
-            myCols <- c("Participant_Id", myX, myFacet)
-          }
+          facetCol = "FACET"
+        } else if (myX == myFacet | myFacet == "none") {
+          facetCol = c()
+        }  else {
+          facetCol = myFacet
         }
+        if (facetType2 == "makeGroups") {
+          facet2Col = "FACET2" 
+        } else if (myX == myFacet2 | myFacet2 == "none") {
+          facet2Col = c()
+        } else {
+          facet2Col = myFacet2
+        }
+        
+        myCols <- c("Participant_Id", myX, facetCol, facet2Col)
+        
         data <- data[, myCols, with = FALSE]
         data <- unique(data)
       }
@@ -929,41 +1249,5 @@ shinyServer(function(input, output, session) {
       data
       
     }), 2000)
-    
-    groupsDataFetcher <- function(myGroups, myX) {
-      #since singlevar is default im assuming fles fetcher is already called. can add check later though to be safe.
-      
-      groupsData <- NULL
-      nums <- getNums(metadata.file)
-      
-      if (myX == 'zscore') {
-        for (i in myGroups) {
-          merge1 <- data.table("Participant_Id" = event.file$Participant_Id, "placeholder" = event.file[[i]], "groups" = metadata.file$property[metadata.file$source_id == i])
-          merge2 <- merge(merge1, prtcpnt.file, by = "Participant_Id")
-          merge3 <- merge(merge2, house.file, by = "Participant_Id")
-          names(merge3)[names(merge3) == 'placeholder'] <- myX
-          draftDF <- completeDT(merge3, myX)
-          groupsData <- rbind(groupsData, draftDF)
-        }
-      } else {
-        for (i in myGroups) {
-          if (i %in% nums$source_id) {
-            merge1 <- data.table("Participant_Id" = event.file$Participant_Id, "placeholder" = event.file$EUPATH_0000644, 
-                                 "groups" = paste0(metadata.file$property[metadata.file$source_id == i], ": ", cut(event.file[[i]], 5)))
-            merge1 <- merge1[- grep("NA", merge1$groups),]
-          } else {
-            #right now this assumes that if a string the x axis is ageDays. when we have time as an option to we will need an if statement somewhere here
-            merge1 <- data.table("Participant_Id" = event.file$Participant_Id, "placeholder" = event.file$EUPATH_0000644, "groups" = event.file[[i]])
-            merge1 <- completeDT(merge1, "groups")
-          }
-          merge2 <- merge(merge1, prtcpnt.file, by = "Participant_Id")
-          merge3 <- merge(merge2, house.file, by = "Participant_Id")
-          names(merge3)[names(merge3) == 'placeholder'] <- myX
-          groupsData <- rbind(groupsData, merge3)
-        }
-      }
-      
-      groupsData
-    }
     
 })

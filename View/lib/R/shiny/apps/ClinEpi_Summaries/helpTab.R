@@ -1,5 +1,4 @@
-help <-      tabPanel("Help", fluid = TRUE,
-               fluidPage(
+help <-      tabItem(tabName = "help",
                  h4("Overview"),
                  #h5(
                    p("This Shiny app has different behavior for longitudinal vs. non-longitudinal datasets."),
@@ -39,12 +38,7 @@ help <-      tabPanel("Help", fluid = TRUE,
                        tags$li("httr: 1.3.1"),
                        tags$li("plotly: 4.7.1"),
                        tags$li("shiny: 1.0.5"),
-                       tags$li("shinyjs: 0.9.1"),
-                       tags$li("shinyTree: TODO"),
-                       tags$li("tidyr: 0.7.1"),
                        tags$li("viridisLite: 0.2.0")
                      )
                    ) 
-                 #)
-               )
              )

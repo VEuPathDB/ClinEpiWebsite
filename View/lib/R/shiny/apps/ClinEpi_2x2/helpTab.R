@@ -1,5 +1,4 @@
-help <- tabPanel("Help", fluid = TRUE,
-          fluidPage(
+help <- tabItem(tabName = "help", 
             h4("Overview"),
             #h5(
               p("This Shiny app allows you to look at the association between any two variables that are found in the dataset. Notice that there are drop-down menus that allow you to choose what variables you are comparing. Below that, after a moment you will also see that two tables and a bar graph appear. Every time you change your selection in the drop-down menus, the two tables and plot will automatically update. Variable 1 defines the rows in the second table and Variable 2 defines the columns. If the dataset is longitudinal, you will also see at least one timeline across the top of the application, allowing you to filter by time periods and/or age groups of interest."),
@@ -54,12 +53,7 @@ help <- tabPanel("Help", fluid = TRUE,
                    tags$li("httr: 1.3.1"),
                    tags$li("plotly: 4.7.1"),
                    tags$li("shiny: 1.0.5"),
-                   tags$li("shinyjs: 0.9.1"),
-                   tags$li("shinyTree: TODO"),
-                   tags$li("tidyr: 0.7.1"),
                    tags$li("viridisLite: 0.2.0")
                  )
                )
-             #)
-           )
        )
