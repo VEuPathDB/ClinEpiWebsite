@@ -137,7 +137,6 @@ shinyServer(function(input, output, session) {
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
-
     if (!nrow(longitudinal.file) == 0) {
       if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
         numTimelines <- 1
@@ -159,7 +158,9 @@ shinyServer(function(input, output, session) {
   #ui stuffs
   output$title <- renderText({
     withProgress(message = 'Loading...', value = 0, style = "old", {
-      singleVarDataFetcher()
+      if (is.null(singleVarData)) {
+        singleVarDataFetcher()
+      } 
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
@@ -189,12 +190,16 @@ shinyServer(function(input, output, session) {
 
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
+      tagList(
+        box(width = 6, status = "primary", title = "Unit of Analysis",
           radioButtons(inputId = "prtcpntViewSwitch",
                       label = NULL,
                       choiceNames = c("Participant View", "Observation View"),
                       choiceValues = c(TRUE, FALSE),
                       selected = "FALSE",
                       inline = TRUE)
+        )
+      )
     }
   })
 
@@ -206,7 +211,6 @@ shinyServer(function(input, output, session) {
     }
   })
 
-    #TODO double check this and next one. make sure the non-longitudinal version of the app still works
     output$xaxis_var <- renderUI({
       if (is.null(longitudinal2)) {
         return()
@@ -241,44 +245,50 @@ shinyServer(function(input, output, session) {
                   step = 1,
                   label = "number of bins:")
     })
-  
-    output$groups_type <- renderUI({
-      longitudinal <- longitudinal1
-      if (!is.null(input$xaxisVar)) {
-        if (input$xaxisVar == "ageVar") {
-          longitudinal <- longitudinal2
-        }
+ 
+    output$xaxisBox <- renderUI({
+       if (is.null(longitudinal2)) {
+         return()
+       }
+
+       tagList(
+         box(width = 6, status = "primary", title = "X-Axis",
+                      uiOutput("xaxis_var"),
+                      uiOutput("xaxis_stp2")
+                  )
+       ) 
+    })
+
+    output$groupBox <- renderUI({
+
+      if (is.null(longitudinal1)) {
+        box(width = 6, status = "primary", title = "X-Axis",
+                     uiOutput("groups_type"),
+                     customGroupsUI("group", colWidth = 12)
+                 )
+      } else {
+        box(width = 6, status = "primary", title = "Facet Line",
+                     uiOutput("groups_type"),
+                     customGroupsUI("group", colWidth = 12)
+                 )
       }
+    })
+ 
+    output$groups_type <- renderUI({
       mySelected <- properties$selected[properties$input == "input$groupsType"]
 
       if (is.null(properties)) {
-        if (!is.null(longitudinal)) {
           selectInput(inputId = "groupsType",
                       label = NULL,
                       choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
-        } else {
-          selectInput(inputId = "groupsType",
-                      label = "X-Axis:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                      selected = "direct",
-                      width = '100%')
-        }
       } else {
-        if (!is.null(longitudinal)) {
           selectInput(inputId = "groupsType",
                       label = NULL,
                       choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
                       selected = mySelected,
                       width = '100%')
-        } else {
-          selectInput(inputId = "groupsType",
-                      label = "X-Axis:",
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                      selected = mySelected,
-                      width = '100%')
-        }
       }
       
     })
@@ -960,9 +970,12 @@ message("nextFacet: ", nextFacet)
       facetVals <- unlist(facetVals)
       names(facetVals) <- facetVals
       
-      #TODO remember to save this ui param as well
-      mySelected <- c("abc")
-      
+      if (is.null(properties)) {
+        mySelected <- c("abc")
+      } else {
+        mySelected <- properties$selected[properties$input == 'input$individualPlot_stp1']
+      }     
+ 
       selectInput(inputId = "individualPlot_stp1",
                   label = "Facet Plot (1) value:",
                   choices = facetVals,
@@ -991,9 +1004,12 @@ message("nextFacet: ", nextFacet)
       facet2Vals <- unlist(facet2Vals)
       names(facet2Vals) <- facet2Vals
       
-      #TODO remember to save this ui param as well
-      mySelected <- c("abc")
-      
+      if (is.null(properties)) {
+        mySelected <- c("abc")
+      } else {
+        mySelected <- properties$selected[properties$input == 'input$individualPlot_stp2']
+      }       
+ 
       selectInput(inputId = "individualPlot_stp2",
                   label = "Facet Plot (2) value:",
                   choices = facet2Vals,
@@ -1766,7 +1782,9 @@ message("nextFacet: ", nextFacet)
                        "input$yaxis\t", myY, "\n",
                        "input$yaxis_stp1\t", yaxis_stp1, "\n",
                        yaxisStp2Text,
-                       "input$yaxis_stp3\t", yaxis_stp3
+                       "input$yaxis_stp3\t", yaxis_stp3, "\n",
+                       "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                       "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
 
         PUT(propUrl, body = "")

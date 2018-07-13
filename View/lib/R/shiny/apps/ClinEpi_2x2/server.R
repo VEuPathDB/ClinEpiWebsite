@@ -157,18 +157,20 @@ shinyServer(function(input, output, session) {
  
   output$title <- renderText({
     withProgress(message = 'Loading...', value = 0, style = "old", {
-      singleVarDataFetcher()
+      if (is.null(singleVarData)) {
+        singleVarDataFetcher()
+      }
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive("Variable 1:"), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
+      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyAttr$val <- selectedAttr()
       } else {
         getMyAttr$val <- properties$selected[properties$input == "attrInfo$group"]
       }
       incProgress(.25)
-      outInfo <<- callModule(customGroups, "out", groupLabel = reactive("Variable 2:"), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
+      outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyOut$val <- "custom"
       } else {
@@ -193,12 +195,16 @@ shinyServer(function(input, output, session) {
  
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
+      tagList(
+        box(width = 6, status = "primary", title = "Unit of Analysis",
           radioButtons(inputId = "prtcpntViewSwitch",
                       label = NULL,
                       choiceNames = c("Participant View", "Observation View"),
                       choiceValues = c(TRUE, FALSE),
                       selected = "FALSE",
                       inline = TRUE)
+        )
+      )
     }
   })
 
@@ -542,9 +548,12 @@ shinyServer(function(input, output, session) {
       facetVals <- unlist(facetVals)
       names(facetVals) <- facetVals
       
-      #TODO remember to save this ui param as well
-      mySelected <- c("abc")
-      
+      if (is.null(properties)) {
+        mySelected <- c("abc")
+      } else {
+        mySelected <- properties$selected[properties$input == 'input$individualPlot_stp1']
+      }     
+ 
       selectInput(inputId = "individualPlot_stp1",
                   label = "Facet Plot (1) value:",
                   choices = facetVals,
@@ -576,9 +585,12 @@ shinyServer(function(input, output, session) {
       facet2Vals <- unlist(facet2Vals)
       names(facet2Vals) <- facet2Vals
       
-      #TODO remember to save this ui param as well
-      mySelected <- c("abc")
-      
+      if (is.null(properties)) {
+        mySelected <- c("abc")
+      } else {
+        mySelected <- properties$selected[properties$input == 'input$individualPlot_stp2']
+      }     
+ 
       selectInput(inputId = "individualPlot_stp2",
                   label = "Facet Plot (2) value:",
                   choices = facet2Vals,
@@ -1235,7 +1247,9 @@ shinyServer(function(input, output, session) {
                        attrText,
                        outText,
                        facetText,
-                       facet2Text
+                       facet2Text,
+                       "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                       "input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
         PUT(propUrl, body = "")

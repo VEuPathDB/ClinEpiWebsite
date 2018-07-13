@@ -121,6 +121,11 @@ shinyServer(function(input, output, session) {
     longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
     longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))),
                         by = setdiff(names(longitudinal.file), "columns")][!is.na(longitudinal.file$columns)]
+
+    #remove non-unique column names and merge them to one data table to return
+    drop <- c("PAN_ID", "PAN_TYPE_ID", "PAN_TYPE", "DESCRIPTION")
+    #consider moving drop to event.file TODO
+    singleVarData <<- singleVarData[, !drop, with = FALSE]
  
     #for all dates convert strings to date format
     dates <- getDates(metadata.file)$source_id
@@ -135,11 +140,11 @@ shinyServer(function(input, output, session) {
         numTimelines <- 2
       }
       if (numTimelines == 1) {
-        longitudinal1 <<- longitudinal.file$columns[1]
+        longitudinal1 <<- longitudinal.file$columns
         longitudinal2 <<- NULL
       } else {
-        longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns[1]
-        longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns[1]
+        longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
+        longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
       }
     }
 
@@ -148,7 +153,9 @@ shinyServer(function(input, output, session) {
   
   output$title <- renderText({
     withProgress(message = 'Loading...', value = 0, style = "old", {
-      singleVarDataFetcher()
+      if (is.null(singleVarData)) {
+        singleVarDataFetcher()
+      }
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
@@ -178,12 +185,16 @@ shinyServer(function(input, output, session) {
  
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
-          radioButtons(inputId = "prtcpntViewSwitch",
-                      label = NULL,
-                      choiceNames = c("Participant View", "Observation View"),
-                      choiceValues = c(TRUE, FALSE),
-                      selected = "FALSE",
-                      inline = TRUE)
+      tagList(
+        box(width = 6, status = "primary", title = "Unit of Analysis",
+            radioButtons(inputId = "prtcpntViewSwitch",
+                         label = NULL,
+                         choiceNames = c("Participant View", "Observation View"),
+                         choiceValues = c(TRUE, FALSE),
+                         selected = "FALSE",
+                         inline = TRUE)
+        )
+      )
     }
   })
 
@@ -570,9 +581,12 @@ shinyServer(function(input, output, session) {
       facetVals <- unlist(facetVals)
       names(facetVals) <- facetVals
       
-      #TODO remember to save this ui param as well
-      mySelected <- c("abc")
-       
+      if (is.null(properties)) {
+        mySelected <- c("abc")
+      } else {
+        mySelected <- properties$selected[properties$input == 'input$individualPlot_stp1']
+      }      
+ 
       selectInput(inputId = "individualPlot_stp1",
                   label = "Facet Plot (1) value:",
                   choices = facetVals,
@@ -603,9 +617,12 @@ shinyServer(function(input, output, session) {
       facet2Vals <- unlist(facet2Vals)
       names(facet2Vals) <- facet2Vals
       
-      #TODO remember to save this ui param as well
-      mySelected <- c("abc")
-      
+      if (is.null(properties)) {
+        mySelected <- c("abc")
+      } else {
+        mySelected <- properties$selected[properties$input == 'input$individualPlot_stp2']
+      }      
+
       selectInput(inputId = "individualPlot_stp2",
                   label = "Facet Plot (2) value:",
                   choices = facet2Vals,
@@ -1098,7 +1115,9 @@ shinyServer(function(input, output, session) {
                      facet2Text,
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
-                     "input$xaxis\t", xType
+                     "input$xaxis\t", xType, "\n",
+                     "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                     "input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
 
       PUT(propUrl, body = "")
@@ -1232,7 +1251,7 @@ shinyServer(function(input, output, session) {
         }  else {
           facetCol = myFacet
         }
-        if (facetType2 == "makeGroups") {
+        if (facet2Type == "makeGroups") {
           facet2Col = "FACET2" 
         } else if (myX == myFacet2 | myFacet2 == "none") {
           facet2Col = c()

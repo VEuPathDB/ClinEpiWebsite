@@ -35,7 +35,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = NULL) {
   ns <- session$ns
 
-  propUrl <- "https://dcallan.clinepidb.org:443/ce.dcallan/service/users/221248430/steps/100005220/analyses/100001990/properties?accessToken=092e13cc862e4159"
+  propUrl <<- getPropertiesUrl(session) 
   properties <- try(fread(propUrl))
 
   if (grepl("Error", properties)) {

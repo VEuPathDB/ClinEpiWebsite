@@ -113,22 +113,22 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
   choicesNumeric <- subset(choices, type %in% "number") 
 
     if (is.null(subList)) {
-      roots <- as.list(metadata.file$property[metadata.file$parent == "null"])
+      roots <- as.list(metadata.file$source_id[metadata.file$parent == "null"])
       if (is.null(roots)) {
         message("No roots in ontology file..")
       } else {
-        names(roots) <- roots
+        names(roots) <- metadata.file$property[metadata.file$source_id %in% unlist(roots)]
         roots <- getUIList(data = data, subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
       }
       return(roots)
     } else {
       #find children
+      print(subList)
       subList <- lapply(subList, FUN = function(x){
-                                                 temp <- as.list(metadata.file$property[metadata.file$parent == x])
-                                                 names(temp) <- temp
+                                                 temp <- as.list(metadata.file$source_id[metadata.file$parent == metadata.file$property[metadata.file$source_id == x]])
+                                                 names(temp) <- metadata.file$property[metadata.file$source_id %in% unlist(temp)]
                                                  temp <- getUIList(data = data, subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
                                                })
-
       #this case is a leaf, so return no children
       if (length(subList) == 0) {
         return("")
@@ -173,8 +173,7 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
       #double check cause this should remove household id and isnt
       if (!all(names(subList) %in% choicesNumeric$property)) {
         for (i in 1:length(subList)) {
-          mySourceId <- metadata.file$source_id[metadata.file$property == names(subList)[i]]
-          mySourceId <- unique(mySourceId)
+          mySourceId <- subList[i]
           if (mySourceId %in% choices$source_id) {
             if (!mySourceId %in% choicesNumeric$source_id) {
               if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {

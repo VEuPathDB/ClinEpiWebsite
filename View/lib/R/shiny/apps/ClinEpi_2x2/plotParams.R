@@ -1,14 +1,10 @@
 plotParams <- tabItem(tabName = "plotParams", 
                 fluidRow(
-                  box(width = 12, status = "primary", title = "Timeline(s)",
                       timelineUI("timeline")
-                  )
                 ),
                 fluidRow(
-                  box(width = 6, status = "primary", title = "Unit of Analysis",
                       uiOutput("prtcpntViewSwitch")
-                  )
-                )  ,
+                ),
                 fluidRow(
                   box(width = 6, status = "primary", title = "Variable 1",
                       customGroupsUI("attr", colWidth = 12)

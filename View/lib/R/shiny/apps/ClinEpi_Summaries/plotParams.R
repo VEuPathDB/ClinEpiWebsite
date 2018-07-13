@@ -1,17 +1,10 @@
 plotParams <- tabItem(tabName = "plotParams", 
                 fluidRow(
-                  box(width = 12, status = "primary", title = "Timeline(s)",
-                      timelineUI("timeline")
-                  )
+                  timelineUI("timeline")
                 ),
                 fluidRow(
-                  box(width = 6, status = "primary", title = "Unit of Analysis",
-                      uiOutput("prtcpntViewSwitch")
-                  ),
-                  box(width = 6, status = "primary", title = "X-Axis",
-                      uiOutput("xaxis_var"),
-                      uiOutput("xaxis_stp2")
-                  )
+                  uiOutput("prtcpntViewSwitch"),
+                  uiOutput("xaxisBox")
                 ),
                 fluidRow(
                   box(width = 6, status = "primary", title = "Y-Axis",
@@ -19,11 +12,8 @@ plotParams <- tabItem(tabName = "plotParams",
                       uiOutput("yaxis_stp1"),
                       uiOutput("yaxis_stp2"),
                       uiOutput("yaxis_stp3")
-                 ),
-                 box(width = 6, status = "primary", title = "Facet Line",
-                     uiOutput("groups_type"),
-                     customGroupsUI("group", colWidth = 12)
-                 )
+                  ),
+                  uiOutput("groupBox")
                 ),
                 fluidRow(
                   box(width = 6, status = "primary", title = "Facet Plot (1)",
