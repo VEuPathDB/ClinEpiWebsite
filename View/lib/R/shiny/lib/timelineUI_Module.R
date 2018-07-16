@@ -107,7 +107,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
         } else {
           selectedMin2 <- properties$selected[properties$input == "current$range2[1]"]
           selectedMax2 <- properties$selected[properties$input == "current$range2[2]"]
-          if (selected %in% dates) {
+          if (selected2 %in% dates) {
             selectedMin2 <- as.Date(selectedMin2)
             selectedMax2 <- as.Date(selectedMax2)
           }

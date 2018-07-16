@@ -78,8 +78,8 @@ shinyServer(function(input, output, session) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Dynamic Attributes", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare2", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare3", "Search Results", "string", "null", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
@@ -87,7 +87,7 @@ shinyServer(function(input, output, session) {
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("dontcare2", "Search Results", "string", "null", "Observation"))
         }  
       }
     }
@@ -415,7 +415,6 @@ shinyServer(function(input, output, session) {
       }
       
       if (facet2Type == "direct") {
-        #selected <- "custom"
         selected <- "custom"
       } else if (facet2Type == "makeGroups") {
         if (isParticipant) {
@@ -488,7 +487,17 @@ shinyServer(function(input, output, session) {
     
     observeEvent(xaxisInfo$group, {
       if (length(get_selected(xaxisInfo$group, format="names")) != 0) {
-        nextX <- metadata.file$source_id[metadata.file$property == get_selected(xaxisInfo$group, format="names")[1][[1]]][1]
+
+        mySelected <- get_selected(xaxisInfo$group, format="names")[[1]]
+        myProp <- mySelected[1]
+        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+        nextX <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+
+        nextX <- unique(nextX)
+
+        if (length(nextX) != 1) {
+          message("Warning: non-unique source_ids returned ", nextX)
+        }
 
         if (is.null(getMyX$val)) {
           getMyX$val <- nextX
@@ -500,7 +509,17 @@ shinyServer(function(input, output, session) {
 
     observeEvent(facetInfo$group, {
       if (length(get_selected(facetInfo$group, format="names")) != 0) {
-        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
+
+        mySelected <- get_selected(facetInfo$group, format="names")[[1]]
+        myProp <- mySelected[1]
+        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+
+        nextFacet <- unique(nextFacet)
+
+        if (length(nextFacet) != 1) {
+          message("Warning: non-unique source_ids returned ", nextFacet)
+        }
 
         if (is.null(getMyFacet$val)) {
           getMyFacet$val <- nextFacet
@@ -514,8 +533,18 @@ shinyServer(function(input, output, session) {
     
     observeEvent(facet2Info$group, {
       if (length(get_selected(facet2Info$group, format="names")) != 0) {
-        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facet2Info$group, format="names")[1][[1]]][1]
-        
+       
+        mySelected <- get_selected(facet2Info$group, format="names")[[1]]
+        myProp <- mySelected[1]
+        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+ 
+        nextFacet <- unique(nextFacet)
+
+        if (length(nextFacet) != 1) {
+          message("Warning: non-unique source_ids returned ", nextFacet)
+        } 
+
         if (is.null(getMyFacet2$val)) {
           getMyFacet2$val <- nextFacet
           print("resetting myFacet2")
@@ -1115,11 +1144,13 @@ shinyServer(function(input, output, session) {
                      facet2Text,
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
+                     "input$facet2Type\t", facet2Type, "\n",
                      "input$xaxis\t", xType, "\n",
                      "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                      "input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
 
+message("propUrl: ", propUrl)
       PUT(propUrl, body = "")
       PUT(propUrl, body = text)
 
@@ -1246,14 +1277,14 @@ shinyServer(function(input, output, session) {
       if (prtcpntView$val == TRUE) {
         if (facetType == "makeGroups") {
           facetCol = "FACET"
-        } else if (myX == myFacet | myFacet == "none") {
+        } else if (myX == myFacet | myFacet == "none" | myFacet == "") {
           facetCol = c()
         }  else {
           facetCol = myFacet
         }
         if (facet2Type == "makeGroups") {
           facet2Col = "FACET2" 
-        } else if (myX == myFacet2 | myFacet2 == "none") {
+        } else if (myX == myFacet2 | myFacet2 == "none" | myFacet2 == "") {
           facet2Col = c()
         } else {
           facet2Col = myFacet2

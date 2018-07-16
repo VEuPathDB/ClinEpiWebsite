@@ -60,7 +60,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     print(paste("myGroup:", myGroup))
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
-    
+   
+    message("double groups ??")
+    message(myGroup) 
     if (myGroup %in% nums$source_id | myGroup %in% dates$source_id) {
       data <- singleVarData
       tempDF <- completeDT(data, myGroup)
@@ -140,8 +142,17 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
 
   observeEvent(input$group, {
     if (length(get_selected(input$group, format="names")) != 0) {
-      nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(input$group, format="names")[1][[1]]][1]
-    
+
+      mySelected <- get_selected(input$group, format="names")[[1]]
+      myProp <- mySelected[1]
+      myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+      nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+      nextGroup <- unique(nextGroup)
+
+      if (length(nextGroup) != 1) {
+        message("Warning: non-unique source_ids returned ", nextGroup)
+      }   
+ 
       if (is.null(getMyGroups$val)) {
         getMyGroups$val <- nextGroup
       } else if (getMyGroups$val != nextGroup) {
@@ -152,33 +163,44 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   
   getGroupBtnLabel <- reactive({
     myGroup <- getMyGroups$val
+
+    message("btn label function, myGroup:", myGroup)
    
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
 
       dontUseProps <- FALSE
       if (is.null(properties)) {
+message("null props")
         dontUseProps <- TRUE
       } else {
           if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
-            if (!is.null(groupsTypeSelected)) {
-              if (groupsTypeSelected != groupsType()) {
-                dontUseProps <- TRUE
-              }
-            } else {
-              return() 
+ message(groupsType())
+message(groupsTypeID)
+ message(groupsTypeSelected)
+            if (groupsTypeSelected != groupsType()) {
+              dontUseProps <- TRUE
             }
+          } else {
+            return
           }
       }
-
+message("dontUseProps: ", dontUseProps)
       if (dontUseProps) {
         mySelected = selected()
       } else {
         mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
       }
+message("mySelected: ", mySelected)
+    #this should only happen if switching from 'none' to other for groupsType
+    if (mySelected == "") {
+      mySelected <- "custom"
+      myGroup <- mySelected
+    } 
 
     if (is.null(myGroup)) {
       label <- metadata.file$property[metadata.file$source_id == mySelected]
       getMyGroups$val <- mySelected
+message("label: ",label)
       if (is.null(label)) {
         label <- mySelected
       }

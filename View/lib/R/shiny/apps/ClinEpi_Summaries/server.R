@@ -82,8 +82,8 @@ shinyServer(function(input, output, session) {
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Dynamic Attributes", "string", "Search Results", "Participant"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare2", "Dynamic Attributes", "string", "Search Results", "Participant"))
+          metadata.file <<- rbind(metadata.file, list("dontcare3", "Search Results", "string", "null", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
@@ -91,7 +91,7 @@ shinyServer(function(input, output, session) {
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Search Results", "string", "null", "Observation"))
+          metadata.file <<- rbind(metadata.file, list("dontcare2", "Search Results", "string", "null", "Observation"))
         }  
       }
     }
@@ -237,11 +237,17 @@ shinyServer(function(input, output, session) {
       if (is.null(longitudinal2)) {
         return()
       }
-      
+     
+      if (is.null(properties)) {
+        mySelected <- 24
+      } else {
+        mySelected <- properties$selected[properties$input == "input$xaxis_stp1"]
+      } 
+ 
       sliderInput(inputId = "xaxis_stp2",
                   min = 2,
                   max = 40,
-                  value = 24,
+                  value = mySelected,
                   step = 1,
                   label = "number of bins:")
     })
@@ -589,7 +595,16 @@ shinyServer(function(input, output, session) {
  
     observeEvent(groupInfo$group, {
       if (length(get_selected(groupInfo$group, format="names")) != 0) {
-        nextGroup <- metadata.file$source_id[metadata.file$property == get_selected(groupInfo$group, format="names")[1][[1]]][1]
+
+        mySelected <- get_selected(groupInfo$group, format="names")[[1]]
+        myProp <- mySelected[1]
+        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+        nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        nextGroup <- unique(nextGroup)
+
+        if (length(nextGroup) != 1) {
+          message("Warning: non-unique source_ids returned ", nextGroup)
+        }
 
         if (is.null(getMyGroups$val)) {
           getMyGroups$val <- nextGroup
@@ -601,7 +616,18 @@ shinyServer(function(input, output, session) {
 
     observeEvent(facetInfo$group, {
       if (length(get_selected(facetInfo$group, format="names")) != 0) {
-        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facetInfo$group, format="names")[1][[1]]][1]
+
+        mySelected <- get_selected(facetInfo$group, format="names")[[1]]
+        myProp <- mySelected[1]
+        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+
+        nextFacet <- unique(nextFacet)
+
+        if (length(nextFacet) != 1) {
+          message("Warning: non-unique source_ids returned ", nextFacet)
+        }
+
 message("nextFacet: ", nextFacet)
         if (is.null(getMyFacet$val)) {
           getMyFacet$val <- nextFacet
@@ -613,7 +639,18 @@ message("nextFacet: ", nextFacet)
 
     observeEvent(facet2Info$group, {
       if (length(get_selected(facet2Info$group, format="names")) != 0) {
-        nextFacet <- metadata.file$source_id[metadata.file$property == get_selected(facet2Info$group, format="names")[1][[1]]][1]
+  
+        mySelected <- get_selected(facet2Info$group, format="names")[[1]]
+        myProp <- mySelected[1]
+        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+
+        nextFacet <- unique(nextFacet)
+
+        if (length(nextFacet) != 1) {
+          message("Warning: non-unique source_ids returned ", nextFacet)
+        }
+
         message("nextFacet: ", nextFacet)
         if (is.null(getMyFacet2$val)) {
           getMyFacet2$val <- nextFacet
@@ -1777,8 +1814,10 @@ message("nextFacet: ", nextFacet)
                        facet2Text,
                        groupsText,
                        "input$xaxisVar\t", input$xaxisVar, "\n",
+                       "input$xaxis_stp2\t", input$xaxis_stp2, "\n", 
                        "input$groupsType\t", groupsType, "\n",
                        "input$facetType\t", facetType, "\n",
+                       "input$facet2Type\t", facet2Type, "\n",  
                        "input$yaxis\t", myY, "\n",
                        "input$yaxis_stp1\t", yaxis_stp1, "\n",
                        yaxisStp2Text,
