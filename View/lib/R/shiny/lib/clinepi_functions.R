@@ -123,7 +123,6 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
       return(roots)
     } else {
       #find children
-      print(subList)
       subList <- lapply(subList, FUN = function(x){
                                                  temp <- as.list(metadata.file$source_id[metadata.file$parent == metadata.file$property[metadata.file$source_id == x]])
                                                  names(temp) <- metadata.file$property[metadata.file$source_id %in% unlist(temp)]
