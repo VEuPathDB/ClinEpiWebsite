@@ -171,10 +171,11 @@ sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
   my $rAdjustString = << 'RADJUST';
+
 profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
 profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "0", ifelse(OPT_STATUS == 'Yes', "1", ifelse((grepl("LAMP not done", STATUS) | grepl("patent", STATUS)), "2", "3"))));
-profile.df.full = transform(profile.df.full, "FILL"=ifelse((grepl("patent",STATUS) | grepl("malaria",STATUS)), as.character(COLOR), ifelse(grepl("microscopic",STATUS),"3",NA)));
+profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "Blood smear not indicated", ifelse(OPT_STATUS == 'Yes', "Febrile", ifelse(grepl("Blood smear positive",STATUS),"Not febrile and BS positive", "Other"))));
+profile.df.full = transform(profile.df.full, "FILL"=ifelse(STATUS == "Blood smear not indicated", "None", ifelse(STATUS == "Blood smear indicated but not done", "BS indicated not done", ifelse(STATUS == "Symptomatic malaria", "Symptomatic malaria", ifelse(grepl("Blood smear positive",STATUS),"Blood smear positive", ifelse(grepl("LAMP positive", STATUS), "LAMP positive", "None"))))));
 profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
 profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.df.full$OPT_STATUS)
 RADJUST
@@ -187,8 +188,9 @@ RADJUST
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
-  $profile->setColorVals("c(\"0\" = \"black\", \"1\" = \"#CD4071FF\", \"2\" = \"#FA7C5EFF\", \"3\" = \"#FECE91FF\")");
-  #$profile->setHorizontalLegend('TRUE');
+  $profile->setColorVals("c(\"Febrile\" = \"#CD4071FF\", \"Blood smear not indicated\" = \"black\", \"Not febrile and BS positive\" = \"#FA7C5EFF\", \"Other\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Symptomatic malaria\" = \"#CD4071FF\", \"LAMP positive\" = \"#FECE91FF\", \"BS indicated not done\" = \"gray\", \"Blood smear positive\" = \"#FA7C5EFF\", \"None\" = NA)");
+  $profile->setCustomBreaks("c(\"Febrile\", \"Blood smear not indicated\", \"Symptomatic malaria\", \"LAMP positive\", \"BS indicated not done\", \"Blood smear positive\")");
 }
 
 1;
