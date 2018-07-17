@@ -202,6 +202,7 @@ getUIStp1List <- function(data, col){
   #                    by = setdiff(names(tempDF), eval(col))][!is.na(eval(col))]
   if (any(grepl("|", data[[col]], fixed=TRUE))) {
     data <- separate_rows(tempDF, col, sep = "[|]+")
+    data[[col]] <- gsub("^\\s+|\\s+$", "", data[[col]])
   }
 
   levels <- levels(as.factor(data[[col]]))

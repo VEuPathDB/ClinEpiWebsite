@@ -1449,19 +1449,21 @@ message("nextFacet: ", nextFacet)
           }
 
         }
-        
-        if (facetType == "none" & facet2Type != "none") {
-          myFacet <- myFacet2
-          facetType <- facet2Type
-          facet2Type <- "none"
-        }
-  
-        if (facet2Type == "none") {
-          myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
-        } else {
-          myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
-        }
-        
+      
+        if (facetType != "none" | facet2Type != "none") {
+          if (facetType == "none" & facet2Type != "none") {
+            myFacet <- myFacet2
+            facetType <- facet2Type
+            facet2Type <- "none"
+          }
+         
+          if (facet2Type == "none") {
+            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
+          } else {
+            myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
+          } 
+        }       
+ 
         #should keep playing with this vs doing it with ggplot syntax. 
         x_list <- list(
           title = paste0(c(rep("\n", 3),
