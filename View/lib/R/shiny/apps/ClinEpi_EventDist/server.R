@@ -494,7 +494,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextX <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextX <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextX <- unique(nextX)
 
@@ -516,13 +516,15 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(facetInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+message("length myParent: ", length(myParent))
+message("nextFacet: ", metadata.file$source_id[metadata.file$property == myProp])
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextFacet <- unique(nextFacet)
-
+message("new nextFacet: ", nextFacet)
         if (length(nextFacet) != 1) {
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
@@ -546,7 +548,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         } 
         nextFacet <- unique(nextFacet)
 

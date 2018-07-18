@@ -241,7 +241,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextAttr <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextAttr <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextAttr <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextAttr <- unique(nextAttr)
 
@@ -266,7 +266,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextOut <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextOut <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextOut <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextOut <- unique(nextOut)
 
@@ -506,7 +506,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextFacet <- unique(nextFacet)
 
@@ -533,7 +533,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }  
         nextFacet <- unique(nextFacet)
 

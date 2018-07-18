@@ -602,7 +602,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextGroup <- unique(nextGroup)
 
@@ -627,7 +627,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextFacet <- unique(nextFacet)
 
@@ -653,7 +653,7 @@ message("nextFacet: ", nextFacet)
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextFacet <- unique(nextFacet)
 
