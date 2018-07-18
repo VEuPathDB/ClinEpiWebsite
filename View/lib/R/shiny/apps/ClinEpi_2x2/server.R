@@ -238,8 +238,11 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(attrInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextAttr <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
-
+        if (length(myParent) != 0) {
+          nextAttr <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextAttr <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+        }
         nextAttr <- unique(nextAttr)
 
         if (length(nextAttr) != 1) {
@@ -260,8 +263,11 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(outInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextOut <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
-
+        if (length(myParent) != 0) {
+          nextOut <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextOut <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+        }
         nextOut <- unique(nextOut)
 
         if (length(nextOut) != 1) {
@@ -497,8 +503,11 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(facetInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
-
+        if (length(myParent) != 0) {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+        }
         nextFacet <- unique(nextFacet)
 
         if (length(nextFacet) != 1) {
@@ -521,8 +530,11 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(facet2Info$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
- 
+        if (length(myParent) != 0) {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == "null"]
+        }  
         nextFacet <- unique(nextFacet)
 
         if (length(nextFacet) != 1) {
