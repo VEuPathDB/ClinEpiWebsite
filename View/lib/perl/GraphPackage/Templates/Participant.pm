@@ -174,7 +174,7 @@ sub finalProfileAdjustments{
 
 profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
 profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "Blood smear not indicated", ifelse(OPT_STATUS == 'Yes', "Febrile", ifelse(grepl("Blood smear positive",STATUS),"Not febrile and BS positive", "Other"))));
+profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "Blood smear not indicated", ifelse(OPT_STATUS == 'Yes', "Febrile", ifelse(grepl("Blood smear positive",STATUS),"Not febrile and BS positive", "Not LAMP positive"))));
 profile.df.full = transform(profile.df.full, "FILL"=ifelse(STATUS == "Blood smear not indicated", "None", ifelse(STATUS == "Blood smear indicated but not done", "BS indicated not done", ifelse(STATUS == "Symptomatic malaria", "Symptomatic malaria", ifelse(grepl("Blood smear positive",STATUS),"Blood smear positive", ifelse(grepl("LAMP positive", STATUS), "LAMP positive", "None"))))));
 profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
 profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.df.full$OPT_STATUS)
@@ -188,9 +188,9 @@ RADJUST
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
-  $profile->setColorVals("c(\"Febrile\" = \"#CD4071FF\", \"Blood smear not indicated\" = \"black\", \"Not febrile and BS positive\" = \"#FA7C5EFF\", \"Other\" = \"#FECE91FF\")");
+  $profile->setColorVals("c(\"Febrile\" = \"#CD4071FF\", \"Blood smear not indicated\" = \"black\", \"Not febrile and BS positive\" = \"#FA7C5EFF\", \"Not LAMP positive\" = \"#FECE91FF\")");
   $profile->setFillVals("c(\"Symptomatic malaria\" = \"#CD4071FF\", \"LAMP positive\" = \"#FECE91FF\", \"BS indicated not done\" = \"gray\", \"Blood smear positive\" = \"#FA7C5EFF\", \"None\" = NA)");
-  $profile->setCustomBreaks("c(\"Febrile\", \"Blood smear not indicated\", \"Symptomatic malaria\", \"LAMP positive\", \"BS indicated not done\", \"Blood smear positive\")");
+  $profile->setCustomBreaks("c(\"Febrile\", \"Blood smear not indicated\", \"Symptomatic malaria\", \"LAMP positive\", \"BS indicated not done\", \"Blood smear positive\", \"Not LAMP positive\")");
 }
 
 1;
@@ -209,8 +209,8 @@ sub finalProfileAdjustments{
   my $rAdjustString = << 'RADJUST';
 profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
 profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-profile.df.full = transform(profile.df.full, "COLOR"=ifelse(test = (STATUS == "Illness other than malaria" | STATUS == "Asymptomatic malaria"), yes = "1", no = ifelse(STATUS == "No illness", "0", "2")))
-profile.df.full = transform(profile.df.full, "FILL"= ifelse(STATUS == "Asymptomatic malaria", "1", ifelse(STATUS == "Severe malaria", "2", NA)))
+profile.df.full = transform(profile.df.full, "COLOR"=ifelse(test = (STATUS == "Illness other than malaria" | STATUS == "Asymptomatic malaria"), yes = "Asymptomatic malaria or other illness", no = ifelse(STATUS == "No illness", "No illness", "Symptomatic malaria")))
+profile.df.full = transform(profile.df.full, "FILL"= ifelse(STATUS == "Asymptomatic malaria", "Asymptomatic malaria", ifelse(STATUS == "Severe malaria", "Severe malaria", NA)))
 profile.df.full$TOOLTIP = profile.df.full$STATUS
 
 RADJUST
@@ -223,8 +223,9 @@ RADJUST
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
-  $profile->setColorVals("c(\"0\" = \"black\", \"2\" = \"#B63679FF\", \"1\" = \"#FECE91FF\")");
-  #$profile->setHorizontalLegend('TRUE');
+  $profile->setColorVals("c(\"No illness\" = \"black\", \"Symptomatic malaria\" = \"#B63679FF\", \"Asymptomatic malaria or other illness\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Severe malaria\" = \"#B63679FF\", \"Asymptomatic malaria\" = \"#FECE91FF\")");
+  $profile->setCustomBreaks("c(\"No illness\", \"Symptomatic malaria\", \"Asymptomatic malaria or other illness\", \"Severe malaria\", \"Asymptomatic malaria\")");
 }
 
 1;

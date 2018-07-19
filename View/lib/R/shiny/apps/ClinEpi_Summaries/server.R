@@ -599,7 +599,11 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(groupInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        if (length(myParent) != 0) {
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
+        }
         nextGroup <- unique(nextGroup)
 
         if (length(nextGroup) != 1) {
@@ -620,8 +624,11 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(facetInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
-
+        if (length(myParent) != 0) {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
+        }
         nextFacet <- unique(nextFacet)
 
         if (length(nextFacet) != 1) {
@@ -643,8 +650,11 @@ message("nextFacet: ", nextFacet)
         mySelected <- get_selected(facet2Info$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
-
+        if (length(myParent) != 0) {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
+        }
         nextFacet <- unique(nextFacet)
 
         if (length(nextFacet) != 1) {
