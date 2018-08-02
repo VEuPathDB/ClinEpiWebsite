@@ -21,9 +21,18 @@ use Data::Dumper;
 
 sub finalProfileAdjustments {} 
 
+sub useWhoStandards {0}
+
 sub init {
   my $self = shift;
   $self->SUPER::init(@_);
+
+  my %WhoProfileSets;
+
+  $WhoProfileSets{'male'}{'EUPATH_0000719'} = 'Length/height for age for boys zscore';
+  $WhoProfileSets{'female'}{'EUPATH_0000719'} = 'Length/height for age for girls zscore';
+  $WhoProfileSets{'male'}{'EUPATH_0000732'} = 'Weight for age for boys zscore';
+  $WhoProfileSets{'female'}{'EUPATH_0000732'} = 'Weight for age for girls zscore';
 
   my $xAxis = $self->getContXAxis();
   my $yAxis = $self->getYAxis();
@@ -35,9 +44,62 @@ sub init {
   my $tblPrefix = $self->getDatasetId();
   $tblPrefix =~ s/DS_/D/g;
 
+  my $profileSets;
+
   my @nodeMetadata;
   my $count = 0;
+
   if (defined $yAxis) {
+      
+      if ($self->useWhoStandards()){
+	  
+	  my $tablename = 'APIDBTUNING.' . $tblPrefix . 'PARTICIPANTS';
+	  $tablename =~ s/[^a-zA-Z0-9.]//g;
+	  
+	  my $ID = $self->getId();
+
+	  my $sql = "select PATO_0000047
+                     from ". $tablename .
+                    " where NAME = '" . $ID . "'" ; 
+	  
+	  my $qh = $self->getQueryHandle();
+
+	  my $sh = $qh->prepare($sql);  
+
+	  $sh->execute();
+	  
+	  my ($sex) = $sh->fetchrow_array();
+
+	  if($sex eq 'Female | Male'){
+	      $sex='male';
+	  }
+	  
+	  $sex = lc($sex);
+
+	  $sh->finish();
+
+
+	  if(scalar @{$yAxis} ==1){
+
+	      my $currentWHOProfileSet = $WhoProfileSets{$sex}{$yAxis->[0]};
+
+	      if (defined $currentWHOProfileSet){	  
+
+		  my @profileSetArray = ([$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD0'],
+					 [$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD2'],
+					 [$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD2neg'],
+		      );
+		  
+		  $profileSets = EbrcWebsiteCommon::View::GraphPackage::Util::makeProfileSets(\@profileSetArray);
+		  
+	      }
+	      
+	  } 
+	  
+      }
+
+
+
     for my $row (@{$yAxis}) {
       $nodeMetadata[$count] =  ({
                                  Id => $self->getId(), 
@@ -114,7 +176,11 @@ sub init {
 
   my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus, \@nodeMetadataSampleInfo);
   my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
- 
+  
+  if (defined $profileSets ){
+      push @{$participantProfile},@{$profileSets};
+  }                                                             
+  
   $line->setProfileSets($participantProfile);
 
   $self->finalProfileAdjustments($line);
@@ -127,14 +193,17 @@ sub init {
 1;
 
 #maled
-package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_121f2c2f02;
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_3dbf92dc05;
 use vars qw( @ISA );
 @ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
 use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
+sub useWhoStandards {1}
+
 sub finalProfileAdjustments{
+
   my ($self, $profile) = @_;
 
   my $rAdjustString = << 'RADJUST';
@@ -144,9 +213,18 @@ profile.df.full$STATUS <- profile.df.full$ID
 profile.df.full$ID <- NULL
 #profile.df.full$LEGEND <- as.factor(profile.df.full$YLABEL)
 
+profile.df.full$oldLegend <- as.character(profile.df.full$LEGEND)
+
+profile.df.full <- transform(profile.df.full, "LEGEND" = ifelse(grepl("SD0", profile.df.full$PROFILE_FILE), "WHO Standards mean", ifelse(grepl("SD2neg", profile.df.full$PROFILE_FILE), "WHO Standards SD-2", ifelse(grepl("SD2", profile.df.full$PROFILE_FILE), "WHO Standards SD2", oldLegend))))
+
+profile.df.full$oldLegend <- NULL
+
+
+
 RADJUST
-  my $colorValues = "c(\"Recumbent length/height (cm)\" = \"black\", \"Weight (kg)\" = \"black\", \"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode, days\" = \"#000099\", \"Vibrio, bacteriology\" = \"#FF0000FF\", \"Taenia sp., microscopy\" = \"#FF3500FF\", \"A. lumbricoides, microscopy\" = \"#FF6A00FF\", \"Adenovirus, ELISA\" = \"#FF9E00FF\", \"Aeromonas, bacteriology\" = \"#FFD300FF\", \"Astrovirus, ELISA\" = \"#F6FF00FF\", \"Balantidium coli, microscopy\" = \"#C1FF00FF\", \"C. mesnili, microscopy\" = \"#8DFF00FF\", \"Cyclospora, microscopy\" = \"#58FF00FF\", \"E. histolytica, microscopy\" = \"#23FF00FF\", \"E. nana, microscopy\" = \"#00FF12FF\", \"E. vermicularis, microscopy\" = \"#00FF46FF\", \"aatA or aaiC EAEC, PCR\" = \"#00FF7BFF\", \"ipaH EIEC, PCR\" = \"#00FFB0FF\", \"eae and bfpA EPEC, PCR\" = \"#00FFE5FF\", \"ST or LT ETEC, PCR\" = \"#00E5FFFF\", \"Entamoeba coli, microscopy\" = \"#00B0FFFF\", \"H. diminuta, microscopy\" = \"#007BFFFF\", \"H. nana, microscopy\" = \"#0046FFFF\", \"Hookworm, microscopy\" = \"#0012FFFF\", \"I. butschilii, microscopy\" = \"#2300FFFF\", \"Norovirus, RT-PCR\" = \"#5800FFFF\", \"Rotavirus, ELISA\" = \"#8D00FFFF\", \"S. stercoralis, microscopy\" = \"#C100FFFF\", \"Salmonella, bacteriology\" = \"#F600FFFF\", \"Schistosoma, microscopy\" = \"#FF00D3FF\", \"Shigella, bacteriology\" = \"#FF009EFF\", \"T. trichiura, microscopy\" = \"#FF006AFF\", \"Yersinia enterocolitica, microscopy\" = \"#FF0035FF\")";
-  my $breaks = "c(\"Length/height-for-age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\")";
+  my $colorValues = "c(\"WHO Standards SD2\" = \"black\",\"WHO Standards SD-2\" = \"black\",\"WHO Standards mean\" = \"black\",\"Recumbent length/height (cm)\" = \"blue\", \"Weight (kg)\" = \"blue\", \"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode, days\" = \"#000099\", \"Vibrio, bacteriology\" = \"#FF0000FF\", \"Taenia sp., microscopy\" = \"#FF3500FF\", \"A. lumbricoides, microscopy\" = \"#FF6A00FF\", \"Adenovirus, ELISA\" = \"#FF9E00FF\", \"Aeromonas, bacteriology\" = \"#FFD300FF\", \"Astrovirus, ELISA\" = \"#F6FF00FF\", \"Balantidium coli, microscopy\" = \"#C1FF00FF\", \"C. mesnili, microscopy\" = \"#8DFF00FF\", \"Cyclospora, microscopy\" = \"#58FF00FF\", \"E. histolytica, microscopy\" = \"#23FF00FF\", \"E. nana, microscopy\" = \"#00FF12FF\", \"E. vermicularis, microscopy\" = \"#00FF46FF\", \"aatA or aaiC EAEC, PCR\" = \"#00FF7BFF\", \"ipaH EIEC, PCR\" = \"#00FFB0FF\", \"eae and bfpA EPEC, PCR\" = \"#00FFE5FF\", \"ST or LT ETEC, PCR\" = \"#00E5FFFF\", \"Entamoeba coli, microscopy\" = \"#00B0FFFF\", \"H. diminuta, microscopy\" = \"#007BFFFF\", \"H. nana, microscopy\" = \"#0046FFFF\", \"Hookworm, microscopy\" = \"#0012FFFF\", \"I. butschilii, microscopy\" = \"#2300FFFF\", \"Norovirus, RT-PCR\" = \"#5800FFFF\", \"Rotavirus, ELISA\" = \"#8D00FFFF\", \"S. stercoralis, microscopy\" = \"#C100FFFF\", \"Salmonella, bacteriology\" = \"#F600FFFF\", \"Schistosoma, microscopy\" = \"#FF00D3FF\", \"Shigella, bacteriology\" = \"#FF009EFF\", \"T. trichiura, microscopy\" = \"#FF006AFF\", \"Yersinia enterocolitica, microscopy\" = \"#FF0035FF\")";
+ 
+  my $breaks = "c(\"WHO Standards SD2\",\"WHO Standards SD-2\",\"WHO Standards mean\",\"Length/height-for-age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\",\"Weight (kg)\",\"Recumbent length/height (cm)\")";
 
   $profile->addAdjustProfile($rAdjustString);
   $profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
@@ -154,6 +232,8 @@ RADJUST
   $profile->setStatusLegend("Pathogen +");
   $profile->setColorVals($colorValues);
   $profile->setCustomBreaks($breaks);
+
+  
 
 }
 
