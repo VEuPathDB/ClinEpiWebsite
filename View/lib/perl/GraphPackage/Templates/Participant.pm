@@ -83,6 +83,9 @@ sub init {
 
 	      my $currentWHOProfileSet = $WhoProfileSets{$sex}{$yAxis->[0]};
 
+	      print STDERR Dumper($currentWHOProfileSet);
+
+
 	      if (defined $currentWHOProfileSet){	  
 
 		  my @profileSetArray = ([$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD0'],
@@ -215,26 +218,24 @@ profile.df.full$ID <- NULL
 
 profile.df.full$oldLegend <- as.character(profile.df.full$LEGEND)
 
-profile.df.full <- transform(profile.df.full, "LEGEND" = ifelse(grepl("SD0", profile.df.full$PROFILE_FILE), "WHO Standards mean", ifelse(grepl("SD2neg", profile.df.full$PROFILE_FILE), "WHO Standards SD-2", ifelse(grepl("SD2", profile.df.full$PROFILE_FILE), "WHO Standards SD2", oldLegend))))
+profile.df.full <- transform(profile.df.full, "LEGEND" = ifelse(grepl("SD0", profile.df.full$PROFILE_FILE), "WHO Standards, Mean", ifelse(grepl("SD2neg", profile.df.full$PROFILE_FILE), "WHO Standards, -2SD", ifelse(grepl("SD2", profile.df.full$PROFILE_FILE), "WHO Standards, +2SD", oldLegend))))
 
 profile.df.full$oldLegend <- NULL
 
 
 
 RADJUST
-  my $colorValues = "c(\"WHO Standards SD2\" = \"black\",\"WHO Standards SD-2\" = \"black\",\"WHO Standards mean\" = \"black\",\"Recumbent length/height (cm)\" = \"blue\", \"Weight (kg)\" = \"blue\", \"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode, days\" = \"#000099\", \"Vibrio, bacteriology\" = \"#FF0000FF\", \"Taenia sp., microscopy\" = \"#FF3500FF\", \"A. lumbricoides, microscopy\" = \"#FF6A00FF\", \"Adenovirus, ELISA\" = \"#FF9E00FF\", \"Aeromonas, bacteriology\" = \"#FFD300FF\", \"Astrovirus, ELISA\" = \"#F6FF00FF\", \"Balantidium coli, microscopy\" = \"#C1FF00FF\", \"C. mesnili, microscopy\" = \"#8DFF00FF\", \"Cyclospora, microscopy\" = \"#58FF00FF\", \"E. histolytica, microscopy\" = \"#23FF00FF\", \"E. nana, microscopy\" = \"#00FF12FF\", \"E. vermicularis, microscopy\" = \"#00FF46FF\", \"aatA or aaiC EAEC, PCR\" = \"#00FF7BFF\", \"ipaH EIEC, PCR\" = \"#00FFB0FF\", \"eae and bfpA EPEC, PCR\" = \"#00FFE5FF\", \"ST or LT ETEC, PCR\" = \"#00E5FFFF\", \"Entamoeba coli, microscopy\" = \"#00B0FFFF\", \"H. diminuta, microscopy\" = \"#007BFFFF\", \"H. nana, microscopy\" = \"#0046FFFF\", \"Hookworm, microscopy\" = \"#0012FFFF\", \"I. butschilii, microscopy\" = \"#2300FFFF\", \"Norovirus, RT-PCR\" = \"#5800FFFF\", \"Rotavirus, ELISA\" = \"#8D00FFFF\", \"S. stercoralis, microscopy\" = \"#C100FFFF\", \"Salmonella, bacteriology\" = \"#F600FFFF\", \"Schistosoma, microscopy\" = \"#FF00D3FF\", \"Shigella, bacteriology\" = \"#FF009EFF\", \"T. trichiura, microscopy\" = \"#FF006AFF\", \"Yersinia enterocolitica, microscopy\" = \"#FF0035FF\")";
+  my $colorValues = "c(\"WHO Standards, +2SD\" = \"red\",\"WHO Standards, -2SD\" = \"red\",\"WHO Standards, Mean\" = \"black\",\"Recumbent length/height (cm)\" = \"blue\", \"Weight (kg)\" = \"blue\", \"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode, days\" = \"#000099\", \"Vibrio, bacteriology\" = \"#FF0000FF\", \"Taenia sp., microscopy\" = \"#FF3500FF\", \"A. lumbricoides, microscopy\" = \"#FF6A00FF\", \"Adenovirus, ELISA\" = \"#FF9E00FF\", \"Aeromonas, bacteriology\" = \"#FFD300FF\", \"Astrovirus, ELISA\" = \"#F6FF00FF\", \"Balantidium coli, microscopy\" = \"#C1FF00FF\", \"C. mesnili, microscopy\" = \"#8DFF00FF\", \"Cyclospora, microscopy\" = \"#58FF00FF\", \"E. histolytica, microscopy\" = \"#23FF00FF\", \"E. nana, microscopy\" = \"#00FF12FF\", \"E. vermicularis, microscopy\" = \"#00FF46FF\", \"aatA or aaiC EAEC, PCR\" = \"#00FF7BFF\", \"ipaH EIEC, PCR\" = \"#00FFB0FF\", \"eae and bfpA EPEC, PCR\" = \"#00FFE5FF\", \"ST or LT ETEC, PCR\" = \"#00E5FFFF\", \"Entamoeba coli, microscopy\" = \"#00B0FFFF\", \"H. diminuta, microscopy\" = \"#007BFFFF\", \"H. nana, microscopy\" = \"#0046FFFF\", \"Hookworm, microscopy\" = \"#0012FFFF\", \"I. butschilii, microscopy\" = \"#2300FFFF\", \"Norovirus, RT-PCR\" = \"#5800FFFF\", \"Rotavirus, ELISA\" = \"#8D00FFFF\", \"S. stercoralis, microscopy\" = \"#C100FFFF\", \"Salmonella, bacteriology\" = \"#F600FFFF\", \"Schistosoma, microscopy\" = \"#FF00D3FF\", \"Shigella, bacteriology\" = \"#FF009EFF\", \"T. trichiura, microscopy\" = \"#FF006AFF\", \"Yersinia enterocolitica, microscopy\" = \"#FF0035FF\")";
  
-  my $breaks = "c(\"WHO Standards SD2\",\"WHO Standards SD-2\",\"WHO Standards mean\",\"Length/height-for-age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\",\"Weight (kg)\",\"Recumbent length/height (cm)\")";
+  my $breaks = "c(\"WHO Standards, Mean\",\"WHO Standards, +2SD\",\"WHO Standards, -2SD\",\"Length/height for age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\",\"Weight (kg)\",\"Recumbent length/height (cm)\")";
+
 
   $profile->addAdjustProfile($rAdjustString);
-  $profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
+  #$profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
   $profile->setEventDurLegend("Diarrhea");
-  $profile->setStatusLegend("Pathogen +");
+  $profile->setStatusLegend("Pathogen+ (check the point for pathogen  information)");
   $profile->setColorVals($colorValues);
-  $profile->setCustomBreaks($breaks);
-
-  
-
+  $profile->setCustomBreaks($breaks);  
 }
 
 1;
