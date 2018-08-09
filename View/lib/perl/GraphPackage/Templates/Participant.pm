@@ -231,9 +231,9 @@ RADJUST
 
 
   $profile->addAdjustProfile($rAdjustString);
-  $profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
+  #$profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
   $profile->setEventDurLegend("Diarrhea");
-  $profile->setStatusLegend("Pathogen +");
+  $profile->setStatusLegend("Pathogen+ (check the point for pathogen  information)");
   $profile->setColorVals($colorValues);
   $profile->setCustomBreaks($breaks);  
 }
