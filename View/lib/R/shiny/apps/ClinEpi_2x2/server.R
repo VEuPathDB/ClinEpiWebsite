@@ -740,7 +740,7 @@ shinyServer(function(input, output, session) {
 
       maxChars <- max(nchar(as.vector(df$Var1Label)))
       if (maxChars <= 35) {
-        legend_list <- list(x = 100, y = .5)       
+        legend_list <- list(x = 100, y = .8)       
       } else {
         legend_list <- list(x = .5, y = -.5) 
       }
@@ -852,7 +852,7 @@ shinyServer(function(input, output, session) {
         )       
         maxChars <- max(nchar(as.vector(df$Var1Label)))
         if (maxChars <= 35) {
-          legend_list <- list(x = 100, y = .5)
+          legend_list <- list(x = 100, y = .8)
         } else {
           legend_list <- list(x = .5, y = -.5)
         }

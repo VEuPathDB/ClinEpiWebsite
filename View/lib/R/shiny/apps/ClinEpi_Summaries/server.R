@@ -1268,7 +1268,7 @@ message("nextFacet: ", nextFacet)
         size = 14
       )
       if (maxChars > 35) {
-        legend_list <- list(x = .5, y = -.5)
+        legend_list <- list(x = .5, y = -.8)
       } else {
         legend_list <- list(x=100, y=.5)
       }
@@ -1501,7 +1501,7 @@ message("nextFacet: ", nextFacet)
           size = 14
         )
         if (maxChars > 35) {
-          legend_list <- list(x = .5, y = -.5)
+          legend_list <- list(x = .5, y = -.8)
         } else {
           legend_list <- list(x=100, y=.5)
         }      
