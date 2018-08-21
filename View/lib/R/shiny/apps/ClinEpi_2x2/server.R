@@ -736,8 +736,15 @@ shinyServer(function(input, output, session) {
                          "\n"),
                        collapse = ""),
         size = 14
-      )       
-      
+      )
+
+      maxChars <- max(nchar(as.vector(df$Var1Label)))
+      if (maxChars <= 35) {
+        legend_list <- list(x = 100, y = .8)       
+      } else {
+        legend_list <- list(x = .5, y = -.5) 
+      }
+
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
       myPlotly <- ggplotly(myPlot)
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
@@ -750,7 +757,7 @@ shinyServer(function(input, output, session) {
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = list(x = 100, y = .5))
+                         legend = legend_list)
       
       myPlotly
     })
@@ -843,6 +850,12 @@ shinyServer(function(input, output, session) {
                          collapse = ""),
           size = 14
         )       
+        maxChars <- max(nchar(as.vector(df$Var1Label)))
+        if (maxChars <= 35) {
+          legend_list <- list(x = 100, y = .8)
+        } else {
+          legend_list <- list(x = .5, y = -.5)
+        }
  
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot)
@@ -856,7 +869,7 @@ shinyServer(function(input, output, session) {
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = list(x = 100, y = .5))
+                                     legend = legend_list)
         
         myPlotly
       

@@ -1177,6 +1177,7 @@ message("nextFacet: ", nextFacet)
         }
         
         numColors <- length(levels(as.factor(df$LINES)))
+        maxChars <- max(nchar(as.vector(df$LINES)))
         
         #find num colors needed
         if (numColors > 2) { 
@@ -1234,7 +1235,8 @@ message("nextFacet: ", nextFacet)
         }
         
         numColors <- length(levels(as.factor(df$XAXIS)))   
-        
+        maxChars <- max(nchar(as.vector(df$XAXIS)))
+
         #find num colors needed
         if (numColors > 2) { 
           myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors))
@@ -1265,6 +1267,11 @@ message("nextFacet: ", nextFacet)
                        collapse = ""),
         size = 14
       )
+      if (maxChars > 35) {
+        legend_list <- list(x = .5, y = -.8)
+      } else {
+        legend_list <- list(x=100, y=.5)
+      }
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
       if (is.null(legendTitle)) {
@@ -1281,7 +1288,7 @@ message("nextFacet: ", nextFacet)
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = list(x = 100, y = .5))
+                         legend = legend_list)
       
       myPlotly
       
@@ -1389,7 +1396,8 @@ message("nextFacet: ", nextFacet)
           }
          
           numColors <- length(levels(as.factor(df$LINES)))
-          
+          maxChars <- max(nchar(as.vector(df$LINES)))          
+
           #find num colors needed
           if (numColors > 2) { 
             myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors))
@@ -1446,6 +1454,7 @@ message("nextFacet: ", nextFacet)
           }
 
           numColors <- length(levels(as.factor(df$XAXIS)))   
+          maxChars <- max(nchar(as.vector(df$XAXIS)))
 
           #find num colors needed
           if (numColors > 2) { 
@@ -1491,7 +1500,12 @@ message("nextFacet: ", nextFacet)
                          collapse = ""),
           size = 14
         )
-        
+        if (maxChars > 35) {
+          legend_list <- list(x = .5, y = -.8)
+        } else {
+          legend_list <- list(x=100, y=.5)
+        }      
+  
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
         if (is.null(legendTitle)) {
           legend.title <- "All"
@@ -1507,7 +1521,7 @@ message("nextFacet: ", nextFacet)
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = list(x = 100, y = .5))
+                                     legend = legend_list)
         
         myPlotly
       
