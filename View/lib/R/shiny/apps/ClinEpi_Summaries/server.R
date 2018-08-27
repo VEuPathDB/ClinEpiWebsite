@@ -1130,7 +1130,7 @@ message("nextFacet: ", nextFacet)
           yaxis_stp1 <- "any"
         }
         
-        ylab <- makeGroupLabel(input$yaxis, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+        ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
         message(ylab)
         if (plotType == "proportion") {
           ylab <- paste("Proportion where", ylab)
@@ -1205,7 +1205,7 @@ message("nextFacet: ", nextFacet)
           yaxis_stp1 <- "any"
         }
         #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
-        ylab <- makeGroupLabel(input$yaxis, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+        ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
         message(ylab)
         if (plotType == "proportion") {
           ylab <- paste("Proportion where", ylab)
@@ -1349,7 +1349,7 @@ message("nextFacet: ", nextFacet)
             yaxis_stp1 <- "any"
           }
           
-          ylab <- makeGroupLabel(input$yaxis, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+          ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
           message(ylab)
           if (plotType == "proportion") {
             ylab <- paste("Proportion where", ylab)
@@ -1424,7 +1424,7 @@ message("nextFacet: ", nextFacet)
             yaxis_stp1 <- "any"
           }
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
-          ylab <- makeGroupLabel(input$yaxis, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
+          ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
           message(ylab)
           if (plotType == "proportion") {
             ylab <- paste("Proportion where", ylab)

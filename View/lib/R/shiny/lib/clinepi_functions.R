@@ -476,7 +476,7 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
   obs <- c("any", "all")   
  
   obsFlag = ""
-  if (!is.null(groups_stp1)) {
+  if (!is.null(groups_stp1) & !is.null(groups_stp2)) {
     if (groups_stp1 %in% obs) {
       if (groups_stp1 == "any") {
         obsFlag <- "Any"
@@ -488,6 +488,7 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
     }
     
   displayName <- metadata.file$property[metadata.file$source_id == myGroups]
+
   if (groups_stp1 %in% numeric ){
     if (groups_stp1 == "greaterThan") {
       label[1] <- paste0(obsFlag, " ", displayName, " > ", groups_stp2)
@@ -566,11 +567,11 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
     }
   }   
 
-  if (useGroup) {
-    prefix <- metadata.file$property[metadata.file$source_id == myGroups]
-    label[1] <- paste0(prefix, ": ", label[1])
-    label[2] <- paste0(prefix, ": ", label[2])
-  }
+    if (useGroup) {
+      prefix <- metadata.file$property[metadata.file$source_id == myGroups]
+      label[1] <- paste0(prefix, ": ", label[1])
+      label[2] <- paste0(prefix, ": ", label[2])
+    }
   } else {
     label <- metadata.file$property[metadata.file$source_id == myGroups]
   }
