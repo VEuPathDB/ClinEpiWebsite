@@ -71,6 +71,8 @@
        </table>
   </record>
 
+
+<!-- OFF until updated...
  <record>
        <attribute name="title">Interacting with and visualizing data: Shiny Apps</attribute>
        <attribute name="description">Interacting with and visualizing data: Shiny Apps</attribute>
@@ -87,6 +89,8 @@
          </row>
        </table>
   </record>
+
+-->
 
 
  </xmlAnswer>
