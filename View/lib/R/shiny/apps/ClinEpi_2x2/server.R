@@ -249,11 +249,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextAttr)
         } 
 
-        if (is.null(getMyAttr$val)) {
+        #if (is.null(getMyAttr$val)) {
           getMyAttr$val <- nextAttr
-        } else if (getMyAttr$val != nextAttr) {
-          getMyAttr$val <- nextAttr
-        }
+        #} else if (getMyAttr$val != nextAttr) {
+        #  getMyAttr$val <- nextAttr
+        #}
       }
     })
 
@@ -274,11 +274,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextOut)
         }
 
-        if (is.null(getMyOut$val)) {
+        #if (is.null(getMyOut$val)) {
           getMyOut$val <- nextOut
-        } else if (getMyOut$val != nextOut) {
-          getMyOut$val <- nextOut
-        }
+        #} else if (getMyOut$val != nextOut) {
+        #  getMyOut$val <- nextOut
+        #}
       }
     })
 
@@ -1314,9 +1314,9 @@ shinyServer(function(input, output, session) {
                        facetText,
                        facet2Text,
                        "input$facetType\t", input$facetType, "\n",
-                       "input$facet2Type\t", input$facet2Type, "\n",
-                       "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
-                       "input$individualPlot_stp2\t", input$individualPlot_stp2 
+                       "input$facet2Type\t", input$facet2Type
+                       #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                       #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
         PUT(propUrl, body = "")

@@ -502,11 +502,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextX)
         }
 
-        if (is.null(getMyX$val)) {
+        #if (is.null(getMyX$val)) {
           getMyX$val <- nextX
-        } else if (getMyX$val != nextX) {
-          getMyX$val <- nextX
-        }
+        #} else if (getMyX$val != nextX) {
+        #  getMyX$val <- nextX
+        #}
       }
     })
 
@@ -529,13 +529,13 @@ message("new nextFacet: ", nextFacet)
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
 
-        if (is.null(getMyFacet$val)) {
+        #if (is.null(getMyFacet$val)) {
           getMyFacet$val <- nextFacet
           print("resetting myFacet")
-        } else if (getMyFacet$val != nextFacet) {
-          getMyFacet$val <- nextFacet
-          print("resetting myFacet")
-        }
+        #} else if (getMyFacet$val != nextFacet) {
+        #  getMyFacet$val <- nextFacet
+        #  print("resetting myFacet")
+        #}
       }
     })
     
@@ -556,13 +556,13 @@ message("new nextFacet: ", nextFacet)
           message("Warning: non-unique source_ids returned ", nextFacet)
         } 
 
-        if (is.null(getMyFacet2$val)) {
+        #if (is.null(getMyFacet2$val)) {
           getMyFacet2$val <- nextFacet
           print("resetting myFacet2")
-        } else if (getMyFacet2$val != nextFacet) {
-          getMyFacet2$val <- nextFacet
-          print("resetting myFacet2")
-        }
+        #} else if (getMyFacet2$val != nextFacet) {
+        #  getMyFacet2$val <- nextFacet
+        #  print("resetting myFacet2")
+        #}
       }
     })
 
@@ -1156,9 +1156,9 @@ message("new nextFacet: ", nextFacet)
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
                      "input$facet2Type\t", facet2Type, "\n",
-                     "input$xaxis\t", xType, "\n",
-                     "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
-                     "input$individualPlot_stp2\t", input$individualPlot_stp2 
+                     "input$xaxis\t", xType
+                     #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                     #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
 
 message("propUrl: ", propUrl)
