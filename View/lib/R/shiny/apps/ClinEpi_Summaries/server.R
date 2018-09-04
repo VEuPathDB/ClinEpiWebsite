@@ -164,28 +164,40 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo", prtcpntView = reactive(prtcpntView$val))
+      groupInit()
+      incProgress(.25)
+      facetInit()
+      facet2Init()
+      incProgress(.15)
+    })
+    c("Data Summaries")
+  })
+
+  groupInit <- reactive({
+    groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyGroups$val <- selectedGroup()
       } else {
         getMyGroups$val <- properties$selected[properties$input == "groupInfo$group"]
       }
-      incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facetInit <- reactive({
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- "custom"
       } else {
         getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
       }
-      facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facet2Init <- reactive({
+    facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet2$val <- "custom"
       } else {
         getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
       }
-      incProgress(.15)
-    })
-    c("Data Summaries")
   })
 
   output$prtcpntViewSwitch <- renderUI({
@@ -610,11 +622,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextGroup)
         }
 
-        if (is.null(getMyGroups$val)) {
+        #if (is.null(getMyGroups$val)) {
           getMyGroups$val <- nextGroup
-        } else if (getMyGroups$val != nextGroup) {
-          getMyGroups$val <- nextGroup
-        }
+        #} else if (getMyGroups$val != nextGroup) {
+        #  getMyGroups$val <- nextGroup
+        #}
       }
     })
 
@@ -636,11 +648,11 @@ shinyServer(function(input, output, session) {
         }
 
 message("nextFacet: ", nextFacet)
-        if (is.null(getMyFacet$val)) {
+        #if (is.null(getMyFacet$val)) {
           getMyFacet$val <- nextFacet
-        } else if (getMyFacet$val != nextFacet) {
-          getMyFacet$val <- nextFacet
-        }
+        #} else if (getMyFacet$val != nextFacet) {
+        #  getMyFacet$val <- nextFacet
+        #}
       }
     })
 
@@ -662,11 +674,11 @@ message("nextFacet: ", nextFacet)
         }
 
         message("nextFacet: ", nextFacet)
-        if (is.null(getMyFacet2$val)) {
+        #if (is.null(getMyFacet2$val)) {
           getMyFacet2$val <- nextFacet
-        } else if (getMyFacet2$val != nextFacet) {
-          getMyFacet2$val <- nextFacet
-        }
+        #} else if (getMyFacet2$val != nextFacet) {
+        #  getMyFacet2$val <- nextFacet
+        #}
       }
     })
     
@@ -728,13 +740,13 @@ message("nextFacet: ", nextFacet)
       if (length(get_selected(input$yaxis, format="names")) != 0) {
         nextY <- metadata.file$source_id[metadata.file$property == get_selected(input$yaxis, format="names")[1][[1]]][1]
       
-        if (is.null(getMyY$val)) {
+        #if (is.null(getMyY$val)) {
           getMyY$val <- nextY
           print("resetting myY")
-        } else if (getMyY$val != nextY) {
-          getMyY$val <- nextY
-          print("resetting myY")
-        }
+        #} else if (getMyY$val != nextY) {
+        #  getMyY$val <- nextY
+        #  print("resetting myY")
+        #}
       }
     })
 
@@ -1000,16 +1012,10 @@ message("nextFacet: ", nextFacet)
         return()
       }
       if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- "FACET"
+        return() 
       }
-      facetType <- input$facetType
-      
-      if (myFacet == "none") {
-        return()
-      }
-      
+
+      myFacet <- "FACET" 
       #TODO try to save this globally and reactively have it update?? cause right now its called in three different places..
       df <- plotData()
       
@@ -1018,15 +1024,18 @@ message("nextFacet: ", nextFacet)
       names(facetVals) <- facetVals
       
       if (is.null(properties)) {
-        mySelected <- c("abc")
+        message("iPlot1 no properties")
+        selectInput(inputId = "individualPlot_stp1",
+                    label = "Facet Plot (1) value:",
+                    choices = facetVals)
       } else {
+        message("iPlot1 has properties")
         mySelected <- properties$selected[properties$input == 'input$individualPlot_stp1']
-      }     
- 
-      selectInput(inputId = "individualPlot_stp1",
-                  label = "Facet Plot (1) value:",
-                  choices = facetVals,
-                  selected = mySelected)
+        selectInput(inputId = "individualPlot_stp1",
+                    label = "Facet Plot (1) value:",
+                    choices = facetVals,
+                    selected = mySelected)
+      }
     })
     
     output$individualPlot_stp2 <- renderUI({
@@ -1320,11 +1329,15 @@ message("nextFacet: ", nextFacet)
         myFacet2 <- "FACET2"
       }
       facet2Type <- input$facet2Type
-      
+      dummy <- getMyFacet$val
+	dummy <- getMyFacet2$val   
+
+ 
       dates <- getDates(metadata.file)
         #get data from plotData here
         df <- plotData()
-      
+        message(unique(df[, myFacet, with=FALSE]))
+        message(unique(df[, myFacet2, with=FALSE]))
         if (is.null(df)) {
           message("plotData returned null!")
           return()
@@ -1847,15 +1860,15 @@ message("nextFacet: ", nextFacet)
                        "input$yaxis\t", myY, "\n",
                        "input$yaxis_stp1\t", yaxis_stp1, "\n",
                        yaxisStp2Text,
-                       "input$yaxis_stp3\t", yaxis_stp3, "\n",
-                       "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
-                       "input$individualPlot_stp2\t", input$individualPlot_stp2
+                       "input$yaxis_stp3\t", yaxis_stp3
+                      # "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                      # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
 
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
-
-        message(paste("\t ", head(data)))
+        message("saving properties")
+        #message(paste("\t ", head(data)))
         plotData <- completeDT(data, myY)
         plotData <- getFinalDT(plotData, metadata.file, myY)
         
