@@ -163,35 +163,51 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
+      attrInit()
+      outInit()
+      incProgress(.25)
+      facetInit()
+      facet2Init()
+      incProgress(.15)
+    })
+    c("Contingency Tables")
+  })
+
+  attrInit <- reactive({
+    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyAttr$val <- selectedAttr()
       } else {
         getMyAttr$val <- properties$selected[properties$input == "attrInfo$group"]
       }
-      incProgress(.25)
-      outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  outInit <- reactive({
+    outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyOut$val <- "custom"
       } else {
         getMyOut$val <- properties$selected[properties$input == "outInfo$group"]
       }
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facetInit <- reactive({
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- selectedFacet()
       } else {
         getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
       }
-      facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facet2Init <- reactive({
+     facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet2$val <- selectedFacet2()
       } else {
         getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
       }
-      incProgress(.15)
-    })
-    c("Contingency Tables")
-  }) 
+  })
  
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
@@ -249,11 +265,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextAttr)
         } 
 
-        if (is.null(getMyAttr$val)) {
+        #if (is.null(getMyAttr$val)) {
           getMyAttr$val <- nextAttr
-        } else if (getMyAttr$val != nextAttr) {
-          getMyAttr$val <- nextAttr
-        }
+        #} else if (getMyAttr$val != nextAttr) {
+        #  getMyAttr$val <- nextAttr
+        #}
       }
     })
 
@@ -274,11 +290,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextOut)
         }
 
-        if (is.null(getMyOut$val)) {
+        #if (is.null(getMyOut$val)) {
           getMyOut$val <- nextOut
-        } else if (getMyOut$val != nextOut) {
-          getMyOut$val <- nextOut
-        }
+        #} else if (getMyOut$val != nextOut) {
+        #  getMyOut$val <- nextOut
+        #}
       }
     })
 
@@ -1314,9 +1330,9 @@ shinyServer(function(input, output, session) {
                        facetText,
                        facet2Text,
                        "input$facetType\t", input$facetType, "\n",
-                       "input$facet2Type\t", input$facet2Type, "\n",
-                       "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
-                       "input$individualPlot_stp2\t", input$individualPlot_stp2 
+                       "input$facet2Type\t", input$facet2Type
+                       #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                       #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
         PUT(propUrl, body = "")

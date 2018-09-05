@@ -159,30 +159,42 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo", prtcpntView = reactive(prtcpntView$val))
+      xaxisInit()
+      incProgress(.25)
+      facetInit()
+      facet2Init() 
+      incProgress(.15)
+    })
+    c("Data Distributions")
+  })
+
+  xaxisInit <- reactive({
+    xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, singleVarData = singleVarData, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyX$val <- selectedGroup()
       } else {
         getMyX$val <- properties$selected[properties$input == "xaxisInfo$group"]
       }
-      incProgress(.25)
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
+  })
+ 
+  facetInit <- reactive({
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- selectedFacet()
       } else {
         getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
       }
-      facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facet2Init <- reactive({
+    facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet2$val <- selectedFacet2()
       } else {
         getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
       }
-      incProgress(.15)
-    })
-    c("Data Distributions")
   })
- 
+
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
       tagList(
@@ -502,11 +514,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextX)
         }
 
-        if (is.null(getMyX$val)) {
+        #if (is.null(getMyX$val)) {
           getMyX$val <- nextX
-        } else if (getMyX$val != nextX) {
-          getMyX$val <- nextX
-        }
+        #} else if (getMyX$val != nextX) {
+        #  getMyX$val <- nextX
+        #}
       }
     })
 
@@ -529,13 +541,13 @@ message("new nextFacet: ", nextFacet)
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
 
-        if (is.null(getMyFacet$val)) {
+        #if (is.null(getMyFacet$val)) {
           getMyFacet$val <- nextFacet
           print("resetting myFacet")
-        } else if (getMyFacet$val != nextFacet) {
-          getMyFacet$val <- nextFacet
-          print("resetting myFacet")
-        }
+        #} else if (getMyFacet$val != nextFacet) {
+        #  getMyFacet$val <- nextFacet
+        #  print("resetting myFacet")
+        #}
       }
     })
     
@@ -556,13 +568,13 @@ message("new nextFacet: ", nextFacet)
           message("Warning: non-unique source_ids returned ", nextFacet)
         } 
 
-        if (is.null(getMyFacet2$val)) {
+        #if (is.null(getMyFacet2$val)) {
           getMyFacet2$val <- nextFacet
           print("resetting myFacet2")
-        } else if (getMyFacet2$val != nextFacet) {
-          getMyFacet2$val <- nextFacet
-          print("resetting myFacet2")
-        }
+        #} else if (getMyFacet2$val != nextFacet) {
+        #  getMyFacet2$val <- nextFacet
+        #  print("resetting myFacet2")
+        #}
       }
     })
 
@@ -939,10 +951,10 @@ message("new nextFacet: ", nextFacet)
         myFacet2 <- getMyFacet2$val
       }
       myX <- getMyX$val
-      if ("FACET" %in% colnames(data)) {
+      if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
       }
-      if ("FACET2" %in% colnames(data)) {
+      if ("FACET2" %in% colnames(plotData)) {
         myFacet2 <- "FACET2"
       }
       myPrtcpntView <- prtcpntView$val
@@ -1156,9 +1168,9 @@ message("new nextFacet: ", nextFacet)
                      "xaxisInfo$group\t", myX, "\n",
                      "input$facetType\t", facetType, "\n",
                      "input$facet2Type\t", facet2Type, "\n",
-                     "input$xaxis\t", xType, "\n",
-                     "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
-                     "input$individualPlot_stp2\t", input$individualPlot_stp2 
+                     "input$xaxis\t", xType
+                     #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                     #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
 
 message("propUrl: ", propUrl)
