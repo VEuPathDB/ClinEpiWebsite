@@ -35,7 +35,7 @@ shinyServer(function(input, output, session) {
   filesFetcher <- reactive({
     if (is.null(propUrl)) {
       propUrl <<- getPropertiesUrl(session)
-      properties <- try(fread(propUrl))
+      properties <<- try(fread(propUrl))
       if (grepl("Error", properties)) {
         properties <<- NULL
       }
@@ -380,7 +380,6 @@ shinyServer(function(input, output, session) {
     
     output$facet2_type <- renderUI({
       mySelected <- properties$selected[properties$input == "input$facet2Type"]
-      
       if (is.null(properties)) {
         if (isParticipant) {
           selectInput(inputId = "facet2Type",
@@ -1215,7 +1214,6 @@ message("nextFacet: ", nextFacet)
         }
         #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
         ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
-        message(ylab)
         if (plotType == "proportion") {
           ylab <- paste("Proportion where", ylab)
         } else if (plotType == "count") {
@@ -1225,13 +1223,11 @@ message("nextFacet: ", nextFacet)
           df$YAXIS <- as.numeric(df$YAXIS)
         }
         ylab <- gsub('(.{1,45})(\\s|$)', '\\1\n', ylab)
-        message(ylab)
         df$XAXIS <- as.factor(df$XAXIS) 
         #plot here
         myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, fill = XAXIS))
         myPlot <- myPlot + theme_bw()
         myPlot <- myPlot + labs(y = "", x = "")
-        message(paste("plot type:", plotType))
         #add the lines
         if (plotType == "proportion") {
           myPlot <- myPlot + geom_bar(stat = "identity")
@@ -1322,13 +1318,11 @@ message("nextFacet: ", nextFacet)
       } else {
         myFacet <- "FACET"
       }
-      facetType <- input$facetType
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
         myFacet2 <- "FACET2"
       }
-      facet2Type <- input$facet2Type
       dummy <- getMyFacet$val
 	dummy <- getMyFacet2$val   
 
@@ -1336,8 +1330,6 @@ message("nextFacet: ", nextFacet)
       dates <- getDates(metadata.file)
         #get data from plotData here
         df <- plotData()
-        message(unique(df[, myFacet, with=FALSE]))
-        message(unique(df[, myFacet2, with=FALSE]))
         if (is.null(df)) {
           message("plotData returned null!")
           return()
@@ -1363,7 +1355,6 @@ message("nextFacet: ", nextFacet)
           }
           
           ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
-          message(ylab)
           if (plotType == "proportion") {
             ylab <- paste("Proportion where", ylab)
           } else if (plotType == "count") {
@@ -1373,7 +1364,6 @@ message("nextFacet: ", nextFacet)
             df$YAXIS <- as.numeric(df$YAXIS)
           }
           ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
-          message(ylab)
  
           #format xaxis ticks
           if (!longitudinal %in% dates$source_id) {
@@ -1387,7 +1377,6 @@ message("nextFacet: ", nextFacet)
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
           myPlot <- myPlot + theme_bw()
           myPlot <- myPlot + labs(y = "", x = "")
-          message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion" | plotType == "count") {
             myPlot <- myPlot + geom_point()
@@ -1438,7 +1427,6 @@ message("nextFacet: ", nextFacet)
           }
           #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
           ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
-          message(ylab)
           if (plotType == "proportion") {
             ylab <- paste("Proportion where", ylab)
           } else if (plotType == "count") {
@@ -1448,13 +1436,11 @@ message("nextFacet: ", nextFacet)
             df$YAXIS <- as.numeric(df$YAXIS)
           }
           ylab <- gsub('(.{1,45})(\\s|$)', '\\1\n', ylab)
-          message(ylab)
           df$XAXIS <- as.factor(df$XAXIS) 
           #plot here
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, fill = XAXIS))
           myPlot <- myPlot + theme_bw()
           myPlot <- myPlot + labs(y = "", x = "")
-          message(paste("plot type:", plotType))
           #add the lines
           if (plotType == "proportion") {
             myPlot <- myPlot + geom_bar(stat = "identity")
@@ -1482,14 +1468,13 @@ message("nextFacet: ", nextFacet)
 
         }
       
-        if (facetType != "none" | facet2Type != "none") {
-          if (facetType == "none" & facet2Type != "none") {
+        if (myFacet != "none" | myFacet2 != "none") {
+          if (myFacet == "none" & myFacet2 != "none") {
             myFacet <- myFacet2
-            facetType <- facet2Type
-            facet2Type <- "none"
+            myFacet2 <- "none"
           }
          
-          if (facet2Type == "none") {
+          if (myFacet2 == "none") {
             myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
           } else {
             myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
@@ -1593,7 +1578,6 @@ message("nextFacet: ", nextFacet)
           colnames(data)[1] <- "Line"
           colnames(data) <- gsub("Participant_Id.", colName, colnames(data))
           #give totals
-          message(paste("length data:", length(data)))
           if (length(data) > 2) {
             data[, "Totals"] <- rowSums(data[, -1], na.rm=TRUE)
           }
@@ -1654,6 +1638,7 @@ message("nextFacet: ", nextFacet)
             data <- plotData[keep,]
           } else {
             data <- plotData
+            facets <- c()
           }
           createUI(id, data, facets)
         })
@@ -1683,17 +1668,14 @@ message("nextFacet: ", nextFacet)
       myY <- getMyY$val
       yaxis_stp1 <- input$yaxis_stp1
       yaxis_stp2 <- input$yaxis_stp2
-      message("orig stp2", yaxis_stp2)
       if (prtcpntView$val != TRUE) {
         yaxis_stp2 <- input$yaxis_stp1
         yaxis_stp1 <- "any"
-        message("changed stp2", yaxis_stp2)
       }
       yaxis_stp3 <- input$yaxis_stp3
       myGroups <- getMyGroups$val 
       #grab optional inputs
       groups_stp1 <- groupInfo$group_stp1
-      message(paste("groups stp1:", groups_stp1))
       groups_stp3 <- groupInfo$group_stp3
       groups_stp4 <- groupInfo$group_stp4
       groups_stp2 <- groupInfo$group_stp2
@@ -1812,7 +1794,6 @@ message("nextFacet: ", nextFacet)
       if (is.null(myY)) {
         go <- FALSE
       } else {
-        message("tested stp2" ,yaxis_stp2)
         print(yaxis_stp1)
         if (myY %in% strings$source_id) {
           if (is.null(yaxis_stp2)) {
@@ -1868,7 +1849,6 @@ message("nextFacet: ", nextFacet)
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
         message("saving properties")
-        #message(paste("\t ", head(data)))
         plotData <- completeDT(data, myY)
         plotData <- getFinalDT(plotData, metadata.file, myY)
         
@@ -1963,7 +1943,6 @@ message("nextFacet: ", nextFacet)
             observations <- metadata.file$source_id[metadata.file$category == "Observation"]
             observations <- observations[observations %in% colnames(singleVarData)]
             label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = observations, useGroup=TRUE)
-            message(paste("label is:", label))
             message("have custom facet! now merge..")
             #add makeGroups data to df and return
             colnames(outData) <- c(aggKey, "FACET")
@@ -1971,12 +1950,9 @@ message("nextFacet: ", nextFacet)
             #if (any(colnames(event.file) %in% myFacet)) {
              # naToZero(outData, "FACET")
             #}
-            message(paste("levels facet:", levels(as.factor(outData$FACET))))
             outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
            # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
-            message(paste("levels facet:", levels(as.factor(outData$FACET))))
             plotData <- merge(plotData, outData, by = aggKey, all = TRUE)
-            message(paste("levels facet:", levels(as.factor(plotData$FACET))))
           }
         }
         
@@ -2020,7 +1996,6 @@ message("nextFacet: ", nextFacet)
             observations <- metadata.file$source_id[metadata.file$category == "Observation"]
             observations <- observations[observations %in% colnames(singleVarData)]
             label <- makeGroupLabel(myFacet2, metadata.file, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4, event.list = observations, useGroup=TRUE)
-            message(paste("label is:", label))
             message("have custom facet2! now merge..")
             #add makeGroups data to df and return
             colnames(outData) <- c(aggKey, "FACET2")
@@ -2028,12 +2003,9 @@ message("nextFacet: ", nextFacet)
             #if (any(colnames(event.file) %in% myFacet)) {
             # naToZero(outData, "FACET")
             #}
-            message(paste("levels facet2:", levels(as.factor(outData$FACET2))))
             outData <- transform(outData, "FACET2" = ifelse(as.numeric(FACET2) == 0, label[2], label[1]))
             # outData$FACET <- factor(outData$FACET, levels(c("Other", facet_stp2)))
-            message(paste("levels facet2:", levels(as.factor(outData$FACET2))))
             plotData <- merge(plotData, outData, by = aggKey, all = TRUE)
-            message(paste("levels facet2:", levels(as.factor(plotData$FACET2))))
           }
         }
         
@@ -2076,7 +2048,6 @@ message("nextFacet: ", nextFacet)
             observations <- metadata.file$source_id[metadata.file$category == "Observation"]
             observations <- observations[observations %in% colnames(singleVarData)]
             label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = observations)
-            message(paste("label is:", label))
             #if (any(colnames(event.file) %in% myGroups)) {
             #  naToZero(plotData, "GROUPS")
             #}
@@ -2106,7 +2077,6 @@ message("nextFacet: ", nextFacet)
         } else {
           #collecting inputs .. i think these are the only ones i need here.. well see
           myY <- getMyY$val
-          message(paste("my y from plotData:", myY))
           if (is.null(input$yaxis_stp3)) {
             return()
           } else {
