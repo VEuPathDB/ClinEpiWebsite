@@ -1049,6 +1049,7 @@ shinyServer(function(input, output, session) {
             data <- plotData[keep,]
           } else {
             data <- plotData
+            facets <- c()
           }
           createUI(id, data, facets)
         })

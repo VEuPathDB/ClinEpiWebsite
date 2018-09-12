@@ -1001,6 +1001,7 @@ shinyServer(function(input, output, session) {
             }
           } else {
             data <- plotData
+            facets <- c()
           }
           createTableUI(id, data, facets)
         })
@@ -1133,6 +1134,7 @@ shinyServer(function(input, output, session) {
             }
           } else {
             data <- plotData
+            facets <- c()
           }
           createUI(id, data, facets)
         })
