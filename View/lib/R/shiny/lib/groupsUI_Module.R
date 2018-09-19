@@ -177,7 +177,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
 message("null props")
         dontUseProps <- TRUE
       } else {
-          if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
+          if (!is.null(groupsType()) & !is.null(groupsTypeSelected)) {
  message(groupsType())
 message(groupsTypeID)
  message(groupsTypeSelected)

@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
      propUrl <<- getPropertiesUrl(session)
-     properties <- try(fread(propUrl))
+     properties <<- try(fread(propUrl))
     if (grepl("Error", properties)) {
       properties <<- NULL
     }
@@ -107,9 +107,6 @@ shinyServer(function(input, output, session) {
     #message(mirror.dir)
     singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
    
-    message(length(colnames(singleVarData)[colnames(singleVarData) == 'Observation_Id']))
-    message(length(colnames(attributes.file)[colnames(singleVarData) == 'Observation_Id']))
- 
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
       naToZero(singleVarData, col = "custom")
@@ -1004,6 +1001,7 @@ shinyServer(function(input, output, session) {
             }
           } else {
             data <- plotData
+            facets <- c()
           }
           createTableUI(id, data, facets)
         })
@@ -1136,6 +1134,7 @@ shinyServer(function(input, output, session) {
             }
           } else {
             data <- plotData
+            facets <- c()
           }
           createUI(id, data, facets)
         })

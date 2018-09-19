@@ -31,7 +31,7 @@ shinyServer(function(input, output, session) {
   filesFetcher <- reactive({
     if (is.null(propUrl)) {
       propUrl <<- getPropertiesUrl(session)
-      properties <- try(fread(propUrl))
+      properties <<- try(fread(propUrl))
       if (grepl("Error", properties)) {
         properties <<- NULL
       }
@@ -506,7 +506,7 @@ shinyServer(function(input, output, session) {
         if (length(myParent) != 0) {
           nextX <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
+          nextX <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextX <- unique(nextX)
 
@@ -528,15 +528,12 @@ shinyServer(function(input, output, session) {
         mySelected <- get_selected(facetInfo$group, format="names")[[1]]
         myProp <- mySelected[1]
         myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-message("length myParent: ", length(myParent))
-message("nextFacet: ", metadata.file$source_id[metadata.file$property == myProp])
         if (length(myParent) != 0) {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
         } else {
           nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
         }
         nextFacet <- unique(nextFacet)
-message("new nextFacet: ", nextFacet)
         if (length(nextFacet) != 1) {
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
@@ -1052,6 +1049,7 @@ message("new nextFacet: ", nextFacet)
             data <- plotData[keep,]
           } else {
             data <- plotData
+            facets <- c()
           }
           createUI(id, data, facets)
         })
@@ -1173,7 +1171,6 @@ message("new nextFacet: ", nextFacet)
                      #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
 
-message("propUrl: ", propUrl)
       PUT(propUrl, body = "")
       PUT(propUrl, body = text)
 
