@@ -691,7 +691,7 @@ message("nextFacet: ", nextFacet)
       }
 
       if (!is.null(longitudinal)) {
-        include <- c("Observation")
+        include <- c("Observation", "Sample")
       } else {
         include <- c("all")
       }
