@@ -43,6 +43,7 @@ shinyServer(function(input, output, session) {
 
      attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        header=TRUE,
         na.strings = c("N/A", "na", "")))
      metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
