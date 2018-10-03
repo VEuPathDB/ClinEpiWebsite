@@ -1001,7 +1001,8 @@ message("nextFacet: ", nextFacet)
       if (myPrtcpntView == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
-        aggKey <- c("Participant_Id", longitudinal1)
+        aggKey <- c("Observation_Id")
+        #aggKey <- c("Participant_Id", longitudinal1)
       }
       
       return(aggKey)

@@ -583,7 +583,8 @@ shinyServer(function(input, output, session) {
       if (prtcpntView$val == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
-        aggKey <- c("Participant_Id", longitudinal1)
+        aggKey <- c("Observation_Id")
+        #aggKey <- c("Participant_Id", longitudinal1)
       }
       
       return(aggKey)
@@ -1147,8 +1148,6 @@ shinyServer(function(input, output, session) {
 
     #all the work will be done here in prepping data
     plotData <- reactive({
-      #test <- propText()    
-  
       #collecting inputs 
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
@@ -1429,7 +1428,7 @@ shinyServer(function(input, output, session) {
           }
           displayLabel <- metadata.file$property[metadata.file$source_id == myFacet]
           facetData[[myFacet]] <- paste0(displayLabel, ": ", facetData[[myFacet]])
-          print(head(facetData))
+          facetData <- unique(facetData)          
         } else if (facetType == "makeGroups") {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")
@@ -1473,6 +1472,7 @@ shinyServer(function(input, output, session) {
           }
           displayLabel <- metadata.file$property[metadata.file$source_id == myFacet2]
           facet2Data[[myFacet2]] <- paste0(displayLabel, ": ", facet2Data[[myFacet2]])
+          facetData <- unique(facetData)
         } else if (facet2Type == "makeGroups") {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")
