@@ -15,6 +15,7 @@ shinyUI(
    tags$style(type = 'text/css', ".btn .caret{position: relative; color: black; border-top: 5px solid; border-left: 5px solid transparent; border-right: 5px solid transparent;}"),
    tags$style(type = 'text/css', ".caret{position: absolute; top: 50%; margin-top: 8px; float: right}"),
    tags$style(".treeContainer { height: 400px; overflow-y: scroll; }"),
+   tags$style(".treeContainer { width: 350px; overflow-x: scroll; }"),
    tags$style(type = "text/css", ".jstree-default .jstree-search { color: #428bca; }"),
    tags$style(type = 'text/css', ".btn, .btn:hover {background: #ffffff; text-align:left; border-color: #cccccc; padding: 6px 12px;}"),
    tags$head(includeScript("../../lib/jstree.js")),
@@ -34,7 +35,20 @@ shinyUI(
                                border-bottom: 1px solid #CCC;}"),
      HTML(".js-irs-1 .irs-bar-edge {background: inherit; border: inherit;}")
    )),
-   dashboardPage(
+   tags$head(tags$script('
+                        var dimension = [0, 0];
+                        $(document).on("shiny:connected", function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        $(window).resize(function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        ')),
+     dashboardPage(
      dashboardHeader(title = textOutput("title")),
      sidebar,
      body
