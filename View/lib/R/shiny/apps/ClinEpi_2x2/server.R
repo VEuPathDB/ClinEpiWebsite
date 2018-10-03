@@ -761,7 +761,7 @@ shinyServer(function(input, output, session) {
       }
 
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
-      myPlotly <- ggplotly(myPlot)
+      myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
       legend.title <- metadata.file$property[metadata.file$source_id == var1]
       legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
@@ -772,7 +772,8 @@ shinyServer(function(input, output, session) {
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = legend_list)
+                         legend = legend_list,
+                         autosize=TRUE)
       
       myPlotly
     })
@@ -873,7 +874,7 @@ shinyServer(function(input, output, session) {
         }
  
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
-        myPlotly <- ggplotly(myPlot)
+        myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
         legend.title <- metadata.file$property[metadata.file$source_id == var1]
         legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
@@ -884,7 +885,8 @@ shinyServer(function(input, output, session) {
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = legend_list)
+                                     legend = legend_list,
+                                     autosize=TRUE)
         
         myPlotly
       

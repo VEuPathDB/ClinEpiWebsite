@@ -34,6 +34,19 @@ shinyUI(
                                border-bottom: 1px solid #CCC;}"),
      HTML(".js-irs-1 .irs-bar-edge {background: inherit; border: inherit;}")
    )),
+   tags$head(tags$script('
+                        var dimension = [0, 0];
+                        $(document).on("shiny:connected", function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        $(window).resize(function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        ')),
    dashboardPage(
      dashboardHeader(title = textOutput("title")),
      sidebar,

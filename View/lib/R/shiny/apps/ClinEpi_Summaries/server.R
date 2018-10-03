@@ -1280,7 +1280,7 @@ message("nextFacet: ", nextFacet)
         legend_list <- list(x=100, y=.5)
       }
       
-      myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
+      myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       if (is.null(legendTitle)) {
         legend.title <- "All"
       } else {
@@ -1295,7 +1295,8 @@ message("nextFacet: ", nextFacet)
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = legend_list)
+                         legend = legend_list,
+                         autosize=TRUE)
       
       myPlotly
       
@@ -1506,7 +1507,7 @@ message("nextFacet: ", nextFacet)
           legend_list <- list(x=100, y=.5)
         }      
   
-        myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
+        myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         if (is.null(legendTitle)) {
           legend.title <- "All"
         } else {
@@ -1521,7 +1522,8 @@ message("nextFacet: ", nextFacet)
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = legend_list)
+                                     legend = legend_list,
+                                     autosize=TRUE)
         
         myPlotly
       
