@@ -1001,8 +1001,8 @@ message("nextFacet: ", nextFacet)
       if (myPrtcpntView == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
-        aggKey <- c("Observation_Id")
-        #aggKey <- c("Participant_Id", longitudinal1)
+        #aggKey <- c("Observation_Id")
+        aggKey <- c("Participant_Id", longitudinal1)
       }
       
       return(aggKey)
@@ -2153,9 +2153,7 @@ message("nextFacet: ", nextFacet)
               tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
               tempData <- aggregate(as.formula(aggStr1), tempData, sum)
-              print(unique(tempData$YAXIS))
               tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
-              print(unique(tempData$YAXIS))
               #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
                 mergeData <- tempData
