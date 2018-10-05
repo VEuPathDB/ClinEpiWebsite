@@ -43,6 +43,7 @@ shinyServer(function(input, output, session) {
 
      attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        header=TRUE,
         na.strings = c("N/A", "na", "")))
      metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
@@ -582,6 +583,7 @@ shinyServer(function(input, output, session) {
       if (prtcpntView$val == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
+        #aggKey <- c("Observation_Id")
         aggKey <- c("Participant_Id", longitudinal1)
       }
       
@@ -759,7 +761,7 @@ shinyServer(function(input, output, session) {
       }
 
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
-      myPlotly <- ggplotly(myPlot)
+      myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
       legend.title <- metadata.file$property[metadata.file$source_id == var1]
       legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
@@ -770,7 +772,8 @@ shinyServer(function(input, output, session) {
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = legend_list)
+                         legend = legend_list,
+                         autosize=TRUE)
       
       myPlotly
     })
@@ -871,7 +874,7 @@ shinyServer(function(input, output, session) {
         }
  
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
-        myPlotly <- ggplotly(myPlot)
+        myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
         legend.title <- metadata.file$property[metadata.file$source_id == var1]
         legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
@@ -882,7 +885,8 @@ shinyServer(function(input, output, session) {
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = legend_list)
+                                     legend = legend_list,
+                                     autosize=TRUE)
         
         myPlotly
       
@@ -1146,8 +1150,6 @@ shinyServer(function(input, output, session) {
 
     #all the work will be done here in prepping data
     plotData <- reactive({
-      #test <- propText()    
-  
       #collecting inputs 
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
@@ -1428,7 +1430,7 @@ shinyServer(function(input, output, session) {
           }
           displayLabel <- metadata.file$property[metadata.file$source_id == myFacet]
           facetData[[myFacet]] <- paste0(displayLabel, ": ", facetData[[myFacet]])
-          print(head(facetData))
+          facetData <- unique(facetData)          
         } else if (facetType == "makeGroups") {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")
@@ -1472,6 +1474,7 @@ shinyServer(function(input, output, session) {
           }
           displayLabel <- metadata.file$property[metadata.file$source_id == myFacet2]
           facet2Data[[myFacet2]] <- paste0(displayLabel, ": ", facet2Data[[myFacet2]])
+          facetData <- unique(facetData)
         } else if (facet2Type == "makeGroups") {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")

@@ -46,6 +46,7 @@ shinyServer(function(input, output, session) {
       
       attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        header=TRUE,
         na.strings = c("N/A", "na", "")))
       metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
@@ -691,7 +692,7 @@ message("nextFacet: ", nextFacet)
       }
 
       if (!is.null(longitudinal)) {
-        include <- c("Observation")
+        include <- c("Observation", "Sample")
       } else {
         include <- c("all")
       }
@@ -1000,6 +1001,7 @@ message("nextFacet: ", nextFacet)
       if (myPrtcpntView == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
+        #aggKey <- c("Observation_Id")
         aggKey <- c("Participant_Id", longitudinal1)
       }
       
@@ -1278,7 +1280,7 @@ message("nextFacet: ", nextFacet)
         legend_list <- list(x=100, y=.5)
       }
       
-      myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
+      myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       if (is.null(legendTitle)) {
         legend.title <- "All"
       } else {
@@ -1293,7 +1295,8 @@ message("nextFacet: ", nextFacet)
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = legend_list)
+                         legend = legend_list,
+                         autosize=TRUE)
       
       myPlotly
       
@@ -1504,7 +1507,7 @@ message("nextFacet: ", nextFacet)
           legend_list <- list(x=100, y=.5)
         }      
   
-        myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"))
+        myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         if (is.null(legendTitle)) {
           legend.title <- "All"
         } else {
@@ -1519,7 +1522,8 @@ message("nextFacet: ", nextFacet)
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 150, t = 40),
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = legend_list)
+                                     legend = legend_list,
+                                     autosize=TRUE)
         
         myPlotly
       
@@ -2151,9 +2155,7 @@ message("nextFacet: ", nextFacet)
               tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
               tempData <- aggregate(as.formula(aggStr1), tempData, sum)
-              print(unique(tempData$YAXIS))
               tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
-              print(unique(tempData$YAXIS))
               #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
                 mergeData <- tempData
