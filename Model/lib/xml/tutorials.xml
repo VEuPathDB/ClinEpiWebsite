@@ -34,7 +34,7 @@
 
   <record>
        <attribute name="title">IRB data sharing guidance</attribute>
-       <attribute name="description"></attribute>
+       <attribute name="description">Things to consider with regards to data sharing when writing an IRB proposal.</attribute>
        <attribute name="uid">2</attribute>
        <table name="files">
         <row>
