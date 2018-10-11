@@ -146,7 +146,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       mySelected <- get_selected(input$group, format="names")[[1]]
       myProp <- mySelected[1]
       myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-      nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+      if (length(myParent) != 0) {
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+        } else {
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
+        }
       nextGroup <- unique(nextGroup)
 
       if (length(nextGroup) != 1) {
@@ -173,7 +177,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
 message("null props")
         dontUseProps <- TRUE
       } else {
-          if (!is.null(groupsType()) & !is.null(groupsTypeID)) {
+          if (!is.null(groupsType()) & !is.null(groupsTypeSelected)) {
  message(groupsType())
 message(groupsTypeID)
  message(groupsTypeSelected)

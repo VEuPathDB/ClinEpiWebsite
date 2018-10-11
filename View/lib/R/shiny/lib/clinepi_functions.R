@@ -408,7 +408,7 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   }
   
   outData <- as.data.table(outData)
-  #dtop dtop
+  
   if (any(colnames(outData) %in% "drop")) {
     outData$drop <- NULL
   }
@@ -487,93 +487,97 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
       groups_stp2 = groups_stp3
     }
     
-  displayName <- metadata.file$property[metadata.file$source_id == myGroups]
-  if (groups_stp1 %in% numeric ){
-    if (groups_stp1 == "greaterThan") {
-      label[1] <- paste0(obsFlag, " ", displayName, " > ", groups_stp2)
-      label[2] <- paste0(obsFlag, " ", displayName, " <= ", groups_stp2)
-    } else if (groups_stp1 == "lessThan") {
-      label[1] <- paste0(obsFlag, " ", displayName, " < ", groups_stp2)
-      label[2] <- paste0(obsFlag, " ", displayName, " >= ", groups_stp2)
-    } else {
-      label[1] <- paste0(obsFlag, " ", displayName, " = ", groups_stp2)
-      label[2] <- paste0(obsFlag, " ", displayName, " != ", groups_stp2)
-    }
-  } else if (groups_stp1 %in% anthro) {
-    if (groups_stp1 == "direct") {
-      if (groups_stp2 == "lessThan") {
-        label[1] <- paste0(displayName, " < ", groups_stp3)
-        label[2] <- paste0(displayName, " >= ", groups_stp3)
-      } else if (groups_stp2 == "greaterThan") {
-        label[1] <- paste0(displayName, " > ", groups_stp3)
-        label[2] <- paste0(displayName, " <= ", groups_stp3)
-      } else {
-        label[1] <- paste0(displayName, " = ", groups_stp3)
-        label[2] <- paste0(displayName, " != ", groups_stp3)
-      }
-    } else if (groups_stp1 == "delta") {
-      if (groups_stp2 == "lessThan") {
-        label[1] <- paste0("Change in ", displayName, " over time < ", groups_stp3)
-        label[2] <- paste0("Change in ", displayName, " over time >= ", groups_stp3)
-      } else if (groups_stp2 == "greaterThan") {
-        label[1] <- paste0("Change in ", displayName, " over time > ", groups_stp3)
-        label[2] <- paste0("Change in ", displayName, " over time <= ", groups_stp3)
-      } else {
-        label[1] <- paste0("Change in ", displayName, " over time = ", groups_stp3)
-        label[2] <- paste0("Change in ", displayName, " over time != ", groups_stp3)
-      }
-    } else {
-      if (groups_stp3 == "lessThan") {
-        label[1] <- paste0(displayName, " < ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-        label[2] <- paste0(displayName, " >= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-      } else if (groups_stp3 == "greaterThan") {
-        label[1] <- paste0(displayName, " > ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-        label[2] <- paste0(displayName, " <= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-      } else {
-        label[1] <- paste0(displayName, " = ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-        label[2] <- paste0(displayName, " != ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-      }
-    }
-  } else {
-    if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
-      if (length(groups_stp1) == 1) { 
-        label[1] <- paste(obsFlag, groups_stp1)
-        if (label[1] == paste0(obsFlag, " Yes")) {
-          label[2] <- "No"
-        } else if (label[1] == paste0(obsFlag, " No")) {
-          label[2] <- "Yes"
-        } else if (label[1] == paste0(obsFlag, " True")) {
-          label[2] <- "False"
-        } else if (label[1] == paste0(obsFlag, " False")) {
-          label[2] <- "True"
+    displayName <- metadata.file$property[metadata.file$source_id == myGroups]
+    if (!is.null(groups_stp1)) {
+      if (groups_stp1 %in% numeric ){
+        if (groups_stp1 == "greaterThan") {
+          label[1] <- paste0(obsFlag, " ", displayName, " > ", groups_stp2)
+          label[2] <- paste0(obsFlag, " ", displayName, " <= ", groups_stp2)
+        } else if (groups_stp1 == "lessThan") {
+          label[1] <- paste0(obsFlag, " ", displayName, " < ", groups_stp2)
+          label[2] <- paste0(obsFlag, " ", displayName, " >= ", groups_stp2)
         } else {
-            label[2] <- paste0("Not ", label[1])
+          label[1] <- paste0(obsFlag, " ", displayName, " = ", groups_stp2)
+          label[2] <- paste0(obsFlag, " ", displayName, " != ", groups_stp2)
         }
-      } else {
-        for (i in groups_stp1) {
-          if (length(label) == 0) {
-            label[1] <- paste(obsFlag, "Observations Matching:", i)
-            label[2] <- paste("Not", obsFlag, "Observations Matching:", i)
+      } else if (groups_stp1 %in% anthro) {
+        if (groups_stp1 == "direct") {
+          if (groups_stp2 == "lessThan") {
+            label[1] <- paste0(displayName, " < ", groups_stp3)
+            label[2] <- paste0(displayName, " >= ", groups_stp3)
+          } else if (groups_stp2 == "greaterThan") {
+            label[1] <- paste0(displayName, " > ", groups_stp3)
+            label[2] <- paste0(displayName, " <= ", groups_stp3)
           } else {
-            label[1] <- paste0(label[1], ", ", i)
-            label[2] <- paste0(label[2], ", ", i)
+            label[1] <- paste0(displayName, " = ", groups_stp3)
+            label[2] <- paste0(displayName, " != ", groups_stp3)
+          }
+        } else if (groups_stp1 == "delta") {
+          if (groups_stp2 == "lessThan") {
+            label[1] <- paste0("Change in ", displayName, " over time < ", groups_stp3)
+            label[2] <- paste0("Change in ", displayName, " over time >= ", groups_stp3)
+          } else if (groups_stp2 == "greaterThan") {
+            label[1] <- paste0("Change in ", displayName, " over time > ", groups_stp3)
+            label[2] <- paste0("Change in ", displayName, " over time <= ", groups_stp3)
+          } else {
+            label[1] <- paste0("Change in ", displayName, " over time = ", groups_stp3)
+            label[2] <- paste0("Change in ", displayName, " over time != ", groups_stp3)
+          }
+        } else {
+          if (groups_stp3 == "lessThan") {
+            label[1] <- paste0(displayName, " < ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+            label[2] <- paste0(displayName, " >= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+          } else if (groups_stp3 == "greaterThan") {
+            label[1] <- paste0(displayName, " > ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+            label[2] <- paste0(displayName, " <= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+          } else {
+            label[1] <- paste0(displayName, " = ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
+            label[2] <- paste0(displayName, " != ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
           }
         }
+      } else {
+        if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
+          if (length(groups_stp1) == 1) { 
+            label[1] <- paste(obsFlag, groups_stp1)
+            if (label[1] == paste0(obsFlag, " Yes")) {
+              label[2] <- "No"
+            } else if (label[1] == paste0(obsFlag, " No")) {
+              label[2] <- "Yes"
+            } else if (label[1] == paste0(obsFlag, " True")) {
+              label[2] <- "False"
+            } else if (label[1] == paste0(obsFlag, " False")) {
+              label[2] <- "True"
+            } else {
+              label[2] <- paste0("Not ", label[1])
+            }
+          } else {
+            for (i in groups_stp1) {
+              if (length(label) == 0) {
+                label[1] <- paste(obsFlag, "Observations Matching:", i)
+                label[2] <- paste("Not", obsFlag, "Observations Matching:", i)
+              } else {
+                label[1] <- paste0(label[1], ", ", i)
+                label[2] <- paste0(label[2], ", ", i)
+              }
+            }
+          }
+        } else {
+          label[1] <- paste0(obsFlag, " observations between ", groups_stp1[1], " and ", groups_stp1[2])
+          label[2] <- paste0("Not ", obsFlag, " observations between ", groups_stp1[1], " and ", groups_stp1[2])
+        }
+      }   
+ 
+        if (useGroup) {
+          prefix <- metadata.file$property[metadata.file$source_id == myGroups]
+          label[1] <- paste0(prefix, ": ", label[1])
+          label[2] <- paste0(prefix, ": ", label[2])
+        }
+      } else {
+        label <- metadata.file$property[metadata.file$source_id == myGroups]
       }
     } else {
-      label[1] <- paste0(obsFlag, " observations between ", groups_stp1[1], " and ", groups_stp1[2])
-      label[2] <- paste0("Not ", obsFlag, " observations between ", groups_stp1[1], " and ", groups_stp1[2])
+      label <- metadata.file$property[metadata.file$source_id == myGroups]
     }
-  }   
-
-  if (useGroup) {
-    prefix <- metadata.file$property[metadata.file$source_id == myGroups]
-    label[1] <- paste0(prefix, ": ", label[1])
-    label[2] <- paste0(prefix, ": ", label[2])
-  }
-  } else {
-    label <- metadata.file$property[metadata.file$source_id == myGroups]
-  }
 
   label
 }

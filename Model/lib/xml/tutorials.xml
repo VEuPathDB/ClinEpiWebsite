@@ -32,21 +32,19 @@
 
 
 
-
-
   <record>
-       <attribute name="title">Accessing ClinEpiDB data and exploring via the filters</attribute>
-       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
-       <attribute name="uid">1</attribute>
+       <attribute name="title">IRB data sharing guidance</attribute>
+       <attribute name="description">Things to consider with regards to data sharing when writing an IRB proposal.</attribute>
+       <attribute name="uid">2</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.mov">unavailable</attribute>
            <attribute name="fileName.avi">unavailable</attribute>
            <attribute name="fileName.flv">>unavailable</attribute>
-           <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
+           <attribute name="fileName.pdf">IRB_data_sharing_guidance.pdf</attribute>
            <attribute name="duration">3 min</attribute>
-           <attribute name="size">Mar 18, 2018</attribute>
+           <attribute name="size">Oct 08, 2018</attribute>
          </row>
        </table>
   </record>
@@ -71,6 +69,27 @@
        </table>
   </record>
 
+
+  <record>
+       <attribute name="title">Accessing ClinEpiDB data and exploring via the filters</attribute>
+       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
+       <attribute name="uid">1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.mov">unavailable</attribute>
+           <attribute name="fileName.avi">unavailable</attribute>
+           <attribute name="fileName.flv">>unavailable</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
+           <attribute name="duration">3 min</attribute>
+           <attribute name="size">Mar 18, 2018</attribute>
+         </row>
+       </table>
+  </record>
+
+
+
+<!-- OFF until updated...
  <record>
        <attribute name="title">Interacting with and visualizing data: Shiny Apps</attribute>
        <attribute name="description">Interacting with and visualizing data: Shiny Apps</attribute>
@@ -87,6 +106,8 @@
          </row>
        </table>
   </record>
+
+-->
 
 
  </xmlAnswer>

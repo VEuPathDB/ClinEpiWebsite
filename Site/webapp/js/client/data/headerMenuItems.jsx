@@ -51,12 +51,12 @@ export default function headerMenuItems ({ siteConfig, siteData }) {
             target: '_blank'
           },
           {
-            text: 'PDF Tutorials',
+            text: 'Tutorials and Resources',
             appUrl: '/showXmlDataContent.do?name=XmlQuestions.Tutorials'
           },
           {
             text: 'Data Access & Use Policy',
-            url: '/documents/CE_DataAccessUsePolicy_Rev2.pdf'
+            url: '/documents/DataAccessUsePolicyClinEpiDB.latest.pdf'
           },
           ...socialLinks
         ]

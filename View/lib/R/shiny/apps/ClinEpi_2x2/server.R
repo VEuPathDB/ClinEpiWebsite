@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
      propUrl <<- getPropertiesUrl(session)
-     properties <- try(fread(propUrl))
+     properties <<- try(fread(propUrl))
     if (grepl("Error", properties)) {
       properties <<- NULL
     }
@@ -43,6 +43,7 @@ shinyServer(function(input, output, session) {
 
      attribute_temp <- try(fread(
         getWdkDatasetFile('attributes.tab', session, FALSE, dataStorageDir),
+        header=TRUE,
         na.strings = c("N/A", "na", "")))
      metadata_temp <- try(fread(
           getWdkDatasetFile('ontologyMetadata.tab', session, FALSE, dataStorageDir),
@@ -107,9 +108,6 @@ shinyServer(function(input, output, session) {
     #message(mirror.dir)
     singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
    
-    message(length(colnames(singleVarData)[colnames(singleVarData) == 'Observation_Id']))
-    message(length(colnames(attributes.file)[colnames(singleVarData) == 'Observation_Id']))
- 
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
       naToZero(singleVarData, col = "custom")
@@ -163,35 +161,51 @@ shinyServer(function(input, output, session) {
       incProgress(.45)
       current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
       incProgress(.15)
-      attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
+      attrInit()
+      outInit()
+      incProgress(.25)
+      facetInit()
+      facet2Init()
+      incProgress(.15)
+    })
+    c("Contingency Tables")
+  })
+
+  attrInit <- reactive({
+    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), singleVarData = singleVarData, selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyAttr$val <- selectedAttr()
       } else {
         getMyAttr$val <- properties$selected[properties$input == "attrInfo$group"]
       }
-      incProgress(.25)
-      outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  outInit <- reactive({
+    outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, singleVarData = singleVarData, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyOut$val <- "custom"
       } else {
         getMyOut$val <- properties$selected[properties$input == "outInfo$group"]
       }
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facetInit <- reactive({
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, singleVarData = singleVarData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet$val <- selectedFacet()
       } else {
         getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
       }
-      facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
+  })
+
+  facet2Init <- reactive({
+     facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
         getMyFacet2$val <- selectedFacet2()
       } else {
         getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
       }
-      incProgress(.15)
-    })
-    c("Contingency Tables")
-  }) 
+  })
  
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
@@ -249,11 +263,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextAttr)
         } 
 
-        if (is.null(getMyAttr$val)) {
+        #if (is.null(getMyAttr$val)) {
           getMyAttr$val <- nextAttr
-        } else if (getMyAttr$val != nextAttr) {
-          getMyAttr$val <- nextAttr
-        }
+        #} else if (getMyAttr$val != nextAttr) {
+        #  getMyAttr$val <- nextAttr
+        #}
       }
     })
 
@@ -274,11 +288,11 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextOut)
         }
 
-        if (is.null(getMyOut$val)) {
+        #if (is.null(getMyOut$val)) {
           getMyOut$val <- nextOut
-        } else if (getMyOut$val != nextOut) {
-          getMyOut$val <- nextOut
-        }
+        #} else if (getMyOut$val != nextOut) {
+        #  getMyOut$val <- nextOut
+        #}
       }
     })
 
@@ -569,6 +583,7 @@ shinyServer(function(input, output, session) {
       if (prtcpntView$val == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
+        #aggKey <- c("Observation_Id")
         aggKey <- c("Participant_Id", longitudinal1)
       }
       
@@ -736,10 +751,17 @@ shinyServer(function(input, output, session) {
                          "\n"),
                        collapse = ""),
         size = 14
-      )       
-      
+      )
+
+      maxChars <- max(nchar(as.vector(df$Var1Label)))
+      if (maxChars <= 35) {
+        legend_list <- list(x = 100, y = .8)       
+      } else {
+        legend_list <- list(x = .5, y = -.5) 
+      }
+
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
-      myPlotly <- ggplotly(myPlot)
+      myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
       legend.title <- metadata.file$property[metadata.file$source_id == var1]
       legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
@@ -750,7 +772,8 @@ shinyServer(function(input, output, session) {
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                          xaxis = x_list, 
                          yaxis = y_list,
-                         legend = list(x = 100, y = .5))
+                         legend = legend_list,
+                         autosize=TRUE)
       
       myPlotly
     })
@@ -843,9 +866,15 @@ shinyServer(function(input, output, session) {
                          collapse = ""),
           size = 14
         )       
+        maxChars <- max(nchar(as.vector(df$Var1Label)))
+        if (maxChars <= 35) {
+          legend_list <- list(x = 100, y = .8)
+        } else {
+          legend_list <- list(x = .5, y = -.5)
+        }
  
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
-        myPlotly <- ggplotly(myPlot)
+        myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
         legend.title <- metadata.file$property[metadata.file$source_id == var1]
         legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
@@ -856,7 +885,8 @@ shinyServer(function(input, output, session) {
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
-                                     legend = list(x = 100, y = .5))
+                                     legend = legend_list,
+                                     autosize=TRUE)
         
         myPlotly
       
@@ -975,6 +1005,7 @@ shinyServer(function(input, output, session) {
             }
           } else {
             data <- plotData
+            facets <- c()
           }
           createTableUI(id, data, facets)
         })
@@ -1107,6 +1138,7 @@ shinyServer(function(input, output, session) {
             }
           } else {
             data <- plotData
+            facets <- c()
           }
           createUI(id, data, facets)
         })
@@ -1118,8 +1150,6 @@ shinyServer(function(input, output, session) {
 
     #all the work will be done here in prepping data
     plotData <- reactive({
-      #test <- propText()    
-  
       #collecting inputs 
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
@@ -1301,9 +1331,9 @@ shinyServer(function(input, output, session) {
                        facetText,
                        facet2Text,
                        "input$facetType\t", input$facetType, "\n",
-                       "input$facet2Type\t", input$facet2Type, "\n",
-                       "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
-                       "input$individualPlot_stp2\t", input$individualPlot_stp2 
+                       "input$facet2Type\t", input$facet2Type
+                       #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
+                       #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
         PUT(propUrl, body = "")
@@ -1400,7 +1430,7 @@ shinyServer(function(input, output, session) {
           }
           displayLabel <- metadata.file$property[metadata.file$source_id == myFacet]
           facetData[[myFacet]] <- paste0(displayLabel, ": ", facetData[[myFacet]])
-          print(head(facetData))
+          facetData <- unique(facetData)          
         } else if (facetType == "makeGroups") {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")
@@ -1444,6 +1474,7 @@ shinyServer(function(input, output, session) {
           }
           displayLabel <- metadata.file$property[metadata.file$source_id == myFacet2]
           facet2Data[[myFacet2]] <- paste0(displayLabel, ": ", facet2Data[[myFacet2]])
+          facetData <- unique(facetData)
         } else if (facet2Type == "makeGroups") {
           numeric <- c("lessThan", "greaterThan", "equals")
           anthro <- c("percentDays", "delta", "direct")

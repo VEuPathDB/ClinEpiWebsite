@@ -1,0 +1,4 @@
+# $SourceFileURL: ApiCommonWebsite/trunk/Model/lib/conifer/roles/conifer/vars/ApiCommon/savm/default.yml $
+---
+
+modelconfig_authenticationMethod: user_db

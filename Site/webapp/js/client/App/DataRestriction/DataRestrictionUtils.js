@@ -1,19 +1,84 @@
 // Data stuff =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// per https://docs.google.com/presentation/d/1Cmf2GcmGuKbSTcH4wdeTEvRHTi9DDoh5-MnPm1MkcEA/edit?pli=1#slide=id.g3d955ef9d5_3_2
+
+// Actions
+// -------
+export const Action = {
+  search: 'search',
+  analysis: 'analysis',
+  results: 'results',
+  paginate: 'paginate',
+  record: 'record',
+  recordPage: 'recordPage',
+  downloadPage: 'downloadPage',
+  download: 'download',
+  basket: 'basket',
+};
+
+
+// Restriction levels
+// ------------------
+export const Require = {
+  // nothing required
+  allow: 'allowed',
+  // login required
+  login: 'login',
+  // approval required
+  approval: 'approval',
+}
+
+// 
+
+// strictActions will popup: "go home" (this is a forbidden page) 
+// non strict actions (clicked on link to do something) will popup: "dismiss" (you may stay in this page)
+export const strictActions = [ Action.search, Action.analysis, Action.results, Action.recordPage, Action.downloadPage ];
+
+// the value  'login' or 'approval' will affect the message to the user: what is required. 
+// https://docs.google.com/presentation/d/1Cmf2GcmGuKbSTcH4wdeTEvRHTi9DDoh5-MnPm1MkcEA/edit?pli=1#slide=id.g3d955ef9d5_3_2
 export const accessLevels = {
-  public: {},
-  limited: {
-    loginRequired: ['download', 'downloadPage']
+  "controlled": {
+    [Action.search]: Require.allow,
+    [Action.analysis]: Require.allow,
+    [Action.results]: Require.allow,
+    [Action.paginate]: Require.allow,
+    [Action.record]: Require.allow,
+    [Action.recordPage]: Require.allow,
+    [Action.download]: Require.approval,
+    [Action.basket]: Require.approval
   },
-  protected: {
-    loginRequired: ['paginate'],
-    approvalRequired: ['download', 'downloadPage']
+  "limited": {
+    [Action.search]: Require.allow,
+    [Action.analysis]: Require.allow,
+    [Action.results]: Require.allow,
+    [Action.paginate]: Require.login,
+    [Action.record]: Require.login,
+    [Action.recordPage]: Require.login,
+    [Action.download]: Require.approval,
+    [Action.basket]: Require.approval
   },
-  private: {
-    approvalRequired: [ 'search', 'results', 'paginate', 'analysis', 'download', 'downloadPage']
+  "protected": {
+    [Action.search]: Require.allow,
+    [Action.analysis]: Require.allow,
+    [Action.results]: Require.allow,
+    [Action.paginate]: Require.approval,
+    [Action.record]: Require.approval,
+    [Action.recordPage]: Require.approval,
+    [Action.download]: Require.approval,
+    [Action.basket]: Require.approval
+  },
+  "private": {
+    [Action.search]: Require.approval,
+    [Action.analysis]: Require.approval,
+    [Action.results]: Require.approval,
+    [Action.paginate]: Require.approval,
+    [Action.record]: Require.approval,
+    [Action.recordPage]: Require.approval,
+    [Action.download]: Require.approval,
+    [Action.basket]: Require.approval
   }
 };
 
-export const strictActions = [ 'search', 'results', 'downloadPage' ];
+
 
 // Getters!   =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -30,72 +95,63 @@ export function getPolicyUrl (study = {}, webAppUrl = '') {
 export function getActionVerb (action) {
   if (typeof action !== 'string') return null;
   switch (action) {
-    case 'search':
+    case Action.search:
       return 'search the data';
-    case 'analysis':
+    case Action.analysis:
       return 'create and view analyses';
-    case 'results':
+    case Action.results:
       return 'view search results';
-    case 'paginate':
+    case Action.paginate:
       return 'see more than 25 results';
-    case 'downloadPage':
-    case 'download':
+    case Action.record:
+    case Action.recordPage:
+      return 'access a record page';
+    case Action.downloadPage:
+      return 'download a search result';
+    case Action.download:
       return 'download data';
-    default:
+    case Action.basket:
+      return 'add to your basket'
+    default: 
       return action;
   }
-};
+}
 
 export function getRequirement ({ action, study }) {
   if (actionRequiresLogin({ action, study })) return 'login or create an account';
   if (actionRequiresApproval({ action, study })) return 'acquire research approval';
   return 'contact us';
-};
-
-export function getStudyAccessLevel (study = {}) {
-  const { id } = study;
-  const hasValidAccessAttribute = Object.keys(accessLevels).includes(study.access);
-  if (typeof id !== 'string')
-    console.warn(`[getStudyAccessLevel] Invalid study id provided. Treating as 'public'. Received:`, { study });
-  else if (!hasValidAccessAttribute)
-    console.warn(`[getStudyAccessLevel] No or invalid [study.access] set in study @${id} (received "${study.access}"). Treating as 'public'.`);
-  return hasValidAccessAttribute ? study.access : 'public';
-};
+}
 
 export function getRestrictionMessage ({ action, study }) {
   const intention = getActionVerb(action);
   const requirement = getRequirement({ action, study });
   return <span>Please <b>{requirement}</b> in order to {intention}.</span>;
-};
+}
 
 // CHECKERS! =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-export function actionRequiresLogin ({ study, action }) {
-  const level = getStudyAccessLevel(study);
-  if (!Object.keys(accessLevels).includes(level)) return;
-  const { loginRequired } = accessLevels[level];
-  return (Array.isArray(loginRequired) && loginRequired.includes(action));
-}
-
-export function actionRequiresApproval ({ study, action }) {
-  const level = getStudyAccessLevel(study);
-  if (!Object.keys(accessLevels).includes(level)) return;
-  const { approvalRequired } = accessLevels[level];
-  return (Array.isArray(approvalRequired) && approvalRequired.includes(action));
-}
-
 export function isAllowedAccess ({ user, action, study }) {
   if (sessionStorage.getItem('restriction_override') === 'true') return true;
-  const loginRequired = actionRequiresLogin({ action, study });
-  const isValidUser = typeof user === 'object' && ['isGuest', 'properties'].every(key => Object.keys(user).includes(key));
-  if (loginRequired && (!isValidUser || user.isGuest)) return false;
-  const approvalRequired = actionRequiresApproval({ action, study });
-  const isApproved = isValidUser && !user.isGuest && user.properties.approvedStudies.includes(study.id);
-  if (approvalRequired && !isApproved) return false;
-  return true;
-};
+  // assuming approvedStudies only contain public studies for this user (in CineEpiWebsite CustomProfileService.java)
+  if (user.properties.approvedStudies.includes(study.id)) return true;
+  if (accessLevels[study.access][action] === Require.allow) return true;
+  if (accessLevels[study.access][action] === Require.login) if (!user.isGuest) return true;
+  // access not allowed, we need to build the modal popup
+  return false;
+}
 
+// we will request the user to login if (1) guest and (2) explicit approval not needed 
+export function actionRequiresLogin ({ study, action }) {
+  if (accessLevels[study.access][action] === Require.login) return true;
+  else return false;
+}
 
+// we will request the user to request approval if explicit approval needed (guest or not)
+export function actionRequiresApproval ({ study, action }) {
+  if (accessLevels[study.access][action] === Require.approval) return true;
+  else return false;
+}
 
 export function disableRestriction () {
   sessionStorage.setItem('restriction_override', true);
@@ -118,10 +174,4 @@ export function getIdFromRecordClassName (recordClass) {
   return result === null
     ? null
     : result[0];
-};
-
-export function emitRestriction (action, details = {}) {
-  const detail = Object.assign({}, details, { action });
-  const event = new CustomEvent('DataRestricted', { detail });
-  document.dispatchEvent(event);
-};
+}

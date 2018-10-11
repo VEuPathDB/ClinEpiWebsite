@@ -9,7 +9,7 @@ individualPlot <- tabItem(tabName = "individualPlot",
                                      uiOutput("individualPlot_stp2")
                               )
                             ),
-                            plotlyOutput("individual_distribution") 
+                            plotlyOutput("individual_distribution", height="auto", width="auto", inline=T) 
                         )
                       )
 )

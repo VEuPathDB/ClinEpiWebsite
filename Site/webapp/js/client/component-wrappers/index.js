@@ -6,10 +6,12 @@ import Index from '../components/Index';
 import TableAsTree from '../components/TableAsTree';
 import RelativeVisitsGroup from '../components/RelativeVisitsGroup';
 import RelatedCaseControlGroup from '../components/RelatedCaseControlGroup';
+import StudyRecordHeading from './StudyRecordHeading';
 
 import Header from 'Client/App/Header';
 import { DataRestrictionDaemon } from 'Client/App/DataRestriction';
-import { getIdFromRecordClassName, emitRestriction } from 'Client/App/DataRestriction/DataRestrictionUtils';
+import { getIdFromRecordClassName, Action } from 'Client/App/DataRestriction/DataRestrictionUtils';
+import { attemptAction } from 'Client/App/DataRestriction/DataRestrictionActionCreators';
 
 import searches from 'Client/data/searches.json';
 import visualizations from 'Client/data/visualizations.json';
@@ -26,37 +28,44 @@ export function getStaticSiteData (studies) {
 
 export default {
   IndexController: WdkIndexController => class IndexController extends WdkIndexController {
+
+    getActionCreators() {
+      return {
+        ...super.getActionCreators(),
+        attemptAction
+      }
+    }
+
     getStateFromStore () {
       const { globalData } = this.store.getState();
-      const { siteConfig, studies } = globalData;
+      const { siteConfig, studies, news } = globalData;
       const { displayName, webAppUrl } = siteConfig;
       const siteData = getStaticSiteData(studies.entities);
 
-      return { displayName, webAppUrl, siteData, isLoading: studies.loading };
+      return { displayName, news, webAppUrl, siteData, isLoading: studies.loading, hasError: !!studies.error };
     }
 
     getTitle () {
       return this.state.displayName;
     }
 
+    isRenderDataLoadError() {
+      return this.state.hasError;
+    }
+
     renderView () {
+      const { attemptAction } = this.eventHandlers;
       return (
-        <Index {...this.state} />
+        <Index {...this.state} attemptAction={attemptAction} />
       )
     }
   },
-
-  DownloadForm: DownloadForm => props => {
-    const { name } = props.recordClass;
-    const studyId = getIdFromRecordClassName(name);
-    emitRestriction('downloadPage', { studyId });
-    return <DownloadForm {...props} />
-  },
-
+  DownloadFormController: withRestrictionHandler(Action.downloadPage),
+  RecordController: withRestrictionHandler(Action.recordPage),
   SiteHeader: () => rawProps => {
-    const { siteConfig, studies, preferences, user = {}, ...actions } = rawProps;
+    const {  user = {}, siteConfig, studies, preferences, dataRestriction, ...actions } = rawProps;
     const siteData = getStaticSiteData(studies.entities);
-    const props = { siteConfig, preferences, user, actions, siteData };
+    const props = { user, siteConfig, preferences, actions, siteData, dataRestriction };
     return (
       <div>
         <Header {...props} />
@@ -64,6 +73,12 @@ export default {
       </div>
     );
   },
+
+  RecordHeading: RecordHeading => props => (
+    props.recordClass.urlSegment === 'dataset'
+      ? <StudyRecordHeading {...props} DefaultComponent={RecordHeading} />
+      : <RecordHeading {...props} />
+  ),
 
   RecordTable: RecordTable => props => {
     return 'tableIsTree' in props.table.properties
@@ -76,11 +91,11 @@ export default {
     return (
       <div>
         { activeStudy == null
-            ? "Could not find study based on the record class. Make sure the study id in studies.json is correct."
+            ? "Could not find study based on the record class."
             : (
               <div className="clinepi-StudyLink">
                 <IconAlt fa="info-circle"/>&nbsp;
-                Learn about the <Link to={activeStudy.route} _target="blank" >{activeStudy.name} Study</Link>
+                Learn about the <Link to={activeStudy.route} _target="blank" >{activeStudy.name}</Link>
               </div>
             )
         }
@@ -135,4 +150,16 @@ function guard(propsPredicate) {
         : null;
     }
   }
+}
+
+function withRestrictionHandler(action) {
+  return baseClass => class RestrictionHandler extends baseClass {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+      super.componentDidUpdate(prevProps, prevState, snapshot);
+      if (this.state.recordClass !== prevState.recordClass) {
+        const studyId = getIdFromRecordClassName(this.state.recordClass.name);
+        this.dispatchAction(attemptAction(action, { studyId }));
+      }
+    }
+  };
 }
