@@ -16,6 +16,33 @@
 -->
 
 <record>
+  <attribute name="headline">ClinEpiDB 4 Released</attribute>
+  <attribute name="date">15 Oct 2018 13:00</attribute>
+  <attribute name="tag">clinepidb_4_release</attribute>
+  <attribute name="category">release</attribute>
+  <attribute name="item">
+    <![CDATA[
+      <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 4!</i></div>
+      <section>
+        <h4><b>New Features in this Release</b></h4>
+        <ul>
+		<li>A “News” section and Twitter newsfeed have been added to our homepage to make update announcements easily accessible.
+        <li>We have improved the layout and design of our analysis apps. The new format allows for easier variable selection, more-intuitive layout and figure presentation. We have also added to the number of facets or strata that can be selected for the data.
+        <li>Protecting the data of research investigators and study participants is important to us. We have updated our 'Data Access and Use Policy' to reflect the different levels of data access offered to data providers and users. Please contact us for more information about how data access restrictions are implemented on ClinEpiDB.
+		<li>In our 'Tutorials and Resources' section we have added a document that provides quick guidance for researchers when considering the complete lifecycle of data. It includes links to data sharing resources and some template language for putting together consent forms, IRB proposals, and amendments. 
+        </ul>
+      </section>
+      <section> <h4><b>New Data in this Release</b></h4>
+		<ul>
+        <li>New data has been added to the PRISM cohort study. Participants from Nagongera were followed for another year from July 1, 2016 to June 30, 2017. This addition to the dataset includes a few new participants, thousands of new observations, and new light trap data..
+        </ul>
+      </section>
+    ]]>
+  </attribute>
+</record>
+
+
+<record>
   <attribute name="headline">ClinEpiDB 3 Released</attribute>
   <attribute name="date">05 Jul 2018 13:00</attribute>
   <attribute name="tag">clinepidb_3_release</attribute>
