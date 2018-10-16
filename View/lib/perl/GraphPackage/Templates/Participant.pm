@@ -70,9 +70,9 @@ sub init {
 	  
 	  my ($sex) = $sh->fetchrow_array();
 
-	  if($sex eq 'Female | Male'){
-	      $sex='male';
-	  }
+	  #if($sex eq 'Female | Male'){
+	   #   $sex='male';
+	  #}
 	  
 	  $sex = lc($sex);
 
