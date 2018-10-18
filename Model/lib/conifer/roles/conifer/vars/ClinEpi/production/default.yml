@@ -13,6 +13,8 @@ modelconfig_userDb_maxIdle: 10
 modelconfig_commentdb.maxIdle: 10
 
 modelprop:
+  USER_DBLINK: '@{{ modelconfig_appDb_userDbLink }}'
+  ACCT_DBLINK: '@{{ modelconfig_appDb_acctDbLink }}'
   GOOGLE_ANALYTICS_ID:  "{{ lookup('euparc',
   'attr=google_analytics_id xpath=sites/site[@hostname=\"{}\"] default='.format( hostname|swap_hostname(_host_frontends) )
   )
