@@ -121,12 +121,21 @@ sub init {
 
   my $nodeMetadataEvent;
   if (defined $eventStart) {
-    $nodeMetadataEvent = ({ 
-                            Id => $self->getId(), 
-                            eventStart => $eventStart, 
-                            eventDur => $eventDur,
-                            tblPrefix => $tblPrefix
-                          });
+    if (!defined $eventDur) {
+      $nodeMetadataEvent = ({
+                             Id => $self->getId(),
+                             eventStart => $eventStart,
+                             contXAxis => $xAxis,
+                             tblPrefix => $tblPrefix
+                            });
+    } else {
+      $nodeMetadataEvent = ({ 
+                             Id => $self->getId(), 
+                             eventStart => $eventStart, 
+                             eventDur => $eventDur,
+                             tblPrefix => $tblPrefix
+                            });
+    }
   } else {
     $nodeMetadataEvent = ({
                             Id => $self->getId(),
@@ -210,11 +219,13 @@ sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
   my $rAdjustString = << 'RADJUST';
-profile.df.full$DURATION[profile.df.full$DURATION == '0 day(s)'] <- NA
+#profile.df.full$DURATION[profile.df.full$DURATION == '0 day(s)'] <- NA
 profile.df.full$ID[profile.df.full$STATUS == 'No'] <- NA
 profile.df.full$STATUS <- profile.df.full$ID
 profile.df.full$ID <- NULL
-#profile.df.full$LEGEND <- as.factor(profile.df.full$YLABEL)
+
+profile.df.full$EVENT[profile.df.full$EVENT == "No diarrhea"] <- NA
+profile.df.full$EVENT[profile.df.full$EVENT == ""] <- NA
 
 profile.df.full$oldLegend <- as.character(profile.df.full$LEGEND)
 
@@ -225,7 +236,7 @@ profile.df.full$oldLegend <- NULL
 
 
 RADJUST
-  my $colorValues = "c(\"WHO Standards, +2SD\" = \"red\",\"WHO Standards, -2SD\" = \"red\",\"WHO Standards, Mean\" = \"black\",\"Recumbent length/height (cm)\" = \"blue\", \"Weight (kg)\" = \"blue\", \"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Duration of diarrheal episode, days\" = \"#000099\", \"Vibrio, bacteriology\" = \"#FF0000FF\", \"Taenia sp., microscopy\" = \"#FF3500FF\", \"A. lumbricoides, microscopy\" = \"#FF6A00FF\", \"Adenovirus, ELISA\" = \"#FF9E00FF\", \"Aeromonas, bacteriology\" = \"#FFD300FF\", \"Astrovirus, ELISA\" = \"#F6FF00FF\", \"Balantidium coli, microscopy\" = \"#C1FF00FF\", \"C. mesnili, microscopy\" = \"#8DFF00FF\", \"Cyclospora, microscopy\" = \"#58FF00FF\", \"E. histolytica, microscopy\" = \"#23FF00FF\", \"E. nana, microscopy\" = \"#00FF12FF\", \"E. vermicularis, microscopy\" = \"#00FF46FF\", \"aatA or aaiC EAEC, PCR\" = \"#00FF7BFF\", \"ipaH EIEC, PCR\" = \"#00FFB0FF\", \"eae and bfpA EPEC, PCR\" = \"#00FFE5FF\", \"ST or LT ETEC, PCR\" = \"#00E5FFFF\", \"Entamoeba coli, microscopy\" = \"#00B0FFFF\", \"H. diminuta, microscopy\" = \"#007BFFFF\", \"H. nana, microscopy\" = \"#0046FFFF\", \"Hookworm, microscopy\" = \"#0012FFFF\", \"I. butschilii, microscopy\" = \"#2300FFFF\", \"Norovirus, RT-PCR\" = \"#5800FFFF\", \"Rotavirus, ELISA\" = \"#8D00FFFF\", \"S. stercoralis, microscopy\" = \"#C100FFFF\", \"Salmonella, bacteriology\" = \"#F600FFFF\", \"Schistosoma, microscopy\" = \"#FF00D3FF\", \"Shigella, bacteriology\" = \"#FF009EFF\", \"T. trichiura, microscopy\" = \"#FF006AFF\", \"Yersinia enterocolitica, microscopy\" = \"#FF0035FF\")";
+  my $colorValues = "c(\"WHO Standards, +2SD\" = \"red\",\"WHO Standards, -2SD\" = \"red\",\"WHO Standards, Mean\" = \"black\",\"Recumbent length/height (cm)\" = \"blue\", \"Weight (kg)\" = \"blue\", \"Length/height for age z-score\" = \"#56B4E9\", \"Weight for age z-score\" = \"#CC79A7\", \"Weight for length/height z-score\" = \"#0072B2\", \"Diarrheal episode status\" = \"#000099\", \"Adenovirus, by ELISA\" = \"#FF0000FF\", \"Aeromonas, by bacteriology\" = \"#FF2100FF\", \"Ascaris lumbricoides, by microscopy\" = \"#FF4300FF\", \"Astrovirus, by ELISA\" = \"#FF6400FF\", \"Atypical EPEC, by PCR\" = \"#FF8500FF\", \"Balantidium coli, by microscopy\" = \"#FFA600FF\", \"Campylobacter, by ELISA\" = \"#FFC800FF\", \"Campylobacter, by bacteriology\" = \"#FFE900FF\", \"Chilomastix mesnili, by microscopy\" = \"#F4FF00FF\", \"Cryptosporidium, by ELISA\" = \"#D3FF00FF\", \"Cyclospora, by microscopy\" = \"#B1FF00FF\", \"EAEC aatA and aaiC pos, by PCR\" = \"#90FF00FF\", \"EAEC aatA or aaiC pos, by PCR\" = \"#6FFF00FF\", \"EIEC ipaH pos, by PCR\" = \"#4EFF00FF\", \"EPEC bfpA pos, by PCR\" = \"#2CFF00FF\", \"EPEC eae and bfpA pos, by PCR\" = \"#0BFF00FF\", \"EPEC eae pos, by PCR\" = \"#00FF16FF\", \"ETEC LT neg ST pos, by PCR\" = \"#00FF37FF\", \"ETEC LT or ST pos, by PCR\" = \"#00FF59FF\", \"ETEC LT pos ST neg, by PCR\" = \"#00FF7AFF\", \"Endolimax nana, by microscopy\" = \"#00FF9BFF\", \"Entamoeba coli, by microscopy\" = \"#00FFBCFF\", \"Entamoeba histolytica, by ELISA\" = \"#00FFDEFF\", \"Enterobius vermicularis, by microscopy\" = \"#00FFFFFF\", \"Escherichia coli, by bacteriology\" = \"#00DEFFFF\", \"Giardia, by ELISA\" = \"#00BCFFFF\", \"Hookworm, by microscopy\" = \"#009BFFFF\", \"Hymenolepis diminuta, by microscopy\" = \"#007AFFFF\", \"Hymenolepis nana, by microscopy\" = \"#0059FFFF\", \"Iodamoeba butschlii, by microscopy\" = \"#0037FFFF\", \"Isospora, by microscopy\" = \"#0016FFFF\", \"Norovirus GI, by RT-PCR\" = \"#0B00FFFF\", \"Norovirus GII, by RT-PCR\" = \"#2C00FFFF\", \"Norovirus, by RT-PCR\" = \"#4E00FFFF\", \"Other parasites, by microscopy\" = \"#6F00FFFF\", \"Plesiomonas shigelloides, by bacteriology\" = \"#9000FFFF\", \"Rotavirus, by ELISA\" = \"#B100FFFF\", \"STEC stx1 or stx2 pos, by PCR\" = \"#D300FFFF\", \"Salmonella, by bacteriology\" = \"#F400FFFF\", \"Schistosoma, by microscopy\" = \"#FF00E9FF\", \"Shigella, by bacteriology\" = \"#FF00C8FF\", \"Strongyloides stercoralis, by microscopy\" = \"#FF00A6FF\", \"Taenia, by microscopy\" = \"#FF0085FF\", \"Trichuris trichiura, by microscopy\" = \"#FF0064FF\", \"Vibrio, by bacteriology\" = \"#FF0043FF\", \"Yersinia enterocolitica, by bacteriology\" = \"#FF0021FF\")";
  
   my $breaks = "c(\"WHO Standards, Mean\",\"WHO Standards, +2SD\",\"WHO Standards, -2SD\",\"Length/height for age z-score\", \"Weight for age z-score\", \"Weight for length/height z-score\",\"Weight (kg)\",\"Recumbent length/height (cm)\")";
 
