@@ -49,7 +49,9 @@ sub init {
   $Self->setEventStart           ( $Args->{EventStart  });
   $Self->setEventDur             ( $Args->{EventDur    });
   $Self->setTblPrefix            ( $Args->{TblPrefix   });
+  $Self->setContXAxis            ( $Args->{ContXAxis   });
 
+  my $contXAxis = $Self->getContXAxis();
   my $eventStart = $Self->getEventStart();
   my $eventDur = $Self->getEventDur();
   my $tblPrefix = $Self->getTblPrefix();
@@ -57,6 +59,8 @@ sub init {
   my $ioTable = $tblPrefix . "PANIO";
   my $obsTable = $tblPrefix . "Observations";
   my $ontologyTable = $tblPrefix . "Ontology";
+
+if (defined $eventDur) {
 
   $Self->setSql(<<Sql);
 
@@ -80,6 +84,27 @@ order by $eventStart
 
 Sql
 
+} else {
+
+  $Self->setSql(<<Sql);
+
+select m.ONTOLOGY_TERM_NAME as LEGEND
+     , ea.$eventStart as EVENT
+     , ea.$contXAxis as NAME
+from apidbtuning.$prtcpntTable pa
+   , apidbtuning.$ioTable io
+   , apidbtuning.$obsTable ea
+   , apidbtuning.$ontologyTable m
+where pa.name = \'<<Id>>\'
+and pa.pan_id = io.input_pan_id
+and io.OUTPUT_PAN_ID = ea.PAN_ID
+and m.ONTOLOGY_TERM_SOURCE_ID = \'$eventStart\'
+order by $eventStart
+
+Sql
+
+}
+
   return $Self;
 }
 
@@ -91,6 +116,9 @@ sub setId                            { $_[0]->{'Id'                         } = 
 
 sub getName                          { $_[0]->{'Name'                       } }
 sub setName                          { $_[0]->{'Name'                       } = $_[1]; $_[0] }
+
+sub getContXAxis                     { $_[0]->{'ContXAxis'                  } }
+sub setContXAxis                     { $_[0]->{'ContXAxis'                  } = $_[1]; $_[0] }
 
 sub getEventStart                    { $_[0]->{'EventStart'                 } }
 sub setEventStart                    { $_[0]->{'EventStart'                 } = $_[1]; $_[0] }
