@@ -9,6 +9,7 @@ import RelatedCaseControlGroup from '../components/RelatedCaseControlGroup';
 import StudyRecordHeading from './StudyRecordHeading';
 
 import Header from 'Client/App/Header';
+import Announcements from '..//components/Announcements';
 import { DataRestrictionDaemon } from 'Client/App/DataRestriction';
 import { getIdFromRecordClassName, Action } from 'Client/App/DataRestriction/DataRestrictionUtils';
 import { attemptAction } from 'Client/App/DataRestriction/DataRestrictionActionCreators';
@@ -65,11 +66,16 @@ export default {
   SiteHeader: () => rawProps => {
     const {  user = {}, siteConfig, studies, preferences, dataRestriction, ...actions } = rawProps;
     const siteData = getStaticSiteData(studies.entities);
-    const props = { user, siteConfig, preferences, actions, siteData, dataRestriction };
+    const location = window.location;
+    const props = { user, location, siteConfig, preferences, actions, siteData, dataRestriction };
     return (
       <div>
         <Header {...props} />
         <DataRestrictionDaemon {...props} />
+        <Announcements projectId={props.siteConfig.projectId}
+                   webAppUrl={props.siteConfig.webAppUrl} 
+                   location={props.location} 
+                   announcements={props.siteConfig.announcements}/>
       </div>
     );
   },
