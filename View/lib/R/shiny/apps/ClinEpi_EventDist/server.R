@@ -27,6 +27,7 @@ shinyServer(function(input, output, session) {
   getMyFacet2 <- reactiveValues()
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
+  metadata.classes <- NULL
 
   filesFetcher <- reactive({
     if (is.null(propUrl)) {
@@ -75,7 +76,10 @@ shinyServer(function(input, output, session) {
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
       
+        metadata.classes <<- metadata.file
+
         if ('Participant_Id' %in% colnames(attributes.file)) {
+          attributes.file <- attributes.file[, Participant_Id:=as.character(Participant_Id)]
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
@@ -85,6 +89,7 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
           } else {
+          attributes.file <- attributes.file[, Observation_Id:=as.character(Observation_Id)] 
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
@@ -105,7 +110,17 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
+    classes <- metadata.classes$type
+    names(classes) <- metadata.classes$source_id
+    classes[classes == "string"] <- "character"
+    classes[classes == "number"] <- "double"
+    classes <- classes[!classes == "null"]
+    classes[classes == "date"] <- "character"
+    classes <- c(classes, "Participant_Id" = "character", "Observation_Id" = "character")
+    classes <- classes[!duplicated(names(classes))]
+    rm(metadata.classes)
+
+    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
     
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
@@ -153,12 +168,12 @@ shinyServer(function(input, output, session) {
   }
   
   output$title <- renderText({
-    withProgress(message = 'Loading...', value = 0, style = "old", {
+    withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
       if (is.null(singleVarData)) {
         singleVarDataFetcher()
       }
       incProgress(.45)
-      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      timelineInit()
       incProgress(.15)
       xaxisInit()
       incProgress(.25)
@@ -167,6 +182,10 @@ shinyServer(function(input, output, session) {
       incProgress(.15)
     })
     c("Data Distributions")
+  })
+
+  timelineInit <- reactive({
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
   })
 
   xaxisInit <- reactive({
@@ -979,16 +998,14 @@ shinyServer(function(input, output, session) {
       dates <- getDates(metadata.file)
       
       createUI <- function(id, data, facets) {
-        
+      countFun <- function(x) {length(unique(x))}       
+      colVal <- length(unique(data[, aggKey(), with=FALSE]))
+message(colVal)
+message(class(data))
         if (myPrtcpntView == TRUE) {
           colLabel <- "# Participants"
-          colVal <- length(unique(data$Participant_Id))
-          countFun <- function(x) {length(unique(x))}
         } else {
           colLabel <- "# Observations"
-          colVal <- nrow(data)
-          aggStr <- myFacet
-          countFun <- function(x) {length(x)}
         }
         
         if (myFacet == "none") {
@@ -1001,9 +1018,9 @@ shinyServer(function(input, output, session) {
             tableData <- cbind(tableData, "IQR" = round(IQR(data[[myX]], na.rm = TRUE),4))
           }
         } else {
-          aggStr <- paste0("Participant_Id ~ ", myFacet)
+          aggStr <- paste0("aggCol ~ ", myFacet)
           aggStr2 <- paste0(myX, " ~ ", myFacet)
-          #will need to change first arg based on all possible or makeGroups
+          data$aggCol <- do.call(paste0, data[, aggKey(), with=FALSE])
           tableData <- aggregate(as.formula(aggStr), data, FUN = countFun)
           if (myX %in% nums) {
             mean <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(mean(x),4)})
@@ -1161,7 +1178,7 @@ shinyServer(function(input, output, session) {
       #first thing is to save properties 
       longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
       facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-      facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
+      facet2Text <- groupText("facet2Info", getMyFacet2$val, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
 
       text <- paste0("input\tselected\n",
                      longitudinalText,
@@ -1298,7 +1315,6 @@ shinyServer(function(input, output, session) {
         }
       }
       
-      if (prtcpntView$val == TRUE) {
         if (facetType == "makeGroups") {
           facetCol = "FACET"
         } else if (myX == myFacet | myFacet == "none" | myFacet == "") {
@@ -1314,11 +1330,11 @@ shinyServer(function(input, output, session) {
           facet2Col = myFacet2
         }
         
-        myCols <- c("Participant_Id", myX, facetCol, facet2Col)
+        myCols <- c(aggKey(), myX, facetCol, facet2Col)
         
         data <- data[, myCols, with = FALSE]
-        data <- unique(data)
-      }
+
+      data <- unique(data)
 
       data
       

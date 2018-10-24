@@ -31,6 +31,7 @@ shinyServer(function(input, output, session) {
   legendTitle <- NULL
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
+  metadata.classes <- NULL
 
   filesFetcher <- reactive({
     if (is.null(propUrl)) {
@@ -78,8 +79,11 @@ shinyServer(function(input, output, session) {
         metadata.file <<- metadata_temp
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
-      
+
+        metadata.classes <<- metadata.file    
+  
         if ('Participant_Id' %in% colnames(attributes.file)) {
+          attributes.file <<- attributes.file[, Participant_Id:=as.character(Participant_Id)]
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
@@ -89,6 +93,7 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
           } else {
+          attributes.file <<- attributes.file[, Observation_Id:=as.character(Observation_Id)]
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
@@ -109,7 +114,17 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
+    classes <- metadata.classes$type
+    names(classes) <- metadata.classes$source_id
+    classes[classes == "string"] <- "character"
+    classes[classes == "number"] <- "double"
+    classes <- classes[!classes == "null"]
+    classes[classes == "date"] <- "character"
+    classes <- c(classes, "Participant_Id" = "character", "Observation_Id" = "character")
+    classes <- classes[!duplicated(names(classes))] 
+    rm(metadata.classes)
+
+    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
     
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
@@ -158,12 +173,12 @@ shinyServer(function(input, output, session) {
   
   #ui stuffs
   output$title <- renderText({
-    withProgress(message = 'Loading...', value = 0, style = "old", {
+    withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
       if (is.null(singleVarData)) {
         singleVarDataFetcher()
       } 
       incProgress(.45)
-      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      timelineInit()
       incProgress(.15)
       groupInit()
       incProgress(.25)
@@ -172,6 +187,10 @@ shinyServer(function(input, output, session) {
       incProgress(.15)
     })
     c("Data Summaries")
+  })
+
+  timelineInit <- reactive({
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
   })
 
   groupInit <- reactive({
@@ -247,14 +266,14 @@ shinyServer(function(input, output, session) {
     })
     
     output$xaxis_stp2 <- renderUI({
-      if (is.null(longitudinal2)) {
+      if (is.null(longitudinal1)) {
         return()
       }
      
       if (is.null(properties)) {
         mySelected <- 24
       } else {
-        mySelected <- properties$selected[properties$input == "input$xaxis_stp1"]
+        mySelected <- properties$selected[properties$input == "input$xaxis_stp2"]
       } 
  
       sliderInput(inputId = "xaxis_stp2",
@@ -266,16 +285,24 @@ shinyServer(function(input, output, session) {
     })
  
     output$xaxisBox <- renderUI({
-       if (is.null(longitudinal2)) {
+       if (is.null(longitudinal1)) {
          return()
        }
 
-       tagList(
-         box(width = 6, status = "primary", title = "X-Axis",
-                      uiOutput("xaxis_var"),
-                      uiOutput("xaxis_stp2")
-                  )
-       ) 
+       if (is.null(longitudinal2)) {
+         tagList(
+           box(width = 6, status = "primary", title = "X-Axis",
+                        uiOutput("xaxis_stp2")
+                    )
+         )
+       } else { 
+         tagList(
+           box(width = 6, status = "primary", title = "X-Axis",
+                        uiOutput("xaxis_var"),
+                        uiOutput("xaxis_stp2")
+                    )
+         ) 
+       }
     })
 
     output$groupBox <- renderUI({
@@ -1896,8 +1923,7 @@ message("nextFacet: ", nextFacet)
         } 
         
         plotData <- tempData
-        #need better way. too specific right now. just need to know if xaxis is time
-        #consider what to do about cinning for actual dates. will that work??
+
         xaxis_bins <- input$xaxis_stp2
         if (!is.null(longitudinal)) {
           plotData$XAXIS <- cut(plotData$XAXIS, xaxis_bins) 
@@ -2068,6 +2094,7 @@ message("nextFacet: ", nextFacet)
             }
           }
         }
+        plotData <- unique(plotData)
         plotData
       }
       

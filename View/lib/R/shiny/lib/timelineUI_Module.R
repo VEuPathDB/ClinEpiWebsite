@@ -142,7 +142,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
               fluidRow(
                 column(12,
                        sliderInput(ns("range2"), label2,
-                                   min = myMin2, max = myMax2, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
+                                   min = myMin2, max = myMax2, value = c(selectedMin2,selectedMax2), round=TRUE, width = '100%')
                 )
               )
           )
