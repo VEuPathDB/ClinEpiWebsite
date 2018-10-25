@@ -47,12 +47,18 @@ groupText <- function(moduleName, myGroups, groups_stp1, groups_stp2, groups_stp
 }
 
 subsetDataFetcher <- function(min, max, myData, col){
-
-  tempDF <- myData[myData[[col]] >= min & myData[[col]] <= max] 
- 
+  colMax <- max(myData[[col]], na.rm = TRUE)
+  colMin <- min(myData[[col]], na.rm = TRUE)
+  
+  if (colMax != max | colMin != min) {
+    #test this. dont understand how it didnt need a comma
+    tempDF <- myData[myData[[col]] >= min & myData[[col]] <= max,] 
+  } else {
+    return(myData)
+  } 
   tempDF
 }
-  
+
 getNums <- function(metadata.file){
   #identify nums 
   nums <- subset(metadata.file, metadata.file$type == "number", "source_id") 
