@@ -9,7 +9,7 @@ import RelatedCaseControlGroup from '../components/RelatedCaseControlGroup';
 import StudyRecordHeading from './StudyRecordHeading';
 
 import Header from 'Client/App/Header';
-import Announcements from '..//components/Announcements';
+import Announcements from 'ebrc-client/components/Announcements';
 import { DataRestrictionDaemon } from 'Client/App/DataRestriction';
 import { getIdFromRecordClassName, Action } from 'Client/App/DataRestriction/DataRestrictionUtils';
 import { attemptAction } from 'Client/App/DataRestriction/DataRestrictionActionCreators';
