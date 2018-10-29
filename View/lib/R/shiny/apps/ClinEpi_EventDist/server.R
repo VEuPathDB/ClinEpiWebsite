@@ -110,8 +110,8 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    classes <- metadata.classes$type
-    names(classes) <- metadata.classes$source_id
+    classes <- metadata.classes$type[metadata.classes$category != "Entomological measurements"]
+    names(classes) <- metadata.classes$source_id[metadata.classes$category != "Entomological measurements"]
     classes[classes == "string"] <- "character"
     classes[classes == "number"] <- "double"
     classes <- classes[!classes == "null"]

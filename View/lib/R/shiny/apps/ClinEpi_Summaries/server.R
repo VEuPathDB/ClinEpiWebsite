@@ -114,8 +114,8 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    classes <- metadata.classes$type
-    names(classes) <- metadata.classes$source_id
+    classes <- metadata.classes$type[metadata.classes$category != "Entomological measurements"]
+    names(classes) <- metadata.classes$source_id[metadata.classes$category != "Entomological measurements"]
     classes[classes == "string"] <- "character"
     classes[classes == "number"] <- "double"
     classes <- classes[!classes == "null"]
@@ -270,15 +270,23 @@ shinyServer(function(input, output, session) {
         return()
       }
      
+      myMin <- 2
+      myMax <- 40      
+
       if (is.null(properties)) {
-        mySelected <- 24
+        if (uniqueN(singleVarData[[longitudinal1]]) > 500) {
+          mySelected <- 24
+        } else {
+          mySelected <- 12
+          myMax <- 12 
+        }  
       } else {
         mySelected <- properties$selected[properties$input == "input$xaxis_stp2"]
       } 
  
       sliderInput(inputId = "xaxis_stp2",
-                  min = 2,
-                  max = 40,
+                  min = myMin,
+                  max = myMax,
                   value = mySelected,
                   step = 1,
                   label = "number of bins:")
@@ -1301,10 +1309,15 @@ message("nextFacet: ", nextFacet)
                        collapse = ""),
         size = 14
       )
-      if (maxChars > 35) {
-        legend_list <- list(x = .5, y = -.8)
-      } else {
+
+      if (is.na(maxChars)) {
         legend_list <- list(x=100, y=.5)
+      } else {
+        if (maxChars > 35) {
+          legend_list <- list(x = .5, y = -.8)
+        } else {
+          legend_list <- list(x=100, y=.5)
+        }
       }
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
@@ -1356,9 +1369,7 @@ message("nextFacet: ", nextFacet)
       dummy <- getMyFacet$val
 	dummy <- getMyFacet2$val   
 
- 
       dates <- getDates(metadata.file)
-        #get data from plotData here
         df <- plotData()
         if (is.null(df)) {
           message("plotData returned null!")
@@ -1366,10 +1377,8 @@ message("nextFacet: ", nextFacet)
         } 
         
         names(df)[names(df) == 'GROUPS'] <- 'LINES'
-        
-        #TODO remember to make min for xaxis_bins 2
+
         if (!is.null(longitudinal)) {
-          #define axis labels here
           xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
           if (xAxisType == "number") {
             xlab = "Age"
@@ -1393,8 +1402,9 @@ message("nextFacet: ", nextFacet)
             ylab <- paste("Mean where", ylab)
             df$YAXIS <- as.numeric(df$YAXIS)
           }
+
           ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
- 
+
           #format xaxis ticks
           if (!longitudinal %in% dates$source_id) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
@@ -1407,6 +1417,7 @@ message("nextFacet: ", nextFacet)
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
           myPlot <- myPlot + theme_bw()
           myPlot <- myPlot + labs(y = "", x = "")
+
           #add the lines
           if (plotType == "proportion" | plotType == "count") {
             myPlot <- myPlot + geom_point()
@@ -1442,7 +1453,7 @@ message("nextFacet: ", nextFacet)
           if (longitudinal %in% dates$source_id) {
             myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
           }
-          
+
         } else {
          
           names(df)[names(df) == 'LINES'] <- 'XAXIS'
@@ -1497,7 +1508,6 @@ message("nextFacet: ", nextFacet)
           }
 
         }
-      
         if (myFacet != "none" | myFacet2 != "none") {
           if (myFacet == "none" & myFacet2 != "none") {
             myFacet <- myFacet2
@@ -1528,10 +1538,14 @@ message("nextFacet: ", nextFacet)
                          collapse = ""),
           size = 14
         )
-        if (maxChars > 35) {
-          legend_list <- list(x = .5, y = -.8)
-        } else {
+        if (is.na(maxChars)) {
           legend_list <- list(x=100, y=.5)
+        } else {
+          if (maxChars > 35) {
+            legend_list <- list(x = .5, y = -.8)
+          } else {
+            legend_list <- list(x=100, y=.5)
+          }
         }      
   
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
@@ -1926,7 +1940,13 @@ message("nextFacet: ", nextFacet)
 
         xaxis_bins <- input$xaxis_stp2
         if (!is.null(longitudinal)) {
-          plotData$XAXIS <- cut(plotData$XAXIS, xaxis_bins) 
+          message(head(plotData$XAXIS))
+          message(typeof(plotData$XAXIS))
+          message(class(plotData$XAXIS))
+          message(is.factor(plotData$XAXIS)) 
+          binnedXaxis  <- cut(plotData$XAXIS, xaxis_bins)
+          plotData$XAXIS <- NULL
+          plotData$XAXIS <- binnedXaxis 
           message("binning xaxis data")
         }
         
