@@ -111,8 +111,8 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    classes <- metadata.classes$type
-    names(classes) <- metadata.classes$source_id
+    classes <- metadata.classes$type[metadata.classes$category != "Entomological measurements"]
+    names(classes) <- metadata.classes$source_id[metadata.classes$category != "Entomological measurements"]
     classes[classes == "string"] <- "character"
     classes[classes == "number"] <- "double"
     classes <- classes[!classes == "null"]
@@ -773,10 +773,15 @@ shinyServer(function(input, output, session) {
       )
 
       maxChars <- max(nchar(as.vector(df$Var1Label)))
-      if (maxChars <= 35) {
-        legend_list <- list(x = 100, y = .8)       
-      } else {
-        legend_list <- list(x = .5, y = -.5) 
+      
+      if (is.na(maxChars)) {
+        legend_list <- list(x = 100, y = .8)
+      } else {  
+        if (maxChars <= 35) {
+          legend_list <- list(x = 100, y = .8)       
+        } else {
+          legend_list <- list(x = .5, y = -.5) 
+        }
       }
 
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
@@ -886,12 +891,16 @@ shinyServer(function(input, output, session) {
           size = 14
         )       
         maxChars <- max(nchar(as.vector(df$Var1Label)))
-        if (maxChars <= 35) {
+        if (is.na(maxChars)) {
           legend_list <- list(x = 100, y = .8)
         } else {
-          legend_list <- list(x = .5, y = -.5)
-        }
- 
+          if (maxChars <= 35) {
+            legend_list <- list(x = 100, y = .8)
+          } else {
+            legend_list <- list(x = .5, y = -.5)
+          }
+        } 
+
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
