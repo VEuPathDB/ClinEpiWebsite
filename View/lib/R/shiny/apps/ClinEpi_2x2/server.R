@@ -1,4 +1,4 @@
-## server.r
+# server.r
 
 #the sliders only show transparent for the first two to appear, names not reused/ dont refer only to whats on screen at the time
 #do we want to move naToZero before the merge and only apply to outdata? seems NA for prtcpnt and house info are real NAs
@@ -28,6 +28,7 @@ shinyServer(function(input, output, session) {
   prtcpntView$val <- TRUE
   getMyFacet <- reactiveValues()
   getMyFacet2 <- reactiveValues()
+  metadata.classes <- NULL
 
   filesFetcher <- reactive({
   if (is.null(propUrl)) {
@@ -76,7 +77,10 @@ shinyServer(function(input, output, session) {
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
       
+        metadata.classes <<- metadata.file 
+
         if ('Participant_Id' %in% colnames(attributes.file)) {
+          attributes.file <- attributes.file[, Participant_Id:=as.character(Participant_Id)]
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
@@ -86,6 +90,7 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
           } else {
+          attributes.file <- attributes.file[, Observation_Id:=as.character(Observation_Id)]
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
@@ -106,7 +111,17 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
+    classes <- metadata.classes$type[metadata.classes$category != "Entomological measurements"]
+    names(classes) <- metadata.classes$source_id[metadata.classes$category != "Entomological measurements"]
+    classes[classes == "string"] <- "character"
+    classes[classes == "number"] <- "double"
+    classes <- classes[!classes == "null"]
+    classes[classes == "date"] <- "character"
+    classes <- c(classes, "Participant_Id" = "character", "Observation_Id" = "character")
+    classes <- classes[!duplicated(names(classes))]
+    rm(metadata.classes)
+
+    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
    
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
@@ -154,12 +169,12 @@ shinyServer(function(input, output, session) {
   }
  
   output$title <- renderText({
-    withProgress(message = 'Loading...', value = 0, style = "old", {
+    withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
       if (is.null(singleVarData)) {
         singleVarDataFetcher()
       }
       incProgress(.45)
-      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      timelineInit()
       incProgress(.15)
       attrInit()
       outInit()
@@ -169,6 +184,10 @@ shinyServer(function(input, output, session) {
       incProgress(.15)
     })
     c("Contingency Tables")
+  })
+
+  timelineInit <- reactive({
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
   })
 
   attrInit <- reactive({
@@ -754,10 +773,15 @@ shinyServer(function(input, output, session) {
       )
 
       maxChars <- max(nchar(as.vector(df$Var1Label)))
-      if (maxChars <= 35) {
-        legend_list <- list(x = 100, y = .8)       
-      } else {
-        legend_list <- list(x = .5, y = -.5) 
+      
+      if (is.na(maxChars)) {
+        legend_list <- list(x = 100, y = .8)
+      } else {  
+        if (maxChars <= 35) {
+          legend_list <- list(x = 100, y = .8)       
+        } else {
+          legend_list <- list(x = .5, y = -.5) 
+        }
       }
 
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
@@ -867,12 +891,16 @@ shinyServer(function(input, output, session) {
           size = 14
         )       
         maxChars <- max(nchar(as.vector(df$Var1Label)))
-        if (maxChars <= 35) {
+        if (is.na(maxChars)) {
           legend_list <- list(x = 100, y = .8)
         } else {
-          legend_list <- list(x = .5, y = -.5)
-        }
- 
+          if (maxChars <= 35) {
+            legend_list <- list(x = 100, y = .8)
+          } else {
+            legend_list <- list(x = .5, y = -.5)
+          }
+        } 
+
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
         myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)

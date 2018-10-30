@@ -31,6 +31,7 @@ shinyServer(function(input, output, session) {
   legendTitle <- NULL
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
+  metadata.classes <- NULL
 
   filesFetcher <- reactive({
     if (is.null(propUrl)) {
@@ -78,8 +79,11 @@ shinyServer(function(input, output, session) {
         metadata.file <<- metadata_temp
         names(metadata.file) <<- gsub(" ", "_", tolower(gsub("\\[|\\]", "", names(metadata.file))))
         setkey(metadata.file, source_id)
-      
+
+        metadata.classes <<- metadata.file    
+  
         if ('Participant_Id' %in% colnames(attributes.file)) {
+          attributes.file <<- attributes.file[, Participant_Id:=as.character(Participant_Id)]
           isParticipant <<- TRUE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant"))
@@ -89,6 +93,7 @@ shinyServer(function(input, output, session) {
           metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant"))
           metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant"))
           } else {
+          attributes.file <<- attributes.file[, Observation_Id:=as.character(Observation_Id)]
           isParticipant <<- FALSE
           metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation"))
           metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation"))
@@ -109,7 +114,17 @@ shinyServer(function(input, output, session) {
     datasetName <- colnames(custom.props)
     mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
     #message(mirror.dir)
-    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
+    classes <- metadata.classes$type[metadata.classes$category != "Entomological measurements"]
+    names(classes) <- metadata.classes$source_id[metadata.classes$category != "Entomological measurements"]
+    classes[classes == "string"] <- "character"
+    classes[classes == "number"] <- "double"
+    classes <- classes[!classes == "null"]
+    classes[classes == "date"] <- "character"
+    classes <- c(classes, "Participant_Id" = "character", "Observation_Id" = "character")
+    classes <- classes[!duplicated(names(classes))] 
+    rm(metadata.classes)
+
+    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
     
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
@@ -158,12 +173,12 @@ shinyServer(function(input, output, session) {
   
   #ui stuffs
   output$title <- renderText({
-    withProgress(message = 'Loading...', value = 0, style = "old", {
+    withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
       if (is.null(singleVarData)) {
         singleVarDataFetcher()
       } 
       incProgress(.45)
-      current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
+      timelineInit()
       incProgress(.15)
       groupInit()
       incProgress(.25)
@@ -172,6 +187,10 @@ shinyServer(function(input, output, session) {
       incProgress(.15)
     })
     c("Data Summaries")
+  })
+
+  timelineInit <- reactive({
+    current <<- callModule(timeline, "timeline", singleVarData, longitudinal.file, metadata.file)
   })
 
   groupInit <- reactive({
@@ -247,35 +266,51 @@ shinyServer(function(input, output, session) {
     })
     
     output$xaxis_stp2 <- renderUI({
-      if (is.null(longitudinal2)) {
+      if (is.null(longitudinal1)) {
         return()
       }
      
+      myMin <- 2
+      myMax <- 40      
+
       if (is.null(properties)) {
-        mySelected <- 24
+        if (uniqueN(singleVarData[[longitudinal1]]) > 500) {
+          mySelected <- 24
+        } else {
+          mySelected <- 12
+          myMax <- 12 
+        }  
       } else {
-        mySelected <- properties$selected[properties$input == "input$xaxis_stp1"]
+        mySelected <- properties$selected[properties$input == "input$xaxis_stp2"]
       } 
  
       sliderInput(inputId = "xaxis_stp2",
-                  min = 2,
-                  max = 40,
+                  min = myMin,
+                  max = myMax,
                   value = mySelected,
                   step = 1,
                   label = "number of bins:")
     })
  
     output$xaxisBox <- renderUI({
-       if (is.null(longitudinal2)) {
+       if (is.null(longitudinal1)) {
          return()
        }
 
-       tagList(
-         box(width = 6, status = "primary", title = "X-Axis",
-                      uiOutput("xaxis_var"),
-                      uiOutput("xaxis_stp2")
-                  )
-       ) 
+       if (is.null(longitudinal2)) {
+         tagList(
+           box(width = 6, status = "primary", title = "X-Axis",
+                        uiOutput("xaxis_stp2")
+                    )
+         )
+       } else { 
+         tagList(
+           box(width = 6, status = "primary", title = "X-Axis",
+                        uiOutput("xaxis_var"),
+                        uiOutput("xaxis_stp2")
+                    )
+         ) 
+       }
     })
 
     output$groupBox <- renderUI({
@@ -1274,10 +1309,15 @@ message("nextFacet: ", nextFacet)
                        collapse = ""),
         size = 14
       )
-      if (maxChars > 35) {
-        legend_list <- list(x = .5, y = -.8)
-      } else {
+
+      if (is.na(maxChars)) {
         legend_list <- list(x=100, y=.5)
+      } else {
+        if (maxChars > 35) {
+          legend_list <- list(x = .5, y = -.8)
+        } else {
+          legend_list <- list(x=100, y=.5)
+        }
       }
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
@@ -1329,9 +1369,7 @@ message("nextFacet: ", nextFacet)
       dummy <- getMyFacet$val
 	dummy <- getMyFacet2$val   
 
- 
       dates <- getDates(metadata.file)
-        #get data from plotData here
         df <- plotData()
         if (is.null(df)) {
           message("plotData returned null!")
@@ -1339,10 +1377,8 @@ message("nextFacet: ", nextFacet)
         } 
         
         names(df)[names(df) == 'GROUPS'] <- 'LINES'
-        
-        #TODO remember to make min for xaxis_bins 2
+
         if (!is.null(longitudinal)) {
-          #define axis labels here
           xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
           if (xAxisType == "number") {
             xlab = "Age"
@@ -1366,8 +1402,9 @@ message("nextFacet: ", nextFacet)
             ylab <- paste("Mean where", ylab)
             df$YAXIS <- as.numeric(df$YAXIS)
           }
+
           ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
- 
+
           #format xaxis ticks
           if (!longitudinal %in% dates$source_id) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
@@ -1380,6 +1417,7 @@ message("nextFacet: ", nextFacet)
           myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
           myPlot <- myPlot + theme_bw()
           myPlot <- myPlot + labs(y = "", x = "")
+
           #add the lines
           if (plotType == "proportion" | plotType == "count") {
             myPlot <- myPlot + geom_point()
@@ -1415,7 +1453,7 @@ message("nextFacet: ", nextFacet)
           if (longitudinal %in% dates$source_id) {
             myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
           }
-          
+
         } else {
          
           names(df)[names(df) == 'LINES'] <- 'XAXIS'
@@ -1470,7 +1508,6 @@ message("nextFacet: ", nextFacet)
           }
 
         }
-      
         if (myFacet != "none" | myFacet2 != "none") {
           if (myFacet == "none" & myFacet2 != "none") {
             myFacet <- myFacet2
@@ -1501,10 +1538,14 @@ message("nextFacet: ", nextFacet)
                          collapse = ""),
           size = 14
         )
-        if (maxChars > 35) {
-          legend_list <- list(x = .5, y = -.8)
-        } else {
+        if (is.na(maxChars)) {
           legend_list <- list(x=100, y=.5)
+        } else {
+          if (maxChars > 35) {
+            legend_list <- list(x = .5, y = -.8)
+          } else {
+            legend_list <- list(x=100, y=.5)
+          }
         }      
   
         myPlotly <- ggplotly(myPlot, tooltip = c("text", "x", "y"), width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
@@ -1896,11 +1937,16 @@ message("nextFacet: ", nextFacet)
         } 
         
         plotData <- tempData
-        #need better way. too specific right now. just need to know if xaxis is time
-        #consider what to do about cinning for actual dates. will that work??
+
         xaxis_bins <- input$xaxis_stp2
         if (!is.null(longitudinal)) {
-          plotData$XAXIS <- cut(plotData$XAXIS, xaxis_bins) 
+          message(head(plotData$XAXIS))
+          message(typeof(plotData$XAXIS))
+          message(class(plotData$XAXIS))
+          message(is.factor(plotData$XAXIS)) 
+          binnedXaxis  <- cut(plotData$XAXIS, xaxis_bins)
+          plotData$XAXIS <- NULL
+          plotData$XAXIS <- binnedXaxis 
           message("binning xaxis data")
         }
         
@@ -2068,6 +2114,7 @@ message("nextFacet: ", nextFacet)
             }
           }
         }
+        plotData <- unique(plotData)
         plotData
       }
       

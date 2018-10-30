@@ -48,8 +48,8 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       timeline1 <- NULL
     } else {
       tempDF <- completeDT(data, selected)
-      myMin <- min(tempDF[[selected]])
-      myMax <- max(tempDF[[selected]]) 
+      myMin <- min(tempDF[[selected]], na.rm = TRUE)
+      myMax <- max(tempDF[[selected]], na.rm = TRUE) 
      
       if (length(longitudinal1$columns) == 1) {
         label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])
@@ -78,7 +78,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
         }
       }
     }
-
+ 
     #timeline2
     if(is.null(longitudinal2)) {
       timeline2 <- NULL 
@@ -88,8 +88,8 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
         timeline2 <- NULL
       } else {
         tempDF2 <- completeDT(data, selected2)
-        myMin2 <- min(tempDF[[selected2]])
-        myMax2 <- max(tempDF[[selected2]])
+        myMin2 <- min(tempDF[[selected2]], na.rm = TRUE)
+        myMax2 <- max(tempDF[[selected2]], na.rm = TRUE)
 
         if (length(longitudinal2$columns) == 1) {
           label2 <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal2$columns[1]])
@@ -142,7 +142,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
               fluidRow(
                 column(12,
                        sliderInput(ns("range2"), label2,
-                                   min = myMin2, max = myMax2, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
+                                   min = myMin2, max = myMax2, value = c(selectedMin2,selectedMax2), round=TRUE, width = '100%')
                 )
               )
           )

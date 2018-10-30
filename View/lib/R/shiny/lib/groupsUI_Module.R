@@ -32,7 +32,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = NULL) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = reactive(NULL)) {
   ns <- session$ns
 
   propUrl <<- getPropertiesUrl(session) 
@@ -42,15 +42,20 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     properties <- NULL
   }   
 
-  obsView <- FALSE
-  if (!is.null(prtcpntView())) {
-    if (!prtcpntView() == TRUE) {
-      obsView <- TRUE
-    } 
-  } 
-
   groupRange <- reactiveValues()
   getMyGroups <- reactiveValues() 
+
+
+  obsView <- reactive({
+    obsView <- FALSE
+    if (!is.null(prtcpntView())) {
+      if (!prtcpntView() == TRUE) {
+        obsView <- TRUE
+      }   
+    }
+  
+    obsView
+  })
  
   setGroupVals <- reactive({
     if(is.null(getMyGroups$val)) {
@@ -166,21 +171,23 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
   
   getGroupBtnLabel <- reactive({
+    propUrl <<- getPropertiesUrl(session)
+    properties <- try(fread(propUrl))
+
+    if (grepl("Error", properties)[1]) {
+      properties <- NULL
+    }
     myGroup <- getMyGroups$val
-
-    message("btn label function, myGroup:", myGroup)
-   
-    groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
-
+    if (!is.null(groupsTypeID)) {
+      groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
+    } else {
+      groupsTypeSelected <- NULL
+    } 
       dontUseProps <- FALSE
       if (is.null(properties)) {
-message("null props")
         dontUseProps <- TRUE
       } else {
           if (!is.null(groupsType()) & !is.null(groupsTypeSelected)) {
- message(groupsType())
-message(groupsTypeID)
- message(groupsTypeSelected)
             if (groupsTypeSelected != groupsType()) {
               dontUseProps <- TRUE
             }
@@ -188,13 +195,11 @@ message(groupsTypeID)
             return
           }
       }
-message("dontUseProps: ", dontUseProps)
       if (dontUseProps) {
         mySelected = selected()
       } else {
         mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
       }
-message("mySelected: ", mySelected)
     #this should only happen if switching from 'none' to other for groupsType
     if (mySelected == "") {
       mySelected <- "custom"
@@ -204,7 +209,6 @@ message("mySelected: ", mySelected)
     if (is.null(myGroup)) {
       label <- metadata.file$property[metadata.file$source_id == mySelected]
       getMyGroups$val <- mySelected
-message("label: ",label)
       if (is.null(label)) {
         label <- mySelected
       }
@@ -258,7 +262,7 @@ message("label: ",label)
     obs <- FALSE
     anthro <- FALSE
     if (dontUseProps) {
-      if (myGroup %in% observations & !obsView) {
+      if (myGroup %in% observations & !obsView()) {
         obs <- TRUE
         mySelected = "any"
       } else {
