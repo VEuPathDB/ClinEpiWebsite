@@ -321,7 +321,7 @@ shinyServer(function(input, output, session) {
                      customGroupsUI("group", colWidth = 12)
                  )
       } else {
-        box(width = 6, status = "primary", title = "Facet Line",
+        box(width = 6, status = "primary", title = "Stratify Line",
                      uiOutput("groups_type"),
                      customGroupsUI("group", colWidth = 12)
                  )
@@ -382,9 +382,9 @@ shinyServer(function(input, output, session) {
       
       label = ""
       if (facetType == "direct") {
-        label <- "facets for"
+        label <- "strata for"
       } else if (facetType != "none") {
-        label <- "facet where:"
+        label <- "strata where:"
       }
       
       return(label)
@@ -448,9 +448,9 @@ shinyServer(function(input, output, session) {
       
       label = ""
       if (facet2Type == "direct") {
-        label <- "facets for"
+        label <- "strata for"
       } else if (facet2Type != "none") {
-        label <- "facet where:"
+        label <- "strata where:"
       }
       
       return(label)
@@ -495,9 +495,9 @@ shinyServer(function(input, output, session) {
       
         if (!is.null(longitudinal)) {
           if (groupsType == "direct") {
-            label = "facets for"
+            label = "strata for"
           } else {
-            label = "facet where:"
+            label = "strata where:"
           }
         } else {
           if (groupsType == "direct") {
@@ -1062,13 +1062,13 @@ message("nextFacet: ", nextFacet)
       if (is.null(properties)) {
         message("iPlot1 no properties")
         selectInput(inputId = "individualPlot_stp1",
-                    label = "Facet Plot (1) value:",
+                    label = "Stratify Plot (1) value:",
                     choices = facetVals)
       } else {
         message("iPlot1 has properties")
         mySelected <- properties$selected[properties$input == 'input$individualPlot_stp1']
         selectInput(inputId = "individualPlot_stp1",
-                    label = "Facet Plot (1) value:",
+                    label = "Stratify Plot (1) value:",
                     choices = facetVals,
                     selected = mySelected)
       }
@@ -1103,7 +1103,7 @@ message("nextFacet: ", nextFacet)
       }       
  
       selectInput(inputId = "individualPlot_stp2",
-                  label = "Facet Plot (2) value:",
+                  label = "Stratify Plot (2) value:",
                   choices = facet2Vals,
                   selected = mySelected)
     })
@@ -1659,7 +1659,7 @@ message("nextFacet: ", nextFacet)
         } 
         
         if (length(facets) > 0) {
-          myCaption <- paste("Facet(s):",paste(facets, collapse = " and "))
+          myCaption <- paste("Strata:",paste(facets, collapse = " and "))
         } else {
           myCaption <- ""
         }

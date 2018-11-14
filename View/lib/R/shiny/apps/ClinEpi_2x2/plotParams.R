@@ -14,11 +14,11 @@ plotParams <- tabItem(tabName = "plotParams",
                   )
                 ),
                 fluidRow(
-                  box(width = 6, status = "primary", title = "Facet Plot (1)",
+                  box(width = 6, status = "primary", title = "Stratify Plot (1)",
                       uiOutput("facet_type"),
                       customGroupsUI("facet", colWidth = 12)
                   ),
-                  box(width = 6, status = "primary", title = "Facet Plot (2)",
+                  box(width = 6, status = "primary", title = "Stratify Plot (2)",
                       uiOutput("facet2_type"),
                       customGroupsUI("facet2", colWidth = 12)
                   )
