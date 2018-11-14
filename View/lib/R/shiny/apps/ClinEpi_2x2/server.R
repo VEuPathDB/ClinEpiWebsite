@@ -793,7 +793,7 @@ shinyServer(function(input, output, session) {
                                   x=1.02, xanchor = "left",
                                   y=.7, yanchor = "bottom",
                                   legendtitle=TRUE, showarrow=FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40), 
                          xaxis = x_list, 
                          yaxis = y_list,
                          legend = legend_list,
@@ -910,7 +910,7 @@ shinyServer(function(input, output, session) {
                                     x=1.02, xanchor = "left",
                                     y=.7, yanchor = "bottom",
                                     legendtitle=TRUE, showarrow=FALSE)
-        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
+        myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40), 
                                      xaxis = x_list, 
                                      yaxis = y_list,
                                      legend = legend_list,

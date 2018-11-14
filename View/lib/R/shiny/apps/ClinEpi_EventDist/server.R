@@ -802,7 +802,7 @@ shinyServer(function(input, output, session) {
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"), , width = (0.70*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40), 
                          xaxis = x_list, 
                          yaxis = y_list,
                          legend = list(x = 100, y = .5),
@@ -946,7 +946,7 @@ shinyServer(function(input, output, session) {
       
       myPlotly <- ggplotly(myPlot, tooltip = c("text"), width = (0.70*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 0, b = 200, t = 40), 
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40), 
                                    xaxis = x_list, 
                                    yaxis = y_list,
                                    legend = list(x = 100, y = .5),
