@@ -408,9 +408,9 @@ shinyServer(function(input, output, session) {
       
       label = ""
       if (facetType == "direct") {
-        label <- "facets for"
+        label <- "strata for"
       } else if (facetType != "none") {
-        label <- "facet where:"
+        label <- "strata where:"
       }
       
       return(label)
@@ -486,9 +486,9 @@ shinyServer(function(input, output, session) {
       
       label = ""
       if (facet2Type == "direct") {
-        label <- "facets for"
+        label <- "strata for"
       } else if (facet2Type != "none") {
-        label <- "facet where:"
+        label <- "strata where:"
       }
       
       return(label)
@@ -658,7 +658,7 @@ shinyServer(function(input, output, session) {
       }      
  
       selectInput(inputId = "individualPlot_stp1",
-                  label = "Facet Plot (1) value:",
+                  label = "Stratify Plot (1) value:",
                   choices = facetVals,
                   selected = mySelected)
     })
@@ -694,7 +694,7 @@ shinyServer(function(input, output, session) {
       }      
 
       selectInput(inputId = "individualPlot_stp2",
-                  label = "Facet Plot (2) value:",
+                  label = "Stratify Plot (2) value:",
                   choices = facet2Vals,
                   selected = mySelected)
     })
@@ -1009,7 +1009,7 @@ message(class(data))
         }
         
         if (myFacet == "none") {
-          tableData <- data.table("Facet" = "All", colLabel = colVal)
+          tableData <- data.table("Strata" = "All", colLabel = colVal)
           if (myX %in% nums) {
             tableData <- cbind(tableData, "Mean" = round(mean(data[[myX]], na.rm = TRUE),4))
             tableData <- cbind(tableData, "Median" = median(data[[myX]], na.rm = TRUE))
@@ -1033,9 +1033,9 @@ message(class(data))
             tableData <- merge(tableData, mySD, by = myFacet)
             myIQR <- aggregate(as.formula(aggStr2), data, FUN = function(x){round(IQR(x),4)})
             tableData <- merge(tableData, myIQR, by = myFacet)
-            colnames(tableData) <- c("Facets", colLabel, "Mean", "Median", "Range", "SD", "IQR")
+            colnames(tableData) <- c("Strata", colLabel, "Mean", "Median", "Range", "SD", "IQR")
           } else {
-            colnames(tableData) <- c("Facets", colLabel)
+            colnames(tableData) <- c("Strata", colLabel)
           }
         }
         
@@ -1046,7 +1046,7 @@ message(class(data))
         }
        
         if (length(facets) > 0) {
-          myCaption <- paste("Facet(s):",paste(facets, collapse = " and "))
+          myCaption <- paste("Strata:",paste(facets, collapse = " and "))
         } else {
           myCaption <- ""
         }

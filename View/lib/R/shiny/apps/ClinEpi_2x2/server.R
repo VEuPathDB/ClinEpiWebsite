@@ -420,9 +420,9 @@ shinyServer(function(input, output, session) {
       
       label = ""
       if (facetType == "direct") {
-        label <- "facets for"
+        label <- "strata for"
       } else if (facetType != "none") {
-        label <- "facet where:"
+        label <- "strata where:"
       }
       
       return(label)
@@ -499,9 +499,9 @@ shinyServer(function(input, output, session) {
       
       label = ""
       if (facet2Type == "direct") {
-        label <- "facets for"
+        label <- "strata for"
       } else if (facet2Type != "none") {
-        label <- "facet where:"
+        label <- "strata where:"
       }
       
       return(label)
@@ -641,7 +641,7 @@ shinyServer(function(input, output, session) {
       }     
  
       selectInput(inputId = "individualPlot_stp1",
-                  label = "Facet Plot (1) value:",
+                  label = "Stratify Plot (1) value:",
                   choices = facetVals,
                   selected = mySelected)
     })
@@ -678,7 +678,7 @@ shinyServer(function(input, output, session) {
       }     
  
       selectInput(inputId = "individualPlot_stp2",
-                  label = "Facet Plot (2) value:",
+                  label = "Stratify Plot (2) value:",
                   choices = facet2Vals,
                   selected = mySelected)
     })
@@ -999,7 +999,7 @@ shinyServer(function(input, output, session) {
         }
         
         if (length(facets) > 0) {
-          myCaption <- paste("Facet(s):",paste(facets, collapse = " and "))
+          myCaption <- paste("Strata:",paste(facets, collapse = " and "))
         } else {
           myCaption <- ""
         }
@@ -1132,7 +1132,7 @@ shinyServer(function(input, output, session) {
         rownames(stats) <- c("Statistics", "95% Confidence Interval")
         
         if (length(facets) > 0) {
-          myCaption <- paste("Facet(s):",paste(facets, collapse = " and "))
+          myCaption <- paste("Strata:",paste(facets, collapse = " and "))
         } else {
           myCaption <- ""
         }
