@@ -322,7 +322,7 @@ shinyServer(function(input, output, session) {
       #temporary until i figure out how to plot histograms with dates in plotly
       dates <- getDates(metadata.file)$source_id
       
-      if (length(dates > 0)) {
+      if (length(dates) > 0) {
         stmp <- singleVarData[, -dates, with=FALSE]
       } else {
         stmp <- singleVarData
@@ -354,6 +354,9 @@ shinyServer(function(input, output, session) {
         leaves <- temp[!temp$property %in% parents]
         leaves <- leaves[order(leaves$property),]
         leaves <- leaves$source_id
+        #remove dates
+        dates <- getDates(metadata.file)$source_id
+        leaves <- leaves[!leaves %in% dates]
         selected <- leaves[1]
       }  
       
@@ -387,6 +390,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates] 
             selected <- leaves[1]
           }
         } else {
@@ -465,6 +471,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates] 
             selected <- leaves[1]
           }
         } else {

@@ -62,36 +62,33 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       return()
     }
     myGroup <- getMyGroups$val
-    print(paste("myGroup:", myGroup))
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
    
-    message("double groups ??")
-    message(myGroup) 
     if (myGroup %in% nums$source_id | myGroup %in% dates$source_id) {
       data <- singleVarData
       tempDF <- completeDT(data, myGroup)
       
+      groupRange$myMin <- min(tempDF[[myGroup]], na.rm=TRUE)
+
       if ("BFO_0000015" %in% colnames(tempDF)) {
-        if (levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode") {
-          groupRange$myMin = 0
+        if (any(levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode")) {
+          groupRange$myMin <- 0
         }
-      } else {
-        print(head(tempDF))
-        print(tempDF[[myGroup]])
-        message(paste("class myGroup:", class(tempDF[[myGroup]])))
-        groupRange$myMin <- min(tempDF[[myGroup]])
       }
-      groupRange$myMax <- max(tempDF[[myGroup]])
+      groupRange$myMax <- max(tempDF[[myGroup]], na.rm=TRUE)
       
       if (myGroup %in% nums$source_id) {
         groupRange$mean <- mean(tempDF[[myGroup]])
-      } else {
-        groupRange$startDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroup]]), .25))
-        groupRange$endDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroup]]), .75))
+      } else if (myGroup %in% dates$source_id) {
+        message("myGroup is a date: ", myGroup)
+        groupRange$startDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroup]]), .25, na.rm = TRUE))
+        groupRange$endDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroup]]), .75, na.rm = TRUE))
+        if (is.null(groupRange$myMin)) {
+          groupRange$myMin <- groupRange$myMax
+        } 
         groupRange$myMin <- as.Date(groupRange$myMin)
         groupRange$myMax <- as.Date(groupRange$myMax)
-        message(paste("start and end dates:", groupRange$startDate, groupRange$endDate))
       }
     }
     

@@ -44,8 +44,10 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     timeline2 <- "GO"
     #timeline1
     selected <- longitudinal1$columns[1]
+    message(selected)
     if (is.null(selected) | is.na(selected) | selected == "NA") {
       timeline1 <- NULL
+      message("timeline is null")
     } else {
       tempDF <- completeDT(data, selected)
       myMin <- min(tempDF[[selected]], na.rm = TRUE)

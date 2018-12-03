@@ -260,6 +260,9 @@ shinyServer(function(input, output, session) {
         leaves <- temp[!temp$property %in% parents]
         leaves <- leaves[order(leaves$property),]
         leaves <- leaves$source_id
+        #remove dates
+        dates <- getDates(metadata.file)$source_id
+        leaves <- leaves[!leaves %in% dates]
         selected <- leaves[1]
     }
     return(selected)
@@ -399,6 +402,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates]
             selected <- leaves[1]
           }
         } else {
@@ -478,6 +484,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates]
             selected <- leaves[1]
           }
         } else {
