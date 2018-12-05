@@ -752,10 +752,10 @@ shinyServer(function(input, output, session) {
       xlab <- metadata.file$property[metadata.file$source_id == var2]
       ylab <- "Proportion"
       
-      df$Var2Label <- gsub(xlab, "", df$Var2Label)
+      df$Outcome <- gsub(xlab, "", df$Outcome)
 
       #plot here
-      myPlot <- ggplot(data = df, aes(x = Var2Label, y = Proportion, fill = Var1Label))
+      myPlot <- ggplot(data = df, aes(x = Outcome, y = Proportion, fill = Exposure))
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
       
@@ -781,7 +781,7 @@ shinyServer(function(input, output, session) {
         size = 14
       )
 
-      maxChars <- max(nchar(as.vector(df$Var1Label)))
+      maxChars <- max(nchar(as.vector(df$Exposure)))
       
       if (is.na(maxChars)) {
         legend_list <- list(x = 100, y = .8)
@@ -859,10 +859,10 @@ shinyServer(function(input, output, session) {
         #width <- c( OPprop*1.9, ONprop*1.9, OPprop*1.9, ONprop*1.9)
         #df$width <- width
    
-        df$Var2Label <- gsub(xlab, "", df$Var2Label)
+        df$Outcome <- gsub(xlab, "", df$Outcome)
         
         #plot here
-        myPlot <- ggplot(data = df, aes(x = Var2Label, y = Proportion, fill = Var1Label))
+        myPlot <- ggplot(data = df, aes(x = Outcome, y = Proportion, fill = Exposure))
         myPlot <- myPlot + theme_bw()
         myPlot <- myPlot + labs(y = "", x = "")
         
@@ -899,7 +899,7 @@ shinyServer(function(input, output, session) {
                          collapse = ""),
           size = 14
         )       
-        maxChars <- max(nchar(as.vector(df$Var1Label)))
+        maxChars <- max(nchar(as.vector(df$Exposure)))
         if (is.na(maxChars)) {
           legend_list <- list(x = 100, y = .8)
         } else {
@@ -991,10 +991,10 @@ shinyServer(function(input, output, session) {
         OF <- c(APOF, AFOF, OFtotal)
         totals <- c(APtotal, AFtotal, total)
         
-        OPLabel <- data$Var2Label[data$Variable2 == "Outcome+"][1]
-        OFLabel <- data$Var2Label[data$Variable2 == "Outcome-"][1]
-        APLabel <- data$Var1Label[data$Variable1 == "Attribute+"][1]
-        AFLabel <- data$Var1Label[data$Variable1 == "Attribute-"][1]
+        OPLabel <- data$Outcome[data$Variable2 == "Outcome+"][1]
+        OFLabel <- data$Outcome[data$Variable2 == "Outcome-"][1]
+        APLabel <- data$Exposure[data$Variable1 == "Attribute+"][1]
+        AFLabel <- data$Exposure[data$Variable1 == "Attribute-"][1]
         tableData <- data.table(col1 = OP, col2 = OF, "Totals" = totals)
         colnames(tableData) <- c(as.vector(OPLabel), as.vector(OFLabel), "Totals")
         rownames(tableData) <- c(as.vector(APLabel), as.vector(AFLabel), "Totals")
@@ -1610,8 +1610,8 @@ shinyServer(function(input, output, session) {
         #data$key <- NULL
         
         #add labels
-        returnData <- transform(returnData, "Var1Label" = ifelse( Variable1 == "Attribute+", attrLabel[1], attrLabel[2]))
-        returnData <- transform(returnData, "Var2Label" = ifelse( Variable2 == "Outcome+", outLabel[1], outLabel[2]))
+        returnData <- transform(returnData, "Exposure" = ifelse( Variable1 == "Attribute+", attrLabel[1], attrLabel[2]))
+        returnData <- transform(returnData, "Outcome" = ifelse( Variable2 == "Outcome+", outLabel[1], outLabel[2]))
         
         print(head(returnData))
         returnData

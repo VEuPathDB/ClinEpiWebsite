@@ -21,16 +21,16 @@ help <- tabItem(tabName = "help",
               tags$table(
                 tags$tr(
                   tags$th(""),
-                  tags$th("Var 2 +"),
-                  tags$th("Var 2 -")
+                  tags$th("Outcome +"),
+                  tags$th("Outcome -")
                  ),
                  tags$tr(
-                   tags$td("Var 1 +"),
+                   tags$td("Exposure +"),
                    tags$td("A"),
                    tags$td("B")                               
                  ),
                  tags$tr(
-                   tags$td("Var 1 -"),
+                   tags$td("Exposure -"),
                    tags$td("C"),
                    tags$td("D")
 		 )
@@ -45,7 +45,7 @@ help <- tabItem(tabName = "help",
              h4("Version Information"),
              #h5(
                p("Shiny Server: 1.5.6.875", br(),
-                 "R: 3.5.0 (2018-04-23)", br(),
+                 "R: 3.5.1 (2018-07-02)", br(),
                  "Packages:", br(),
                  tags$ul(
                    tags$li("data.table: 1.11.4"),
