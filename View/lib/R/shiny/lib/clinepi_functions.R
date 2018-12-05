@@ -82,7 +82,7 @@ getDates <- function(metadata.file){
 
 #this just a list of clinepi source_ids we want to make sure never appear in ui    
 getDropList <- function(){
-  c("EUPATH_0000644", "BFO_0000015", "EUPATH_0000702", "OBI_0100051")
+  c("EUPATH_0000644", "EUPATH_0000702", "OBI_0100051")
 }
 
   

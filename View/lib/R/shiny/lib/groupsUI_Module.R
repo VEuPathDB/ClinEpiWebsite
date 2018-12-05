@@ -71,11 +71,11 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       
       groupRange$myMin <- min(tempDF[[myGroup]], na.rm=TRUE)
 
-      if ("BFO_0000015" %in% colnames(tempDF)) {
-        if (any(levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode")) {
-          groupRange$myMin <- 0
-        }
-      }
+      #if ("BFO_0000015" %in% colnames(tempDF)) {
+      #  if (any(levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode")) {
+      #    groupRange$myMin <- 0
+      #  }
+      #}
       groupRange$myMax <- max(tempDF[[myGroup]], na.rm=TRUE)
       
       if (myGroup %in% nums$source_id) {
@@ -283,12 +283,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         }
       }
 
-      if (any(colnames(tempDF) %in% "BFO_0000015")) {
-        if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
-          mySelected = "delta"
-          anthro <- TRUE
-        }     
-      }
+      #if (any(colnames(tempDF) %in% "BFO_0000015")) {
+      #  if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
+      #    mySelected = "delta"
+      #    anthro <- TRUE
+      #  }     
+      #}
     } else {
       if (mySelected == 'all' | mySelected == 'any') {
         obs <- TRUE
