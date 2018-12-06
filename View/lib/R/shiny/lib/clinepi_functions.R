@@ -1,8 +1,15 @@
 ### all clinepi specific functions b/c rely on data and/or metadata to be formatted consistently
 
 
-longitudinalText <- function(myTimeframe1, myTimeframe2) {
-  longitudinalText <- paste0("current$range1[1]\t", myTimeframe1[1], "\n",
+longitudinalText <- function(mySubset = NULL, myTimeframe1 = NULL, myTimeframe2 = NULL) {
+  subsetText <- ""
+  for (i in seq(length(mySubset))) {
+    subsetText <- paste0(subsetText,
+    "current$subset\t", mySubset[i], "\n")
+  }
+
+  longitudinalText <- paste0(subsetText,
+                             "current$range1[1]\t", myTimeframe1[1], "\n",
                              "current$range1[2]\t", myTimeframe1[2], "\n",
                              "current$range2[1]\t", myTimeframe2[1], "\n",
                              "current$range2[2]\t", myTimeframe2[2], "\n")
@@ -46,15 +53,19 @@ groupText <- function(moduleName, myGroups, groups_stp1, groups_stp2, groups_stp
   groupsText
 }
 
-subsetDataFetcher <- function(min, max, myData, col){
-  colMax <- max(myData[[col]], na.rm = TRUE)
-  colMin <- min(myData[[col]], na.rm = TRUE)
+subsetDataFetcher <- function(keep = NULL, min = NULL, max = NULL, myData = NULL, col = NULL){
+  if (is.null(keep)) {
+    colMax <- max(myData[[col]], na.rm = TRUE)
+    colMin <- min(myData[[col]], na.rm = TRUE)
   
-  if (colMax != max | colMin != min) {
-    #test this. dont understand how it didnt need a comma
-    tempDF <- myData[myData[[col]] >= min & myData[[col]] <= max,] 
+    if (colMax != max | colMin != min) {
+      #test this. dont understand how it didnt need a comma
+      tempDF <- myData[myData[[col]] >= min & myData[[col]] <= max,] 
+    } else {
+      return(myData)
+    }
   } else {
-    return(myData)
+    tempDF <- myData[myData[[col]] %in% keep,]
   } 
   tempDF
 }

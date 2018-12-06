@@ -6,10 +6,10 @@ plotParams <- tabItem(tabName = "plotParams",
                       uiOutput("prtcpntViewSwitch")
                 ),
                 fluidRow(
-                  box(width = 6, status = "primary", title = "Independant/Exposure",
+                  box(width = 6, status = "primary", title = "Independent/Exposure",
                       customGroupsUI("attr", colWidth = 12)
                   ),
-                  box(width = 6, status = "primary", title = "Dependant/Outcome",
+                  box(width = 6, status = "primary", title = "Dependent/Outcome",
                       customGroupsUI("out", colWidth = 12)
                   )
                 ),
