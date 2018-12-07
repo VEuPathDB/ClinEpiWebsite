@@ -30,7 +30,7 @@ help <-      tabItem(tabName = "help",
                  h4("Version Information"),
                  #h5(
                    p("Shiny Server: 1.5.6.875", br(),
-                     "R: 3.5.0 (2018-04-23)", br(),
+                     "R: 3.5.1 (2018-07-02)", br(),
                      "Packages:", br(),
                      tags$ul(
                        tags$li("data.table: 1.11.4"),

@@ -25,7 +25,8 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
 
   dates <- getDates(metadata.file)$source_id
   nums <- getNums(metadata.file)$source_id
-  if (all(longitudinal$columns %in% dates) | all(longitudinal$columns %in% nums)) {
+  strings <- getStrings(metadata.file)$source_id
+  if (all(longitudinal$columns %in% dates) | all(longitudinal$columns %in% nums) | all(longitudinal$columns %in% strings)) {
     numTimelines <<- 1
   } else {
     numTimelines <<- 2
@@ -44,37 +45,49 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     timeline2 <- "GO"
     #timeline1
     selected <- longitudinal1$columns[1]
+    message(selected)
     if (is.null(selected) | is.na(selected) | selected == "NA") {
       timeline1 <- NULL
+      message("timeline is null")
     } else {
       tempDF <- completeDT(data, selected)
-      myMin <- min(tempDF[[selected]], na.rm = TRUE)
-      myMax <- max(tempDF[[selected]], na.rm = TRUE) 
+
+      if (selected %in% strings) {
+        label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])   
+
+        dontUseProps <- FALSE
+        if (is.null(properties)) {
+          dontUseProps <- TRUE
+        } 
+      } else {
+        myMin <- min(tempDF[[selected]], na.rm = TRUE)
+        myMax <- max(tempDF[[selected]], na.rm = TRUE) 
      
-      if (length(longitudinal1$columns) == 1) {
-        label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])
-      } else {
-        if (all(longitudinal1$columns %in% dates)) {
-          label <- "Date Variable:"
+        if (length(longitudinal1$columns) == 1) {
+          label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])
         } else {
-          label <- "Age Variable:"
+          if (all(longitudinal1$columns %in% dates)) {
+            label <- "Date Variable:"
+          } else {
+            label <- "Age Variable:"
+          }
         }
-      }
       
-      dontUseProps <- FALSE
-      if (is.null(properties)) {
-        dontUseProps <- TRUE
-      }
+        dontUseProps <- FALSE
+        if (is.null(properties)) {
+          dontUseProps <- TRUE
+        }
     
-      if (dontUseProps) {
-        selectedMin <- myMin
-        selectedMax <- myMax 
-      } else {
-        selectedMin <- properties$selected[properties$input == "current$range1[1]"]
-        selectedMax <- properties$selected[properties$input == "current$range1[2]"]
-        if (selected %in% dates) {
-            selectedMin <- as.Date(selectedMin)
-            selectedMax <- as.Date(selectedMax)
+        if (dontUseProps) {
+          selectedMin <- myMin
+          selectedMax <- myMax 
+        } else {
+          selectedMin <- properties$selected[properties$input == "current$range1[1]"]
+          selectedMax <- properties$selected[properties$input == "current$range1[2]"]
+          if (selected %in% dates) {
+              selectedMin <- as.Date(selectedMin)
+              selectedMax <- as.Date(selectedMax)
+          }
         }
       }
     }
@@ -120,16 +133,45 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
       return
     } else {
       if (is.null(timeline2)) {
-        tagList(
-          box(width = 12, status = "primary", title = "Timeline(s)",
-              fluidRow(
-                column(12,
-                      sliderInput(ns("range1"), label,
-                      min = myMin, max = myMax, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
-                )
+        if (selected %in% strings) {
+          #need to decide if i wantto keep on with this name or create new ui
+          #consider the saving and reading of params and that there can be more or less than 2 values
+          if (dontUseProps) {
+            tagList(
+              box(width = 12, status = "primary", title = "Timepoint Filter",
+                  selectizeInput(inputId = ns("subset"),
+                                 label = label,
+                                 choices = getUIStp1List(tempDF, selected),
+                                 width = '100%',
+                                 multiple = TRUE,
+                                 options = list(placeholder = '-Selected Items Will Appear Here-'))    
               )
+            )
+          } else {
+            tagList(
+              box(width = 12, status = "primary", title = "Timepoint Filter", 
+                  selectizeInput(inputId = ns("subset"),
+                                 label = label,
+                                 choices = getUIStp1List(tempDF, selected),
+                                 selected = properties$selected[properties$input == "current$subset"],
+                                 width = '100%',
+                                 multiple = TRUE,
+                                 options = list(placeholder = '-Selected Items Will Appear Here-'))
+              )
+            ) 
+          } 
+        } else {
+          tagList(
+            box(width = 12, status = "primary", title = "Timeline(s)",
+                fluidRow(
+                  column(12,
+                        sliderInput(ns("range1"), label,
+                        min = myMin, max = myMax, value = c(selectedMin,selectedMax), round=TRUE, width = '100%')
+                  )
+                )
+            )
           )
-        )
+        }
       } else {
         tagList(
           box(width = 12, status = "primary", title = "Timeline(s)",

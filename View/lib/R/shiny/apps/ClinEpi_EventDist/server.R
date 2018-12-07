@@ -121,6 +121,18 @@ shinyServer(function(input, output, session) {
     rm(metadata.classes)
 
     singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
+
+    #specific for gems, temporary fix for house obs so its not treated independantly of other obs
+    if (grepl("GEMS", datasetName)) {
+      obs <- singleVarData[!is.na(singleVarData$BFO_0000015),]
+      obs <- obs[,which(unlist(lapply(obs, function(x)!all(is.na(x))))),with=F]
+      houseObs <- singleVarData[is.na(singleVarData$BFO_0000015),]
+      houseObs$BFO_0000015 <- houseObs$EUPATH_0015467
+      houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
+      myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015")]
+      houseObs <- houseObs[, !myCols, with=FALSE] 
+      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"))
+    }
     
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
@@ -149,8 +161,9 @@ shinyServer(function(input, output, session) {
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
+    strings <- getStrings(metadata.file)$source_id
     if (!nrow(longitudinal.file) == 0) {
-      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums) | all(longitudinal.file$columns %in% strings)) {
         numTimelines <- 1
       } else {
         numTimelines <- 2
@@ -322,7 +335,7 @@ shinyServer(function(input, output, session) {
       #temporary until i figure out how to plot histograms with dates in plotly
       dates <- getDates(metadata.file)$source_id
       
-      if (length(dates > 0)) {
+      if (length(dates) > 0) {
         stmp <- singleVarData[, -dates, with=FALSE]
       } else {
         stmp <- singleVarData
@@ -354,6 +367,9 @@ shinyServer(function(input, output, session) {
         leaves <- temp[!temp$property %in% parents]
         leaves <- leaves[order(leaves$property),]
         leaves <- leaves$source_id
+        #remove dates
+        dates <- getDates(metadata.file)$source_id
+        leaves <- leaves[!leaves %in% dates]
         selected <- leaves[1]
       }  
       
@@ -387,6 +403,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates] 
             selected <- leaves[1]
           }
         } else {
@@ -465,6 +484,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates] 
             selected <- leaves[1]
           }
         } else {
@@ -1120,6 +1142,7 @@ message(class(data))
       facet2_stp2 <- facet2Info$group_stp2
       prevFacet2 <<- myFacet2
       myGroups <- input$groups
+      mySubset <- current$subset
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
  
@@ -1176,7 +1199,7 @@ message(class(data))
       }
 
       #first thing is to save properties 
-      longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
+      longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
       facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
       facet2Text <- groupText("facet2Info", getMyFacet2$val, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
 
@@ -1200,8 +1223,19 @@ message(class(data))
         data <- singleVarData
         #subset data
         if (!is.null(longitudinal1)) {
+          #should never have both subset and timeframes..
+          if (!is.null(mySubset)) {
+            data <- subsetDataFetcher(keep = mySubset, myData = singleVarData, col = longitudinal1)
+            message("subsetting data by non-continuous longitudinal variable..")
+            if (nrow(data) == 0) {
+              message("subset failed, returning")
+              return()
+            }
+          } else {
+            data <- singleVarData
+          }
           if (!is.null(myTimeframe1)) {
-            data <- subsetDataFetcher(myTimeframe1[1], myTimeframe1[2], singleVarData, longitudinal1)
+            data <- subsetDataFetcher(min = myTimeframe1[1], max = myTimeframe1[2], myData = data, col = longitudinal1)
             message("subsetting data by first longitudinal variable..")
             if (nrow(data) == 0) {
               message("subset failed, returning")
@@ -1210,7 +1244,7 @@ message(class(data))
           }
           if (!is.null(longitudinal2)) {
             if (!is.null(myTimeframe2)) {
-              data <- subsetDataFetcher(myTimeframe2[1], myTimeframe2[2], data, longitudinal2)
+              data <- subsetDataFetcher(min = myTimeframe2[1], max = myTimeframe2[2], myData = data, col = longitudinal2)
               message("subsetting data by second longitudinal variable..")
               if (nrow(data) == 0) {
                 message("subset failed, returning")

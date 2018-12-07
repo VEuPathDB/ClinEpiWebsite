@@ -32,6 +32,7 @@ shinyServer(function(input, output, session) {
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
   metadata.classes <- NULL
+  contLongitudinal <- FALSE
 
   filesFetcher <- reactive({
     if (is.null(propUrl)) {
@@ -125,6 +126,18 @@ shinyServer(function(input, output, session) {
     rm(metadata.classes)
 
     singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
+ 
+    #specific for gems, temporary fix for house obs so its not treated independantly of other obs
+    if (grepl("GEMS", datasetName)) {
+      obs <- singleVarData[!is.na(singleVarData$BFO_0000015),]
+      obs <- obs[,which(unlist(lapply(obs, function(x)!all(is.na(x))))),with=F]
+      houseObs <- singleVarData[is.na(singleVarData$BFO_0000015),]
+      houseObs$BFO_0000015 <- houseObs$EUPATH_0015467
+      houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
+      myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015")]
+      houseObs <- houseObs[, !myCols, with=FALSE]
+      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"))
+    }
     
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
@@ -153,9 +166,13 @@ shinyServer(function(input, output, session) {
     for (col in dates) set(singleVarData, j=col, value=as.Date(singleVarData[[col]], format = "%d-%b-%y"))
 
     nums <- getNums(metadata.file)$source_id
+    strings <- getStrings(metadata.file)$source_id
     if (!nrow(longitudinal.file) == 0) {
-      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums)) {
+      if (all(longitudinal.file$columns %in% dates) | all(longitudinal.file$columns %in% nums) | all(longitudinal.file$columns %in% strings)) {
         numTimelines <- 1
+        if (!any(longitudinal.file$columns %in% strings)) {
+          contLongitudinal <<- TRUE
+        }     
       } else {
         numTimelines <- 2
       }
@@ -266,7 +283,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$xaxis_stp2 <- renderUI({
-      if (is.null(longitudinal1)) {
+      if (!contLongitudinal) {
         return()
       }
      
@@ -293,7 +310,7 @@ shinyServer(function(input, output, session) {
     })
  
     output$xaxisBox <- renderUI({
-       if (is.null(longitudinal1)) {
+       if (!contLongitudinal) {
          return()
        }
 
@@ -315,7 +332,7 @@ shinyServer(function(input, output, session) {
 
     output$groupBox <- renderUI({
 
-      if (is.null(longitudinal1)) {
+      if (!contLongitudinal) {
         box(width = 6, status = "primary", title = "X-Axis",
                      uiOutput("groups_type"),
                      customGroupsUI("group", colWidth = 12)
@@ -493,7 +510,7 @@ shinyServer(function(input, output, session) {
           }
         }
       
-        if (!is.null(longitudinal)) {
+        if (contLongitudinal) {
           if (groupsType == "direct") {
             label = "strata for"
           } else {
@@ -556,6 +573,9 @@ shinyServer(function(input, output, session) {
         leaves <- temp[!temp$property %in% parents]
         leaves <- leaves[order(leaves$property),]
         leaves <- leaves$source_id
+        #remove dates
+        dates <- getDates(metadata.file)$source_id
+        leaves <- leaves[!leaves %in% dates]
         selected <- leaves[1]
       }     
  
@@ -589,6 +609,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates]
             selected <- leaves[1]
           }
         } else {
@@ -628,6 +651,9 @@ shinyServer(function(input, output, session) {
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
             leaves <- leaves$source_id
+            #remove dates
+            dates <- getDates(metadata.file)$source_id
+            leaves <- leaves[!leaves %in% dates]
             selected <- leaves[1]
           }
         } else {
@@ -726,7 +752,8 @@ message("nextFacet: ", nextFacet)
         }
       }
 
-      if (!is.null(longitudinal)) {
+      #dont remember why this is
+      if (contLongitudinal) {
         include <- c("Observation", "Sample")
       } else {
         include <- c("all")
@@ -957,7 +984,7 @@ message("nextFacet: ", nextFacet)
 
       if (dontUseProps) {
         if (myY %in% nums$source_id) {
-          if (!is.null(longitudinal)) {
+          if (contLongitudinal) {
             radioButtons(inputId = "yaxis_stp3",
                          label = "Display as:",
                          choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
@@ -993,7 +1020,7 @@ message("nextFacet: ", nextFacet)
         }
       } else {
         if (myY %in% nums$source_id) {
-          if (!is.null(longitudinal)) {
+          if (contLongitudinal) {
             radioButtons(inputId = "yaxis_stp3",
                          label = "Display as:",
                          choices = list("Mean" = "mean", "Smoothed Conditional Mean" = "smooth"),
@@ -1139,6 +1166,7 @@ message("nextFacet: ", nextFacet)
       iPlot_stp2 <- input$individualPlot_stp2
       
       dates <- getDates(metadata.file)
+      nums <- getNums(metadata.file)
       #get data from plotData here
       df <- plotData()
       
@@ -1158,8 +1186,7 @@ message("nextFacet: ", nextFacet)
         df <- df[keep2,]
       }
       
-      #TODO remember to make min for xaxis_bins 2
-      if (!is.null(longitudinal)) {
+      if (contLongitudinal) {
         #define axis labels here
         xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
         if (xAxisType == "number") {
@@ -1189,7 +1216,7 @@ message("nextFacet: ", nextFacet)
         message(ylab)
         
         #format xaxis ticks
-        if (!longitudinal %in% dates$source_id) {
+        if (longitudinal %in% nums$source_id) {
           df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
         } else {
           df$XAXIS <- as.factor(df$XAXIS)
@@ -1233,7 +1260,7 @@ message("nextFacet: ", nextFacet)
           myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
         }
         
-        if (longitudinal %in% dates$source_id) {
+        if (!longitudinal %in% nums$source_id) {
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
         
@@ -1370,6 +1397,7 @@ message("nextFacet: ", nextFacet)
 	dummy <- getMyFacet2$val   
 
       dates <- getDates(metadata.file)
+      nums <- getNums(metadata.file)
         df <- plotData()
         if (is.null(df)) {
           message("plotData returned null!")
@@ -1378,7 +1406,7 @@ message("nextFacet: ", nextFacet)
         
         names(df)[names(df) == 'GROUPS'] <- 'LINES'
 
-        if (!is.null(longitudinal)) {
+        if (contLongitudinal) {
           xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
           if (xAxisType == "number") {
             xlab = "Age"
@@ -1406,7 +1434,7 @@ message("nextFacet: ", nextFacet)
           ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
 
           #format xaxis ticks
-          if (!longitudinal %in% dates$source_id) {
+          if (longitudinal %in% nums$source_id) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
           } else {
             df$XAXIS <- as.factor(df$XAXIS)
@@ -1450,7 +1478,7 @@ message("nextFacet: ", nextFacet)
             myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
           }
 
-          if (longitudinal %in% dates$source_id) {
+          if (!longitudinal %in% nums$source_id) {
             myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
           }
 
@@ -1654,7 +1682,7 @@ message("nextFacet: ", nextFacet)
           }
         }
         #temp placeholder for checking if data has time vars for x axis
-        if (is.null(longitudinal)) {
+        if (!contLongitudinal) {
           names(data)[names(data) == 'Line'] <- 'X-Axis'
         } 
         
@@ -1697,6 +1725,7 @@ message("nextFacet: ", nextFacet)
     tableData <- debounce(reactive({
       
       #collecting inputs 
+      mySubset <- current$subset
       myTimeframe1 <- current$range1
       myTimeframe2 <- current$range2
       longitudinal <- longitudinal1
@@ -1736,6 +1765,17 @@ message("nextFacet: ", nextFacet)
       message("have all inputs for plotData")
       #subset data
       if (!is.null(longitudinal1)) {
+        #should never have both subset and timeframes..
+        if (!is.null(mySubset)) {
+          data <- subsetDataFetcher(keep = mySubset, myData = singleVarData, col = longitudinal1)
+          message("subsetting data by non-continuous longitudinal variable..")
+          if (nrow(data) == 0) {
+            message("subset failed, returning")
+            return()
+          }
+        } else {
+          data <- singleVarData
+        }     
         if (!is.null(myTimeframe1)) {
           data <- subsetDataFetcher(myTimeframe1[1], myTimeframe1[2], singleVarData, longitudinal1)
           message("subsetting data by first longitudinal variable..")
@@ -1857,7 +1897,7 @@ message("nextFacet: ", nextFacet)
         #should have natozero before this for non-anthro events?? so an NA for diarrhea -> 0 ?? 
 
         #first thing is to save properties 
-        longitudinalText <- longitudinalText(myTimeframe1, myTimeframe2)
+        longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
         facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
         facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
         groupsText <- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
@@ -1899,13 +1939,14 @@ message("nextFacet: ", nextFacet)
         
         aggKey <- aggKey()
         
-        if (!is.null(longitudinal)) {
+        if (contLongitudinal) {
           myCols <- c(aggKey, myY, longitudinal)
           tempData <- plotData[, myCols, with=FALSE] 
           colnames(tempData) <- c(aggKey, "YAXIS", "XAXIS")
         } else {
           myCols <- c(aggKey, myY)
           tempData <- plotData[, myCols, with=FALSE] 
+          tempData <- unique(tempData)
           colnames(tempData) <- c(aggKey, "YAXIS")
         }
         
@@ -1939,7 +1980,7 @@ message("nextFacet: ", nextFacet)
         plotData <- tempData
 
         xaxis_bins <- input$xaxis_stp2
-        if (!is.null(longitudinal)) {
+        if (contLongitudinal) {
           message(head(plotData$XAXIS))
           message(typeof(plotData$XAXIS))
           message(class(plotData$XAXIS))
