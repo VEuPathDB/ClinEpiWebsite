@@ -157,7 +157,7 @@ shinyServer(function(input, output, session) {
       houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
       myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015")]
       houseObs <- houseObs[, !myCols, with=FALSE] 
-      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"))
+      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"), all = TRUE)
     }
 
     nums <- getNums(metadata.file)$source_id
