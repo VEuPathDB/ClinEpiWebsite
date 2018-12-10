@@ -15,6 +15,31 @@
     </record>
 -->
 <record>
+  <attribute name="headline">ClinEpiDB 5 Released</attribute>
+  <attribute name="date">15 Nov 2018 13:00</attribute>
+  <attribute name="tag">clinepidb_5_release</attribute>
+  <attribute name="category">release</attribute>
+  <attribute name="item">
+    <![CDATA[
+      <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 5!</i></div>
+      <section>
+        <h4><b>New Features in this Release</b></h4>
+        <ul>
+		<li>The analysis apps in the 'Analyze Results' tab of the results table have now been upated. There are still three apps available, Distributions, Contingency Tables, and Data Summaries but they have been redesigned to be easier to navigate and view results! Check them out!
+        
+        </ul>
+      </section>
+      <section> <h4><b>New Data in this Release</b></h4>
+		<ul>
+        <li>The Global Enteric Multicenter Study (GEMS), coordinated by the University of Maryland School of Medicine’s Center for Vaccine Development, was a case-control study conducted at seven diverse, high-burden sites in Asia and Africa: the Gambia, Kenya, Mali, Mozambique, Bangladesh, India and Pakistan. The study enrolled 22,568 children under 5 years of age. GEMS is the largest, most comprehensive study of childhood diarrheal diseases ever conducted in developing country settings.  Results showed that most attributable cases of moderate-to-severe diarrhoea were due to four pathogens: rotavirus, Cryptosporidium, enterotoxigenic Escherichia coli producing heat-stable toxin (ST-ETEC; with or without co-expression of heat-labile enterotoxin), and Shigella. Truly a groundbreaking study in childhood infectious disease, GEMS1 data is now available on ClinEpiDB.org. Exploring the data using the search wizard and analysis applications is open to all users; in order to download the data, investigators will be required to register and submit a data access request. In the coming months, the GEMS1A and heathcare utilization surveys that were conducted in concert with GEMS will also be made available. 
+        </ul>
+      </section>
+    ]]>
+  </attribute>
+</record>
+
+
+<record>
   <attribute name="headline">ClinEpiDB at ASTMH!</attribute>
   <attribute name="date">18 Oct 2018 13:00</attribute>
   <attribute name="tag">clinepidb_astmh</attribute>
@@ -49,7 +74,7 @@
       </section>
       <section> <h4><b>New Data in this Release</b></h4>
 		<ul>
-        <li>New data has been added to the PRISM cohort study. Participants from Nagongera were followed for another year from July 1, 2016 to June 30, 2017. This addition to the dataset includes a few new participants, thousands of new observations, and new light trap data..
+        <li>New data has been added to the PRISM cohort study. Participants from Nagongera were followed for another year from July 1, 2016 to June 30, 2017. This addition to the dataset includes a few new participants, thousands of new observations, and new light trap data.
         </ul>
       </section>
     ]]>
