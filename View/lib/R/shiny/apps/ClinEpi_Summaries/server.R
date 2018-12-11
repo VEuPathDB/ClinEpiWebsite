@@ -136,7 +136,7 @@ shinyServer(function(input, output, session) {
       houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
       myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015")]
       houseObs <- houseObs[, !myCols, with=FALSE]
-      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"))
+      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"), all = TRUE)
     }
     
     if ('Participant_Id' %in% colnames(attributes.file)) {
@@ -1777,7 +1777,7 @@ message("nextFacet: ", nextFacet)
           data <- singleVarData
         }     
         if (!is.null(myTimeframe1)) {
-          data <- subsetDataFetcher(myTimeframe1[1], myTimeframe1[2], singleVarData, longitudinal1)
+          data <- subsetDataFetcher(min = myTimeframe1[1], max = myTimeframe1[2], myData = data, col = longitudinal1)
           message("subsetting data by first longitudinal variable..")
           if (nrow(data) == 0) {
             message("subset failed, returning")
@@ -1786,7 +1786,7 @@ message("nextFacet: ", nextFacet)
         }
         if (!is.null(longitudinal2)) {
           if (!is.null(myTimeframe2)) {
-            data <- subsetDataFetcher(myTimeframe2[1], myTimeframe2[2], data, longitudinal2)
+            data <- subsetDataFetcher(min = myTimeframe2[1], max = myTimeframe2[2], myData = data, col = longitudinal2)
             message("subsetting data by second longitudinal variable..")
             if (nrow(data) == 0) {
               message("subset failed, returning")
