@@ -136,9 +136,29 @@ shinyServer(function(input, output, session) {
       houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
       myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015")]
       houseObs <- houseObs[, !myCols, with=FALSE]
-      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"), all = TRUE)
+      myStaticCols <- c("Participant_Id", "OBI_0001627")
+      static <- houseObs[, myStaticCols, with=FALSE]
+      static <- unique(static[!is.na(static$OBI_0001627),])
+      houseObs <- houseObs[, !c("OBI_0001627"), with=FALSE]
+      houseObs <- merge(static, houseObs, by = "Participant_Id")
+      singleVarData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"))
     }
-    
+   
+   if (grepl("PRISM", datasetName)) {
+      obs <- singleVarData[is.na(singleVarData$EUPATH_0000054),]
+      houseObs <- singleVarData[!is.na(singleVarData$EUPATH_0000054),]
+      obs <- obs[,which(unlist(lapply(obs, function(x)!all(is.na(x))))),with=F]
+      houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
+      myCols <- colnames(houseObs)[colnames(houseObs) %in% colnames(obs) & !colnames(houseObs) %in% c("Participant_Id")]
+      houseObs <- houseObs[, !myCols, with=FALSE]
+      obs <- unique(obs)
+      metadata.file <<- metadata.file[metadata.file$category != "Entomological measurements",]
+      keep <- c("Participant_Id", colnames(houseObs)[colnames(houseObs) %in% metadata.file$source_id])
+      houseObs <- houseObs[, keep, with=FALSE]
+      houseObs <- unique(houseObs)
+      singleVarData <<- merge(obs, houseObs, by = "Participant_Id")     
+    } 
+ 
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
       naToZero(singleVarData, col = "custom")
