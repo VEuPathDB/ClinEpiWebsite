@@ -243,6 +243,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
+  #in case input does not get rendered (i.e. is null) set prtcpntView$val TRUE globally and override with input
   observeEvent(input$prtcpntViewSwitch, {
     if (input$prtcpntViewSwitch == "TRUE" | input$prtcpntViewSwitch == TRUE) {
       prtcpntView$val <- TRUE
@@ -556,11 +557,7 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextX)
         }
 
-        #if (is.null(getMyX$val)) {
-          getMyX$val <- nextX
-        #} else if (getMyX$val != nextX) {
-        #  getMyX$val <- nextX
-        #}
+        getMyX$val <- nextX
       }
     })
 
@@ -580,13 +577,7 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
 
-        #if (is.null(getMyFacet$val)) {
-          getMyFacet$val <- nextFacet
-          print("resetting myFacet")
-        #} else if (getMyFacet$val != nextFacet) {
-        #  getMyFacet$val <- nextFacet
-        #  print("resetting myFacet")
-        #}
+        getMyFacet$val <- nextFacet
       }
     })
     
@@ -607,13 +598,7 @@ shinyServer(function(input, output, session) {
           message("Warning: non-unique source_ids returned ", nextFacet)
         } 
 
-        #if (is.null(getMyFacet2$val)) {
-          getMyFacet2$val <- nextFacet
-          print("resetting myFacet2")
-        #} else if (getMyFacet2$val != nextFacet) {
-        #  getMyFacet2$val <- nextFacet
-        #  print("resetting myFacet2")
-        #}
+        getMyFacet2$val <- nextFacet
       }
     })
 
@@ -642,7 +627,8 @@ shinyServer(function(input, output, session) {
       if (myPrtcpntView == TRUE) {
         aggKey <- c("Participant_Id")
       } else {
-        #aggKey <- c("Observation_Id") 
+        #apps currently assume one col will be participant_id, so not using obs_id for now
+        #assumes the two are equivalent (no more than one observation for a participant on some date longitudinal1)  
         aggKey <- c("Participant_Id", longitudinal1)
       }
       
@@ -664,7 +650,6 @@ shinyServer(function(input, output, session) {
         return()
       }
       
-      #TODO try to save this globally and reactively have it update?? cause right now its called in three different places..
       df <- plotData()
       if (facetType == "makeGroups") {
         myFacet <- "FACET"
@@ -731,9 +716,9 @@ shinyServer(function(input, output, session) {
       if (is.null(input$facet2Type)) {
         return()
       }
-      if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
-        return()
-      }
+      #if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
+      #  return()
+      #}
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
         if (is.null(getMyX$val)) {
@@ -1169,6 +1154,9 @@ message(class(data))
           if (is.null(myFacet)) {
             return()
           }
+          if (myFacet == "none") {
+            return()
+          }
         } 
       }
       
@@ -1195,6 +1183,9 @@ message(class(data))
           if (is.null(myFacet2)) {
             return()
           }
+          if (myFacet2 == "none") {
+            return()
+          } 
         } 
       }
 
