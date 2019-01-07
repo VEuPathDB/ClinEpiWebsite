@@ -734,9 +734,9 @@ shinyServer(function(input, output, session) {
       if (is.null(input$facet2Type)) {
         return()
       }
-      if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
-        return()
-      }
+      #if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
+      #  return()
+      #}
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
@@ -1292,6 +1292,9 @@ shinyServer(function(input, output, session) {
           if (is.null(myFacet)) {
             return()
           }
+          if (myFacet == "none") {
+            return()
+          }
         } 
       }
       
@@ -1316,6 +1319,9 @@ shinyServer(function(input, output, session) {
           } 
         } else if (facet2Type == "direct") {
           if (is.null(myFacet2)) {
+            return()
+          }
+          if (myFacet2 == "none") {
             return()
           }
         } 

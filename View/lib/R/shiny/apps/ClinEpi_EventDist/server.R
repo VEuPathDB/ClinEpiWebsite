@@ -751,9 +751,9 @@ shinyServer(function(input, output, session) {
       if (is.null(input$facet2Type)) {
         return()
       }
-      if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
-        return()
-      }
+      #if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
+      #  return()
+      #}
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
         if (is.null(getMyX$val)) {
@@ -1189,6 +1189,9 @@ message(class(data))
           if (is.null(myFacet)) {
             return()
           }
+          if (myFacet == "none") {
+            return()
+          }
         } 
       }
       
@@ -1213,6 +1216,9 @@ message(class(data))
           } 
         } else if (facet2Type == "direct") {
           if (is.null(myFacet2)) {
+            return()
+          }
+          if (myFacet2 == "none") {
             return()
           }
         } 

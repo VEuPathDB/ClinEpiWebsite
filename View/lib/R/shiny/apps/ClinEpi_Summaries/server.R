@@ -195,6 +195,7 @@ shinyServer(function(input, output, session) {
         }     
       } else {
         numTimelines <- 2
+        contLongitudinal <<- TRUE 
       }
       if (numTimelines == 1) {
         longitudinal1 <<- longitudinal.file$columns
@@ -251,7 +252,7 @@ shinyServer(function(input, output, session) {
   facet2Init <- reactive({
     facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, singleVarData = singleVarData, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
       if (is.null(properties)) {
-        getMyFacet2$val <- "custom"
+        getMyFacet2$val <- selectedFacet2()
       } else {
         getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
       }
@@ -454,19 +455,11 @@ shinyServer(function(input, output, session) {
     output$facet2_type <- renderUI({
       mySelected <- properties$selected[properties$input == "input$facet2Type"]
       if (is.null(properties)) {
-        if (isParticipant) {
-          selectInput(inputId = "facet2Type",
-                      label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                      selected = "direct",
-                      width = '100%')
-        } else {
-          selectInput(inputId = "facet2Type",
-                      label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
-                      selected = "makeGroups",
-                      width = '100%')
-        }
+        selectInput(inputId = "facet2Type",
+                    label = NULL,
+                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    selected = "none",
+                    width = '100%')
       } else {
         selectInput(inputId = "facet2Type",
                     label = NULL,
@@ -1844,6 +1837,9 @@ message("nextFacet: ", nextFacet)
           if (is.null(myGroups)) {
             return()
           }
+          if (myGroups == "none") {
+            return()
+          }
         } 
       }
       if (is.null(facetType)) {
@@ -1869,6 +1865,9 @@ message("nextFacet: ", nextFacet)
           if (is.null(myFacet)) {
             return()
           }
+          if (myFacet == "none") {
+            return()
+          }
         }
       }
       if (is.null(facet2Type)) {
@@ -1892,6 +1891,9 @@ message("nextFacet: ", nextFacet)
           }
         } else if (facet2Type == "direct") {
           if (is.null(myFacet2)) {
+            return()
+          }
+          if (myFacet2 == "none") {
             return()
           }
         }
