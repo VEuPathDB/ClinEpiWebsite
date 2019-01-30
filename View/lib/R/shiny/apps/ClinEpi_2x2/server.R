@@ -120,8 +120,13 @@ shinyServer(function(input, output, session) {
     classes <- c(classes, "Participant_Id" = "character", "Observation_Id" = "character")
     classes <- classes[!duplicated(names(classes))]
 
-    singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
-   
+    #patch for india. not sure why this source id is in ontology table but cant find in data
+    if (!grepl("MAL-ED", datasetName)) {
+      singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"))
+    } else {
+      singleVarData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), colClasses = classes)
+    }   
+ 
     if ('Participant_Id' %in% colnames(attributes.file)) {
       singleVarData <<- merge(singleVarData, attributes.file, by = "Participant_Id", all = TRUE)
       naToZero(singleVarData, col = "custom")
