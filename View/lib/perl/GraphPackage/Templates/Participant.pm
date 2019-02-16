@@ -301,8 +301,10 @@ sub finalProfileAdjustments{
   my $rAdjustString = << 'RADJUST';
 profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
 profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-profile.df.full = transform(profile.df.full, "COLOR"=ifelse(test = (STATUS == "Illness other than malaria" | STATUS == "Asymptomatic malaria"), yes = "Asymptomatic malaria or other illness", no = ifelse(STATUS == "No illness", "No illness", "Symptomatic malaria")))
-profile.df.full = transform(profile.df.full, "FILL"= ifelse(STATUS == "Asymptomatic malaria", "Asymptomatic malaria", ifelse(STATUS == "Severe malaria", "Severe malaria", NA)))
+profile.df.full$COLOR <- profile.df.full$STATUS;
+profile.df.full$FILL <- profile.df.full$STATUS;
+#profile.df.full = transform(profile.df.full, "COLOR"=ifelse(test = (STATUS == "Illness other than malaria" | STATUS == "Asymptomatic malaria"), yes = "Asymptomatic malaria or other illness", no = ifelse(STATUS == "No illness", "No illness", "Symptomatic malaria")))
+#profile.df.full = transform(profile.df.full, "FILL"= ifelse(STATUS == "Asymptomatic malaria", "Asymptomatic malaria", ifelse(STATUS == "Severe malaria", "Severe malaria", NA)))
 profile.df.full$TOOLTIP = profile.df.full$STATUS
 
 RADJUST
@@ -315,9 +317,9 @@ RADJUST
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
-  $profile->setColorVals("c(\"No illness\" = \"black\", \"Symptomatic malaria\" = \"#B63679FF\", \"Asymptomatic malaria or other illness\" = \"#FECE91FF\")");
-  $profile->setFillVals("c(\"Severe malaria\" = \"#B63679FF\", \"Asymptomatic malaria\" = \"#FECE91FF\")");
-  $profile->setCustomBreaks("c(\"No illness\", \"Symptomatic malaria\", \"Asymptomatic malaria or other illness\", \"Severe malaria\", \"Asymptomatic malaria\")");
+  $profile->setColorVals("c(\"No illness\" = \"black\", \"Uncomplicated malaria\" = \"#CD4071FF\", \"Asymptomatic parasitemia\" = \"#FA7C5EFF\", \"Illness other than malaria\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Uncomplicated malaria\" = \"#CD4071FF\", \"Asymptomatic parasitemia\" = \"#FA7C5EFF\", \"Illness other than malaria\" = \"#FECE91FF\")");
+  $profile->setCustomBreaks("c(\"No illness\", \"Uncomplicated malaria\", \"Asymptomatic parasitemia\", \"Illness other than malaria\")");
 }
 
 1;
