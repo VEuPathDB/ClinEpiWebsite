@@ -32,7 +32,7 @@ customGroupsUI <- function(id, colWidth = 6) {
 }
 
 #make sure this returns inputs and range info 
-customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, singleVarData, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = reactive(NULL)) {
+customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = reactive(NULL)) {
   ns <- session$ns
 
   propUrl <<- getPropertiesUrl(session) 
@@ -66,24 +66,17 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     dates <- getDates(metadata.file)
    
     if (myGroup %in% nums$source_id | myGroup %in% dates$source_id) {
-      data <- singleVarData
-      tempDF <- completeDT(data, myGroup)
       
-      groupRange$myMin <- min(tempDF[[myGroup]], na.rm=TRUE)
+      groupRange$myMin <- as.numeric(metadata.file$min[metadata.file$source_id == myGroup]) 
 
-      #if ("BFO_0000015" %in% colnames(tempDF)) {
-      #  if (any(levels(as.factor(tempDF$BFO_0000015)) == "Diarrhea Episode")) {
-      #    groupRange$myMin <- 0
-      #  }
-      #}
-      groupRange$myMax <- max(tempDF[[myGroup]], na.rm=TRUE)
+      groupRange$myMax <- as.numeric(metadata.file$max[metadata.file$source_id == myGroup])
       
       if (myGroup %in% nums$source_id) {
-        groupRange$mean <- mean(tempDF[[myGroup]])
+        groupRange$mean <- as.numeric(metadata.file$average[metadata.file$source_id == myGroup])
       } else if (myGroup %in% dates$source_id) {
         message("myGroup is a date: ", myGroup)
-        groupRange$startDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroup]]), .25, na.rm = TRUE))
-        groupRange$endDate <- as.Date(quantile(as.POSIXct(tempDF[[myGroup]]), .75, na.rm = TRUE))
+        groupRange$startDate <- metadata.file$lower_quantile[metadata.file$source_id == myGroup]
+        groupRange$endDate <- metadata.file$upper_quantile[metadata.file$source_id == myGroup]
         if (is.null(groupRange$myMin)) {
           groupRange$myMin <- groupRange$myMax
         } 
@@ -103,9 +96,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     }
  
     if (groupsType() == "makeGroups") {
-      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, include = include())
+      attrChoiceList <- getUIList(metadata.file = metadata.file, include = include())
     } else {
-      attrChoiceList <- getUIList(data = singleVarData, metadata.file = metadata.file, include = include(), maxLevels = 12)
+      attrChoiceList <- getUIList(metadata.file = metadata.file, include = include(), maxLevels = 12)
     }
     
     attrChoiceList
@@ -149,9 +142,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       myProp <- mySelected[1]
       myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
       if (length(myParent) != 0) {
-          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parent == myParent]
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parentlabel == myParent]
         } else {
-          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parent == "null" | metadata.file$parent == "" | is.null(metadata.file$parent))]
+          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parentlabel == "null" | metadata.file$parentlabel == "" | is.null(metadata.file$parentlabel))]
         }
       nextGroup <- unique(nextGroup)
 
@@ -174,36 +167,50 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (grepl("Error", properties)[1]) {
       properties <- NULL
     }
+	message("properties: ", head(properties))
     myGroup <- getMyGroups$val
+    #if (is.null(myGroup)) {
+    #  return()
+    #}
+	message("my group, btn: ", myGroup)
     if (!is.null(groupsTypeID)) {
       groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
+	message("groupTypeSelected: ", groupsTypeSelected)
     } else {
+        message("groupsTypeID is null")
       groupsTypeSelected <- NULL
     } 
       dontUseProps <- FALSE
       if (is.null(properties)) {
         dontUseProps <- TRUE
       } else {
+	message(!is.null(groupsType()))
+	message(!is.null(groupsTypeSelected))
           if (!is.null(groupsType()) & !is.null(groupsTypeSelected)) {
-            if (groupsTypeSelected != groupsType()) {
-              dontUseProps <- TRUE
+	    if (!is.na(groupsType()) & !is.na(groupsTypeSelected)) {
+              if (groupsTypeSelected != groupsType()) {
+                dontUseProps <- TRUE
+	      }
             }
           } else {
             return
           }
       }
+	message("dontUseProps: ", dontUseProps)
       if (dontUseProps) {
         mySelected = selected()
       } else {
         mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
       }
     #this should only happen if switching from 'none' to other for groupsType
-    if (mySelected == "") {
+	message("mySelected: ", mySelected)
+    if (length(mySelected) == 0) {
       mySelected <- "custom"
-      myGroup <- mySelected
+     # myGroup <- mySelected
     } 
 
     if (is.null(myGroup)) {
+	message("making label with mySelected")
       label <- metadata.file$property[metadata.file$source_id == mySelected]
       getMyGroups$val <- mySelected
       if (is.null(label)) {
@@ -211,9 +218,10 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       }
       #label <- "Please select one"
     } else {
+	message("making label with myGroup")
       label <- metadata.file$property[metadata.file$source_id == myGroup]
     }
-    
+   message("label: ", label) 
     label
   })
 
@@ -225,34 +233,37 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (groupsType() != "makeGroups") {
       return()
     }
+
     myGroup <- getMyGroups$val
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
     
-    data <- singleVarData
-    tempDF <- completeDT(data, myGroup)
-
     myGroupSelected <- properties$selected[properties$input == paste0(moduleName, "$group")]
     mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]  
 
-    attrStp1List <- getUIStp1List(singleVarData, myGroup)
+    attrStp1List <- getUIStp1List(metadata.file, myGroup)
     observations <- metadata.file$source_id[metadata.file$category == "Observation"]
-    observations <- observations[observations %in% colnames(singleVarData)]
+    #observations <- observations[observations %in% colnames(studyData)]
 
     dontUseProps <- FALSE
     if (is.null(properties)) {
       dontUseProps <- TRUE
     } else {
-      if (myGroupSelected != myGroup) {
-        dontUseProps <- TRUE
+      if (length(myGroupSelected) != 0) {
+        if (myGroupSelected != myGroup) {
+          dontUseProps <- TRUE
+	}
       }
-      if (!is.null(groupsTypeID)) {
-        if (!is.null(groupsTypeSelected)) {
-          if (groupsType() != groupsTypeSelected & myGroup %in% dates$source_id) {
+      if (length(groupsTypeID) != 0) {
+        if (length(groupsTypeSelected) != 0) {
+          if (groupsType() != groupsTypeSelected | myGroup %in% dates$source_id) {
             dontUseProps <- TRUE
           }
         }
+      }
+      if (length(mySelected) == 0) {
+	dontUseProps <- TRUE
       }
     }
 
@@ -283,18 +294,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         }
       }
 
-      #if (any(colnames(tempDF) %in% "BFO_0000015")) {
-      #  if (levels(as.factor(tempDF$BFO_0000015)) == "Anthropometry") {
-      #    mySelected = "delta"
-      #    anthro <- TRUE
-      #  }     
-      #}
     } else {
       if (mySelected == 'all' | mySelected == 'any') {
         obs <- TRUE
       }
     }
-  
+
     if (anthro) {
           selectInput(inputId = ns("group_stp1"),
                       label = "where",
@@ -355,6 +360,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (input$group_stp1 == "") {
       return()
     }
+    if (length(input$group_stp1) == 0) {
+      return()
+    }
     if (groupsType() != "makeGroups") {
       return()
     }
@@ -366,7 +374,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
 
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
-    attrStp1List <- getUIStp1List(singleVarData, myGroup)
+    attrStp1List <- getUIStp1List(metadata.file, myGroup)
 
     numeric <- c("lessThan", "greaterThan", "equals")
     anthro <- c("percentDays", "delta", "direct")
@@ -376,8 +384,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(properties)) {
       dontUseProps <- TRUE
     } else {
-      if (myStp1Selected != myStp1Val) {
-        dontUseProps <- TRUE
+      if (length(myStp1Selected) != 0) {
+	if (myStp1Selected != myStp1Val) {
+          dontUseProps <- TRUE
+	}
+      } else {
+	dontUseProps <- TRUE
       }
     }
     
@@ -493,9 +505,15 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(properties)) {
       dontUseProps <- TRUE
     } else {
-      if (myStp1Selected != myStp1Val) {
-        dontUseProps <- TRUE
+      if (!is.null(myStp1Selected)) {
+        if (myStp1Selected != myStp1Val) {
+          dontUseProps <- TRUE
+ 	}
       }
+    }
+
+    if (is.null(mySelected)) {
+      dontUseProps <- FALSE
     }
 
     if (dontUseProps) {
@@ -539,6 +557,12 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   
   output$choose_stp4 <- renderUI({
     if (is.null(input$group_stp1)) {
+      return()
+    }
+    if (is.null(input$group_stp2)) {
+      return()
+    }
+    if (is.null(input$group_stp3)) {
       return()
     }
     if (groupsType() != "makeGroups") {

@@ -13,7 +13,7 @@ timelineUI <- function(id) {
 }
 
 #make sure this returns inputs and range info 
-timeline <- function(input, output, session, data, longitudinal, metadata.file) {
+timeline <- function(input, output, session, longitudinal, metadata.file) {
   ns <- session$ns
 
   propUrl <<- getPropertiesUrl(session)
@@ -60,16 +60,27 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
           dontUseProps <- TRUE
         } 
       } else {
-        myMin <- min(tempDF[[selected]], na.rm = TRUE)
-        myMax <- max(tempDF[[selected]], na.rm = TRUE) 
+        myMin <- unique(metadata.file$min[metadata.file$source_id == selected])
+        myMax <- unique(metadata.file$max[metadata.file$source_id == selected])
      
         if (length(longitudinal1$columns) == 1) {
           label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])
+	  if (longitudinal1$columns[1] %in% dates) {
+	    myMin <- as.Date(myMin, format = "%d-%b-%y")
+            myMax <- as.Date(myMax, format = "%d-%b-%y")
+          } else {
+	    myMin <- as.numeric(myMin)
+            myMax <- as.numeric(myMax)
+	  }
         } else {
           if (all(longitudinal1$columns %in% dates)) {
             label <- "Date Variable:"
+	    myMin <- as.Date(myMin, format = "%d-%b-%y")
+	    myMax <- as.Date(myMax, format = "%d-%b-%y")
           } else {
             label <- "Age Variable:"
+	    myMin <- as.numeric(myMin)
+	    myMax <- as.numeric(myMax)
           }
         }
       
@@ -101,16 +112,27 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
         timeline2 <- NULL
       } else {
         tempDF2 <- completeDT(data, selected2)
-        myMin2 <- min(tempDF[[selected2]], na.rm = TRUE)
-        myMax2 <- max(tempDF[[selected2]], na.rm = TRUE)
+        myMin2 <- metadata.file$min[metadata.file$source_id == selected2]
+        myMax2 <- metadata.file$max[metadata.file$source_id == selected2]
 
         if (length(longitudinal2$columns) == 1) {
           label2 <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal2$columns[1]])
+ 	  if (longitudinal2$columns[1] %in% dates) {
+            myMin2 <- as.Date(myMin2, format = "%d-%b-%y")
+            myMax2 <- as.Date(myMax2, format = "%d-%b-%y")
+          } else {
+	    myMin2 <- as.numeric(myMin2)
+            myMax2 <- as.numeric(myMax2)
+	  }
         } else {
           if (all(longitudinal2$columns %in% dates)) {
             label2 <- "Date Variable:"
+            myMin2 <- as.Date(myMin2, format = "%d-%b-%y")
+            myMax2 <- as.Date(myMax2, format = "%d-%b-%y")
           } else {
             label2 <- "Age Variable:"
+            myMin2 <- as.numeric(myMin2)
+            myMax2 <- as.numeric(myMax2)
           }
         }
 
@@ -129,7 +151,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
     }
 
     if (is.null(timeline1)) {
-      print("returning empty timelineBox")
+      message("returning empty timelineBox")
       return
     } else {
       if (is.null(timeline2)) {
@@ -141,7 +163,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
               box(width = 12, status = "primary", title = "Timepoint Filter",
                   selectizeInput(inputId = ns("subset"),
                                  label = label,
-                                 choices = getUIStp1List(tempDF, selected),
+                                 choices = getUIStp1List(metadata.file, selected),
                                  width = '100%',
                                  multiple = TRUE,
                                  options = list(placeholder = '-Selected Items Will Appear Here-'))    
@@ -152,7 +174,7 @@ timeline <- function(input, output, session, data, longitudinal, metadata.file) 
               box(width = 12, status = "primary", title = "Timepoint Filter", 
                   selectizeInput(inputId = ns("subset"),
                                  label = label,
-                                 choices = getUIStp1List(tempDF, selected),
+                                 choices = getUIStp1List(metadata.file, selected),
                                  selected = properties$selected[properties$input == "current$subset"],
                                  width = '100%',
                                  multiple = TRUE,

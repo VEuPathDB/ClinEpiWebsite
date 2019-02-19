@@ -98,17 +98,16 @@ getDropList <- function(){
 
   
 #this is a bit slow right now because were working with a list of lists and if its possible to vectorize rather than use for loops idk how yet.
-getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subList = NULL, include=c("all")) {
+getUIListOLD <- function(metadata.file, minLevels = 1, maxLevels = Inf, subList = NULL, include=c("all")) {
   drop <- getDropList()
   
-  colnames <- colnames(data)
-  colnames <- setdiff(colnames, drop)
-  
-  choices <- subset(metadata.file, source_id %in% colnames)
+  #choices <- subset(metadata.file, source_id %in% colnames)
+  choices <- metadata.file[!is.na(metadata.file$number_distinct_values)]
+
   #temporary until i can figure how to allow plotting of dates. 
   #will probably need to manually bin them in any place we would allowl plotly to automatically bin nums
   #then remember in those cases to set the labels accurately
-  choices <- subset(choices, !type %in% "date")  
+  choices <- choices[choices$type != 'date']  
 
   #here remove from choices anything where category not in include param, unless param is 'all'
   #could alternatively assume if include is NULL to use everything
@@ -130,20 +129,20 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
   choicesNumeric <- subset(choices, type %in% "number") 
 
     if (is.null(subList)) {
-      roots <- as.list(metadata.file$source_id[metadata.file$parent == "null"])
+      roots <- as.list(metadata.file$source_id[metadata.file$parentlabel == ""])
       if (is.null(roots)) {
         message("No roots in ontology file..")
       } else {
         names(roots) <- metadata.file$property[metadata.file$source_id %in% unlist(roots)]
-        roots <- getUIList(data = data, subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
+        roots <- getUIList(subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
       }
       return(roots)
     } else {
       #find children
       subList <- lapply(subList, FUN = function(x){
-                                                 temp <- as.list(metadata.file$source_id[metadata.file$parent == metadata.file$property[metadata.file$source_id == x]])
+                                                 temp <- as.list(metadata.file$source_id[metadata.file$parentlabel == metadata.file$property[metadata.file$source_id == x]])
                                                  names(temp) <- metadata.file$property[metadata.file$source_id %in% unlist(temp)]
-                                                 temp <- getUIList(data = data, subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
+                                                 temp <- getUIList(subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
                                                })
       #this case is a leaf, so return no children
       if (length(subList) == 0) {
@@ -192,9 +191,7 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
           mySourceId <- subList[i]
           if (mySourceId %in% choices$source_id) {
             if (!mySourceId %in% choicesNumeric$source_id) {
-              if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
-                #print(length(subList[[i]]))
-                #print(mySourceId)
+              if (metadata.file$number_distinct_values[metadata.file$source_id == mySourceId] > maxLevels | metadata.file$number_distinct_values[metadata.file$source_id == mySourceId] < minLevels) {
                 if (length(subList[[i]]) == 0) {
                   subList[[i]] <- NULL
                 } else {
@@ -210,29 +207,111 @@ getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subLi
     }
 }
  
-#this ui will be different from above one(s)
-#returns all values for a column, can probably just pass singleVarData as data param
-getUIStp1List <- function(data, col){
+#TODO profile this against old one
+getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include=c("all")) {
+  drop <- getDropList()
+  
+  choices <- metadata.file[!metadata.file$source_id %in% drop,]
+  #temporary until i can figure how to allow plotting of dates. 
+  #will probably need to manually bin them in any place we would allowl plotly to automatically bin nums
+  #then remember in those cases to set the labels accurately
+  choices <- subset(choices, !type %in% "date")  
 
-  tempDF <- completeDT(data, col)
-  #data <- setDT(tempDF)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-  #                    by = setdiff(names(tempDF), eval(col))][!is.na(eval(col))]
-  if (any(grepl("|", data[[col]], fixed=TRUE))) {
-    data <- separate_rows(tempDF, col, sep = "[|]+")
-    data[[col]] <- gsub("^\\s+|\\s+$", "", data[[col]])
+  #here remove from choices anything where category not in include param, unless param is 'all'
+  #could alternatively assume if include is NULL to use everything
+  
+  if (length(include) > 1) {
+    if (all(include != "all")) {
+      include <- c(include, "", "null")
+      choices <- choices[choices$category %in% include,]
+    } else {
+      stop("parameter 'include' of getUIList can either be 'all' or a character vector of categories..")
+    }
+  } else {
+    if (include != "all") {
+      include <- c(include, "", "null")
+      choices <- choices[choices$category %in% include,]
+    }
   }
 
-  levels <- levels(as.factor(data[[col]]))
+  if (nrow(choices) == 0) {
+    return()
+  }
+
+  #TODO figure how to incorporate include and drop into this
+  network <- choices
+  #for efficiency, only take levels on strings.
+  networkOther <- network[!network$type == "string",]
+  networkString <- network[network$type == "string",]
+  networkString$stdisable <- is.na(networkString$number_distinct_values) | networkString$number_distinct_values > maxLevels | networkString$number_distinct_values < minLevels
+  networkOther$stdisable <- is.na(networkOther$number_distinct_values)
+  network <- rbind(networkString, networkOther)
+  network$leaf <- !(network$property %in% network$parentlabel)
+  
+  #i hate loops, but i see no other way. at least its iterative rather than recursive .. :/
+  while (any(network$stdisable == TRUE & network$leaf == TRUE)) {
+    remove <- network$stdisable == TRUE & network$leaf == TRUE
+    network <- network[!remove,]
+    network$leaf <- !(network$property %in% network$parentlabel)
+  }
+  disabled <- network$property[network$stdisable == TRUE]
+  
+  myCols <- c("property", "parentlabel")#, "stdisable")
+  network <- as.data.frame(network[, myCols, with=FALSE])
+  rootName <- unique(network[!(network$parentlabel %in% network$property),])
+ 
+  
+  tree <- FromDataFrameNetwork(network)
+  list <- as.list(tree)
+  list$name <- NULL
+  
+  #grr recursion
+  list <- setAttrDisabled(disabled, list)
+  
+  list
+} 
+
+setAttrDisabled <- function(disabledNames, list) {
+  if (length(list) == 0) {
+    return("")
+  }  
+  for (name in names(list)) {
+    if (name %in% disabledNames) {
+      attr(list[[name]], "stdisabled") <- TRUE
+    }
+    disabledList <- setAttrDisabled(disabledNames, list[[name]])
+    list[[name]] <- disabledList
+  }
+  list
+}
+
+getUIStp1List <- function(metadata.file, col){
+  uniqueVals <- metadata.file$distinct_values[metadata.file$source_id == col]
+  uniqueVals <- unlist(strsplit(uniqueVals, split="|", fixed = TRUE))
+message("uniqueVals: ", uniqueVals)
+  #TODO come back check this. dont remember second line
+  #if (any(grepl("|", uniqueVals, fixed=TRUE))) {
+  #  uniqueVals <- separate_rows(uniqueVals, col, sep = "[|]+")
+  #  uniqueVals <- gsub("^\\s+|\\s+$", "", uniqueVals)
+  #}
+
+  uniqueVals
 }
     
 #seperate pipe delimited fields into their own rows if necessary
 getFinalDT <- function(data, metadata.file, col){
      
   strings <- getStrings(metadata.file)
-   
+	message("col: ", col)
   if (col %in% strings$source_id) {
     #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
     #                      by = setdiff(names(data), eval(col))][!is.na(eval(col))]
+	message(is.null(data))
+	message(length(data))
+	message(col)
+	message(unique(data[[col]]))
+	message("test grepl: ", any(grepl("|", data[[col]], fixed=TRUE)))
+	
     if (any(grepl("|", data[[col]], fixed=TRUE))) {
       data <- separate_rows(data, col, sep = "[|]+")
     }
@@ -245,6 +324,12 @@ getFinalDT <- function(data, metadata.file, col){
 #this takes inputs passed to it and creates subsets of data based on those inputs
 makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey = c("Participant_Id")){
   #realistically should check for nulls before calling, but just in case
+  if (is.null(myGroups)) {
+    return()
+  }
+  if (length(myGroups) == 0) {
+    return()
+  }
   if (is.null(groups_stp1)) {
     message("groups stp1 is null!! returning")
     return()
