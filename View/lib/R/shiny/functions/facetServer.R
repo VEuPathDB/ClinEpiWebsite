@@ -150,6 +150,8 @@ facet2 <- reactive({
     }
   }
 
+  nums <- getNums(metadata.file)
+  dates <- getDates(metadata.file)
   data <- timelineData()
   if (facet2Type == "direct") {
         outData <- data
