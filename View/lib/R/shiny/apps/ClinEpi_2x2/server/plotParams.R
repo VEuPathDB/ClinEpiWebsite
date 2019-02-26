@@ -3,7 +3,7 @@
   })
 
   attrInit <- reactive({
-    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val))
+    attrInfo <<- callModule(customGroups, "attr", groupLabel = reactive(NULL), metadata.file = metadata.file, include = reactive(c("all")), selected = selectedAttr, moduleName = "attrInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
       if (is.null(properties)) {
         getMyAttr$val <- selectedAttr()
       } else {
@@ -12,7 +12,7 @@
   })
 
   outInit <- reactive({
-    outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val))
+    outInfo <<- callModule(customGroups, "out", groupLabel = reactive(NULL), include = reactive(c("all")), metadata.file = metadata.file, selected = reactive("custom"), moduleName = "outInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
       if (is.null(properties)) {
         getMyOut$val <- "custom"
       } else {
@@ -21,7 +21,7 @@
   })
 
   facetInit <- reactive({
-    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val))
+    facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
       if (is.null(properties)) {
         getMyFacet$val <- selectedFacet()
       } else {
@@ -30,7 +30,7 @@
   })
 
   facet2Init <- reactive({
-     facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val))
+     facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
       if (is.null(properties)) {
         getMyFacet2$val <- selectedFacet2()
       } else {

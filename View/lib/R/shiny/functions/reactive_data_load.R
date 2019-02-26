@@ -21,6 +21,10 @@ reactiveDataFetcher = reactive({
       houseObs <- houseObs[, !c("OBI_0001627"), with=FALSE]
       houseObs <- merge(static, houseObs, by = "Participant_Id")
       studyData <<- merge(obs, houseObs, by = c("Participant_Id", "BFO_0000015"))
+      metadata.file$distinct_values[metadata.file$source_id == 'BFO_0000015'] <<- "60 day follow-up|Enrollment"
+      temp <- sapply(metadata.file$source_id[metadata.file$source_id %in% colnames(studyData)], FUN = function(x){unique(studyData$BFO_0000015[!is.na(studyData[[x]])])})
+      temp <- data.table(timepoints = temp, source_id = names(temp))
+      metadata.file <<- merge(metadata.file, temp, by = "source_id", all=TRUE)
     }
 
     if (grepl("India", datasetName)) {
@@ -120,23 +124,26 @@ reactiveDataFetcher = reactive({
           studyData$custom[studyData$custom == 0] <<- "Not Selected"
         }
 
+	if (!"timepoints" %in% colnames(metadata.file)) {
+	  metadata.file$timepoints <<- NA
+	}
         if ('Participant_Id' %in% colnames(attributes.file)) {
           attributes.file <- attributes.file[, Participant_Id:=as.character(Participant_Id)]
           isParticipant <<- TRUE
-          metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant", NA, NA, NA, NA, NA, 2, "Selected|Not Selected"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant", NA, NA, NA, NA, NA, NA, NA))
-          metadata.file <<- rbind(metadata.file, list("dontcare2", "Dynamic Attributes", "string", "Search Results", "Participant", NA, NA, NA, NA, NA, NA, NA))
-          metadata.file <<- rbind(metadata.file, list("dontcare3", "Search Results", "string", "", "Participant", NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant", NA, NA, NA, NA, NA, 2, "Selected|Not Selected", NA))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant", NA, NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("dontcare2", "Dynamic Attributes", "string", "Search Results", "Participant", NA, NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("dontcare3", "Search Results", "string", "", "Participant", NA, NA, NA, NA, NA, NA, NA, NA))
           #TODO figure out what we want to do here for the dynamic ones. for now NA
-          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant", NA, NA, NA, NA, NA, NA, NA))
-          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant", NA, NA, NA, NA, NA, NA, NA))
-          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant", NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant", NA, NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant", NA, NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant", NA, NA, NA, NA, NA, NA, NA, NA))
           } else {
           attributes.file = attributes.file[, Observation_Id:=as.character(Observation_Id)]
           isParticipant <<- FALSE
-          metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation", NA, NA, NA, NA, NA, 2, "Selected|Not Selected"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation", NA, NA, NA, NA, NA, NA, NA))
-          metadata.file <<- rbind(metadata.file, list("dontcare2", "Search Results", "string", "", "Observation", NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation", NA, NA, NA, NA, NA, 2, "Selected|Not Selected", NA))
+          metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation", NA, NA, NA, NA, NA, NA, NA, NA))
+          metadata.file <<- rbind(metadata.file, list("dontcare2", "Search Results", "string", "", "Observation", NA, NA, NA, NA, NA, NA, NA, NA))
         }
       }
     }
