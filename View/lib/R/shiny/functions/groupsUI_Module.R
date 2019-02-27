@@ -38,7 +38,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   force(timepoints())
   force(prtcpntView())
   force(groupsType())
-  force(selected())
+  #force(selected())
   force(include())
 
   propUrl <<- getPropertiesUrl(session) 
@@ -157,11 +157,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         message("Warning: non-unique source_ids returned ", nextGroup)
       }   
  
-      if (is.null(getMyGroups$val)) {
-        getMyGroups$val <- nextGroup
-      } else if (getMyGroups$val != nextGroup) {
-        getMyGroups$val <- nextGroup
-      }
+      getMyGroups$val <- nextGroup
     }
   })
   
@@ -481,6 +477,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (groupsType() != "makeGroups") {
       return()
     }
+
     myStp1Val <- input$group_stp1
     myStp1Selected <- properties$selected[properties$input == paste0(moduleName, "$group_stp1")]
     mySelected <- properties$selected[properties$input == paste0(moduleName, "$group_stp3")]
@@ -492,7 +489,6 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     anthro <- c("delta", "direct", "percentDays")
     numeric <- c("lessThan", "greaterThan", "equals")
     obs <- c("all", "any")
-
     dontUseProps <- FALSE
     if (is.null(properties)) {
       dontUseProps <- TRUE
@@ -523,7 +519,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         }
       }
     }
-   
+
     if (myStp1Val %in% anthro) {
       if (myStp1Val == "percentDays") {
         selectInput(inputId = ns("group_stp3"),

@@ -127,8 +127,6 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include=c("
   if (!is.null(timepoints.keep)) {
     if ("timepoints" %in% colnames(choices)) {
       leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
-	message("leaves: ", nrow(leaves))
-	message("choices: ", nrow(choices))
     }
   }
 
@@ -188,12 +186,6 @@ setAttrDisabled <- function(disabledNames, list) {
 getUIStp1List <- function(metadata.file, col){
   uniqueVals <- metadata.file$distinct_values[metadata.file$source_id == col]
   uniqueVals <- unlist(strsplit(uniqueVals, split="|", fixed = TRUE))
-message("uniqueVals: ", uniqueVals)
-  #TODO come back check this. dont remember second line
-  #if (any(grepl("|", uniqueVals, fixed=TRUE))) {
-  #  uniqueVals <- separate_rows(uniqueVals, col, sep = "[|]+")
-  #  uniqueVals <- gsub("^\\s+|\\s+$", "", uniqueVals)
-  #}
 
   uniqueVals
 }
@@ -202,15 +194,7 @@ message("uniqueVals: ", uniqueVals)
 getFinalDT <- function(data, metadata.file, col){
      
   strings <- getStrings(metadata.file)
-	message("col: ", col)
   if (col %in% strings$source_id) {
-    #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-    #                      by = setdiff(names(data), eval(col))][!is.na(eval(col))]
-	message(is.null(data))
-	message(length(data))
-	message(col)
-	message(unique(data[[col]]))
-	message("test grepl: ", any(grepl("|", data[[col]], fixed=TRUE)))
 	
     if (any(grepl("|", data[[col]], fixed=TRUE))) {
       data <- separate_rows(data, col, sep = "[|]+")
@@ -234,7 +218,6 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
     message("groups stp1 is null!! returning")
     return()
   }
-  message("preparing data to make own groups")
   #get group data for make groups option
   groupData <- completeDT(data, myGroups)
   groupData <- getFinalDT(groupData, metadata.file, myGroups)
@@ -288,10 +271,12 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     cols <- c(aggKey, "GROUPS")
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
-    message("custom groups for date")
   #for numbers
   } else if (groups_stp1 == "lessThan") {
     if (is.null(groups_stp2)) {
+      return()
+    }
+    if (!is.numeric(groups_stp2)) { 
       return()
     }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
@@ -299,9 +284,15 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (is.null(groups_stp2)) {
       return()
     }
+    if (!is.numeric(groups_stp2)) {
+      return()
+    }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
   } else if (groups_stp1 == "equals") {
     if (is.null(groups_stp2)) {
+      return()
+    }
+    if (!is.numeric(groups_stp2)) {
       return()
     }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
@@ -431,7 +422,6 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- transform(tempData, "GROUPS" = ifelse(numLevels == 1, GROUPS, 0))
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
-    message("custom groups for date")
   #for numbers
   } else if (groups_stp1 == "lessThan") {
     if (is.null(groups_stp2)) {
