@@ -79,13 +79,11 @@
             myPlot <- myPlot + geom_point()
             myPlot <- myPlot + geom_line(size = 1)
           } else if (plotType == "mean") {
-            message("plotting mean")
             myPlot <- myPlot + stat_summary(fun.data = function(x){c( "y" = median(x, na.rm = TRUE), "ymax" = max(x, na.rm = TRUE), "ymin" = min(x, na.rm = TRUE))})
             myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .25, na.rm = TRUE)})
             myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .75, na.rm = TRUE)})
             myPlot <- myPlot + stat_summary(fun.y = mean, geom="line", size = 1)
           } else {
-            message("plotting smooth")
             #myPlot <- myPlot + geom_point()
             myPlot <- myPlot + stat_summary(fun.data = function(x){c( "y" = median(x, na.rm = TRUE), "ymax" = max(x, na.rm = TRUE), "ymin" = min(x, na.rm = TRUE))})
             myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .25, na.rm = TRUE)})
@@ -146,7 +144,6 @@
           } else if (plotType == "count") {
             myPlot <- myPlot + geom_bar(stat = "identity")
           } else {
-            message("plotting mean")
             myPlot <- myPlot + geom_boxplot()
           }
 

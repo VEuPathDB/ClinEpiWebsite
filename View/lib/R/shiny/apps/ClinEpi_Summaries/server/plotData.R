@@ -56,7 +56,6 @@ group <- reactive({
 
           if (myGroups %in% nums$source_id | myGroups %in% dates$source_id) {
             if (length(levels(as.factor(outData$GROUPS))) >= 4) {
-              message("need to bin dates")
               outData$GROUPS <- rcut_number(outData$GROUPS)
             } else {
               outData$GROUPS <- as.factor(outData$GROUPS)
@@ -175,7 +174,6 @@ axes <- reactive({
 xaxis_bins <- input$xaxis_stp2
         if (contLongitudinal) {
           tempData$XAXIS <- cut(tempData$XAXIS, xaxis_bins)
-          message("binning xaxis data")
         }
 
 unique(tempData)
@@ -249,7 +247,6 @@ unique(tempData)
 	  colnames(facetData2) <- c(aggKey, "FACET2")
           tempData <- merge(tempData, facetData2, by = aggKey)
         }
- message("taste merge3: ", head(tempData))
 
       unique(tempData)
     })
@@ -388,10 +385,8 @@ unique(tempData)
         }
         plotData <- unique(plotData)
         if (all(as.numeric(levels(as.factor(plotData$GROUPS))) %in% c(1,0))) {
-          message("rename strings to Positive and Negative from 1 and 0")
           plotData <- transform(plotData, "GROUPS" = ifelse(GROUPS == 1, "Positive", "Negative"))
         }
-        message("return!")
         plotData
         }
 

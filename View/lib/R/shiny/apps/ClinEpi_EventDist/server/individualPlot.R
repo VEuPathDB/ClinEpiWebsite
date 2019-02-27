@@ -84,9 +84,7 @@
       if (is.null(input$facet2Type)) {
         return()
       }
-      #if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
-      #  return()
-      #}
+
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
         if (is.null(getMyX$val)) {
@@ -136,9 +134,6 @@
 
       df <- plotData()
       df <- completeDT(df, myX)
-
-      message(iPlot_stp1)
-      message(iPlot_stp2)
 
       if (myFacet != "none" & !is.null(iPlot_stp1)) {
         keep <- c(df[, myFacet, with=FALSE] == iPlot_stp1)
