@@ -118,7 +118,6 @@ out <- reactive({
 	data <- timelineData()
 	aggKey <- aggKey()
         myCols <- c(aggKey, myOut)
-	message("myCols: ", myCols)
         outData <- data[, myCols, with=FALSE]
 	outData <- completeDT(data, myOut)
         outData <- getFinalDT(outData, metadata.file, myOut)
@@ -206,44 +205,44 @@ out <- reactive({
         }
       }
 
-  if (is.null(attrInfo$group_stp1)) {
+    if (is.null(attrInfo$group_stp1)) {
         print("attr stp1 is null")
-      } else {
-  if (attrInfo$group_stp1 == 'any' | attrInfo$group_stp1 == 'all') {
-          if (is.null(attrInfo$group_stp2)) {
-            return()
-          } else {
-            if (attrInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(attrInfo$group_stp3)) {
-                return()
-              }
+    } else {
+      if (attrInfo$group_stp1 == 'any' | attrInfo$group_stp1 == 'all') {
+        if (is.null(attrInfo$group_stp2)) {
+          return()
+        } else {
+          if (attrInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+            if (is.null(attrInfo$group_stp3)) {
+              return()
             }
           }
         }
       }
+    }
 
         attr_stp1 <- attrInfo$group_stp1
         attr_stp2 <- attrInfo$group_stp2
         attr_stp3 <- attrInfo$group_stp3
         attr_stp4 <- attrInfo$group_stp4
 
-  if (is.null(outInfo$group_stp1)) {
-        print("out stp1 is null")
-      } else {
-        if (outInfo$group_stp1 == 'any' | outInfo$group_stp1 == 'all') {
-          if (is.null(outInfo$group_stp2)) {
-            return()
-          } else if (length(outInfo$group_stp2) == 0) {
-            return()
-          } else {
-            if (outInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(outInfo$group_stp3)) {
-                return()
-              }
+    if (is.null(outInfo$group_stp1)) {
+      print("out stp1 is null")
+    }  else {
+      if (outInfo$group_stp1 == 'any' | outInfo$group_stp1 == 'all') {
+        if (is.null(outInfo$group_stp2)) {
+          return()
+        } else if (length(outInfo$group_stp2) == 0) {
+          return()
+        } else {
+          if (outInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+            if (is.null(outInfo$group_stp3)) {
+              return()
             }
           }
         }
       }
+    }
 
         out_stp1 <- outInfo$group_stp1
         out_stp3 <- outInfo$group_stp3
@@ -273,12 +272,6 @@ out <- reactive({
         facetData <- facet1()
         facet2Data <- facet2()
 
-        #TODO check for nulls from the above reactives 
-
-        print(head(facetData))
-        print(head(facet2Data))
-        #merge on participant id and keep all prtcpnts.
-        #data <- merge(attrData, outData, by = "Participant_Id", all = TRUE)
         data <- merge(attrData, outData, by = aggKey, all = TRUE)
         if (!is.null(facetData)) {
           data <- merge(data, facetData, by = aggKey, all = TRUE)
@@ -288,8 +281,6 @@ out <- reactive({
         }
 
         #naToZero(data)
-message("colnames plotdata: ", colnames(data))
-message("taste plotdata: ", head(data))
         #format into 2x2
         data <- transform(data, "APOP" = ifelse( Attribute == 1 & Outcome == 1, 1, 0))
         data <- transform(data, "APOF" = ifelse( Attribute == 1 & Outcome == 0, 1, 0))
@@ -313,10 +304,10 @@ message("taste plotdata: ", head(data))
         }
         facets <- c(facetCol, facet2Col)
         if (length(facets) == 0) {
-          APOP <- sum(data$APOP)
-          APOF <- sum(data$APOF)
-          AFOP <- sum(data$AFOP)
-          AFOF <- sum(data$AFOF)
+          APOP <- sum(data$APOP, na.rm = TRUE)
+          APOF <- sum(data$APOF, na.rm = TRUE)
+          AFOP <- sum(data$AFOP, na.rm = TRUE)
+          AFOF <- sum(data$AFOF, na.rm = TRUE)
 
           Proportion <- c(APOP,APOF,AFOP,AFOF)
           Variable1 <- c("Attribute+", "Attribute+", "Attribute-", "Attribute-")
@@ -335,7 +326,6 @@ message("taste plotdata: ", head(data))
           returnData <- transform(returnData, "Variable1" = ifelse( key == "APOP" | key == "APOF", "Attribute+", "Attribute-"))
           returnData <- transform(returnData, "Variable2" = ifelse( key == "AFOP" | key == "APOP", "Outcome+", "Outcome-"))
         }
-
 
        #add labels
 

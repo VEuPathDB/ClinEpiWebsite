@@ -6,6 +6,7 @@
 
     #TEMPLATE_ANCHOR shinyDataLoad
 
+    if (length(metadataList[["ISASimple_Gates_MAL-ED_phase2_RSRC"]]) > 1) {
       myPrtcpntCols <- metadataList[["ISASimple_Gates_MAL-ED_phase2_RSRC"]]$source_id[metadataList[["ISASimple_Gates_MAL-ED_phase2_RSRC"]]$category == "Participant"]
       prtcpnt <- unique(datasetList[["ISASimple_Gates_MAL-ED_phase2_RSRC"]][, c("Participant_Id", myPrtcpntCols), with=FALSE])
       temp <- datasetList[["ISASimple_Gates_MAL-ED_phase2_RSRC"]][, !myPrtcpntCols, with=FALSE]
@@ -26,8 +27,9 @@
       obs <- merge(obs, houseObs, by = c("Participant_Id", "EUPATH_0004991", "EUPATH_0000579"), all=TRUE)
       obs <- merge(obs, prtcpnt, by = "Participant_Id")
       datasetList[["ISASimple_Gates_MAL-ED_phase2_RSRC"]] <- merge(static, obs, by = "Participant_Id")
-
+    }
+  
     assign("datasetList", datasetList, .GlobalEnv)
     assign("metadataList", metadataList, .GlobalEnv)
-
+  
   }

@@ -15,12 +15,10 @@
       names(facetVals) <- facetVals
       
       if (is.null(properties)) {
-        message("iPlot1 no properties")
         selectInput(inputId = "individualPlot_stp1",
                     label = "Stratify Plot (1) value:",
                     choices = facetVals)
       } else {
-        message("iPlot1 has properties")
         mySelected <- properties$selected[properties$input == 'input$individualPlot_stp1']
         selectInput(inputId = "individualPlot_stp1",
                     label = "Stratify Plot (1) value:",
@@ -104,7 +102,6 @@
       }
 
       names(df)[names(df) == 'GROUPS'] <- 'LINES'
-
       if (!is.null(iPlot_stp1)) {
         keep <- c(df[, myFacet, with=FALSE] == iPlot_stp1)
         df <- df[keep,]
@@ -131,7 +128,6 @@
         }
 
         ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
-        message(ylab)
         if (plotType == "proportion") {
           ylab <- paste("Proportion where", ylab)
         } else if (plotType == "count") {
@@ -141,7 +137,6 @@
           df$YAXIS <- as.numeric(df$YAXIS)
         }
         ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
-        message(ylab)
 
         #format xaxis ticks
         if (longitudinal %in% nums$source_id) {
@@ -155,24 +150,19 @@
         myPlot <- ggplot(data = df, aes(x = XAXIS, y = YAXIS, group = LINES,  color = LINES))
         myPlot <- myPlot + theme_bw()
         myPlot <- myPlot + labs(y = "", x = "")
-        message(paste("plot type:", plotType))
         #add the lines
         if (plotType == "proportion" | plotType == "count") {
           myPlot <- myPlot + geom_point()
           myPlot <- myPlot + geom_line(size = 1)
         } else if (plotType == "mean") {
-          message("plotting mean")
           myPlot <- myPlot + stat_summary(fun.data = function(x){c( "y" = median(x, na.rm = TRUE), "ymax" = max(x, na.rm = TRUE), "ymin" = min(x, na.rm = TRUE))})
           myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .25, na.rm = TRUE)})
           myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .75, na.rm = TRUE)})
           myPlot <- myPlot + stat_summary(fun.y = mean, geom="line", size = 1)
         } else {
-          message("plotting smooth")
-          #myPlot <- myPlot + geom_point()
           myPlot <- myPlot + stat_summary(fun.data = function(x){c( "y" = median(x, na.rm = TRUE), "ymax" = max(x, na.rm = TRUE), "ymin" = min(x, na.rm = TRUE))})
           myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .25, na.rm = TRUE)})
           myPlot <- myPlot + stat_summary(fun.y=function(x){y <- quantile(x, .75, na.rm = TRUE)})
-          #myPlot <- myPlot + quantile()
           myPlot <- myPlot + geom_smooth(span = .3, na.rm = TRUE)
         }
 
@@ -193,6 +183,7 @@
         }
 
       } else {
+	names(df)[names(df) == 'LINES'] <- 'XAXIS'
 
         # if y axis is numeric box plots otherwise bar pltos.
         #define axis labels here
@@ -226,8 +217,6 @@
         } else if (plotType == "count") {
           myPlot <- myPlot + geom_bar(stat = "identity")
         } else {
-
-          message("plotting mean")
           myPlot <- myPlot + geom_boxplot()
         }
 

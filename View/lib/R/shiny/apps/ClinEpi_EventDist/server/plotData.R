@@ -6,7 +6,6 @@ source("../../functions/facetServer.R", local = TRUE)
 
 xAxis <- reactive({
   if (is.null(input$xaxis)) {
-	message("input$xaxis null")
     return()
   }
 
@@ -14,7 +13,6 @@ xAxis <- reactive({
   myX <- input$xaxis  
   if (myX == "direct" | myX == "makeGroups") {
     if (is.null(getMyX$val)) {
-	message("xaxis stp1 null")
       return()
     } else {
       myX <- getMyX$val
@@ -38,9 +36,7 @@ xAxis <- reactive({
 
 
 plotData <- reactive({
-	message("starting plotData()")
       if (is.null(xAxis())) {
-	message("xaxis reactive null")
         return()
       }
 
@@ -68,10 +64,6 @@ plotData <- reactive({
       facet2Data <- facet2()
 
       if (!is.null(facetData)) {
-	message("xdata: ", colnames(xData))
-	message(nrow(xData))
-	message("facetdata: ", colnames(facetData))
-	message(nrow(facetData))
         data <- merge(xData, facetData, by = aggKey())
       } else {
         data <- xData
@@ -97,8 +89,6 @@ plotData <- reactive({
       #  } else {
       #    facet2Col = myFacet2
       #  }
-      print("done plotDATA !!")
-      message(head(data))
       data
 
     })
