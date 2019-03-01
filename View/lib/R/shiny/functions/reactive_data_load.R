@@ -4,8 +4,19 @@ reactiveDataFetcher = reactive({
      custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
      datasetName <<- colnames(custom.props)
-     studyData <<- datasetList[[datasetName]]
-     metadata.file <<- metadataList[[datasetName]]
+
+     if (datasetName %in% names(datasetList)) {
+       studyData <<- datasetList[[datasetName]]
+       metadata.file <<- metadataList[[datasetName]]
+     } else {
+       model.prop <- fread(getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
+                           sep="=", header=FALSE, fill=TRUE)
+       mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
+       num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber'])
+       mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
+       studyData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt")) 
+       metadata.file <<- fread(paste0(mirror.dir, "ontologyMetadata.tab"))
+     }
 
     if (grepl("GEMS", datasetName)) {
       obs <- studyData[!is.na(studyData$BFO_0000015),]
@@ -27,7 +38,7 @@ reactiveDataFetcher = reactive({
       metadata.file <<- merge(metadata.file, temp, by = "source_id", all=TRUE)
     }
 
-    if (grepl("India", datasetName)) {
+    if (grepl("India", datasetName) & !(grepl("fever", datasetName))) {
       obs <- studyData[!is.na(studyData$EUPATH_0000091),]
       obs <- obs[,which(unlist(lapply(obs, function(x)!all(is.na(x))))),with=F]
       houseObs <- studyData[is.na(studyData$EUPATH_0000091),]
