@@ -97,142 +97,105 @@ getDropList <- function(){
 }
 
   
-#this is a bit slow right now because were working with a list of lists and if its possible to vectorize rather than use for loops idk how yet.
-getUIList <- function(data, metadata.file, minLevels = 1, maxLevels = Inf, subList = NULL, include=c("all")) {
+getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include=c("all"), timepoints.keep = NULL) {
   drop <- getDropList()
-  
-  colnames <- colnames(data)
-  colnames <- setdiff(colnames, drop)
-  
-  choices <- subset(metadata.file, source_id %in% colnames)
+
+  choices <- metadata.file[!metadata.file$source_id %in% drop,]
   #temporary until i can figure how to allow plotting of dates. 
   #will probably need to manually bin them in any place we would allowl plotly to automatically bin nums
   #then remember in those cases to set the labels accurately
   choices <- subset(choices, !type %in% "date")  
 
+
   #here remove from choices anything where category not in include param, unless param is 'all'
   #could alternatively assume if include is NULL to use everything
+  
   if (length(include) > 1) {
     if (all(include != "all")) {
+      include <- c(include, "", "null")
       choices <- choices[choices$category %in% include,]
     } else {
       stop("parameter 'include' of getUIList can either be 'all' or a character vector of categories..")
     }
   } else {
     if (include != "all") {
+      include <- c(include, "", "null")
       choices <- choices[choices$category %in% include,]
+    }
+  }
+
+  if (!is.null(timepoints.keep)) {
+    if ("timepoints" %in% colnames(choices)) {
+      leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
     }
   }
 
   if (nrow(choices) == 0) {
     return()
   }
-  choicesNumeric <- subset(choices, type %in% "number") 
 
-    if (is.null(subList)) {
-      roots <- as.list(metadata.file$source_id[metadata.file$parent == "null"])
-      if (is.null(roots)) {
-        message("No roots in ontology file..")
-      } else {
-        names(roots) <- metadata.file$property[metadata.file$source_id %in% unlist(roots)]
-        roots <- getUIList(data = data, subList = roots, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
-      }
-      return(roots)
-    } else {
-      #find children
-      subList <- lapply(subList, FUN = function(x){
-                                                 temp <- as.list(metadata.file$source_id[metadata.file$parent == metadata.file$property[metadata.file$source_id == x]])
-                                                 names(temp) <- metadata.file$property[metadata.file$source_id %in% unlist(temp)]
-                                                 temp <- getUIList(data = data, subList = temp, metadata.file = metadata.file, maxLevels = maxLevels, include = include)
-                                               })
-      #this case is a leaf, so return no children
-      if (length(subList) == 0) {
-        return("")
-      }
-     
-      #remove leaves/ children of subList not in df
-      if (any(subList == "")) {
-        myLeaves <- subList == ""
-        if (!all(subList[myLeaves] %in% choices$property)) {
-          subList[subList == "" & !names(subList) %in% choices$property] <- NULL
-          if (length(subList) == 0) {
-            return("")
-          } 
-        }
-        myLeaves <- subList == ""
-        if (length(subList[myLeaves] != 0)) {
-          if (length(myLeaves) != length(unique(names(subList[myLeaves])))) {
-            leaves <- subList[subList == ""]
-            leaves <- as.list(unique(names(leaves)))
-            names(leaves) <- leaves
-            leaves[1:length(leaves)] <- ""
-            notLeaves <- subList[subList != ""]
-            subList <- c(leaves, notLeaves)
-            if (length(subList) == 0) {
-              return("")
-            }
-          }
-        }
-      }    
+  network <- choices
+  networkOther <- network[!network$type == "string",]
+  networkString <- network[network$type == "string",]
+  networkString$stdisable <- is.na(networkString$number_distinct_values) | networkString$number_distinct_values > maxLevels | networkString$number_distinct_values < minLevels
+  networkOther$stdisable <- is.na(networkOther$number_distinct_values)
+  network <- rbind(networkString, networkOther)
 
-      #if not a leaf then disable selection if not in data
-      if (!all(names(subList) %in% choices$property)) {
-        myNodesToDisable <- !(names(subList) %in% choices$property)
-        for (i in 1:length(myNodesToDisable)) {
-          if (myNodesToDisable[i] == TRUE) {
-            attr(subList[[i]], "stdisabled") <- TRUE
-          }
-        }
-      }
+  network$leaf <- !(network$property %in% network$parentlabel)
+  if (exists("leaves")) {
+    network$leaf <- network$property %in% leaves$property 
+  }  
 
-      #check if number and if not then set disabled if outside min/maxLevels
-      #double check cause this should remove household id and isnt
-      if (!all(names(subList) %in% choicesNumeric$property)) {
-        for (i in 1:length(subList)) {
-          mySourceId <- subList[i]
-          if (mySourceId %in% choices$source_id) {
-            if (!mySourceId %in% choicesNumeric$source_id) {
-              if (uniqueN(data[, mySourceId, with=FALSE]) > maxLevels | uniqueN(data[, mySourceId, with=FALSE]) < minLevels) {
-                #print(length(subList[[i]]))
-                #print(mySourceId)
-                if (length(subList[[i]]) == 0) {
-                  subList[[i]] <- NULL
-                } else {
-                  attr(subList[[i]], "stdisabled") <- TRUE
-                }  
-              }
-            }
-          }
-        }
-      }
-
-      return(subList)
-    }
-}
- 
-#this ui will be different from above one(s)
-#returns all values for a column, can probably just pass singleVarData as data param
-getUIStp1List <- function(data, col){
-
-  tempDF <- completeDT(data, col)
-  #data <- setDT(tempDF)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-  #                    by = setdiff(names(tempDF), eval(col))][!is.na(eval(col))]
-  if (any(grepl("|", data[[col]], fixed=TRUE))) {
-    data <- separate_rows(tempDF, col, sep = "[|]+")
-    data[[col]] <- gsub("^\\s+|\\s+$", "", data[[col]])
+  #i hate loops
+  while (any(network$stdisable == TRUE & network$leaf == TRUE)) {
+    remove <- network$stdisable == TRUE & network$leaf == TRUE
+    network <- network[!remove,]
+    network$leaf <- !(network$property %in% network$parentlabel)
   }
+  disabled <- network$property[network$stdisable == TRUE]
+  
+  myCols <- c("property", "parentlabel")#, "stdisable")
+  network <- as.data.frame(network[, myCols, with=FALSE])
+  rootName <- unique(network[!(network$parentlabel %in% network$property),])
+ 
+  
+  tree <- FromDataFrameNetwork(network)
+  list <- as.list(tree)
+  list$name <- NULL
+  
+  #grr recursion
+  list <- setAttrDisabled(disabled, list)
+  
+  list
+} 
 
-  levels <- levels(as.factor(data[[col]]))
+setAttrDisabled <- function(disabledNames, list) {
+  if (length(list) == 0) {
+    return("")
+  }  
+  for (name in names(list)) {
+    if (name %in% disabledNames) {
+      attr(list[[name]], "stdisabled") <- TRUE
+    }
+    disabledList <- setAttrDisabled(disabledNames, list[[name]])
+    list[[name]] <- disabledList
+  }
+  list
+}
+
+getUIStp1List <- function(metadata.file, col){
+  uniqueVals <- metadata.file$distinct_values[metadata.file$source_id == col]
+  uniqueVals <- unlist(strsplit(uniqueVals, split="|", fixed = TRUE))
+
+  uniqueVals
 }
     
 #seperate pipe delimited fields into their own rows if necessary
 getFinalDT <- function(data, metadata.file, col){
      
   strings <- getStrings(metadata.file)
-   
   if (col %in% strings$source_id) {
-    #data <- setDT(data)[, lapply(.SD, function(x) unlist(tstrsplit(x, " | ", fixed=TRUE))), 
-    #                      by = setdiff(names(data), eval(col))][!is.na(eval(col))]
+	
     if (any(grepl("|", data[[col]], fixed=TRUE))) {
       data <- separate_rows(data, col, sep = "[|]+")
     }
@@ -245,11 +208,16 @@ getFinalDT <- function(data, metadata.file, col){
 #this takes inputs passed to it and creates subsets of data based on those inputs
 makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey = c("Participant_Id")){
   #realistically should check for nulls before calling, but just in case
+  if (is.null(myGroups)) {
+    return()
+  }
+  if (length(myGroups) == 0) {
+    return()
+  }
   if (is.null(groups_stp1)) {
     message("groups stp1 is null!! returning")
     return()
   }
-  message("preparing data to make own groups")
   #get group data for make groups option
   groupData <- completeDT(data, myGroups)
   groupData <- getFinalDT(groupData, metadata.file, myGroups)
@@ -303,10 +271,12 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     cols <- c(aggKey, "GROUPS")
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
-    message("custom groups for date")
   #for numbers
   } else if (groups_stp1 == "lessThan") {
     if (is.null(groups_stp2)) {
+      return()
+    }
+    if (!is.numeric(groups_stp2)) { 
       return()
     }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
@@ -314,9 +284,15 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (is.null(groups_stp2)) {
       return()
     }
+    if (!is.numeric(groups_stp2)) {
+      return()
+    }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
   } else if (groups_stp1 == "equals") {
     if (is.null(groups_stp2)) {
+      return()
+    }
+    if (!is.numeric(groups_stp2)) {
       return()
     }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
@@ -446,7 +422,6 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- transform(tempData, "GROUPS" = ifelse(numLevels == 1, GROUPS, 0))
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
-    message("custom groups for date")
   #for numbers
   } else if (groups_stp1 == "lessThan") {
     if (is.null(groups_stp2)) {
