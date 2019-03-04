@@ -16,6 +16,14 @@ facet1 <- reactive({
   if (is.null(facetType)) {
     return()
   } else {
+    if (is.null(myFacet)) {
+      return()
+    } else if (length(myFacet) == 0) {
+      return()
+    }
+    if (myFacet == "none") {
+      return()
+    }
     if (facetType == "makeGroups") {
       if (is.null(facet_stp1)) {
         return()
@@ -31,15 +39,6 @@ facet1 <- reactive({
             }
           }
         }
-      }
-    } else if (facetType == "direct") {
-      if (is.null(myFacet)) {
-        return()
-      } else if (length(myFacet) == 0) {
-	return()
-      }
-      if (myFacet == "none") {
-        return()
       }
     }
   }
@@ -122,6 +121,14 @@ facet2 <- reactive({
   if (is.null(facet2Type)) {
     return()
   } else {
+    if (is.null(myFacet2)) {
+      return()
+    } else if (length(myFacet2) == 0) {
+      return()
+    }
+    if (myFacet2 == "none") {
+      return()
+    }
     if (facet2Type == "makeGroups") {
       if (is.null(facet2_stp1)) {
         return()
@@ -137,15 +144,6 @@ facet2 <- reactive({
             }
           }
         }
-      }
-    } else if (facet2Type == "direct") {
-      if (is.null(myFacet2)) {
-        return()
-      } else if (length(myFacet2) == 0) {
-        return()
-      }
-      if (myFacet2 == "none") {
-        return()
       }
     }
   }

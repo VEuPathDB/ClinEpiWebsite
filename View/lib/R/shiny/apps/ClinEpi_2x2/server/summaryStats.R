@@ -3,21 +3,23 @@
       if (is.null(plotData)) {
         return()
       }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- getMyFacet$val
-      }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- getMyFacet2$val
-      }
       if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
       }
       if ("FACET2" %in% colnames(plotData)) {
         myFacet2 <- "FACET2"
+      }
+      if (input$facetType == "none") {
+        myFacet <- "none"
+      } else {
+        myFacet <- getMyFacet$val
+	if (!(myFacet %in% colnames(plotData))) { return() }
+      }
+      if (input$facet2Type == "none") {
+        myFacet2 <- "none"
+      } else {
+        myFacet2 <- getMyFacet2$val
+        if (!(myFacet2 %in% colnames(plotData))) { return() }
       }
       myPrtcpntView <- prtcpntView$val
 

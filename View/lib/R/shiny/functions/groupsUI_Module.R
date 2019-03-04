@@ -38,8 +38,8 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   force(timepoints())
   force(prtcpntView())
   force(groupsType())
-  #force(selected())
   force(include())
+  force(selected())
 
   propUrl <<- getPropertiesUrl(session) 
   properties <- try(fread(propUrl))
