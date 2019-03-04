@@ -219,12 +219,12 @@ sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
   my $rAdjustString = << 'RADJUST';
-#profile.df.full$DURATION[profile.df.full$DURATION == '0 day(s)'] <- NA
 profile.df.full$ID[profile.df.full$STATUS == 'No'] <- NA
 profile.df.full$STATUS <- profile.df.full$ID
 profile.df.full$ID <- NULL
 
-profile.df.full$EVENT[profile.df.full$EVENT == "No diarrhea"] <- NA
+profile.df.full$EVENT[profile.df.full$EVENT == "No"] <- NA
+profile.df.full$EVENT[profile.df.full$EVENT == "Day not in diarrheal episode"] <- NA
 profile.df.full$EVENT[profile.df.full$EVENT == ""] <- NA
 
 profile.df.full$oldLegend <- as.character(profile.df.full$LEGEND)
