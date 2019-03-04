@@ -290,6 +290,7 @@ out <- reactive({
         #TODO use aggregate here so we can sum based on facets
         if (facetType == "makeGroups") {
           facetCol = "FACET"
+	  if (!facetCol %in% colnames(data)) {return()}
         } else if (myFacet == "none") {
           facetCol = c()
         }  else {
@@ -297,6 +298,7 @@ out <- reactive({
         }
         if (facet2Type == "makeGroups") {
           facet2Col = "FACET2"
+	  if (!facet2Col %in% colnames(data)) {return()}
         } else if (myFacet2 == "none") {
           facet2Col = c()
         } else {

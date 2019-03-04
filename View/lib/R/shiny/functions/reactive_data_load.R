@@ -4,8 +4,19 @@ reactiveDataFetcher = reactive({
      custom.props <- try(fread(
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
      datasetName <<- colnames(custom.props)
-     studyData <<- datasetList[[datasetName]]
-     metadata.file <<- metadataList[[datasetName]]
+
+     if (datasetName %in% names(datasetList)) {
+       studyData <<- datasetList[[datasetName]]
+       metadata.file <<- metadataList[[datasetName]]
+     } else {
+       model.prop <- fread(getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
+                           sep="=", header=FALSE, fill=TRUE)
+       mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
+       num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber'])
+       mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
+       studyData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt")) 
+       metadata.file <<- fread(paste0(mirror.dir, "ontologyMetadata.tab"))
+     }
 
     if (grepl("GEMS", datasetName)) {
       obs <- studyData[!is.na(studyData$BFO_0000015),]
@@ -27,21 +38,23 @@ reactiveDataFetcher = reactive({
       metadata.file <<- merge(metadata.file, temp, by = "source_id", all=TRUE)
     }
 
-    if (grepl("India", datasetName)) {
+    if (grepl("India", datasetName) & !(grepl("fever", datasetName))) {
       obs <- studyData[!is.na(studyData$EUPATH_0000091),]
       obs <- obs[,which(unlist(lapply(obs, function(x)!all(is.na(x))))),with=F]
       houseObs <- studyData[is.na(studyData$EUPATH_0000091),]
       #houseObs$BFO_0000015 <- houseObs$EUPATH_0015467
-      houseObs$EUPATH_0000091 <- houseObs$EUPATH_0021085
+      #houseObs$EUPATH_0000091 <- houseObs$EUPATH_0021085
       houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
       myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015", "EUPATH_0000091")]
       houseObs <- houseObs[, !myCols, with=FALSE]
-      myStaticCols <- c("Participant_Id", "EUPATH_0021095", "EUPATH_0021094", "EUPATH_0000407", "EUPATH_0000444")
-      static <- houseObs[, myStaticCols, with=FALSE]
-      static <- unique(static[!is.na(static$EUPATH_0021095),])
-      houseObs <- houseObs[, !c("EUPATH_0021095", "EUPATH_0021094", "EUPATH_0000407", "EUPATH_0000444"), with=FALSE]
-      obs <- merge(obs, houseObs, by = c("Participant_Id", "EUPATH_0000091"), all=TRUE)
-      studyData <<- merge(static, obs, by = "Participant_Id")
+      myCols <- c("EUPATH_0021070", "EUPATH_0021071", "EUPATH_0021072", "EUPATH_0021073")	
+      visit1 <- houseObs[, c("Participant_Id", myCols), with=FALSE]
+      visit1 <- unique(visit1[!is.na(visit1$EUPATH_0021070),])
+      enrollment <- houseObs[, !myCols, with=FALSE]
+      enrollment <- unique(enrollment[!is.na(enrollment$EUPATH_0021095),])
+      houseObs <- merge(visit1, enrollment, by = "Participant_Id")
+      studyData <<- merge(obs, houseObs, by = "Participant_Id")
+      metadata.file <<- metadata.file[metadata.file$category != "Sample",]
     }
 
 

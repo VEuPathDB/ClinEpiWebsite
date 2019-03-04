@@ -361,7 +361,8 @@
         selected <- leaves[1]
       }
 
-      return(selected)
+      #return(selected)
+      return("custom")
     })
 
     selectedFacet <- reactive({
@@ -402,7 +403,6 @@
       } else {
         selected <- ""
       }
-#message("selected Facet:", selected)
       return(selected)
     })
 
@@ -444,7 +444,6 @@
       } else {
         selected <- ""
       }
-      #message("selected Facet:", selected)
       return(selected)
     })
 
@@ -464,12 +463,7 @@
         if (length(nextGroup) != 1) {
           message("Warning: non-unique source_ids returned ", nextGroup)
         }
-
-        #if (is.null(getMyGroups$val)) {
-          getMyGroups$val <- nextGroup
-        #} else if (getMyGroups$val != nextGroup) {
-        #  getMyGroups$val <- nextGroup
-        #}
+        getMyGroups$val <- nextGroup
       }
     })
 
@@ -490,12 +484,7 @@
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
 
-message("nextFacet: ", nextFacet)
-        #if (is.null(getMyFacet$val)) {
-          getMyFacet$val <- nextFacet
-        #} else if (getMyFacet$val != nextFacet) {
-        #  getMyFacet$val <- nextFacet
-        #}
+        getMyFacet$val <- nextFacet
       }
     })
 
@@ -516,12 +505,7 @@ message("nextFacet: ", nextFacet)
           message("Warning: non-unique source_ids returned ", nextFacet)
         }
 
-        message("nextFacet: ", nextFacet)
-        #if (is.null(getMyFacet2$val)) {
           getMyFacet2$val <- nextFacet
-        #} else if (getMyFacet2$val != nextFacet) {
-        #  getMyFacet2$val <- nextFacet
-        #}
       }
     })
 
