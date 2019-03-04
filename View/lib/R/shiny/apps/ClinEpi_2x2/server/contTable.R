@@ -20,6 +20,12 @@
         myFacet2 <- "FACET2"
       }
       myPrtcpntView <- prtcpntView$val
+      if (!(myFacet %in% colnames(plotData)) & myFacet != "none") {
+        return()
+      }
+      if (!(myFacet2 %in% colnames(plotData)) & myFacet2 != "none") {
+        return()
+      }
 
       if (myFacet2 != "none") {
         if (myFacet != "none") {
