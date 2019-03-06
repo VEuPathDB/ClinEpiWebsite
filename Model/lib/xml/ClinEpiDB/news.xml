@@ -23,14 +23,21 @@
     <![CDATA[
       <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 6!</i></div>
       <section>
-        <h4><b>ClinEpiDB in India</b></h4>
+        <h3><b>ClinEpiDB in India</b></h3>
         <ul>
-		      <li>March 13 - 17th, the ClinEpiDB outreach team will be attending a conference and conducting a workshop in New Delhi, India. Here we'll be working with data providers and researchers to walk them through their data, teach them all the features of ClinEpiDB and discuss integration of future studies. As ClinEpiDB grows we will continue to conduct these workshops in various locations globally. Please do not hesitate to reach out to us if you are interested in learning more about our workshops at help@ClinEpiDB.org.</li>
-        </ul>
+		      <li>March 13 - 17th, the ClinEpiDB outreach team will be attending a conference and conducting a workshop in New Delhi, India. Here we'll be working with data providers and researchers to walk them through their data, teach them all the features of ClinEpiDB and discuss integration of future studies. As ClinEpiDB grows we will continue to conduct these workshops in various locations globally. Please do not hesitate to <a href="/a/app/contact-us">Contact Us</a> if you are interested in learning more about our workshops.</li>        
+</ul>
       </section>
-      <section> <h4><b>New Data in this Release</b></h4>
+      <section> <h3><b>New Data in this Release</b></h3>
 		    <ul>
-          <li>The Etiology, Risk Factors, and Interactions of Enteric Infections and Malnutrition and the Consequences for Child Health and Development (MAL-ED) Study was coordinated by the Foundation for the National Institutes of Health and in collaboration with the National Institutes of Health's Fogarty International Center. This longitudinal cohort study was conducted at eight sites across three continents: Bangladesh, Nepal, India, Pakistan, Tanzania, South Africa, Peru and Brazil. 2145 children enrolled during the first 2 weeks after birth were followed for up to 5 years to better understand the complicated relationships among intestinal infections, nutrition and other environmental exposures early in life on child development. The children were continuously and carefully monitored for illness, enteric (gut) infections, immune responses to childhood vaccines, breastfeeding and other nutrient intakes, and cognitive development. In addition, information regarding a number of socioeconomic factors (such as water quality, household income and maternal education) were collected in and around each child's household to assess and compare overall living conditions. The <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_3dbf92dc05">MAL-ED study</a> provides some of the strongest evidence linking the burden of enteropathogens (gut bacteria, parasites and viruses), even in the absence of overt symptoms (especially diarrhea), to growth and developmental shortfalls in infancy and early childhood. The MAL-ED study of nutrient intake by young children in developing countries is among the most robust of its type ever conducted, and demonstrated the benefit of a diverse diet and one containing a significant amount of protein on growth and development. Most analytic data from the first 2 years of study are now available on ClinEpiDB.org. In the coming months, MAL-ED data from the full 5 years of study will also be made available.</li> 
+          <li>The Etiology, Risk Factors, and Interactions of Enteric Infections and Malnutrition and the Consequences for Child Health and Development <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_3dbf92dc05">(MAL-ED) Study</a> was coordinated by the Foundation for the National Institutes of Health and in collaboration with the National Institutes of Health's Fogarty International Center.  Read more at the <a href="https://fnih.org/what-we-do/programs/mal-ed">FNIH website</a>.  
+<ul style="font-size:70%">
+<li>This longitudinal cohort study was conducted at eight sites across three continents: Bangladesh, Nepal, India, Pakistan, Tanzania, South Africa, Peru and Brazil. 
+<li>2145 children enrolled during the first 2 weeks after birth were followed for up to 5 years to better understand the complicated relationships among intestinal infections, nutrition and other environmental exposures early in life on child development. 
+<li>The children were continuously and carefully monitored for illness, enteric (gut) infections, immune responses to childhood vaccines, breastfeeding and other nutrient intakes, and cognitive development. In addition, information regarding a number of socioeconomic factors (such as water quality, household income and maternal education) were collected in and around each child's household to assess and compare overall living conditions. 
+<li>The <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_3dbf92dc05">MAL-ED study</a> provides some of the strongest evidence linking the burden of enteropathogens (gut bacteria, parasites and viruses), even in the absence of overt symptoms (especially diarrhea), to growth and developmental shortfalls in infancy and early childhood. The MAL-ED study of nutrient intake by young children in developing countries is among the most robust of its type ever conducted, and demonstrated the benefit of a diverse diet and one containing a significant amount of protein on growth and development. 
+</ul>
+Most analytic data from the first 2 years of study are now available on ClinEpiDB.org. In the coming months, MAL-ED data from the full 5 years of study will also be made available.</li> 
 		      <li><a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_2a6ace17a1">Global Enteric Multicenter Study (GEMS) 1A</a>, coordinated by the University of Maryland School of Medicine's Center for Vaccine Development, was a one-year follow-on study in which six GEMS sites performed simultaneous case-control studies of both moderate-to-severe diarrhea (MSD) and less severe diarrhea (LSD), and one GEMS site performed a case-control study of MSD only. The study enrolled 14,242 children under 5 years of age from seven sites in sub-Saharan Africa and South Asia.</li>
 		      <li>The <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_05ea525fd3">India ICEMR longitudinal cohort study</a> was coordinated by the Center for the Study of Complex Malaria in India (CSCMi), part of the International Centers of Excellence for Malaria Research (ICEMR) program. The longitudinal study enrolled ~400 participants across 2 sites in India, in Rourkela, Odisha and Tamil Nadu, Chennai, and followed them over a period of 2 years. Two additional studies from CSCMi, including a cross-sectional study and fever surveillance study, will also be made available in the next few months.</li>
         </ul>
@@ -50,13 +57,13 @@
     <![CDATA[
       <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 5!</i></div>
       <section>
-        <h4><b>New Features in this Release</b></h4>
+        <h3><b>New Features in this Release</b></h3>
         <ul>
 		<li>The analysis apps in the 'Analyze Results' tab of the results table have now been upated. There are still three apps available, Distributions, Contingency Tables, and Data Summaries but they have been redesigned to be easier to navigate and view results! Check them out!
         
         </ul>
       </section>
-      <section> <h4><b>New Data in this Release</b></h4>
+      <section> <h3><b>New Data in this Release</b></h3>
 		<ul>
         <li>The Global Enteric Multicenter Study (GEMS), coordinated by the University of Maryland School of Medicine's Center for Vaccine Development, was a case-control study conducted at seven diverse, high-burden sites in Asia and Africa: the Gambia, Kenya, Mali, Mozambique, Bangladesh, India and Pakistan. The study enrolled 22,568 children under 5 years of age. GEMS is the largest, most comprehensive study of childhood diarrheal diseases ever conducted in developing country settings.  Results showed that most attributable cases of moderate-to-severe diarrhea were due to four pathogens: rotavirus, Cryptosporidium, enterotoxigenic Escherichia coli producing heat-stable toxin (ST-ETEC; with or without co-expression of heat-labile enterotoxin), and Shigella. Truly a groundbreaking study in childhood infectious disease, the initial GEMS1 Case-Control data, including TaqMan Array Card molecular detection results, are now available on <a href="https://clinepidb.org/a/app/record/dataset/DS_841a9f5259">ClinEpiDB.org</a>. Exploring the data using the search wizard and analysis applications are open to all users; in order to download the data, investigators will be required to register and submit a data access request. About 1000 stool samples from GEMS1 have 16S sequence data available; results and more information about those samples can be found at our companion site <a href="http://microbiomedb.org/a/app/record/dataset/DS_bb7b589593">MicrobiomeDB.org</a>. In the coming months, the GEMS1A and heathcare utilization surveys that were conducted in concert with GEMS will also be made available. 
         </ul>
@@ -75,7 +82,7 @@
     <![CDATA[
       <div style="font-size:130%"><i>ASTMH 2018 New Orleans</i></div>
       <section>
-        <h4><b>The EuPathDB and ClinEpiDB team will be attending the American Society of Tropical Medicine and Hygiene annual meeting this month, kicking off Sunday, October 28th, 2018! We are looking forward to chatting with the attendees. ClinEpiDB and EuPathDB will be sharing booth 317-319 with VectorBase. Stop by for a demo, learn more about ClinEpiDB, and grab a sticker!</b></h4>
+        <h3><b>The EuPathDB and ClinEpiDB team will be attending the American Society of Tropical Medicine and Hygiene annual meeting this month, kicking off Sunday, October 28th, 2018! We are looking forward to chatting with the attendees. ClinEpiDB and EuPathDB will be sharing booth 317-319 with VectorBase. Stop by for a demo, learn more about ClinEpiDB, and grab a sticker!</b></h3>
 
     ]]>
   </attribute>
@@ -91,7 +98,7 @@
     <![CDATA[
       <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 4!</i></div>
       <section>
-        <h4><b>New Features in this Release</b></h4>
+        <h3><b>New Features in this Release</b></h3>
         <ul>
 		<li>A News section and Twitter newsfeed have been added to our homepage to make update announcements easily accessible.
         <li>We have improved the layout and design of our analysis apps. The new format allows for easier variable selection, more-intuitive layout and figure presentation. We have also added to the number of facets or strata that can be selected for the data.
@@ -99,7 +106,7 @@
 		<li>In our 'Tutorials and Resources' section we have added a document that provides quick guidance for researchers when considering the complete lifecycle of data. It includes links to data sharing resources and some template language for putting together consent forms, IRB proposals, and amendments. 
         </ul>
       </section>
-      <section> <h4><b>New Data in this Release</b></h4>
+      <section> <h3><b>New Data in this Release</b></h3>
 		<ul>
         <li>New data has been added to the PRISM cohort study. Participants from Nagongera were followed for another year from July 1, 2016 to June 30, 2017. This addition to the dataset includes a few new participants, thousands of new observations, and new light trap data.
         </ul>
@@ -118,13 +125,13 @@
     <![CDATA[
       <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 3</i></div>
       <section>
-        <h4><b>New Features in this Release</b></h4>
+        <h3><b>New Features in this Release</b></h3>
         <ul>
         <li>A <a href="https://eupathdb.org/tutorials/ClinEpiDBTutorial3ShinyApp_osh_dh2-2.pdf"><b> new tutorial</b> </a> explains the three analysis apps available in ClinEpiDB after returning search results. These include distributions, contingency tables, and data summarization statistics.
         <li>For each study that will be represented in ClinEpiDB there will be a detailed study data set page. Here you will find information about the study that will be necessary to accurately interpret the data including key details like study design, data collection methodology and a description of the population of interest. For PRISM, in this release we have added data collection materials (Case Report Forms) and data dictionaries.
         </ul>
       </section>
-      <section>        <h4><b>No new Data in this Release</b></h4>
+      <section>        <h3><b>No new Data in this Release</b></h3>
       </section>
     ]]>
   </attribute>
@@ -140,7 +147,7 @@
     <![CDATA[
       <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 2</i></div>
       <section>
-        <h4><b>New Features in this Release</b></h4>
+        <h3><b>New Features in this Release</b></h3>
         <ul>
         <li>A <a href="https://eupathdb.org/tutorials/ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf"><b> new tutorial</b> </a> explains the options ClinEpiDB provides to explore results after performing a search. These include the dynamic tabular outputs, column visualization tools, and data download options.
         <li>In the Distributions app we have added automatically generated summary statistics: mean, median, range, SD (standard deviation) & interquartile range (IQR)
@@ -149,7 +156,7 @@
         <li>Improvements to Active Filters summary popup describing more clearly filter selections, especially in the Related Observations step.
         </ul>
       </section>
-      <section>        <h4><b>No new Data in this Release</b></h4>
+      <section>        <h3><b>No new Data in this Release</b></h3>
       </section>
     ]]>
   </attribute>
@@ -167,7 +174,7 @@
         <h3><b>This release of ClinEpiDB contains data from the Program for Resistance, Immunology, Surveillance and Modeling of Malaria in Uganda (PRISM) study. PRISM is the dedicated East Africa International Center of Excellence for Malaria Research. The data presented here include the longitudinal cohort and entomological surveillance components of the <a href="/ce/app/record/dataset/DS_0ad509829e">PRISM study</a>.</b></h3>
       </section>
       <section>
-        <h4><b>New Features in this Release</b></h4>
+        <h3><b>New Features in this Release</b></h3>
         <ul>
         <li>The contingency table app allows you to create 2x2 contingency tables of different categorical variables or allows you to create categorical variables from continuous measurements. Here you can explore the relationship between two variables.
         <li>The data summary app for longitudinal datasets, allows you to plot summary information, similar to a box-and-whisker plot for variables over time. The timeline(s) allow you to filter by time periods and age groups of interest.
