@@ -124,11 +124,10 @@ axes <- reactive({
       yaxis_stp3 <- input$yaxis_stp3
       yaxis_stp1 <- input$yaxis_stp1
 
+	longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
         if (input$xaxisVar == "ageVar") {
           longitudinal <- longitudinal2
-        } else {
-	  longitudinal <- longitudinal1
 	}
       }
 

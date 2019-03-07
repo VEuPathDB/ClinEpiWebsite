@@ -15,7 +15,11 @@ reactiveDataFetcher = reactive({
        num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber'])
        mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
        studyData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt")) 
+       datasetList[[datasetName]] <- studyData
        metadata.file <<- fread(paste0(mirror.dir, "ontologyMetadata.tab"))
+       metadataList[[datasetName]] <- metadata.file
+       assign("datasetList", datasetList, .GlobalEnv)
+       assign("metadataList", metadataList, .GlobalEnv)
      }
 
     if (grepl("GEMS", datasetName)) {
@@ -42,8 +46,6 @@ reactiveDataFetcher = reactive({
       obs <- studyData[!is.na(studyData$EUPATH_0000091),]
       obs <- obs[,which(unlist(lapply(obs, function(x)!all(is.na(x))))),with=F]
       houseObs <- studyData[is.na(studyData$EUPATH_0000091),]
-      #houseObs$BFO_0000015 <- houseObs$EUPATH_0015467
-      #houseObs$EUPATH_0000091 <- houseObs$EUPATH_0021085
       houseObs <- houseObs[,which(unlist(lapply(houseObs, function(x)!all(is.na(x))))),with=F]
       myCols <- colnames(obs)[colnames(obs) %in% colnames(houseObs) & !colnames(obs) %in% c("Participant_Id", "BFO_0000015", "EUPATH_0000091")]
       houseObs <- houseObs[, !myCols, with=FALSE]
@@ -54,7 +56,7 @@ reactiveDataFetcher = reactive({
       enrollment <- unique(enrollment[!is.na(enrollment$EUPATH_0021095),])
       houseObs <- merge(visit1, enrollment, by = "Participant_Id")
       studyData <<- merge(obs, houseObs, by = "Participant_Id")
-      metadata.file <<- metadata.file[metadata.file$category != "Sample",]
+      metadata.file <<- metadata.file[metadata.file$source_id %in% colnames(studyData) | metadata.file$property %in% metadata.file$parentlabel,]
     }
 
 
