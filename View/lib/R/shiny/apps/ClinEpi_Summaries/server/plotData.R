@@ -104,7 +104,11 @@ group <- reactive({
               outData <- cbind(outData, "GROUPS" = "All Observations")
             }
           }
-        }
+        } else {
+          myCols <- c(aggKey)
+          outData <- data[, myCols, with=FALSE]
+	  outData$GROUPS <- "All"
+	}
         outData <- unique(outData)
 
         groupsText <<- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
