@@ -14,7 +14,7 @@ reactiveDataFetcher = reactive({
        mirror.dir <- paste0(model.prop$V2[model.prop$V1 == "WEBSERVICEMIRROR"], "ClinEpiDB")
        num <- paste0("build-", model.prop$V2[model.prop$V1 == 'buildNumber'])
        mirror.dir <- paste0(mirror.dir, "/", num, "/", datasetName, "/shiny/")
-       studyData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt")) 
+       studyData <<- fread(paste0(mirror.dir, "shiny_masterDataTable.txt"), na.strings = c('NA', 'null', 'N/A', 'na', '')) 
        datasetList[[datasetName]] <- studyData
        metadata.file <<- fread(paste0(mirror.dir, "ontologyMetadata.tab"))
        metadataList[[datasetName]] <- metadata.file
