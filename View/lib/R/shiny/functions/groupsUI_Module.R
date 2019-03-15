@@ -231,7 +231,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]  
 
     attrStp1List <- getUIStp1List(metadata.file, myGroup)
-    observations <- metadata.file$source_id[metadata.file$category == "Observation"]
+    observations <- metadata.file$source_id[metadata.file$category %in% c("Observation", "Sample")]
     #observations <- observations[observations %in% colnames(studyData)]
 
     dontUseProps <- FALSE
