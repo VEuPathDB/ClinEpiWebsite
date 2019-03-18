@@ -56,7 +56,7 @@ output$distribution <- renderPlotly({
         xlab <- as.character(xlab[1,2])
       }
 
-      myPlot <- ggplot(data = df, aes_string(x = myX))
+      myPlot <- ggplot(data = subset(df, !is.na(get(myX))), aes_string(x = myX))
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
 
