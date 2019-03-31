@@ -30,6 +30,9 @@ function paramRenderer(param, props) {
       value={value}
       uiState={uiState}
       onActiveOntologyTermChange={props.eventHandlers.setActiveOntologyTerm}
+      onOntologyTermSummaryUpdateRequest={props.eventHandlers.updateOntologyTermSummary}
+      onOntologyTermSort={props.eventHandlers.setOntologyTermSort}
+      onOntologyTermSearch={props.eventHandlers.setOntologyTermSearch}
       onParamValueChange={props.eventHandlers.setParamValue}
       onParamStateChange={props.eventHandlers.setParamState}
     />

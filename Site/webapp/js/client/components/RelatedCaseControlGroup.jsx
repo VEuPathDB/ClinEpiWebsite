@@ -88,6 +88,9 @@ export default class RelatedCaseControlGroup extends React.Component {
         value={this.props.wizardState.paramValues[param.name]}
         uiState={this.props.wizardState.paramUIState[param.name]}
         onActiveOntologyTermChange={this.props.eventHandlers.setActiveOntologyTerm}
+        onOntologyTermSummaryUpdateRequest={this.props.eventHandlers.updateOntologyTermSummary}
+        onOntologyTermSort={this.props.eventHandlers.setOntologyTermSort}
+        onOntologyTermSearch={this.props.eventHandlers.setOntologyTermSearch}
         onParamValueChange={this.props.eventHandlers.setParamValue}
         onParamStateChange={this.props.eventHandlers.setParamState}
       />
