@@ -8,81 +8,25 @@
 ]>
 
 
-<!-- PLEASE ENTER TUTORIALS SORTED in the order you want to see them -->
+<!-- PLEASE ENTER TUTORIALS, and OTHER RESOURCES, SORTED in the order you want to see them -->
 
 
 
 <xmlAnswer>
 
  
-<!--
-     <record>
-       <attribute name="title">Exploring ClinEpiDB</attribute>
-       <attribute name="description">Have a guided tour around this new website.</attribute>
-       <attribute name="uid">1</attribute>
-       <table name="files">
-         <row>
-           <attribute name="projects">ClinEpiDB</attribute>
-           <attribute name="fileName.pdf">ExploreTranscripts.pdf</attribute>
-         </row>
-       </table>
-     </record>
-
+<!-- TUTORIALS :  most recent on top
+     remind UI team to update the page with the new number of tutorials.  
 -->
-
-
-
   <record>
        <attribute name="title">IRB data sharing guidance</attribute>
        <attribute name="description">Things to consider with regards to data sharing when writing an IRB proposal.</attribute>
-       <attribute name="uid">2</attribute>
+       <attribute name="uid">3</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.mov">unavailable</attribute>
-           <attribute name="fileName.avi">unavailable</attribute>
-           <attribute name="fileName.flv">>unavailable</attribute>
            <attribute name="fileName.pdf">IRB_data_sharing_guidance.pdf</attribute>
-           <attribute name="duration">3 min</attribute>
            <attribute name="size">Oct 08, 2018</attribute>
-         </row>
-       </table>
-  </record>
-
-
-
-
-  <record>
-       <attribute name="title">Exploring search results</attribute>
-       <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
-       <attribute name="uid">2</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.mov">unavailable</attribute>
-           <attribute name="fileName.avi">unavailable</attribute>
-           <attribute name="fileName.flv">>unavailable</attribute>
-           <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
-           <attribute name="duration">3 min</attribute>
-           <attribute name="size">Apr 11, 2018</attribute>
-         </row>
-       </table>
-  </record>
-
-
-  <record>
-       <attribute name="title">Accessing ClinEpiDB data and exploring via the filters</attribute>
-       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
-       <attribute name="uid">1</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.mov">unavailable</attribute>
-           <attribute name="fileName.avi">unavailable</attribute>
-           <attribute name="fileName.flv">>unavailable</attribute>
-           <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
-           <attribute name="duration">3 min</attribute>
-           <attribute name="size">Mar 18, 2018</attribute>
          </row>
        </table>
   </record>
@@ -97,17 +41,198 @@
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.mov">unavailable</attribute>
-           <attribute name="fileName.avi">unavailable</attribute>
-           <attribute name="fileName.flv">>unavailable</attribute>
            <attribute name="fileName.pdf">ClinEpiDBTutorial3ShinyApp_osh_dh2-2.pdf</attribute>
-           <attribute name="duration">3 min</attribute>
            <attribute name="size">Jul 5, 2018</attribute>
          </row>
        </table>
   </record>
 
 -->
+
+
+  <record>
+       <attribute name="title">Exploring search results</attribute>
+       <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
+       <attribute name="uid">2</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
+           <attribute name="size">Apr 11, 2018</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">Accessing ClinEpiDB data and exploring via the filters</attribute>
+       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
+       <attribute name="uid">1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
+           <attribute name="size">Mar 18, 2018</attribute>
+         </row>
+       </table>
+  </record>
+
+
+<!-- OTHER RESOURCES :  most recent on top, otherwise alphabetically
+-->
+
+  <record>
+       <attribute name="title">GEMS_Anthropometry.pdf</attribute>
+       <attribute name="description">GEMS_Anthropometry.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">GEMS_Anthropometry.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">GEMS_DiarrheaDuration.pdf</attribute>
+       <attribute name="description">GEMS_DiarrheaDuration.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">GEMS_DiarrheaDuration.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+ <record>
+       <attribute name="title">GEMS_GiardiaMatched.pdf</attribute>
+       <attribute name="description">GEMS_GiardiaMatched.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">GEMS_GiardiaMatched.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">General_1_create_personal_account.pdf</attribute>
+       <attribute name="description">General_1_create_personal_account.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">General_1_create_personal_account.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">General_2_get_help_or_submit_comment.pdf</attribute>
+       <attribute name="description">General_2_get_help_or_submit_comment.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">General_2_get_help_or_submit_comment.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">India_longitudinal_bednet.pdf</attribute>
+       <attribute name="description">India_longitudinal_bednet.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">India_longitudinal_bednet.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">MALED_1_data_set_page.pdf</attribute>
+       <attribute name="description">MALED_1_data_set_page.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">MALED_1_data_set_page.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">MALED_2_explore_data.pdf</attribute>
+       <attribute name="description">MALED_2_explore_data.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">MALED_2_explore_data.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">MALED_3_related_observations</attribute>
+       <attribute name="description">MALED_3_related_observations</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">MALED_3_related_observations.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">PRISM_asymptomaticAge.pdf</attribute>
+       <attribute name="description">PRISM_asymptomaticAge.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">PRISM_asymptomaticAge.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+
+  <record>
+       <attribute name="title">PRISM_dwelling.pdf</attribute>
+       <attribute name="description">PRISM_dwelling.pdf</attribute>
+       <attribute name="uid">r1</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">PRISM_dwelling.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
 
 
  </xmlAnswer>
