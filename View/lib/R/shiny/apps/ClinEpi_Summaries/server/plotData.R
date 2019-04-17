@@ -9,13 +9,13 @@ group <- reactive({
       if (groupsType == 'none') {
 	myGroups <- "none"
       } else {
-	myGroups <- getMyGroups$val
+	myGroups <- groupInfo()$group
       }
       #grab optional inputs
-      groups_stp1 <- groupInfo$group_stp1
-      groups_stp3 <- groupInfo$group_stp3
-      groups_stp4 <- groupInfo$group_stp4
-      groups_stp2 <- groupInfo$group_stp2
+      groups_stp1 <- groupInfo()$group_stp1
+      groups_stp3 <- groupInfo()$group_stp3
+      groups_stp4 <- groupInfo()$group_stp4
+      groups_stp2 <- groupInfo()$group_stp2
 
         if (groupsType == "makeGroups") {
           if (is.null(groups_stp1)) {
@@ -44,17 +44,24 @@ group <- reactive({
           }
         }
 
+        mySubset <- current$subset
+        myTimeframe1 <- current$range1
+        myTimeframe2 <- current$range2
+
+        data <- dataFromServiceQuery(myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        if (is.null(data)) { return() }
+        data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
 	nums <- getNums(metadata.file)
 	dates <- getDates(metadata.file)
 	aggKey <- aggKey()
-	data <- timelineData()
         if (groupsType == "direct") {
           myCols <- c(aggKey, myGroups)
           outData <- data[, myCols, with=FALSE]
           outData <- unique(outData)
           colnames(outData) <- c(aggKey, "GROUPS")
 
-          if (myGroups %in% nums$source_id | myGroups %in% dates$source_id) {
+          if (myGroups %in% nums$SOURCE_ID | myGroups %in% dates$source_id) {
             if (length(levels(as.factor(outData$GROUPS))) >= 4) {
               outData$GROUPS <- rcut_number(outData$GROUPS)
             } else {
@@ -66,7 +73,6 @@ group <- reactive({
           anthro <- c("percentDays", "delta", "direct")
           if (groupsType != "none") {
             if (is.null(groups_stp1)) {
-              message("groups stp1 is null... returning")
               return()
             } else {
               if (groups_stp1 %in% numeric) {
@@ -88,8 +94,7 @@ group <- reactive({
             }
             outData <- makeGroups(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey)
 	    if (is.null(outData)) { return() }
-            observations <- metadata.file$source_id[metadata.file$category == "Observation"]
-            observations <- observations[observations %in% colnames(studyData)]
+            observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
             label <- makeGroupLabel(myGroups, metadata.file, groups_stp1, groups_stp2, groups_stp3, groups_stp4, event.list = observations)
             #add makeGroups data to df and return
             outData <- transform(outData, "GROUPS" = ifelse(as.numeric(GROUPS) == 0, label[2], label[1]))
@@ -140,7 +145,7 @@ axes <- reactive({
         return()
       } else {
         print(yaxis_stp1)
-        if (myY %in% strings$source_id) {
+        if (myY %in% strings$SOURCE_ID) {
           if (is.null(yaxis_stp2)) {
             return()
           }
@@ -161,8 +166,14 @@ axes <- reactive({
           yaxisStp2Text <<- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
         }
 
+        mySubset <- current$subset
+        myTimeframe1 <- current$range1
+        myTimeframe2 <- current$range2
+
+        data <- dataFromServiceQuery(myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        if (is.null(data)) { return() }
+        data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 	aggKey <- aggKey()
-	data <- timelineData()
         if (contLongitudinal) {
           myCols <- c(aggKey, myY, longitudinal)
           tempData <- data[, myCols, with=FALSE]
@@ -174,12 +185,12 @@ axes <- reactive({
           colnames(tempData) <- c(aggKey, "YAXIS")
         }
 
-xaxis_bins <- input$xaxis_stp2
+        xaxis_bins <- input$xaxis_stp2
         if (contLongitudinal) {
           tempData$XAXIS <- cut(tempData$XAXIS, xaxis_bins)
         }
 
-unique(tempData)
+        unique(tempData)
 })
 
 
@@ -226,7 +237,6 @@ unique(tempData)
 
         aggKey <- aggKey()
 
-  #TODO figure out tempData
         axesData <- axes()
         if (is.null(axesData)) {
           return()
@@ -293,7 +303,7 @@ unique(tempData)
             }
           }
           facetStr <- paste(facetCols, collapse = " + ")
-          aggStr2 <- paste("Participant_Id ~ GROUPS + ", facetStr)
+          aggStr2 <- paste("PARTICIPANT_ID ~ GROUPS + ", facetStr)
           sumCols <- c("GROUPS", facetCols, "SUM")
           mergeBy <- c("GROUPS", facetCols)
           dropCols <- c(aggKey, "YAXIS")
@@ -305,7 +315,7 @@ unique(tempData)
             mergeBy2 <- c("GROUPS", facetCols)
           }
         } else {
-          aggStr2 <- "Participant_Id ~ GROUPS"
+          aggStr2 <- "PARTICIPANT_ID ~ GROUPS"
           sumCols <- c("GROUPS", "SUM")
           mergeBy <- c("GROUPS")
           dropCols <- c(aggKey, "YAXIS")
@@ -321,7 +331,7 @@ unique(tempData)
         myPrtcpntView <- prtcpntView$val
         if (myPrtcpntView == TRUE) {
           aggStr3 <- aggStr1
-          aggStr1 <- paste0(aggStr1, " + Participant_Id")
+          aggStr1 <- paste0(aggStr1, " + PARTICIPANT_ID")
           countFun <- function(x) {length(unique(x))}
         } else {
           aggStr3 <- aggStr1
@@ -329,7 +339,7 @@ unique(tempData)
           countFun <- function(x) {length(x)}
         }
 
-        if (myY %in% strings$source_id) {
+        if (myY %in% strings$SOURCE_ID) {
           mergeData <- NULL
           if (yaxis_stp1 == "any" | prtcpntView$val == FALSE) {
             #will have to replace all instances of myY with 1 and all else with 0 before can sum
@@ -338,7 +348,7 @@ unique(tempData)
               #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
               tempData <- aggregate(as.formula(aggStr1), tempData, sum)
               tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
-              #tempData <- aggregate(as.formula(paste0(aggStr1, " + Participant_Id")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
+              #tempData <- aggregate(as.formula(paste0(aggStr1, " + PARTICIPANT_ID")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
               if (is.null(mergeData)) {
                 mergeData <- tempData
               } else {
@@ -377,7 +387,7 @@ unique(tempData)
           }
         }
         if (yaxis_stp3 == "smooth" | yaxis_stp3 == "mean") {
-          plotData$Participant_Id <- NULL
+          plotData$PARTICIPANT_ID <- NULL
           plotData <- unique(plotData)
         } else {
           plotData <- plotData[, -dropCols, with=FALSE]

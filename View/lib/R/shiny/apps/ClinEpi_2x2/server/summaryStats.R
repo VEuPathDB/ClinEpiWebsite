@@ -12,13 +12,13 @@
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
 	if (!(myFacet %in% colnames(plotData))) { return() }
       }
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
         if (!(myFacet2 %in% colnames(plotData))) { return() }
       }
       myPrtcpntView <- prtcpntView$val

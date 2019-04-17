@@ -5,7 +5,7 @@
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
       }
       facetType <- input$facetType
 
@@ -45,7 +45,7 @@
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
       }
       facet2Type <- input$facet2Type
 
@@ -87,16 +87,16 @@
 
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
-        if (is.null(getMyX$val)) {
+        if (is.null(xaxisInfo()$group)) {
           return()
         } else {
-          myX <- getMyX$val
+          myX <- xaxisInfo()$group
         }
       }
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
         if (is.null(input$individualPlot_stp1)) {
           return()
         }
@@ -105,7 +105,7 @@
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
         if (is.null(input$individualPlot_stp2)) {
           return()
         }
@@ -128,7 +128,7 @@
       } else if (myX == 'zscore') {
         xlab <- "Z-score"
       } else {
-        xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
+        xlab <- subset(metadata.file, metadata.file$SOURCE_ID %in% myX)
         xlab <- as.character(xlab[1,2])
       }
 
@@ -148,7 +148,7 @@
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
 
-      if ((myX %in% nums$source_id | myX %in% dates$source_id) & myX != myFacet) {
+      if ((myX %in% nums$SOURCE_ID | myX %in% dates$SOURCE_ID) & myX != myFacet) {
         myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
       } else {
         myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))

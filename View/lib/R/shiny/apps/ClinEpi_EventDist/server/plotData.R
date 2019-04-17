@@ -3,7 +3,6 @@ source("../../functions/timelineServer.R", local = TRUE)
 source("../../functions/facetServer.R", local = TRUE)
 
 
-
 xAxis <- reactive({
   if (is.null(input$xaxis)) {
     return()
@@ -12,25 +11,31 @@ xAxis <- reactive({
   xType <- input$xaxis
   myX <- input$xaxis  
   if (myX == "direct" | myX == "makeGroups") {
-    if (is.null(getMyX$val)) {
+    if (is.null(xaxisInfo()$group)) {
       return()
     } else {
-      myX <- getMyX$val
+      myX <- xaxisInfo()$group
+      if (is.na(myX)) { return() }
     }
   }
+  mySubset <- current$subset
+  myTimeframe1 <- current$range1
+  myTimeframe2 <- current$range2 
+  
+  data <- dataFromServiceQuery(myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
  
-  data <- timelineData()
   strings <- getStrings(metadata.file)
   myCols <- c(aggKey(), myX)
   outData <- data[, myCols, with = FALSE]
 
-  if (myX %in% strings$source_id) {
+  if (myX %in% strings$SOURCE_ID) {
     if (any(grepl("|", outData[[myX]], fixed=TRUE))) {
       outData <- separate_rows(outData, myX, sep = "[|]+")
     }
   }
   
-  #TODO check this still works, even though were limiting the number of cols before splitting the pipes into their own rows
   unique(outData)
 })
 
@@ -45,7 +50,7 @@ plotData <- reactive({
                      longitudinalText,
                      facetText,
                      facet2Text,
-                     "xaxisInfo$group\t", getMyX$val, "\n",
+                     "xaxisInfo()$group\t", xaxisInfo()$group, "\n",
                      "input$facetType\t", input$facetType, "\n",
                      "input$facet2Type\t", input$facet2Type, "\n",
                      "input$xaxis\t", input$xaxis
@@ -71,7 +76,6 @@ plotData <- reactive({
       if (!is.null(facet2Data)) {
         data <- merge(data, facet2Data, by = aggKey())
       }
-      #print(nrow(data))
       #data <- unique(data)
 
       #consider if xaxis and facet are the same?? TODO
@@ -89,6 +93,5 @@ plotData <- reactive({
       #  } else {
       #    facet2Col = myFacet2
       #  }
-      data
-
+      unique(data)
     })

@@ -23,9 +23,9 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
     properties <- NULL
   }
 
-  dates <- getDates(metadata.file)$source_id
-  nums <- getNums(metadata.file)$source_id
-  strings <- getStrings(metadata.file)$source_id
+  dates <- getDates(metadata.file)$SOURCE_ID
+  nums <- getNums(metadata.file)$SOURCE_ID
+  strings <- getStrings(metadata.file)$SOURCE_ID
   if (all(longitudinal$columns %in% dates) | all(longitudinal$columns %in% nums) | all(longitudinal$columns %in% strings)) {
     numTimelines <<- 1
   } else {
@@ -45,26 +45,25 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
     timeline2 <- "GO"
     #timeline1
     selected <- longitudinal1$columns[1]
-    message(selected)
+    
     if (is.null(selected) | is.na(selected) | selected == "NA") {
       timeline1 <- NULL
-      message("timeline is null")
     } else {
       tempDF <- completeDT(data, selected)
 
       if (selected %in% strings) {
-        label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])   
+        label <- paste0("Filter by ", metadata.file$PROPERTY[metadata.file$SOURCE_ID == longitudinal1$columns[1]])   
 
         dontUseProps <- FALSE
         if (is.null(properties)) {
           dontUseProps <- TRUE
         } 
       } else {
-        myMin <- unique(metadata.file$min[metadata.file$source_id == selected])
-        myMax <- unique(metadata.file$max[metadata.file$source_id == selected])
+        myMin <- unique(metadata.file$MIN[metadata.file$SOURCE_ID == selected])
+        myMax <- unique(metadata.file$MAX[metadata.file$SOURCE_ID == selected])
      
         if (length(longitudinal1$columns) == 1) {
-          label <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal1$columns[1]])
+          label <- paste0("Filter by ", metadata.file$PROPERTY[metadata.file$SOURCE_ID == longitudinal1$columns[1]])
 	  if (longitudinal1$columns[1] %in% dates) {
 	    myMin <- as.Date(myMin, format = "%d-%b-%y")
             myMax <- as.Date(myMax, format = "%d-%b-%y")
@@ -112,11 +111,11 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
         timeline2 <- NULL
       } else {
         tempDF2 <- completeDT(data, selected2)
-        myMin2 <- metadata.file$min[metadata.file$source_id == selected2]
-        myMax2 <- metadata.file$max[metadata.file$source_id == selected2]
+        myMin2 <- metadata.file$MIN[metadata.file$SOURCE_ID == selected2]
+        myMax2 <- metadata.file$MAX[metadata.file$SOURCE_ID == selected2]
 
         if (length(longitudinal2$columns) == 1) {
-          label2 <- paste0("Filter by ", metadata.file$property[metadata.file$source_id == longitudinal2$columns[1]])
+          label2 <- paste0("Filter by ", metadata.file$PROPERTY[metadata.file$SOURCE_ID == longitudinal2$columns[1]])
  	  if (longitudinal2$columns[1] %in% dates) {
             myMin2 <- as.Date(myMin2, format = "%d-%b-%y")
             myMax2 <- as.Date(myMax2, format = "%d-%b-%y")
@@ -151,8 +150,7 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
     }
 
     if (is.null(timeline1)) {
-      message("returning empty timelineBox")
-      return
+      return()
     } else {
       if (is.null(timeline2)) {
         if (selected %in% strings) {

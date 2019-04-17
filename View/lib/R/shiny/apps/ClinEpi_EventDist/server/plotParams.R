@@ -1,33 +1,18 @@
-  timelineInit <- reactive({
+  observeEvent(reactiveVal(0), {
     current <<- callModule(timeline, "timeline", longitudinal.file, metadata.file)
-  })
+  }, once = TRUE)
 
-  xaxisInit <- reactive({
+  observeEvent(input$xaxis, {
     xaxisInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, selected = selectedGroup, groupsType = reactive(input$xaxis), groupsTypeID = "input$xaxis", moduleName = "xaxisInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
-      if (is.null(properties)) {
-        getMyX$val <- selectedGroup()
-      } else {
-        getMyX$val <- properties$selected[properties$input == "xaxisInfo$group"]
-      }
-  })
+  }, once = TRUE)
 
-  facetInit <- reactive({
+  observeEvent(input$facetType, {
     facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
-      if (is.null(properties)) {
-        getMyFacet$val <- selectedFacet()
-      } else {
-        getMyFacet$val <- properties$selected[properties$input == "facetInfo$group"]
-      }
-  })
+  }, once = TRUE)
 
-  facet2Init <- reactive({
+  observeEvent(input$facet2Type, {
     facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
-      if (is.null(properties)) {
-        getMyFacet2$val <- selectedFacet2()
-      } else {
-        getMyFacet2$val <- properties$selected[properties$input == "facet2Info$group"]
-      }
-  })
+  }, once = TRUE)
 
   output$prtcpntViewSwitch <- renderUI({
     if (isParticipant != TRUE) {
@@ -146,23 +131,23 @@
         groupsType <- input$xaxis
       }
 
-      if ("EUPATH_0000338" %in% metadata.file$source_id) {
+      if ("EUPATH_0000338" %in% metadata.file$SOURCE_ID) {
         selected <- "EUPATH_0000338"
       } else {
         include <- groupData()
         if (include != "all") {
-          temp <- metadata.file[metadata.file$category %in% include]
+          temp <- metadata.file[metadata.file$CATEGORY %in% include]
         } else {
           temp <- metadata.file
         }
-        myCols <- metadata.file$source_id[!is.na(metadata.file$number_distinct_values)]
-        temp <- temp[temp$source_id %in% myCols]
+        myCols <- metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]
+        temp <- temp[temp$SOURCE_ID %in% myCols]
         parents <- temp$parentlabel
         leaves <- temp[!temp$property %in% parents]
         leaves <- leaves[order(leaves$property),]
-        leaves <- leaves$source_id
+        leaves <- leaves$SOURCE_ID
         #remove dates
-        dates <- getDates(metadata.file)$source_id
+        dates <- getDates(metadata.file)$SOURCE_ID
         leaves <- leaves[!leaves %in% dates]
         selected <- leaves[1]
       }
@@ -182,23 +167,23 @@
         selected <- "custom"
       } else if (facetType == "makeGroups") {
         if (isParticipant) {
-          if ("EUPATH_0000054" %in% metadata.file$source_id[!is.na(metadata.file$number_distinct_values)]) {
+          if ("EUPATH_0000054" %in% metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]) {
             selected <- "EUPATH_0000054"
           } else {
             include <- facetData()
             if (include != "all") {
-              temp <- metadata.file[metadata.file$category %in% include]
+              temp <- metadata.file[metadata.file$CATEGORY %in% include]
             } else {
               temp <- metadata.file
             }
-            myCols <- metadata.file$source_id[!is.na(metadata.file$number_distinct_values)]
-            temp <- temp[temp$source_id %in% myCols]
+            myCols <- metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]
+            temp <- temp[temp$SOURCE_ID %in% myCols]
             parents <- temp$parentlabel
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
-            leaves <- leaves$source_id
+            leaves <- leaves$SOURCE_ID
             #remove dates
-            dates <- getDates(metadata.file)$source_id
+            dates <- getDates(metadata.file)$SOURCE_ID
             leaves <- leaves[!leaves %in% dates]
             selected <- leaves[1]
           }
@@ -235,11 +220,11 @@
       } else {
         facetType <- input$facetType
       }
-
+message("facetData: ", facetType)
       if (facetType == "direct") {
-        dates <- getDates(metadata.file)$source_id
+        dates <- getDates(metadata.file)$SOURCE_ID
         #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if ("Household" %in% metadata.file$category) {
+        if ("Household" %in% metadata.file$CATEGORY) {
           #htmp <- house.file[, !dates, with = FALSE]
           include <- c("Participant", "Household")
         } else {
@@ -248,7 +233,7 @@
       } else {
         include <- c("all")
       }
-
+      message(include)
       return(include)
     })
 
@@ -263,23 +248,23 @@
         selected <- "custom"
       } else if (facet2Type == "makeGroups") {
         if (isParticipant) {
-          if ("EUPATH_0000054" %in% metadata.file$source_id[!is.na(metadata.file$number_distinct_values)]) {
+          if ("EUPATH_0000054" %in% metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]) {
             selected <- "EUPATH_0000054"
           } else {
             include <- facet2Data()
             if (include != "all") {
-              temp <- metadata.file[metadata.file$category %in% include]
+              temp <- metadata.file[metadata.file$CATEGORY %in% include]
             } else {
               temp <- metadata.file
             }
-            myCols <- metadata.file$source_id[!is.na(metadata.file$number_distinct_values)]
-            temp <- temp[temp$source_id %in% myCols]
+            myCols <- metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]
+            temp <- temp[temp$SOURCE_ID %in% myCols]
             parents <- temp$parentlabel
             leaves <- temp[!temp$property %in% parents]
             leaves <- leaves[order(leaves$property),]
-            leaves <- leaves$source_id
+            leaves <- leaves$SOURCE_ID
             #remove dates
-            dates <- getDates(metadata.file)$source_id
+            dates <- getDates(metadata.file)$SOURCE_ID
             leaves <- leaves[!leaves %in% dates]
             selected <- leaves[1]
           }
@@ -318,9 +303,9 @@
       }
 
       if (facet2Type == "direct") {
-        dates <- getDates(metadata.file)$source_id
+        dates <- getDates(metadata.file)$SOURCE_ID
         #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if ("Household" %in% metadata.file$category) {
+        if ("Household" %in% metadata.file$CATEGORY) {
           #htmp <- house.file[, !dates, with = FALSE]
           include <- c("Participant", "Household")
         } else {
@@ -333,82 +318,20 @@
       return(include)
     })
 
-    observeEvent(xaxisInfo$group, {
-      if (length(get_selected(xaxisInfo$group, format="names")) != 0) {
-
-        mySelected <- get_selected(xaxisInfo$group, format="names")[[1]]
-        myProp <- mySelected[1]
-        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        if (length(myParent) != 0) {
-          nextX <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parentlabel == myParent]
-        } else {
-          nextX <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parentlabel == "null" | metadata.file$parentlabel == "" | is.null(metadata.file$parentlabel))]
-        }
-        nextX <- unique(nextX)
-
-        if (length(nextX) != 1) {
-          message("Warning: non-unique source_ids returned ", nextX)
-        }
-
-        getMyX$val <- nextX
-      }
-    })
-
-    observeEvent(facetInfo$group, {
-      if (length(get_selected(facetInfo$group, format="names")) != 0) {
-
-        mySelected <- get_selected(facetInfo$group, format="names")[[1]]
-        myProp <- mySelected[1]
-        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        if (length(myParent) != 0) {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parentlabel == myParent]
-        } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parentlabel == "null" | metadata.file$parentlabel == "" | is.null(metadata.file$parentlabel))]
-        }
-        nextFacet <- unique(nextFacet)
-        if (length(nextFacet) != 1) {
-          message("Warning: non-unique source_ids returned ", nextFacet)
-        }
-
-        getMyFacet$val <- nextFacet
-      }
-    })
-
-    observeEvent(facet2Info$group, {
-      if (length(get_selected(facet2Info$group, format="names")) != 0) {
-
-        mySelected <- get_selected(facet2Info$group, format="names")[[1]]
-        myProp <- mySelected[1]
-        myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
-        if (length(myParent) != 0) {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parentlabel == myParent]
-        } else {
-          nextFacet <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parentlabel == "null" | metadata.file$parentlabel == "" | is.null(metadata.file$parentlabel))]
-        }
-        nextFacet <- unique(nextFacet)
-
-        if (length(nextFacet) != 1) {
-          message("Warning: non-unique source_ids returned ", nextFacet)
-        }
-
-        getMyFacet2$val <- nextFacet
-      }
-    })
-
     #tried to wrap these three into one observer and it broke.. look again later
-    observeEvent(getMyX$val, {
+    observeEvent(xaxisInfo()$group, {
       #execute javascript to virtually click outside the dropdown
       print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();
     })
 
-    observeEvent(getMyFacet$val, {
+    observeEvent(facetInfo()$group, {
       #execute javascript to virtually click outside the dropdown
       print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();
     })
 
-    observeEvent(getMyFacet2$val, {
+    observeEvent(facet2Info()$group, {
       #execute javascript to virtually click outside the dropdown
       print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();

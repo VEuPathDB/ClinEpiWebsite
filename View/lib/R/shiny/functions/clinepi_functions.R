@@ -1,5 +1,134 @@
-### all clinepi specific functions b/c rely on data and/or metadata to be formatted consistently
+dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data) {
 
+  if (is.null(myVar)) { return() }
+  if (length(myVar) == 0) { return() } 
+  if (is.na(myVar)) { return() }
+  if (myVar == "none") { return() } 
+
+  category <- metadata.file$CATEGORY[metadata.file$SOURCE_ID == myVar]
+  if (is.null(category)) { return() }
+  if (length(category) == 0) { return() }
+  if (is.na(category)) { return() }
+
+  if (myVar != "custom") {
+    if (!is.null(longitudinal1)) {
+      if (category != "Household") {
+        varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", longitudinal1)
+        message("myVar: ", varUrl)
+        data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+        data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	if (category != "Participant") {
+          if (!is.null(lon2Data)) {
+            data <- merge(data, lon2Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
+          } else {
+            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
+          }
+        } else {
+	  data[[longitudinal1]] <- NULL
+	  data <- unique(data)
+	  if (!is.null(lon2Data)) {
+            data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          } else {
+            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          }
+        }
+      } else {
+        if (!is.null(hlongitudinal1)) {
+          varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", hlongitudinal1)
+          message("myVar: ", varUrl)
+          data <- unique(as.data.table(stream_in(url(varUrl)), pagesize=1000))
+          data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          if (!is.null(hlon2Data)) {
+            data <- merge(data, hlon2Data, by = c("PARTICIPANT_ID", hlongitudinal1))
+            names(data)[names(data) == hlongitudinal2] <- longitudinal2
+            names(data)[names(data) == hlongitudinal1] <- longitudinal1
+          } else {
+            data <- merge(data, hlon1Data, by = c("PARTICIPANT_ID", hlongitudinal1))
+            names(data)[names(data) == hlongitudinal1] <- longitudinal1
+          }
+          names(data)[names(data) == hlongitudinal1] <- longitudinal1
+        # assuming if we dont have a household longitudinal source id that households data is static
+	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id
+        } else {
+          varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
+          message("myVar: ", varUrl)
+          data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+          data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          if (!is.null(lon2Data)) {
+             data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          } else {
+            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          }
+        }
+      }
+    } else {
+      varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
+      message("myVar: ", varUrl)
+      data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+    }
+  } else {
+    if (category == "Participant") {
+      if (!is.null(longitudinal1)) {
+        if (!is.null(lon2Data)) {
+          data <- merge(lon2Data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
+        } else {
+          data <- merge(lon1Data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
+        }
+      } else {
+        varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/NAME")
+        message("myVar: ", varUrl)
+        data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+        data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+        data <- merge(data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
+      }
+      naToNotSelected(data, col = "custom")
+    } else if (category == "Observation") {
+      varUrl <- paste0(serviceUrl, "/ObservationNames/", datasetDigest, "?timeSourceId=", longitudinal1)
+      message("myVar: ", varUrl)
+      data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+      data <- merge(data, attributes.file, by = "OBSERVATION_ID", all=TRUE)
+      if (!is.null(longitudinal1)) {
+        if (!is.null(lon2Data)) {
+          data <- merge(data, lon2Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
+        } else {
+          data <- merge(data, lon1Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
+        }
+      }
+      naToNotSelected(data, col = "custom")
+    }
+  }
+
+  data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+  data <- setDTColType(myVar, metadata.file, data)
+  if (!is.null(longitudinal1)) {
+    if (longitudinal1 %in% colnames(data)) {
+      data <- setDTColType(longitudinal1, metadata.file, data)
+    }
+  }
+  if (!is.null(longitudinal2)) {
+    if (longitudinal2 %in% colnames(data)) {
+      data <- setDTColType(longitudinal2, metadata.file, data)
+    }
+  }
+ 
+  message("returning query data")
+  data
+}
+
+setDTColType <- function(myVar, metadata.file, data) {
+  colType <- unique(metadata.file$TYPE[metadata.file$SOURCE_ID == myVar])
+  if (colType == "string") {
+    data <- data[, (myVar):=as.character(get(myVar))]
+  } else if (colType == "number") {
+    data <- data[, (myVar):=as.numeric(get(myVar))]
+  } else {
+    data <- separate(data, myVar, c(myVar, "drop"), "[[:blank:]]")
+    data$drop <- NULL
+    data <- data[, (myVar):=as.Date(get(myVar), format = "%Y-%m-%d")]
+  }
+
+  data
+} 
 
 longitudinalText <- function(mySubset = NULL, myTimeframe1 = NULL, myTimeframe2 = NULL) {
   subsetText <- ""
@@ -72,21 +201,21 @@ subsetDataFetcher <- function(keep = NULL, min = NULL, max = NULL, myData = NULL
 
 getNums <- function(metadata.file){
   #identify nums 
-  nums <- subset(metadata.file, metadata.file$type == "number", "source_id") 
+  nums <- subset(metadata.file, metadata.file$TYPE == "number", "SOURCE_ID") 
    
   nums
 }
     
 getStrings <- function(metadata.file){
   #identify strings 
-  strings <- subset(metadata.file, metadata.file$type == "string", "source_id") 
+  strings <- subset(metadata.file, metadata.file$TYPE == "string", "SOURCE_ID") 
       
   strings
 }
     
 getDates <- function(metadata.file){
   #identify dates 
-  dates <- subset(metadata.file, metadata.file$type == "date", "source_id") 
+  dates <- subset(metadata.file, metadata.file$TYPE == "date", "SOURCE_ID") 
       
   dates
 }
@@ -97,30 +226,29 @@ getDropList <- function(){
 }
 
   
-getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include=c("all"), timepoints.keep = NULL) {
-  drop <- getDropList()
+getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = NULL, timepoints.keep = NULL) {
 
-  choices <- metadata.file[!metadata.file$source_id %in% drop,]
+  if (is.null(include)) { return() }
+ 
+  drop <- getDropList()
+  choices <- metadata.file[!metadata.file$SOURCE_ID %in% drop,]
   #temporary until i can figure how to allow plotting of dates. 
   #will probably need to manually bin them in any place we would allowl plotly to automatically bin nums
   #then remember in those cases to set the labels accurately
-  choices <- subset(choices, !type %in% "date")  
-
+  choices <- subset(choices, !TYPE %in% "date")  
 
   #here remove from choices anything where category not in include param, unless param is 'all'
-  #could alternatively assume if include is NULL to use everything
-  
   if (length(include) > 1) {
     if (all(include != "all")) {
       include <- c(include, "", "null")
-      choices <- choices[choices$category %in% include,]
+      choices <- choices[choices$CATEGORY %in% include,]
     } else {
       stop("parameter 'include' of getUIList can either be 'all' or a character vector of categories..")
     }
   } else {
     if (include != "all") {
       include <- c(include, "", "null")
-      choices <- choices[choices$category %in% include,]
+      choices <- choices[choices$CATEGORY %in% include,]
     }
   }
 
@@ -135,35 +263,34 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include=c("
   }
 
   network <- choices
-  networkOther <- network[!network$type == "string",]
-  networkString <- network[network$type == "string",]
-  networkString$stdisable <- is.na(networkString$number_distinct_values) | networkString$number_distinct_values > maxLevels | networkString$number_distinct_values < minLevels
-  networkOther$stdisable <- is.na(networkOther$number_distinct_values)
+  networkOther <- network[!network$TYPE == "string",]
+  networkString <- network[network$TYPE == "string",]
+  networkString$stdisable <- is.na(networkString$NUMBER_DISTINCT_VALUES) | as.numeric(networkString$NUMBER_DISTINCT_VALUES) > maxLevels | as.numeric(networkString$NUMBER_DISTINCT_VALUES) < minLevels | networkString$NUMBER_DISTINCT_VALUES == "null"
+  networkOther$stdisable <- is.na(networkOther$NUMBER_DISTINCT_VALUES) | networkOther$NUMBER_DISTINCT_VALUES == "null"
   network <- rbind(networkString, networkOther)
 
-  network$leaf <- !(network$property %in% network$parentlabel)
+  network$leaf <- !(network$PROPERTY %in% network$PARENTLABEL)
   if (exists("leaves")) {
-    network$leaf <- network$property %in% leaves$property 
+    network$leaf <- network$PROPERTY %in% leaves$PROPERTY 
   }  
 
   #i hate loops
   while (any(network$stdisable == TRUE & network$leaf == TRUE)) {
     remove <- network$stdisable == TRUE & network$leaf == TRUE
     network <- network[!remove,]
-    network$leaf <- !(network$property %in% network$parentlabel)
+    network$leaf <- !(network$PROPERTY %in% network$PARENTLABEL)
   }
-  disabled <- network$property[network$stdisable == TRUE]
+  disabled <- network$PROPERTY[network$stdisable == TRUE]
   
-  myCols <- c("property", "parentlabel")#, "stdisable")
+  myCols <- c("PROPERTY", "PARENTLABEL")#, "stdisable")
   network <- as.data.frame(network[, myCols, with=FALSE])
-  rootName <- unique(network[!(network$parentlabel %in% network$property),])
+  rootName <- unique(network[!(network$PARENTLABEL %in% network$PROPERTY),])
  
-  
   tree <- FromDataFrameNetwork(network)
   list <- as.list(tree)
   list$name <- NULL
   
-  #grr recursion
+  #grrr recursion
   list <- setAttrDisabled(disabled, list)
   
   list
@@ -184,7 +311,7 @@ setAttrDisabled <- function(disabledNames, list) {
 }
 
 getUIStp1List <- function(metadata.file, col){
-  uniqueVals <- metadata.file$distinct_values[metadata.file$source_id == col]
+  uniqueVals <- metadata.file$DISTINCT_VALUES[metadata.file$SOURCE_ID == col]
   uniqueVals <- unlist(strsplit(uniqueVals, split="|", fixed = TRUE))
 
   uniqueVals
@@ -194,7 +321,7 @@ getUIStp1List <- function(metadata.file, col){
 getFinalDT <- function(data, metadata.file, col){
      
   strings <- getStrings(metadata.file)
-  if (col %in% strings$source_id) {
+  if (col %in% strings$SOURCE_ID) {
 	
     if (any(grepl("|", data[[col]], fixed=TRUE))) {
       data <- separate_rows(data, col, sep = "[|]+")
@@ -206,7 +333,7 @@ getFinalDT <- function(data, metadata.file, col){
 }
     
 #this takes inputs passed to it and creates subsets of data based on those inputs
-makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey = c("Participant_Id")){
+makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey = c("PARTICIPANT_ID")){
   #realistically should check for nulls before calling, but just in case
   if (is.null(myGroups)) {
     return()
@@ -215,13 +342,12 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
     return()
   }
   if (is.null(groups_stp1)) {
-    message("groups stp1 is null!! returning")
     return()
   }
   #get group data for make groups option
   groupData <- completeDT(data, myGroups)
   groupData <- getFinalDT(groupData, metadata.file, myGroups)
-  #myCols <- c("Participant_Id", myGroups)
+  #myCols <- c("PARTICIPANT_ID", myGroups)
   myCols <- c(aggKey, myGroups)
   outData <- groupData[, myCols, with=FALSE]
 
@@ -267,7 +393,7 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   #this if statement will have to change. handle dates first
   if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
-    #cols <- c("Participant_Id", "GROUPS")
+    #cols <- c("PARTICIPANT_ID", "GROUPS")
     cols <- c(aggKey, "GROUPS")
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
@@ -296,87 +422,6 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
       return()
     }
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
-    #for change over time, maled  
-  } else if (groups_stp1 == "delta") {
-    if(is.null(groups_stp3)) {
-      return()
-    }
-    outData <- completeDT(data, myGroups)
-    outData <- getFinalDT(outData, metadata.file, myGroups)
-    myCols <- c("Participant_Id", "EUPATH_0000644", myGroups)
-    outData <- outData[, myCols, with=FALSE]
-    
-    tempTable <- NULL
-   
-    prtcpnts <- levels(as.factor(outData$Participant_Id))
-    for (i in prtcpnts) {
-      currData <- subset(outData, outData$Participant_Id %in% i)
-      
-      startDay <- min(currData[, EUPATH_0000644])
-      startVal <- currData[[myGroups]][currData$EUPATH_0000644 == startDay]
-      endVal <- currData[[myGroups]][currData$EUPATH_0000644 == max(currData[, EUPATH_0000644])]
-      diffVal <- startVal - endVal
-      
-      #if statement for direction of change
-      if (startVal > endVal) {
-        diffVal = diffVal * -1
-      }
-      
-      if (groups_stp2 == "lessThan") {
-        if (diffVal < groups_stp3) {
-          row <- c(i, 1)
-        } else {
-          row <- c(i,0)
-        }
-      } else if (groups_stp2 == "greaterThan") {
-        if (diffVal > groups_stp3) {
-          row <- c(i,1)
-        } else {
-          row <- c(i,0)
-        }
-      } else {
-        if (diffVal == groups_stp3) {
-          row <- c(i,1)
-        } else {
-          row <- c(i,0)
-        }
-      }
-       
-      #add participant to growing data table for outcomes
-      tempTable <- rbindlist(list(tempTable, as.list(row)))
-    }
-    #edit outdata so the merge with attr data works..
-    outData <- tempTable
-    colnames(outData) <- c("Participant_Id", "GROUPS")
-    #also maled, but wonder if this could be generalized
-  } else if (groups_stp1 == "percentDays") {
-    if (is.null(groups_stp4)) {
-      return()
-    }
-    tempTable <- NULL
-    #may be able to do this option with aggregate. look into it TODO
-    prtcpnts <- levels(as.factor(outData$Participant_Id))
-    for (i in prtcpnts) {
-      currData <- subset(outData, outData$Participant_Id %in% i)
-      
-      if (groups_stp3 == "lessThan") {
-        currData <- transform(currData, "GROUPS" =  ifelse(currData[[myGroups]] < groups_stp4,1 ,0))
-      } else if (groups_stp3 == "greaterThan") {
-        currData <- transform(currData, "GROUPS" =  ifelse(currData[[myGroups]] > groups_stp4,1 ,0))
-      } else {
-        currData <- transform(currData, "GROUPS" =  ifelse(currData[[myGroups]] == groups_stp4,1 ,0))
-      }
-      colnames(currData) <- c("Participant_Id", "drop", "GROUPS")
-      if ((sum(currData$Outcome)/length(currData$Outcome)*100) >= groups_stp2) {
-        row <- c(i,1)
-      } else {
-        row <- c(i,0)
-      }
-       
-      tempTable <- rbindlist(list(tempTable, as.list(row)))
-    }
-    outData <- tempTable
-    colnames(outData) <- c("Participant_Id", "GROUPS")
   }  else {
     mergeData <- NULL
     #for strings
@@ -396,9 +441,9 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- mergeData
   }
 
-  if (ncol(outData) > 2) {
+  #if (ncol(outData) > 2) {
     colnames(outData) <- c(aggKey, "GROUPS")
-  }
+  #}
   
   outData <- as.data.table(outData)
   
@@ -414,11 +459,11 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   #this if statement will have to change. handle dates first
   if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
-    cols <- c("Participant_Id", "GROUPS")
+    cols <- c("PARTICIPANT_ID", "GROUPS")
     outData <- outData[, cols, with = FALSE]
-    tempData <- aggregate(GROUPS ~ Participant_Id, outData, FUN = function(x){length(unique(x))})
-    colnames(tempData) <- c("Participant_Id", "numLevels")
-    tempData <- merge(outData, tempData, by = "Participant_Id")
+    tempData <- aggregate(GROUPS ~ PARTICIPANT_ID, outData, FUN = function(x){length(unique(x))})
+    colnames(tempData) <- c("PARTICIPANT_ID", "numLevels")
+    tempData <- merge(outData, tempData, by = "PARTICIPANT_ID")
     outData <- transform(tempData, "GROUPS" = ifelse(numLevels == 1, GROUPS, 0))
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
@@ -427,27 +472,27 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (all(x < as.numeric(groups_stp2))) {1} else {0} })
+    outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x < as.numeric(groups_stp2))) {1} else {0} })
   } else if (groups_stp1 == "greaterThan") {
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (all(x > as.numeric(groups_stp2))) {1} else {0} })
+    outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x > as.numeric(groups_stp2))) {1} else {0} })
   } else if (groups_stp1 == "equals") {
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$Participant_Id), FUN = function(x){ if (all(x == as.numeric(groups_stp2))) {1} else {0} })
+    outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x == as.numeric(groups_stp2))) {1} else {0} })
   }  else {
     #for strings
-    aggStr <- paste0(myGroups, " ~ Participant_Id")
+    aggStr <- paste0(myGroups, " ~ PARTICIPANT_ID")
     outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(groups_stp1), all(sort(levels(as.factor(x))) == sort(groups_stp1)), FALSE) })
-    colnames(outData) <- c("Participant_Id", "GROUPS")
+    colnames(outData) <- c("PARTICIPANT_ID", "GROUPS")
     outData <- transform(outData, "GROUPS" = ifelse(GROUPS == TRUE, 1, 0))
   }
 
   if (ncol(outData) > 2) {
-    colnames(outData) <- c("Participant_Id", "drop", "GROUPS")
+    colnames(outData) <- c("PARTICIPANT_ID", "drop", "GROUPS")
   }
   
   outData <- as.data.table(outData)
@@ -479,7 +524,7 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
       groups_stp2 = groups_stp3
     }
     
-    displayName <- metadata.file$property[metadata.file$source_id == myGroups]
+    displayName <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myGroups]
     if (!is.null(groups_stp1)) {
       if (groups_stp1 %in% numeric ){
         if (groups_stp1 == "greaterThan") {
@@ -560,15 +605,15 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
       }   
  
         if (useGroup) {
-          prefix <- metadata.file$property[metadata.file$source_id == myGroups]
+          prefix <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myGroups]
           label[1] <- paste0(prefix, ": ", label[1])
           label[2] <- paste0(prefix, ": ", label[2])
         }
       } else {
-        label <- metadata.file$property[metadata.file$source_id == myGroups]
+        label <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myGroups]
       }
     } else {
-      label <- metadata.file$property[metadata.file$source_id == myGroups]
+      label <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myGroups]
     }
 
   label

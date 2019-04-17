@@ -5,6 +5,8 @@ shinyUI(
    useShinyjs(),
    extendShinyjs(text="shinyjs.virtualBodyClick = function(){$(\"body\").trigger(\"click\")}", functions=c("virtualBodyClick")),
    theme = "cerulean.css",
+   
+   tags$script(inactivity),
    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",

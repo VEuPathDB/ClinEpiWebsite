@@ -1,36 +1,31 @@
 output$distribution <- renderPlotly({
-      message("render plot!")
       if (is.null(input$xaxis)) {
-        message("xaxis null")
         return()
       }
       if (is.null(input$facetType)) {
-	message("facetType null")
         return()
       }
       if (is.null(input$facet2Type)) {
-	message("facetType2 null")
         return()
       }
       myX <- input$xaxis
       if (myX == "direct" | myX == "makeGroups") {
-        if (is.null(getMyX$val)) {
-          message("xaxis stp1 null")
+        if (is.null(xaxisInfo()$group)) {
           return()
         } else {
-          myX <- getMyX$val
+          myX <- xaxisInfo()$group
         }
       }
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
       }
       facetType <- input$facetType
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
       }
       facet2Type <- input$facet2Type
       df <- plotData()
@@ -39,8 +34,6 @@ output$distribution <- renderPlotly({
 	message("plotData null")
         return()
       }
-
-      message(paste("just starting plot"))
 
       df <- completeDT(df, myX)
 
@@ -52,7 +45,7 @@ output$distribution <- renderPlotly({
       } else if (myX == 'zscore') {
         xlab <- "Z-score"
       } else {
-        xlab <- subset(metadata.file, metadata.file$source_id %in% myX)
+        xlab <- subset(metadata.file, metadata.file$SOURCE_ID %in% myX)
         xlab <- as.character(xlab[1,2])
       }
 
@@ -61,7 +54,7 @@ output$distribution <- renderPlotly({
       myPlot <- myPlot + labs(y = "", x = "")
 
         #consider when facetType is makeGroups to use geom_density instead ??
-        if ((myX %in% nums$source_id | myX %in% dates$source_id) & myX != myFacet) {
+        if ((myX %in% nums$SOURCE_ID | myX %in% dates$SOURCE_ID) & myX != myFacet) {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "bin", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + geom_vline(aes(xintercept = mean(df[[myX]], na.rm = T), text = paste0("mean:", mean(df[[myX]], na.rm = T))), color = viridis(1, begin = .75), linetype = "dashed", size = 1)
 
@@ -121,7 +114,6 @@ output$distribution <- renderPlotly({
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
 
-      message(paste("c'est fini"))
       x_list <- list(
         title = paste0(c(rep("\n", 3),
                        rep(" ", 10),

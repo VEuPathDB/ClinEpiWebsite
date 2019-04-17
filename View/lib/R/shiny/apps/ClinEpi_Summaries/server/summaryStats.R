@@ -51,10 +51,10 @@
         }
         #and still need to remove duplicates across time.
         if (any(colnames(data) %in% "FACET")) {
-          data <- reshape(aggregate(Participant_Id ~ FACET + GROUPS, data, FUN = countFun ),
-                          timevar = "FACET", idvar = "GROUPS", v.names = "Participant_Id", direction = "wide")
+          data <- reshape(aggregate(PARTICIPANT_ID ~ FACET + GROUPS, data, FUN = countFun ),
+                          timevar = "FACET", idvar = "GROUPS", v.names = "PARTICIPANT_ID", direction = "wide")
           colnames(data)[1] <- "Line"
-          colnames(data) <- gsub("Participant_Id.", colName, colnames(data))
+          colnames(data) <- gsub("PARTICIPANT_ID.", colName, colnames(data))
           #give totals
           if (length(data) > 2) {
             data[, "Totals"] <- rowSums(data[, -1], na.rm=TRUE)
@@ -64,7 +64,7 @@
           data["Totals" ,] <- colSums(data, na.rm=TRUE)
           data <- cbind("Line" = rownames(data), data)
         } else {
-          data <- aggregate(Participant_Id ~ GROUPS, data, countFun )
+          data <- aggregate(PARTICIPANT_ID ~ GROUPS, data, countFun )
           colnames(data) <- c("Line", colName)
           #totals
           levels(data$Line) <- c(levels(as.factor(data$Line)),"Totals")

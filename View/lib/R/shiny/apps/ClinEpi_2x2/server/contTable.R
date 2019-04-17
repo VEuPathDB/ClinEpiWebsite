@@ -6,12 +6,12 @@
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
       }
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
       }
       if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
@@ -47,8 +47,6 @@
       }
 
       createTableUI <- function(id, data, facets) {
-
-        print(data)
         #get or
         #TODO double check i've pulled these out right !!!!
         APOP <- data$Proportion[data$Variable1 == "Attribute+" & data$Variable2 == "Outcome+"]

@@ -113,7 +113,7 @@
 
       if (contLongitudinal) {
         #define axis labels here
-        xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
+        xAxisType <- metadata.file$TYPE[metadata.file$SOURCE_ID == longitudinal]
         if (xAxisType == "number") {
           xlab = "Age"
         } else {
@@ -139,7 +139,7 @@
         ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
 
         #format xaxis ticks
-        if (longitudinal %in% nums$source_id) {
+        if (longitudinal %in% nums$SOURCE_ID) {
           df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
         } else {
           df$XAXIS <- as.factor(df$XAXIS)
@@ -178,7 +178,7 @@
           myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
         }
 
-        if (!longitudinal %in% nums$source_id) {
+        if (!longitudinal %in% nums$SOURCE_ID) {
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
 
@@ -268,7 +268,7 @@
       if (is.null(legendTitle)) {
         legend.title <- "All"
       } else {
-        legend.title <- metadata.file$property[metadata.file$source_id == legendTitle]
+        legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == legendTitle]
         legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
       }
       myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
