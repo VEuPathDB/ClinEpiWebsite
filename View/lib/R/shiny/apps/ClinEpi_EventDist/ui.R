@@ -10,7 +10,7 @@ shinyUI(
    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
-              "#distribution{height:90vh !important;}",
+              "#distribution{height:auto !important;}",
               ".dataTable {border: none;}"
    ),
    tags$style(type = 'text/css', ".btn-default{width: 100%;}"),
