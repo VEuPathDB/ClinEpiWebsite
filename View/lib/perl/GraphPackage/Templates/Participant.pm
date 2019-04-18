@@ -274,8 +274,8 @@ RADJUST
 
   $profile->addAdjustProfile($rAdjustString);
   $profile->setForceNoLines(1);
-  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2016-06-30";
-  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2011-08-01";
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2017-08-30";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2011-06-01";
   $profile->setDefaultXMax($xmax);
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
