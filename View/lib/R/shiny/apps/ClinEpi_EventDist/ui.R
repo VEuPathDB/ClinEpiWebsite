@@ -5,10 +5,12 @@ shinyUI(
    useShinyjs(),
    extendShinyjs(text="shinyjs.virtualBodyClick = function(){$(\"body\").trigger(\"click\")}", functions=c("virtualBodyClick")),
    theme = "cerulean.css",
+   
+   tags$script(inactivity),
    tags$style(type="text/css",
               ".shiny-output-error { visibility: hidden; }",
               ".shiny-output-error:before { visibility: hidden; }",
-              "#distribution{height:90vh !important;}",
+              "#distribution{height:auto !important;}",
               ".dataTable {border: none;}"
    ),
    tags$style(type = 'text/css', ".btn-default{width: 100%;}"),

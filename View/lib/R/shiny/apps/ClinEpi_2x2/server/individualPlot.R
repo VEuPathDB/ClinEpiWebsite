@@ -6,7 +6,7 @@
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
       }
       facetType <- input$facetType
       
@@ -43,7 +43,7 @@
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
       }
       facet2Type <- input$facet2Type
 
@@ -86,7 +86,7 @@
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
         if (is.null(input$individualPlot_stp1)) {
           return()
         }
@@ -95,7 +95,7 @@
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
         if (is.null(input$individualPlot_stp2)) {
           return()
         }
@@ -126,11 +126,11 @@
         df <- df[keep2,]
       }
 
-      var1 <- getMyAttr$val
-      var2 <- getMyOut$val
+      var1 <- attrInfo()$group
+      var2 <- outInfo()$group
 
       #define axis labels here
-      xlab <- metadata.file$property[metadata.file$source_id == var2]
+      xlab <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == var2]
       ylab <- "Proportion"
 
       df$Outcome <- gsub(xlab, "", df$Outcome)
@@ -177,7 +177,7 @@
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
       myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-      legend.title <- metadata.file$property[metadata.file$source_id == var1]
+      legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == var1]
       legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
       myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
                                   x=1.02, xanchor = "left",

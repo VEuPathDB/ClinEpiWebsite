@@ -6,14 +6,14 @@
       if (input$facetType == "none") {
         myFacet <- "none"
       } else {
-        myFacet <- getMyFacet$val
+        myFacet <- facetInfo()$group
       }
       if (input$facet2Type == "none") {
         myFacet2 <- "none"
       } else {
-        myFacet2 <- getMyFacet2$val
+        myFacet2 <- facet2Info()$group
       }
-      myX <- getMyX$val
+      myX <- xaxisInfo()$group
       if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
       }
@@ -48,8 +48,6 @@
       createUI <- function(id, data, facets) {
       countFun <- function(x) {length(unique(x))}
       colVal <- length(unique(data[, aggKey(), with=FALSE]))
-message(colVal)
-message(class(data))
         if (myPrtcpntView == TRUE) {
           colLabel <- "# Participants"
         } else {

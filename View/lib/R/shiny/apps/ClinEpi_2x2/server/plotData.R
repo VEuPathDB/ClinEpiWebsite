@@ -3,24 +3,24 @@ source("../../functions/timelineServer.R", local = TRUE)
 source("../../functions/facetServer.R", local = TRUE)
 
 attr <- reactive({
-      if (is.null(getMyAttr$val)) {
+      if (is.null(attrInfo()$group)) {
         return()
       } else {
-        myAttr <- getMyAttr$val
+        myAttr <- attrInfo()$group
 	if (length(myAttr) == 0) {
 	  return ()
 	}
       }
 
-  if (is.null(attrInfo$group_stp1)) {
+  if (is.null(attrInfo()$group_stp1)) {
         print("attr stp1 is null")
       } else {
-  if (attrInfo$group_stp1 == 'any' | attrInfo$group_stp1 == 'all') {
-          if (is.null(attrInfo$group_stp2)) {
+  if (attrInfo()$group_stp1 == 'any' | attrInfo()$group_stp1 == 'all') {
+          if (is.null(attrInfo()$group_stp2)) {
             return()
           } else {
-            if (attrInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(attrInfo$group_stp3)) {
+            if (attrInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+              if (is.null(attrInfo()$group_stp3)) {
                 return()
               }
             }
@@ -28,17 +28,24 @@ attr <- reactive({
         }
       }
 
-        attr_stp1 <- attrInfo$group_stp1
-        attr_stp2 <- attrInfo$group_stp2
-        attr_stp3 <- attrInfo$group_stp3
-        attr_stp4 <- attrInfo$group_stp4
+        attr_stp1 <- attrInfo()$group_stp1
+        attr_stp2 <- attrInfo()$group_stp2
+        attr_stp3 <- attrInfo()$group_stp3
+        attr_stp4 <- attrInfo()$group_stp4
+
+        mySubset <- current$subset
+        myTimeframe1 <- current$range1
+        myTimeframe2 <- current$range2
+
+        data <- dataFromServiceQuery(myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        if (is.null(data)) { return() }
+        data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
         #get attr col
-	data <- timelineData()
 	aggKey <- aggKey()
         myCols <- c(aggKey, myAttr)
         attrData <- data[, myCols, with=FALSE]
-	attrData <- completeDT(timelineData(), myAttr)
+	attrData <- completeDT(attrData, myAttr)
         attrData <- getFinalDT(attrData, metadata.file, myAttr)
 
         numeric <- c("lessThan", "greaterThan", "equals")
@@ -69,10 +76,7 @@ attr <- reactive({
 
         attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4, aggKey)
 	if (is.null(attrData)) { return() }
-        observations <- metadata.file$source_id[metadata.file$category == "Observation"]
-        observations <- observations[observations %in% colnames(studyData)]
-
-        #colnames(attrData) <- c("Participant_Id", "Attribute")
+        observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
         colnames(attrData) <- c(aggKey, "Attribute")
         
        attrText <<- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
@@ -81,26 +85,26 @@ attr <- reactive({
 })
 
 out <- reactive({
-      if (is.null(getMyOut$val)) {
+      if (is.null(outInfo()$group)) {
         return()
       } else {
-        myOut <- getMyOut$val
+        myOut <- outInfo()$group
 	if (length(myOut) == 0) {
 	  return()
 	}
       }
 
-  if (is.null(outInfo$group_stp1)) {
+  if (is.null(outInfo()$group_stp1)) {
         print("out stp1 is null")
       } else {
-        if (outInfo$group_stp1 == 'any' | outInfo$group_stp1 == 'all') {
-          if (is.null(outInfo$group_stp2)) {
+        if (outInfo()$group_stp1 == 'any' | outInfo()$group_stp1 == 'all') {
+          if (is.null(outInfo()$group_stp2)) {
             return()
-          } else if (length(outInfo$group_stp2) == 0) {
+          } else if (length(outInfo()$group_stp2) == 0) {
 	    return()
 	  } else {
-            if (outInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(outInfo$group_stp3)) {
+            if (outInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+              if (is.null(outInfo()$group_stp3)) {
                 return()
               }
             }
@@ -108,18 +112,24 @@ out <- reactive({
         }
       }
 
-        out_stp1 <- outInfo$group_stp1
-        out_stp3 <- outInfo$group_stp3
-        out_stp4 <- outInfo$group_stp4
-        out_stp2 <- outInfo$group_stp2
+        out_stp1 <- outInfo()$group_stp1
+        out_stp3 <- outInfo()$group_stp3
+        out_stp4 <- outInfo()$group_stp4
+        out_stp2 <- outInfo()$group_stp2
+
+        mySubset <- current$subset
+        myTimeframe1 <- current$range1
+        myTimeframe2 <- current$range2
+
+        data <- dataFromServiceQuery(myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        if (is.null(data)) { return() }
+        data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
         #get outcome data
-        #may not need to do the splitting on pipes. grepl will still return true for it.
-	data <- timelineData()
 	aggKey <- aggKey()
         myCols <- c(aggKey, myOut)
         outData <- data[, myCols, with=FALSE]
-	outData <- completeDT(data, myOut)
+	outData <- completeDT(outData, myOut)
         outData <- getFinalDT(outData, metadata.file, myOut)
 
         numeric <- c("lessThan", "greaterThan", "equals")
@@ -152,10 +162,7 @@ out <- reactive({
 
         outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4, aggKey)
 	if (is.null(outData)) { return() }
-        observations <- metadata.file$source_id[metadata.file$category == "Observation"]
-        observations <- observations[observations %in% colnames(studyData)]
-
-        #colnames(outData) <- c("Participant_Id", "Outcome")
+        observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
         colnames(outData) <- c(aggKey, "Outcome")
 
 
@@ -175,45 +182,45 @@ out <- reactive({
         if (facetType == "none") {
   	  myFacet <- "none"
   	} else {
-  	  myFacet <- getMyFacet$val
+  	  myFacet <- facetInfo()$group
 	  if (is.null(myFacet)) { return() }
 	  if (length(myFacet) == 0) { return() }
   	}
         if (facet2Type == "none") {
           myFacet2 <- "none"
         } else {
-          myFacet2 <- getMyFacet2$val
+          myFacet2 <- facet2Info()$group
           if (is.null(myFacet2)) { return() }
           if (length(myFacet2) == 0) { return() }
         }
 
-      if (is.null(getMyOut$val)) {
+      if (is.null(outInfo()$group)) {
         return()
       } else {
-        myOut <- getMyOut$val
+        myOut <- outInfo()$group
         if (length(myOut) == 0) {
           return()
         }
       }
 
-      if (is.null(getMyAttr$val)) {
+      if (is.null(attrInfo()$group)) {
         return()
       } else {
-        myAttr <- getMyAttr$val
+        myAttr <- attrInfo()$group
         if (length(myAttr) == 0) {
           return ()
         }
       }
 
-    if (is.null(attrInfo$group_stp1)) {
+    if (is.null(attrInfo()$group_stp1)) {
         print("attr stp1 is null")
     } else {
-      if (attrInfo$group_stp1 == 'any' | attrInfo$group_stp1 == 'all') {
-        if (is.null(attrInfo$group_stp2)) {
+      if (attrInfo()$group_stp1 == 'any' | attrInfo()$group_stp1 == 'all') {
+        if (is.null(attrInfo()$group_stp2)) {
           return()
         } else {
-          if (attrInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-            if (is.null(attrInfo$group_stp3)) {
+          if (attrInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+            if (is.null(attrInfo()$group_stp3)) {
               return()
             }
           }
@@ -221,22 +228,22 @@ out <- reactive({
       }
     }
 
-        attr_stp1 <- attrInfo$group_stp1
-        attr_stp2 <- attrInfo$group_stp2
-        attr_stp3 <- attrInfo$group_stp3
-        attr_stp4 <- attrInfo$group_stp4
+        attr_stp1 <- attrInfo()$group_stp1
+        attr_stp2 <- attrInfo()$group_stp2
+        attr_stp3 <- attrInfo()$group_stp3
+        attr_stp4 <- attrInfo()$group_stp4
 
-    if (is.null(outInfo$group_stp1)) {
+    if (is.null(outInfo()$group_stp1)) {
       print("out stp1 is null")
     }  else {
-      if (outInfo$group_stp1 == 'any' | outInfo$group_stp1 == 'all') {
-        if (is.null(outInfo$group_stp2)) {
+      if (outInfo()$group_stp1 == 'any' | outInfo()$group_stp1 == 'all') {
+        if (is.null(outInfo()$group_stp2)) {
           return()
-        } else if (length(outInfo$group_stp2) == 0) {
+        } else if (length(outInfo()$group_stp2) == 0) {
           return()
         } else {
-          if (outInfo$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-            if (is.null(outInfo$group_stp3)) {
+          if (outInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+            if (is.null(outInfo()$group_stp3)) {
               return()
             }
           }
@@ -244,10 +251,10 @@ out <- reactive({
       }
     }
 
-        out_stp1 <- outInfo$group_stp1
-        out_stp3 <- outInfo$group_stp3
-        out_stp4 <- outInfo$group_stp4
-        out_stp2 <- outInfo$group_stp2
+        out_stp1 <- outInfo()$group_stp1
+        out_stp3 <- outInfo()$group_stp3
+        out_stp4 <- outInfo()$group_stp4
+        out_stp2 <- outInfo()$group_stp2
 
         text <- paste0("input\tselected\n",
                        longitudinalText,
@@ -263,7 +270,6 @@ out <- reactive({
 
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
-
         aggKey <- aggKey()
         attrData <- attr()
 	if (is.null(attrData)) { return() }

@@ -10,6 +10,7 @@ shinyUI(
               ".shiny-output-error:before { visibility: hidden; }",
               ".dataTable {border: none;}"
    ),
+   tags$script(inactivity),
    tags$style(type = 'text/css', ".btn-default{width: 100%;}"),
    tags$style(type = 'text/css', ".btn .caret{position: relative; color: black; border-top: 5px solid; border-left: 5px solid transparent; border-right: 5px solid transparent;}"),
    tags$style(type = 'text/css', ".caret{position: absolute; top: 50%; margin-top: 8px; float: right}"),

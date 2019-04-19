@@ -51,7 +51,6 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   groupRange <- reactiveValues()
   getMyGroups <- reactiveValues() 
 
-
   obsView <- reactive({
     obsView <- FALSE
     if (!is.null(prtcpntView())) {
@@ -64,24 +63,24 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
  
   setGroupVals <- reactive({
-    if(is.null(getMyGroups$val)) {
-      return()
-    }
+    if (is.null(getMyGroups$val)) { return() }
+    if (length(getMyGroups$val) == 0) { return() }     
+
     myGroup <- getMyGroups$val
     nums <- getNums(metadata.file)
     dates <- getDates(metadata.file)
    
-    if (myGroup %in% nums$source_id | myGroup %in% dates$source_id) {
+    if (myGroup %in% nums$SOURCE_ID | myGroup %in% dates$SOURCE_ID) {
       
-      groupRange$myMin <- as.numeric(metadata.file$min[metadata.file$source_id == myGroup]) 
+      groupRange$myMin <- as.numeric(metadata.file$MIN[metadata.file$SOURCE_ID == myGroup]) 
 
-      groupRange$myMax <- as.numeric(metadata.file$max[metadata.file$source_id == myGroup])
+      groupRange$myMax <- as.numeric(metadata.file$MAX[metadata.file$SOURCE_ID == myGroup])
       
-      if (myGroup %in% nums$source_id) {
-        groupRange$mean <- as.numeric(metadata.file$average[metadata.file$source_id == myGroup])
-      } else if (myGroup %in% dates$source_id) {
-        groupRange$startDate <- metadata.file$lower_quantile[metadata.file$source_id == myGroup]
-        groupRange$endDate <- metadata.file$upper_quantile[metadata.file$source_id == myGroup]
+      if (myGroup %in% nums$SOURCE_ID) {
+        groupRange$mean <- as.numeric(metadata.file$AVERAGE[metadata.file$SOURCE_ID == myGroup])
+      } else if (myGroup %in% dates$SOURCE_ID) {
+        groupRange$startDate <- metadata.file$lower_quantile[metadata.file$SOURCE_ID == myGroup]
+        groupRange$endDate <- metadata.file$upper_quantile[metadata.file$SOURCE_ID == myGroup]
         if (is.null(groupRange$myMin)) {
           groupRange$myMin <- groupRange$myMax
         } 
@@ -94,21 +93,35 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   
   #make sure ranges are updated when attr or out change
   observeEvent(getMyGroups$val, setGroupVals())
-  
-  output$group <- renderTree({
-    if (groupsType() != "makeGroups" & groupsType() != "direct") {
-      return()
-    }
  
+  observeEvent(groupsType(), {
+    output$group <- renderTree({
+      attrChoiceList <- NULL
+      
+      if (isolate(groupsType()) == "makeGroups") {
+        attrChoiceList <- getUIList(metadata.file = metadata.file, include = isolate(include()), timepoints.keep = isolate(timepoints()))
+      } else if (isolate(groupsType()) == "direct") {
+        attrChoiceList <- getUIList(metadata.file = metadata.file, include = isolate(include()), maxLevels = 12, timepoints.keep = isolate(timepoints()))
+      }
+
+      attrChoiceList
+    })
+  }, once = TRUE)
+  #output$group <- renderEmptyTree()
+
+  observeEvent(groupsType() ,{
     if (groupsType() == "makeGroups") {
       attrChoiceList <- getUIList(metadata.file = metadata.file, include = include(), timepoints.keep = timepoints())
-    } else {
+    } else if (groupsType() == "direct") {
       attrChoiceList <- getUIList(metadata.file = metadata.file, include = include(), maxLevels = 12, timepoints.keep = timepoints())
+    } else {
+      attrChoiceList <- NULL 
     }
     
-    attrChoiceList
-
-  })
+    if (!is.null(attrChoiceList)) {    
+      updateTree(session, "group", data = attrChoiceList)
+    }
+  }, ignoreInit = TRUE)
   
   output$choose_group <- renderUI({
     if (is.null(groupsType())) {
@@ -122,6 +135,8 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(myGroupBtnLabel)) {
       return()
     }
+
+    if (is.null(include())) { return() }
     
     tagList(
       div(
@@ -133,7 +148,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                        status = "default", 
                        tags$div(
                          class = "treeContainer",
-                         shinyTree(ns("group"), search = TRUE)
+                         shinyTree(ns("group"), search = TRUE, themeIcon=FALSE, themeDots = FALSE)
                        )),
         style="margin-bottom: 10px"
       )
@@ -141,37 +156,45 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
 
   observeEvent(input$group, {
-    if (length(get_selected(input$group, format="names")) != 0) {
+    if (length(get_selected(input$group, format="slices")) != 0) {
 
-      mySelected <- get_selected(input$group, format="names")[[1]]
-      myProp <- mySelected[1]
-      myParent <- unlist(attributes(mySelected))[length(unlist(attributes(mySelected)))]
+      mySelected <- get_selected(input$group, format = "slices")
+      mySelected <- unlist(strsplit(names(unlist(mySelected)), ".", fixed=TRUE))
+      myProp <- mySelected[length(mySelected)]
+      myParent <- mySelected[length(mySelected)-1]
       if (length(myParent) != 0) {
-          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & metadata.file$parentlabel == myParent]
+          nextGroup <- metadata.file$SOURCE_ID[metadata.file$PROPERTY == myProp & metadata.file$PARENTLABEL == myParent]
         } else {
-          nextGroup <- metadata.file$source_id[metadata.file$property == myProp & (metadata.file$parentlabel == "null" | metadata.file$parentlabel == "" | is.null(metadata.file$parentlabel))]
+          nextGroup <- metadata.file$SOURCE_ID[metadata.file$PROPERTY == myProp & (metadata.file$PARENTLABEL == "null" | metadata.file$PARENTLABEL == "" | is.null(metadata.file$PARENTLABEL))]
         }
       nextGroup <- unique(nextGroup)
 
-      if (length(nextGroup) != 1) {
+      if (length(nextGroup) > 1) {
         message("Warning: non-unique source_ids returned ", nextGroup)
       }   
  
       getMyGroups$val <- nextGroup
     }
   })
-  
+
   getGroupBtnLabel <- reactive({
-    propUrl <<- getPropertiesUrl(session)
-    properties <- try(fread(propUrl))
+    
+    if (is.null(properties)) {
+      propUrl <<- getPropertiesUrl(session)
+      properties <- try(fread(propUrl))
+    }
 
     if (grepl("Error", properties)[1]) {
       properties <- NULL
     }
     myGroup <- getMyGroups$val
-    #if (is.null(myGroup)) {
-    #  return()
+    #if (!is.null(myGroup)) {
+    #  category <- metadata.file$CATEGORY[metadata.file$SOURCE_ID == myGroup]
+    #  if (category %in% c("Observation", "Sample") & groupsType() == "direct") {
+    #    myGroup <- NULL
+    #  }
     #}
+
     if (!is.null(groupsTypeID)) {
       groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]
     } else {
@@ -196,19 +219,18 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       } else {
         mySelected = properties$selected[properties$input == paste0(moduleName, "$group")]
       }
-    #this should only happen if switching from 'none' to other for groupsType
-    if (length(mySelected) == 0) {
-      mySelected <- "custom"
-    } 
 
+    if (length(mySelected) == 0) { mySelected <- "custom" }
+    if (is.na(mySelected)) { mySelected <- "custom" } 
+	
     if (is.null(myGroup)) {
-      label <- metadata.file$property[metadata.file$source_id == mySelected]
+      label <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == mySelected]
       getMyGroups$val <- mySelected
       if (is.null(label)) {
         label <- mySelected
       }
     } else {
-      label <- metadata.file$property[metadata.file$source_id == myGroup]
+      label <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myGroup]
     }
     label
   })
@@ -231,8 +253,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]  
 
     attrStp1List <- getUIStp1List(metadata.file, myGroup)
-    observations <- metadata.file$source_id[metadata.file$category %in% c("Observation", "Sample")]
-    #observations <- observations[observations %in% colnames(studyData)]
+    observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY %in% c("Observation", "Sample")]
 
     dontUseProps <- FALSE
     if (is.null(properties)) {
@@ -245,7 +266,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       }
       if (length(groupsTypeID) != 0) {
         if (length(groupsTypeSelected) != 0) {
-          if (groupsType() != groupsTypeSelected | myGroup %in% dates$source_id) {
+          if (groupsType() != groupsTypeSelected | myGroup %in% dates$SOURCE_ID) {
             dontUseProps <- TRUE
           }
         }
@@ -262,9 +283,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         obs <- TRUE
         mySelected = "any"
       } else {
-        if (myGroup %in% nums$source_id) {
+        if (myGroup %in% nums$SOURCE_ID) {
           mySelected = "greaterThan"
-        } else if (myGroup %in% dates$source_id) {
+        } else if (myGroup %in% dates$SOURCE_ID) {
           mySelected1 = groupRange$startDate
           mySelected2 = groupRange$endDate
         } else {
@@ -301,13 +322,13 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                    selected = mySelected,
                    width = '100%')
     } else {
-      if (myGroup %in% nums$source_id) {
+      if (myGroup %in% nums$SOURCE_ID) {
         selectInput(inputId = ns("group_stp1"),
                     label = "is",
                     choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                     selected = mySelected,
                     width = '100%')
-      } else if (myGroup %in% dates$source_id) {
+      } else if (myGroup %in% dates$SOURCE_ID) {
         mySelected1 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[1]")]
         mySelected2 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[2]")]
         dateRangeInput(inputId = ns("group_stp1"),
@@ -342,6 +363,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   })
   
   output$choose_stp2 <- renderUI ({
+    assign(paste0(moduleName, "$group_stp1"), input$group_stp1, pos=parent.frame())
     if (is.null(input$group_stp1)) {
        return()
     }
@@ -389,9 +411,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
           mySelected = "greaterThan"
         }
       } else if (myStp1Val %in% obs) {
-        if (myGroup %in% nums$source_id) {
+        if (myGroup %in% nums$SOURCE_ID) {
           mySelected = "greaterThan"
-        } else if (myGroup %in% dates$source_id) {
+        } else if (myGroup %in% dates$SOURCE_ID) {
           mySelected1 = groupRange$startDate
           mySelected2 = groupRange$endDate
         } else {
@@ -430,13 +452,13 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                     width = '100%')
       }
     } else if (myStp1Val %in% obs) {
-      if (myGroup %in% nums$source_id) {
+      if (myGroup %in% nums$SOURCE_ID) {
         selectInput(inputId = ns("group_stp2"),
                     label = NULL,
                     choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                     selected = mySelected,
                     width = '100%')
-      } else if (myGroup %in% dates$source_id) {
+      } else if (myGroup %in% dates$SOURCE_ID) {
         mySelected1 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[1]")]
         mySelected2 <- properties$selected[properties$input == paste0(moduleName, "$group_stp1[2]")]
         dateRangeInput(inputId = ns("group_stp2"),
@@ -471,6 +493,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(input$group_stp1)) {
       return()
     }
+    assign(paste0(moduleName, "$group_stp2"), input$group_stp2, pos=parent.frame())
     if (is.null(input$group_stp2)) {
       return()
     }
@@ -550,6 +573,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (is.null(input$group_stp2)) {
       return()
     }
+    assign(paste0(moduleName, "$group_stp3"), input$group_stp3, pos=parent.frame())
     if (is.null(input$group_stp3)) {
       return()
     }
@@ -581,6 +605,6 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     }
 
   })
-  
-  return(input)
+ 
+  return(reactive({ list('group' = getMyGroups$val, "group_stp1" = input$group_stp1, "group_stp2" = input$group_stp2, "group_stp3" = input$group_stp3, "group_stp4" = input$group_stp4) }))
 }

@@ -1,34 +1,47 @@
 ## server.r
 
-source("../../functions/static_data_load.R")
-staticDataFetcher() 
+#source("../../functions/static_data_load.R")
+#staticDataFetcher() 
 
 shinyServer(function(input, output, session) {
+
+  observeEvent(input$timeOut, { 
+    print(paste0("Session (", session$token, ") timed out at: ", Sys.time()))
+    showModal(modalDialog(
+      title = "Timeout",
+      paste("Session timeout due to", input$timeOut, "inactivity -", Sys.time()),
+      footer = NULL
+    ))
+    session$close()
+  })
   
   metadata.file <- NULL
-  studyData <- NULL
   longitudinal.file <- NULL
   current <- NULL
-  facetInfo <- NULL
-  facet2Info <- NULL
-  groupInfo <- NULL
+  facetInfo <- reactive({ list("group" = NULL, "group_stp1" = NULL, "group_stp2" = NULL, "group_stp3" = NULL, "group_stp4" = NULL) })
+  facet2Info <- reactive({ list("group" = NULL, "group_stp1" = NULL, "group_stp2" = NULL, "group_stp3" = NULL, "group_stp4" = NULL) })
+  groupInfo <- reactive({ list("group" = NULL, "group_stp1" = NULL, "group_stp2" = NULL, "group_stp3" = NULL, "group_stp4" = NULL) })
   attributes.file <- NULL
   propUrl <- NULL
   properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  lon2Data <- NULL
+  lon1Data <- NULL
+  hlongitudinal1 <- NULL
+  hlongitudinal2 <- NULL
+  hlon2Data <- NULL
+  hlon1Data <- NULL
   project.id <- NULL
   isParticipant <- NULL
-  getMyY <- reactiveValues()
-  getMyGroups <- reactiveValues()
-  getMyFacet <- reactiveValues()
-  getMyFacet2 <- reactiveValues()
   legendTitle <- NULL
+  getMyY <- reactiveValues()
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
   metadata.classes <- NULL
   contLongitudinal <- FALSE
   datasetName <- NULL
+  datasetDigest <- NULL
   longitudinalText <- NULL
   facetText <- NULL
   facet2Text <- NULL
@@ -37,19 +50,18 @@ shinyServer(function(input, output, session) {
 
   source("../../functions/reactive_data_load.R", local = TRUE) 
  
-  #ui stuffs
   output$title <- renderText({
-    withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
-      if (is.null(studyData)) {
+    withProgress(message = 'Loading... ', value = 0, style = "old", {
+      if (is.null(attributes.file)) {
         reactiveDataFetcher()
       } 
       incProgress(.45)
-      timelineInit()
+      #timelineInit()
       incProgress(.15)
-      groupInit()
+      #groupInit()
       incProgress(.25)
-      facetInit()
-      facet2Init()
+      #facetInit()
+      #facet2Init()
       incProgress(.15)
     })
     c("Data Summaries")
@@ -61,10 +73,10 @@ shinyServer(function(input, output, session) {
       myPrtcpntView <- prtcpntView$val
       
       if (myPrtcpntView == TRUE) {
-        aggKey <- c("Participant_Id")
+        aggKey <- c("PARTICIPANT_ID")
       } else {
         #aggKey <- c("Observation_Id")
-        aggKey <- c("Participant_Id", longitudinal1)
+        aggKey <- c("PARTICIPANT_ID", longitudinal1)
       }
       
       return(aggKey)

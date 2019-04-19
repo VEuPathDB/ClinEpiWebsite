@@ -1,50 +1,64 @@
 ## server.r
 
-source("../../functions/static_data_load.R")
-staticDataFetcher()
+#source("../../functions/static_data_load.R")
+#staticDataFetcher()
 
 shinyServer(function(input, output, session) {
+
+  observeEvent(input$timeOut, { 
+    message("Session (", session$token, ") timed out at: ", Sys.time())
+    showModal(modalDialog(
+      title = "Timeout",
+      paste("Session timeout due to", input$timeOut, "inactivity -", Sys.time()),
+      footer = NULL
+    ))
+    session$close()
+  })
   
   prevFacet <- NULL
   current <- NULL
-  facetInfo <- NULL
-  facet2Info <- NULL
-  xaxisInfo <- NULL
+  facetInfo <- reactive({ list("group" = NULL, "group_stp1" = NULL, "group_stp2" = NULL, "group_stp3" = NULL, "group_stp4" = NULL) })
+  facet2Info <- reactive({ list("group" = NULL, "group_stp1" = NULL, "group_stp2" = NULL, "group_stp3" = NULL, "group_stp4" = NULL) })
+  xaxisInfo <- reactive({ list("group" = NULL, "group_stp1" = NULL, "group_stp2" = NULL, "group_stp3" = NULL, "group_stp4" = NULL) })
   attributes.file <- NULL  
   propUrl <- NULL
   properties <- NULL
-  getMyX <- reactiveValues()
-  getMyFacet <- reactiveValues()
-  getMyFacet2 <- reactiveValues()
   prtcpntView <- reactiveValues()
   prtcpntView$val <- TRUE
   longitudinalText <- NULL
   facetText <- NULL
   facet2Text <- NULL
   datasetName <- NULL
-  studyData <- NULL
+  datasetDigest <- NULL
   metadata.file <- NULL
   longitudinal.file <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
+  lon1Data <- NULL
+  lon2Data <- NULL
+  hlongitudinal1 <- NULL
+  hlongitudinal2 <- NULL
+  hlon1Data <- NULL
+  hlon2Data <- NULL
   attributes.file <- NULL
   isParticipant <- NULL
 
   source("../../functions/reactive_data_load.R", local = TRUE)
 
   output$title <- renderText({
+	#TODO move withProgess to reactive data loader now that modules are initialized differently
     withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
-      if (is.null(studyData)) {
+      if (is.null(attributes.file)) {
 	message("reactive data fetcher")
 	 reactiveDataFetcher()
       }
       incProgress(.45)
-      timelineInit()
+      #timelineInit()
       incProgress(.15)
-      xaxisInit()
+      #xaxisInit()
       incProgress(.25)
-      facetInit()
-      facet2Init() 
+      #facetInit()
+      #facet2Init() 
       incProgress(.15)
     })
     c("Data Distributions")
@@ -56,11 +70,11 @@ shinyServer(function(input, output, session) {
     myPrtcpntView <- prtcpntView$val
     
     if (myPrtcpntView == TRUE) {
-      aggKey <- c("Participant_Id")
+      aggKey <- c("PARTICIPANT_ID")
     } else {
       #apps currently assume one col will be participant_id, so not using obs_id for now
       #assumes the two are equivalent (no more than one observation for a participant on some date longitudinal1)  
-      aggKey <- c("Participant_Id", longitudinal1)
+      aggKey <- c("PARTICIPANT_ID", longitudinal1)
     }
     
     return(aggKey)
@@ -68,11 +82,12 @@ shinyServer(function(input, output, session) {
     
 
   source("server/individualPlot.R", local = TRUE)
-  #consolidate code between two plots
+  #TODO consolidate code between two plots
   source("server/plotGrid.R", local = TRUE)
     
   source("server/summaryStats.R", local = TRUE) 
    
+  #all roads lead to rome
   source("server/plotData.R", local = TRUE)
  
 })

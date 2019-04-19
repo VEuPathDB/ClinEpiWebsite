@@ -22,8 +22,8 @@
       } else {
         myFacet2 <- "FACET2"
       }
-      dummy <- getMyFacet$val
-        dummy <- getMyFacet2$val
+      dummy <- facetInfo()$group
+        dummy <- facet2Info()$group
 
       dates <- getDates(metadata.file)
       nums <- getNums(metadata.file)
@@ -36,7 +36,7 @@
         names(df)[names(df) == 'GROUPS'] <- 'LINES'
 
         if (contLongitudinal) {
-          xAxisType <- metadata.file$type[metadata.file$source_id == longitudinal]
+          xAxisType <- metadata.file$TYPE[metadata.file$SOURCE_ID == longitudinal]
           if (xAxisType == "number") {
             xlab = "Age"
           } else {
@@ -63,7 +63,7 @@
           ylab <- gsub('(.{1,65})(\\s|$)', '\\1\n', ylab)
 
           #format xaxis ticks
-          if (longitudinal %in% nums$source_id) {
+          if (longitudinal %in% nums$SOURCE_ID) {
             df$XAXIS <- as.numeric(gsub("\\[|\\]", "", sub(".*,", "", df$XAXIS)))
           } else {
             df$XAXIS <- as.factor(df$XAXIS)
@@ -104,7 +104,7 @@
             myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
           }
 
-          if (!longitudinal %in% nums$source_id) {
+          if (!longitudinal %in% nums$SOURCE_ID) {
             myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
           }
 
@@ -113,7 +113,7 @@
           names(df)[names(df) == 'LINES'] <- 'XAXIS'
           # if y axis is numeric box plots otherwise bar pltos.
           #define axis labels here
-          xlab <- ""
+          xlab <- unique(metadata.file$PROPERTY[metadata.file$SOURCE_ID == groupInfo()$group])
           yaxis_stp1 <- input$yaxis_stp1
           yaxis_stp2 <- input$yaxis_stp2
           if (prtcpntView$val != TRUE) {
@@ -205,7 +205,7 @@
         if (is.null(legendTitle)) {
           legend.title <- "All"
         } else {
-          legend.title <- metadata.file$property[metadata.file$source_id == legendTitle]
+          legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == legendTitle]
           legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
         }
         myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
