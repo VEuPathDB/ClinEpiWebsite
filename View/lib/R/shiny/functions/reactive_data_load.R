@@ -33,28 +33,48 @@ reactiveDataFetcher = reactive({
       if (numTimelines == 1) {
         longitudinal1 <<- longitudinal.file$columns
         message("lon data: ", paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], "/", datasetDigest, "/", longitudinal1))
-        lon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], "/", datasetDigest, "/", longitudinal1)), pagesize=1000)))
-        lon1Data <<- lon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	if (!datasetName %in% names(lon1DataList)) {
+          lon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], "/", datasetDigest, "/", longitudinal1)), pagesize=1000)))
+          lon1Data <<- lon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	  lon1DataList[[datasetName]] <<- lon1Data
+	} else {
+	  lon1Data <<- lon1DataList[[datasetName]]
+        }
         longitudinal2 <<- NULL
         hlongitudinal1 <<- ifelse(is.na(longitudinal.file$house_columns), NULL, longitudinal.file$house_columns)
         
         message("hlon data: ", paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], "/", datasetDigest, "/", hlongitudinal1))
-        hlon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], "/", datasetDigest, "/", hlongitudinal1)), pagesize=1000)))
-        hlon1Data <<- hlon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	if (!datasetName %in% names(hlon1DataList)) {
+	  hlon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], "/", datasetDigest, "/", hlongitudinal1)), pagesize=1000)))
+          hlon1Data <<- hlon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	  hlon1DataList[[datasetName]] <<- hlon1Data
+        } else {
+	  hlon1Data <<- hlon1DataList[[datasetName]]
+	}
         hlongitudinal2 <<- NULL
       } else {
         longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
         
         longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
         message("lon data: ", paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], "/", datasetDigest, "/", longitudinal2, "?timeSourceId=", longitudinal1))
-        lon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], "/", datasetDigest, "/", longitudinal2, "?timeSourceId=", longitudinal1)), pagesize=1000)))
-        lon2Data <<- lon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	if (!datasetName %in% names(lon2DataList)) {
+          lon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], "/", datasetDigest, "/", longitudinal2, "?timeSourceId=", longitudinal1)), pagesize=1000)))
+          lon2Data <<- lon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	  lon2DataList[[datasetName]] <<- lon2Data
+	} else {
+	  lon2Data <<- lon2DataList[[datasetName]]
+        }
         hlongitudinal1 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% dates)$house_columns
         if (length(hlongitudinal1) > 0) {
           hlongitudinal2 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% nums)$house_columns
           message("hlon data: ", paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], "/", datasetDigest, "/", hlongitudinal2, "?timeSourceId=", hlongitudinal1))
-          hlon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], "/", datasetDigest, "/", hlongitudinal2, "?timeSourceId=", hlongitudinal1)), pagesize=1000)))
-          hlon2Data <<- hlon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          if (!datasetName %in% names(hlon2DataList)) {
+            hlon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], "/", datasetDigest, "/", hlongitudinal2, "?timeSourceId=", hlongitudinal1)), pagesize=1000)))
+            hlon2Data <<- hlon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+	    hlon2DataList[[datasetName]] <<- hlon2DataList
+	  } else {
+	    hlon2Data <<- hlon2DataList[[datasetName]]
+	  }
         } else {
           hlongitudinal1 <<- NULL
           hlongitudinal2 <<- NULL
