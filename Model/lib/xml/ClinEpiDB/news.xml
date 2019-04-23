@@ -15,6 +15,26 @@
     </record>
 -->
 <record>
+  <attribute name="headline">ClinEpiDB 7 Released</attribute>
+  <attribute name="date">25 Mar 2019 13:00</attribute>
+  <attribute name="tag">clinepidb_7_release</attribute>
+  <attribute name="category">release</attribute>
+  <attribute name="item">
+    <![CDATA[
+      <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 7!</i></div>
+
+      <section> <h3><b>New Data in this Release</b></h3>
+		    <ul>
+		      <li><a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_221d2bcac4">Global Enteric Multicenter Study (GEMS) 1 HUAS/HUAS Lite</a> and <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_6a93753102">GEMS1A HUAS Lite</a> coordinated by the University of Maryland School of Medicine’s Center for Vaccine Development, were two community-based Healthcare Services Utilization and Attitudes Surveys (HUAS) conducted in conjunction with the GEMS and GEMS1A studies. These surveys provide data on where parents seek care when their children have diarrheal disease, and their attitudes and practices concerning diarrhea, its prevention and treatment.  This information was used to optimize the surveillance for determining disease burden, to perform data adjustments to account for the proportion of children with diarrhea who do not seek care at the health care facilities participating in GEMS surveillance, to calculate population-based incidence rates, to compare data between the different sites, and to assess public perception of the need for interventions to prevent childhood diarrhea. The surveys included almost 200,000 children under 5 years of age from seven sites in sub-Saharan Africa and South Asia. See the recently published GEMS1A study results here: <a target="_blank" href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(19)30076-2/fulltext">The incidence, aetiology, and adverse clinical consequences of less severe diarrhoeal episodes among infants and children residing in low-income and middle-income countries: a 12-month case-control study as a follow-on to the Global Enteric Multicenter Study (GEMS)</a></li>
+		      <li>The <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_a5c969d5fa">India ICEMR cross-sectional study</a> and  <a target="_blank" href="https://clinepidb.org/a/app/record/dataset/DS_4902d9b7ec">India ICEMR fever surveillance study</a> were coordinated by the Center for the Study of Complex Malaria in India (CSCMi), part of the International Centers of Excellence for Malaria Research (ICEMR) program. The cross-sectional study surveyed over 3000 participants across 3 sites in India, in Rourkela, Tamil Nadu, and Nadiad, to examine malaria prevalence and associations with vector control methods, travel, and more. The fever surveillance study enrolled almost 1000 participants at Ispat General Hospital, Rourkela with acute febrile illness that was thought to be non-malarial. The study examined prevalence of chikungunya, dengue, and scrub typhus in this population, compared the performance of commercially available diagnostic tests, and determined how many malaria cases were missed during initial triage.</li>
+        </ul>
+      </section>
+    ]]>
+  </attribute>
+</record>
+
+
+<record>
   <attribute name="headline">ClinEpiDB 6 Released</attribute>
   <attribute name="date">07 Mar 2019 13:00</attribute>
   <attribute name="tag">clinepidb_6_release</attribute>
