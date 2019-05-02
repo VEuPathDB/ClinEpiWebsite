@@ -17,6 +17,7 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
         message("myVar: ", varUrl)
         data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+        data <- setDTColType(longitudinal1, metadata.file, data)
 	if (category != "Participant") {
           if (!is.null(lon2Data)) {
             data <- merge(data, lon2Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
@@ -38,6 +39,7 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
           message("myVar: ", varUrl)
           data <- unique(as.data.table(stream_in(url(varUrl)), pagesize=1000))
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          data <- setDTColType(hlongitudinal1, metadata.file, data)
           if (!is.null(hlon2Data)) {
             data <- merge(data, hlon2Data, by = c("PARTICIPANT_ID", hlongitudinal1))
             names(data)[names(data) == hlongitudinal2] <- longitudinal2
@@ -88,6 +90,7 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
       data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
       data <- merge(data, attributes.file, by = "OBSERVATION_ID", all=TRUE)
       if (!is.null(longitudinal1)) {
+        data <- setDTColType(longitudinal1, metadata.file, data)
         if (!is.null(lon2Data)) {
           data <- merge(data, lon2Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
         } else {

@@ -36,6 +36,7 @@ reactiveDataFetcher = reactive({
 	if (!datasetName %in% names(lon1DataList)) {
           lon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], "/", datasetDigest, "/", longitudinal1)), pagesize=1000)))
           lon1Data <<- lon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          lon1Data <<- setDTColType(longitudinal1, metadata.file, lon1Data)
 	  lon1DataList[[datasetName]] <<- lon1Data
 	} else {
 	  lon1Data <<- lon1DataList[[datasetName]]
@@ -47,6 +48,7 @@ reactiveDataFetcher = reactive({
 	if (!datasetName %in% names(hlon1DataList)) {
 	  hlon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], "/", datasetDigest, "/", hlongitudinal1)), pagesize=1000)))
           hlon1Data <<- hlon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          hlon1Data <<- setDTColType(hlongitudinal1, metadata.file, hlon1Data)
 	  hlon1DataList[[datasetName]] <<- hlon1Data
         } else {
 	  hlon1Data <<- hlon1DataList[[datasetName]]
@@ -60,6 +62,8 @@ reactiveDataFetcher = reactive({
 	if (!datasetName %in% names(lon2DataList)) {
           lon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], "/", datasetDigest, "/", longitudinal2, "?timeSourceId=", longitudinal1)), pagesize=1000)))
           lon2Data <<- lon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          lon2Data <<- setDTColType(longitudinal1, metadata.file, lon2Data)
+          lon2Data <<- setDTColType(longitudinal2, metadata.file, lon2Data)
 	  lon2DataList[[datasetName]] <<- lon2Data
 	} else {
 	  lon2Data <<- lon2DataList[[datasetName]]
@@ -71,6 +75,8 @@ reactiveDataFetcher = reactive({
           if (!datasetName %in% names(hlon2DataList)) {
             hlon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], "/", datasetDigest, "/", hlongitudinal2, "?timeSourceId=", hlongitudinal1)), pagesize=1000)))
             hlon2Data <<- hlon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+            hlon2Data <<- setDTColType(hlongitudinal1, metadata.file, hlon2Data)
+            hlon2Data <<- setDTColType(hlongitudinal2, metadata.file, hlon2Data)
 	    hlon2DataList[[datasetName]] <<- hlon2DataList
 	  } else {
 	    hlon2Data <<- hlon2DataList[[datasetName]]
