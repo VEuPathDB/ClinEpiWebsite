@@ -15,13 +15,14 @@
 <xmlAnswer>
 
  
-<!-- TUTORIALS :  most recent on top
-     remind UI team to update the page with the new number of tutorials.  
+<!-- Resources 
+     UPDATE the page ClinEpiWebsite/Site/webapp/wdkCustomization/jsp/questions/XmlQuestions.Tutorials.jsp
+       with the new number of resources.  
 -->
   <record>
        <attribute name="title">IRB data sharing guidance</attribute>
        <attribute name="description">Things to consider with regards to data sharing when writing an IRB proposal.</attribute>
-       <attribute name="uid">3</attribute>
+       <attribute name="uid">r1</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -33,100 +34,13 @@
 
 
 
-<!-- OFF until updated...
- <record>
-       <attribute name="title">Interacting with and visualizing data: Shiny Apps</attribute>
-       <attribute name="description">Interacting with and visualizing data: Shiny Apps</attribute>
-       <attribute name="uid">3</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">ClinEpiDBTutorial3ShinyApp_osh_dh2-2.pdf</attribute>
-           <attribute name="size">Jul 5, 2018</attribute>
-         </row>
-       </table>
-  </record>
-
+<!-- TUTORIALS :  order provided by ClinEPi Outreach
 -->
 
-
-  <record>
-       <attribute name="title">Exploring search results</attribute>
-       <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
-       <attribute name="uid">2</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
-           <attribute name="size">Apr 11, 2018</attribute>
-         </row>
-       </table>
-  </record>
-
-
-  <record>
-       <attribute name="title">Accessing ClinEpiDB data and exploring via the filters</attribute>
-       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
-       <attribute name="uid">1</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
-           <attribute name="size">Mar 18, 2018</attribute>
-         </row>
-       </table>
-  </record>
-
-
-<!-- OTHER RESOURCES :  most recent on top, otherwise alphabetically
--->
-
-  <record>
-       <attribute name="title">GEMS_Anthropometry.pdf</attribute>
-       <attribute name="description">GEMS_Anthropometry.pdf</attribute>
-       <attribute name="uid">r1</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">GEMS_Anthropometry.pdf</attribute>
-           <attribute name="size">Apr 26, 2019</attribute>
-         </row>
-       </table>
-  </record>
-
-
-  <record>
-       <attribute name="title">GEMS_DiarrheaDuration.pdf</attribute>
-       <attribute name="description">GEMS_DiarrheaDuration.pdf</attribute>
-       <attribute name="uid">r2</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">GEMS_DiarrheaDuration.pdf</attribute>
-           <attribute name="size">Apr 26, 2019</attribute>
-         </row>
-       </table>
-  </record>
-
-
- <record>
-       <attribute name="title">GEMS_GiardiaMatched.pdf</attribute>
-       <attribute name="description">GEMS_GiardiaMatched.pdf</attribute>
-       <attribute name="uid">r3</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">GEMS_GiardiaMatched.pdf</attribute>
-           <attribute name="size">Apr 26, 2019</attribute>
-         </row>
-       </table>
-  </record>
-
-
-  <record>
-       <attribute name="title">General_1_create_personal_account.pdf</attribute>
-       <attribute name="description">General_1_create_personal_account.pdf</attribute>
-       <attribute name="uid">r4</attribute>
+<record>
+       <attribute name="title">Creating a personal account</attribute>
+       <attribute name="description">Creating a personal account</attribute>
+       <attribute name="uid">t1</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -136,11 +50,10 @@
        </table>
   </record>
 
-
-  <record>
-       <attribute name="title">General_2_get_help_or_submit_comment.pdf</attribute>
-       <attribute name="description">General_2_get_help_or_submit_comment.pdf</attribute>
-       <attribute name="uid">r5</attribute>
+ <record>
+       <attribute name="title">Getting help and submitting feedback</attribute>
+       <attribute name="description">Getting help and submitting feedback</attribute>
+       <attribute name="uid">t2</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -150,25 +63,10 @@
        </table>
   </record>
 
-
-  <record>
-       <attribute name="title">India_longitudinal_bednet.pdf</attribute>
-       <attribute name="description">India_longitudinal_bednet.pdf</attribute>
-       <attribute name="uid">r6</attribute>
-       <table name="files">
-        <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">India_longitudinal_bednet.pdf</attribute>
-           <attribute name="size">Apr 26, 2019</attribute>
-         </row>
-       </table>
-  </record>
-
-
-  <record>
-       <attribute name="title">MALED_1_data_set_page.pdf</attribute>
-       <attribute name="description">MALED_1_data_set_page.pdf</attribute>
-       <attribute name="uid">r7</attribute>
+ <record>
+       <attribute name="title">MAL-ED Data Set page: the key to understanding the study methodologies</attribute>
+       <attribute name="description">MAL-ED Data Set page: the key to understanding the study methodologies</attribute>
+       <attribute name="uid">t3</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -178,11 +76,10 @@
        </table>
   </record>
 
-
   <record>
-       <attribute name="title">MALED_2_explore_data.pdf</attribute>
-       <attribute name="description">MALED_2_explore_data.pdf</attribute>
-       <attribute name="uid">r8</attribute>
+       <attribute name="title">Accessing and exploring MAL-ED data via the filters</attribute>
+       <attribute name="description">Accessing and exploring MAL-ED data via the filters</attribute>
+       <attribute name="uid">t4</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -192,11 +89,10 @@
        </table>
   </record>
 
-
   <record>
-       <attribute name="title">MALED_3_related_observations</attribute>
-       <attribute name="description">MALED_3_related_observations</attribute>
-       <attribute name="uid">r9</attribute>
+       <attribute name="title">Building a search of MAL-ED data with Related Observations and revising the search strategy</attribute>
+       <attribute name="description">Building a search of MAL-ED data with Related Observations and revising the search strategy</attribute>
+       <attribute name="uid">t5</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -206,25 +102,36 @@
        </table>
   </record>
 
-
   <record>
-       <attribute name="title">PRISM_asymptomaticAge.pdf</attribute>
-       <attribute name="description">PRISM_asymptomaticAge.pdf</attribute>
-       <attribute name="uid">r10</attribute>
+       <attribute name="title">Accessing and exploring PRISM data via the filters</attribute>
+       <attribute name="description">This tutorial explains what types of data searches you can do and how to use the search filters and visualization tools built into the website.</attribute>
+       <attribute name="uid">t6</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">PRISM_asymptomaticAge.pdf</attribute>
-           <attribute name="size">Apr 26, 2019</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
+           <attribute name="size">Mar 18, 2018</attribute>
          </row>
        </table>
   </record>
 
-
   <record>
-       <attribute name="title">PRISM_dwelling.pdf</attribute>
-       <attribute name="description">PRISM_dwelling.pdf</attribute>
-       <attribute name="uid">r11</attribute>
+       <attribute name="title">Viewing PRISM search results: tabular outputs, column visualization, and data download options</attribute>
+       <attribute name="description">Learn about the tools available to view your search results and how to download the data.</attribute>
+       <attribute name="uid">t7</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
+           <attribute name="size">Apr 11, 2018</attribute>
+         </row>
+       </table>
+  </record>
+
+ <record>
+       <attribute name="title">PRISM exercise: house design and malaria incidence in children</attribute>
+       <attribute name="description">PRISM exercise: house design and malaria incidence in children</attribute>
+       <attribute name="uid">t8</attribute>
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
@@ -234,6 +141,70 @@
        </table>
   </record>
 
+ <record>
+       <attribute name="title">PRISM exercise: average age of first asymptomatic parasitemia</attribute>
+       <attribute name="description">PRISM exercise: average age of first asymptomatic parasitemia</attribute>
+       <attribute name="uid">t9</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">PRISM_asymptomaticAge.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
 
+ <record>
+       <attribute name="title">India ICEMR longitudinal cohort exercise: poverty and the use of bednets</attribute>
+       <attribute name="description">India ICEMR longitudinal cohort exercise: poverty and the use of bednets</attribute>
+       <attribute name="uid">t10</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">India_longitudinal_bednet.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+  <record>
+       <attribute name="title">GEMS exercise: age distributions of females vs. males with diarrheal illness longer than 3 days</attribute>
+       <attribute name="description">GEMS exercise: age distributions of females vs. males with diarrheal illness longer than 3 days</attribute>
+       <attribute name="uid">t11</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">GEMS_DiarrheaDuration.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+ <record>
+       <attribute name="title">GEMS exercise: prevalence of wasting and stunting and relationship to various pathogens</attribute>
+       <attribute name="description">GEMS exercise: prevalence of wasting and stunting and relationship to various pathogens</attribute>
+       <attribute name="uid">t12</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">GEMS_Anthropometry.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+
+ <record>
+       <attribute name="title">GEMS exercise: relationship between Giardia or Cryptosporidium and moderate-to-severe diarrhea</attribute>
+       <attribute name="description">GEMS exercise: relationship between Giardia or Cryptosporidium and moderate-to-severe diarrhea</attribute>
+       <attribute name="uid">t13</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="fileName.pdf">GEMS_GiardiaMatched.pdf</attribute>
+           <attribute name="size">Apr 26, 2019</attribute>
+         </row>
+       </table>
+  </record>
+ 
  </xmlAnswer>
 
