@@ -50,58 +50,31 @@ sub init {
   my $count = 0;
 
   if (defined $yAxis) {
-      
-      if ($self->useWhoStandards()){
-	  
-	  my $tablename = 'APIDBTUNING.' . $tblPrefix . 'PARTICIPANTS';
-	  $tablename =~ s/[^a-zA-Z0-9.]//g;
-	  
+    if ($self->useWhoStandards()){
+      my $tablename = 'APIDBTUNING.' . $tblPrefix . 'PARTICIPANTS';
+      $tablename =~ s/[^a-zA-Z0-9.]//g;
 	  my $ID = $self->getId();
-
 	  my $sql = "select PATO_0000047
                      from ". $tablename .
                     " where NAME = '" . $ID . "'" ; 
-	  
 	  my $qh = $self->getQueryHandle();
-
 	  my $sh = $qh->prepare($sql);  
-
 	  $sh->execute();
-	  
 	  my ($sex) = $sh->fetchrow_array();
-
-	  #if($sex eq 'Female | Male'){
-	   #   $sex='male';
-	  #}
-	  
 	  $sex = lc($sex);
-
 	  $sh->finish();
 
-
 	  if(scalar @{$yAxis} ==1){
-
-	      my $currentWHOProfileSet = $WhoProfileSets{$sex}{$yAxis->[0]};
-
-	      print STDERR Dumper($currentWHOProfileSet);
-
-
+	    my $currentWHOProfileSet = $WhoProfileSets{$sex}{$yAxis->[0]};
 	      if (defined $currentWHOProfileSet){	  
-
-		  my @profileSetArray = ([$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD0'],
-					 [$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD2'],
-					 [$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD2neg'],
-		      );
-		  
-		  $profileSets = EbrcWebsiteCommon::View::GraphPackage::Util::makeProfileSets(\@profileSetArray);
-		  
+	        my @profileSetArray = ([$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD0'],
+                                       [$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD2'],
+                                       [$currentWHOProfileSet,'values', '', '', '', '', '', '', '', '', '','SD2neg'],
+		);
+		$profileSets = EbrcWebsiteCommon::View::GraphPackage::Util::makeProfileSets(\@profileSetArray);  
 	      }
-	      
 	  } 
-	  
-      }
-
-
+    }
 
     for my $row (@{$yAxis}) {
       $nodeMetadata[$count] =  ({
@@ -273,7 +246,6 @@ profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.
 RADJUST
 
   $profile->addAdjustProfile($rAdjustString);
-  $profile->setForceNoLines(1);
   my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2017-08-30";
   my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2011-06-01";
   $profile->setDefaultXMax($xmax);
@@ -283,6 +255,8 @@ RADJUST
   $profile->setColorVals("c(\"Febrile\" = \"#CD4071FF\", \"Blood smear not indicated\" = \"black\", \"Not febrile and BS positive\" = \"#FA7C5EFF\", \"Not LAMP positive\" = \"#FECE91FF\")");
   $profile->setFillVals("c(\"Symptomatic malaria\" = \"#CD4071FF\", \"LAMP positive\" = \"#FECE91FF\", \"BS indicated not done\" = \"gray\", \"Blood smear positive\" = \"#FA7C5EFF\", \"None\" = NA)");
   $profile->setCustomBreaks("c(\"Febrile\", \"Blood smear not indicated\", \"Symptomatic malaria\", \"LAMP positive\", \"BS indicated not done\", \"Blood smear positive\", \"Not LAMP positive\")");
+  $profile->setForceNoLines(1);
+
 }
 
 1;
@@ -309,7 +283,6 @@ profile.df.full$TOOLTIP = profile.df.full$STATUS
 RADJUST
 
   $profile->addAdjustProfile($rAdjustString);
-  $profile->setForceNoLines(1);
   my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2015-03-31";
   my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2012-12-01";
   $profile->setDefaultXMax($xmax);
@@ -319,6 +292,51 @@ RADJUST
   $profile->setColorVals("c(\"No illness\" = \"black\", \"um\" = \"#CD4071FF\", \"ap\" = \"#FA7C5EFF\", \"other\" = \"#FECE91FF\")");
   $profile->setFillVals("c(\"Uncomplicated malaria\" = \"#CD4071FF\", \"Asymptomatic parasitemia\" = \"#FA7C5EFF\", \"Illness other than malaria\" = \"#FECE91FF\")");
   $profile->setCustomBreaks("c(\"No illness\", \"Uncomplicated malaria\", \"Asymptomatic parasitemia\", \"Illness other than malaria\")");
+  $profile->setForceNoLines(1);
+}
+
+1;
+
+#icemr amazonia
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_a885240fc4;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+profile.df.full$STATUS <- as.character(profile.df.full$STATUS)
+profile.df.full$STATUS[profile.df.full$STATUS == "No"] <- "fever negative"
+profile.df.full$STATUS[profile.df.full$STATUS == "Yes"] <- "fever positive"
+profile.df.full$STATUS[profile.df.full$STATUS == "Negative"] <- "Microscopy negative"
+profiles.list <- split(profile.df.full, f = profile.df.full$PROFILE_FILE)
+profile.df.full <- merge(profiles.list[[1]], profiles.list[[2]], by = "ELEMENT_NAMES")
+profile.df.full <- profile.df.full[profile.df.full$STATUS.x != "Not applicable (smear not taken)" & profile.df.full$STATUS.y != "Not applicable (smear not taken)",]
+profile.df.full <- transform(profile.df.full, COLOR = ifelse(STATUS.y == "Microscopy negative" | STATUS.x == "Microscopy negative", "Microscopy negative, fever negative", ifelse(STATUS.y == "Mixed infection" | STATUS.x == "Mixed infection", "Mixed infection, fever negative", ifelse(STATUS.y == "P. vivax" | STATUS.x == "P. vivax", "P. vivax, fever negative", ifelse(STATUS.y == "P. falciparum" | STATUS.x == "P. falciparum", "P. falciparum, fever negative", NA)))))
+profile.df.full <- transform(profile.df.full, FILL = ifelse(STATUS.y == "fever negative" | STATUS.x == "fever negative", NA, as.character(gsub("fever negative", "fever positive", COLOR, fixed = TRUE))))
+profile.df.full$TOOLTIP <- paste0(profile.df.full$STATUS.y, ", ", profile.df.full$STATUS.x)
+profile.df.full$STATUS <- profile.df.full$TOOLTIP
+profile.df.full$VALUE <- NA
+profile.df.full$PROFILE_FILE <- "dummy"
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2016-01-30";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2012-06-01";
+  $profile->setDefaultXMax($xmax);
+  $profile->setDefaultXMin($xmin);
+  $profile->setTimeline('TRUE');
+  $profile->setXaxisLabel("Date");
+  $profile->setColorVals("c(\"Microscopy negative, fever negative\" = \"black\", \"Mixed infection, fever negative\" = \"#CD4071FF\", \"P. vivax, fever negative\" = \"#FA7C5EFF\", \"P. falciparum, fever negative\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Microscopy negative, fever positive\" = \"black\", \"Mixed infection, fever positive\" = \"#CD4071FF\", \"P. vivax, fever positive\" = \"#FA7C5EFF\", \"P. falciparum, fever positive\" = \"#FECE91FF\")");
+  $profile->setCustomBreaks("c(\"Microscopy negative, fever negative\", \"Microscopy negative, fever positive\", \"Mixed infection, fever negative\", \"Mixed infection, fever positive\", \"P. vivax, fever negative\", \"P. vivax, fever positive\", \"P. falciparum, fever negative\", \"P. falciparum, fever positive\")");
+  $profile->setForceNoLines(1);
 }
 
 1;
