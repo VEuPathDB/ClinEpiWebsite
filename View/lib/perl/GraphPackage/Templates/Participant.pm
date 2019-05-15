@@ -257,6 +257,11 @@ RADJUST
   $profile->setCustomBreaks("c(\"Febrile\", \"Blood smear not indicated\", \"Symptomatic malaria\", \"LAMP positive\", \"BS indicated not done\", \"Blood smear positive\", \"Not LAMP positive\")");
   $profile->setForceNoLines(1);
 
+  my $post = "
+gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+";
+  $profile->addRPostscript($post);
+
 }
 
 1;
@@ -293,6 +298,11 @@ RADJUST
   $profile->setFillVals("c(\"Uncomplicated malaria\" = \"#CD4071FF\", \"Asymptomatic parasitemia\" = \"#FA7C5EFF\", \"Illness other than malaria\" = \"#FECE91FF\")");
   $profile->setCustomBreaks("c(\"No illness\", \"Uncomplicated malaria\", \"Asymptomatic parasitemia\", \"Illness other than malaria\")");
   $profile->setForceNoLines(1);
+
+  my $post = "
+gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+";
+  $profile->addRPostscript($post);
 }
 
 1;
@@ -337,6 +347,12 @@ RADJUST
   $profile->setFillVals("c(\"Microscopy negative, fever positive\" = \"black\", \"Mixed infection, fever positive\" = \"#CD4071FF\", \"P. vivax, fever positive\" = \"#FA7C5EFF\", \"P. falciparum, fever positive\" = \"#FECE91FF\")");
   $profile->setCustomBreaks("c(\"Microscopy negative, fever negative\", \"Microscopy negative, fever positive\", \"Mixed infection, fever negative\", \"Mixed infection, fever positive\", \"P. vivax, fever negative\", \"P. vivax, fever positive\", \"P. falciparum, fever negative\", \"P. falciparum, fever positive\")");
   $profile->setForceNoLines(1);
+
+  my $post = "
+gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+";
+  $profile->addRPostscript($post);
+
 }
 
 1;
