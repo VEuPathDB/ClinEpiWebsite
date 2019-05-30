@@ -13,7 +13,8 @@ reactiveDataFetcher = reactive({
        metadata.file <<- fread(getWdkDatasetFile("ontologyMetadata.tab", session, FALSE, dataStorageDir))
        metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomological measurements",]
 
-     longitudinal.file <<- fread("../../functions/longitudinal.tab")
+     longitudinal.file <<- fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE)
+     names(longitudinal.file) <<- c("dataset_name", "columns", "house_columns")
      longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
      longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))), by = setdiff(names(longitudinal.file), c("columns", "house_columns"))][!is.na(longitudinal.file$columns)]
 

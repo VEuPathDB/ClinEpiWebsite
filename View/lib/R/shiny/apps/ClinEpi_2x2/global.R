@@ -26,7 +26,7 @@ source("ui/individualPlot.R")
 source("ui/helpTab.R")
 source("ui/body.R")
 
-timeoutSeconds <- 300
+timeoutSeconds <- 900
 
 inactivity <- sprintf("function idleTimer() {
 var t = setTimeout(logout, %s);
