@@ -1,4 +1,150 @@
-dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data) {
+getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceId = "none") {
+  if (is.null(queryName)) { return() }
+  if (is.null(tblPrefix)) { return() }
+  if (is.null(sourceId)) { return() }
+  if (is.na(sourceId)) { return() }
+  if (sourceId == "TODO") { return() }
+
+  if (queryName == "Participant") {
+    if (timeSourceId == "none") {
+      query <- paste0("select pa.name as Participant_Id",
+                            ", pa.", sourceId,
+                     " from apidbtuning.", tblPrefix, "Participants pa",
+                     " where pa.", sourceId, " is not null")
+    } else {
+      query <- paste0("select pa.name as Participant_Id",
+                           ", pa.", sourceId,
+                           ", oa.", timeSourceId,
+                     " from apidbtuning.", tblPrefix, "Participants pa",
+                         ", apidbtuning.", tblPrefix, "Observations oa",
+                         ", apidbtuning.", tblPrefix, "PartObsIO io",
+                     " where pa.pan_id = io.participant_id",
+                     " and io.observation_id = oa.pan_id",
+                     " and pa.", sourceId, " is not null")
+    }
+  } else if (queryName == "Household") {
+    if (timeSourceId == "none") {
+      query <- paste0("select pa.name as Participant_Id",
+                            ", h.string_value as ", sourceId,
+                     " from apidbtuning.", tblPrefix, "HouseholdMD h",
+                         ", apidbtuning.", tblPrefix, "HousePartIO hp",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                     " where h.ontology_term_name = '", sourceId, "'",
+                     " and hp.household_id = h.household_id",
+                     " and hp.participant_id = pa.pan_id")
+    } else{
+      query <- paste0("with termtime as (",
+                       " select h1.household_id",
+                             ", h1.string_value as ", sourceId,
+                             ", h2.string_value as ", timeSourceId,
+                       " from apidbTuning.", tblPrefix, "HouseholdMD h1",
+                           ", apidbTuning.", tblPrefix, "HouseholdMD h2",
+                       " where h1.ontology_term_name = '", sourceId, "'",
+                       " and h2.ontology_term_name = '", timeSourceId, "'",
+                       " and h1.household_id = h2.household_id",
+                       " and exists (select ontology_term_name",
+                                   " from apidbTuning.", tblPrefix, "HouseholdMD",
+                                   " where ontology_term_name = '", sourceId, "'",
+                                   " and household_id = household_observation_id)",
+                       " UNION ALL",
+                       " select h1.household_id",
+                             ", h1.string_value as ", sourceId,
+                             ", h2.string_value as ", timeSourceId,
+                       " from apidbTuning.", tblPrefix, "HouseholdMD h1",
+                           ", apidbTuning.", tblPrefix, "HouseholdMD h2",
+                       " where h1.ontology_term_name = '", sourceId, "'",
+                       " and h2.ontology_term_name = '", timeSourceId, "'",
+                       " and h1.household_observation_id = h2.household_observation_id",
+                       " and not exists (select ontology_term_name",
+                                       " from apidbTuning.", tblPrefix, "HouseholdMD",
+                                       " where ontology_term_name = '", sourceId, "'",
+                                       " and household_id = household_observation_id)",
+                     ")",
+                    " select p.name as participant_id",
+                          ", termtime.", sourceId,
+                          ", termtime.", timeSourceId,
+                    " from termtime",
+                        ", apidbTuning.", tblPrefix, "HousePartIO hp",
+                        ", apidbTuning.", tblPrefix, "Participants p",
+                    " where termtime.household_id = hp.household_id",
+                    " and hp.participant_id = p.pan_id")
+    }
+  } else if (queryName == "Observation") {
+    if (timeSourceId == "none") {
+      query <- paste0("select pa.name as participant_id",
+                           ", string_value as ", sourceId,
+                     " from apidbtuning.", tblPrefix, "ObservationMD o",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                     " where o.ontology_term_name = '", sourceId, "'",
+                     " and o.participant_id = pa.pan_id")
+    } else {
+      query <- paste0("select pa.name as participant_id",
+                           ", o1.string_value as ", sourceId,
+                           ", o2.string_value as ", timeSourceId,
+                     " from apidbtuning.", tblPrefix, "ObservationMD o1",
+                         ", apidbtuning.", tblPrefix, "ObservationMD o2",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                     " where o1.ontology_term_name = '", sourceId, "'",
+                     " and o2.ontology_term_name = '", timeSourceId, "'",
+                     " and o1.sub_observation_id = o2.sub_observation_id",
+                     " and o1.participant_id = pa.pan_id")
+    }
+  } else if (queryName == "ObservationNames") {
+    if (timeSourceId == "none") {
+      query <- paste0("select pa.name as participant_id",
+                           ", oa.name as observation_id",
+                     " from apidbtuning.", tblPrefix, "Observations oa",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                         ", apidbtuning.", tblPrefix, "PartObsIO po",
+                     " where oa.pan_id = po.observation_id",
+                     " and po.participant_id = pa.pan_id")
+    } else{
+      query <- paste0("select pa.name as participant_id",
+                           ", oa.name as observation_id",
+                           ", oa.", timeSourceId,
+                     " from apidbtuning.", tblPrefix, "Observations oa",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                         ", apidbtuning.", tblPrefix, "PartObsIO po",
+                     " where oa.pan_id = po.observation_id",
+                     " and po.participant_id = pa.pan_id")
+    } 
+  } else if (queryName == "Sample") {
+    if (timeSourceId == "none") {
+      query <- paste0("select pa.name as Participant_Id, sa.", sourceId,
+                     " from apidbtuning.", tblPrefix, "Participants pa",
+                         ", apidbtuning.", tblPrefix, "Samples sa ",
+                         ", apidbtuning.", tblPrefix, "PartObsIO io",
+                         ", apidbtuning.", tblPrefix, "ObsSampleIO io2",
+                     " where pa.pan_id = io.participant_id",
+                     " and io.observation_id = io2.observation_id",
+                     " and io2.sample_id = sa.pan_id",
+                     " and sa.", sourceId, " is not null")
+    } else{
+      query <- paste0("select pa.name as Participant_Id",
+                           ", sa.", sourceId,
+                           ", oa.", timeSourceId,
+                     " from apidbtuning.", tblPrefix, "Participants pa",
+                         ", apidbtuning.", tblPrefix, "Observations oa",
+                         ", apidbtuning.", tblPrefix, "Samples sa ",
+                         ", apidbtuning.", tblPrefix, "PartObsIO io",
+                         ", apidbtuning.", tblPrefix, "ObsSampleIO io2",
+                     " where pa.pan_id = io.participant_id",
+                     " and io.observation_id = oa.pan_id",
+                     " and io.observation_id = io2.observation_id",
+                     " and io2.sample_id = sa.pan_id",
+                     " and sa.", sourceId, " is not null")
+    }
+  } else {
+    warning("Query name not recognized: ", queryName)
+  }
+
+  dt <- as.data.table(dbGetQuery(con, query))
+  
+  dt
+}
+
+#TODO revisit this name later
+queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data) {
 
   if (is.null(myVar)) { return() }
   if (length(myVar) == 0) { return() } 
@@ -13,9 +159,8 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
   if (myVar != "custom") {
     if (!is.null(longitudinal1)) {
       if (category != "Household") {
-        varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", longitudinal1)
-        message("myVar: ", varUrl)
-        data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+        data <- getNamedQueryResult(con, category, datasetDigest, myVar, longitudinal1)
+        if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- setDTColType(longitudinal1, metadata.file, data)
 	if (category != "Participant") {
@@ -35,9 +180,8 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
         }
       } else {
         if (!is.null(hlongitudinal1)) {
-          varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", hlongitudinal1)
-          message("myVar: ", varUrl)
-          data <- unique(as.data.table(stream_in(url(varUrl)), pagesize=1000))
+          data <- getNamedQueryResult(con, category, datasetDigest, myVar, hlongitudinal1)
+          if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           data <- setDTColType(hlongitudinal1, metadata.file, data)
           if (!is.null(hlon2Data)) {
@@ -52,9 +196,8 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
         # assuming if we dont have a household longitudinal source id that households data is static
 	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id
         } else {
-          varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
-          message("myVar: ", varUrl)
-          data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+          data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+          if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           if (!is.null(lon2Data)) {
              data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
@@ -64,9 +207,8 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
         }
       }
     } else {
-      varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
-      message("myVar: ", varUrl)
-      data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+      data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+      if (is.null(data)) { return() }
     }
   } else {
     if (category == "Participant") {
@@ -77,17 +219,15 @@ dataFromServiceQuery <- function(myVar, attributes.file, datasetDigest, metadata
           data <- merge(lon1Data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
         }
       } else {
-        varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/NAME")
-        message("myVar: ", varUrl)
-        data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+        data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
+        if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- merge(data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
       }
       naToNotSelected(data, col = "custom")
     } else if (category == "Observation") {
-      varUrl <- paste0(serviceUrl, "/ObservationNames/", datasetDigest, "?timeSourceId=", longitudinal1)
-      message("myVar: ", varUrl)
-      data <- unique(as.data.table(stream_in(url(varUrl), pagesize=1000)))
+      data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, longitudinal1)
+      if (is.null(data)) { return() }
       data <- merge(data, attributes.file, by = "OBSERVATION_ID", all=TRUE)
       if (!is.null(longitudinal1)) {
         data <- setDTColType(longitudinal1, metadata.file, data)

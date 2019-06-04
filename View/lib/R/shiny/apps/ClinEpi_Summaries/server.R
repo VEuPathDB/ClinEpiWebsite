@@ -8,6 +8,9 @@ lon2DataList <- list()
 hlon1DataList <- list()
 hlon2DataList <- list()
 
+dbDrv <- dbDriver("Oracle")
+dbCon <- NULL
+
 shinyServer(function(input, output, session) {
 
   observeEvent(input$timeOut, { 
