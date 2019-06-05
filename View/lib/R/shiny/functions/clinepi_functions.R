@@ -159,7 +159,10 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
   if (myVar != "custom") {
     if (!is.null(longitudinal1)) {
       if (category != "Household") {
-        data <- getNamedQueryResult(con, category, datasetDigest, myVar, longitudinal1)
+        #data <- getNamedQueryResult(con, category, datasetDigest, myVar, longitudinal1)
+        varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", longitudinal1)
+        message("myVar: ", varUrl)
+        data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- setDTColType(longitudinal1, metadata.file, data)
@@ -180,7 +183,10 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
         }
       } else {
         if (!is.null(hlongitudinal1)) {
-          data <- getNamedQueryResult(con, category, datasetDigest, myVar, hlongitudinal1)
+          #data <- getNamedQueryResult(con, category, datasetDigest, myVar, hlongitudinal1)
+          varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", hlongitudinal1)
+          message("myVar: ", varUrl)
+          data <- unique(as.data.table(stream_in(url(varUrl)), pagesize=10000))
           if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           data <- setDTColType(hlongitudinal1, metadata.file, data)
@@ -196,7 +202,10 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
         # assuming if we dont have a household longitudinal source id that households data is static
 	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id
         } else {
-          data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+          #data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+          varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
+          message("myVar: ", varUrl)
+          data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
           if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           if (!is.null(lon2Data)) {
@@ -207,7 +216,10 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
         }
       }
     } else {
-      data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+      #data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+      varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
+      message("myVar: ", varUrl)
+      data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
       if (is.null(data)) { return() }
     }
   } else {
@@ -219,14 +231,20 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
           data <- merge(lon1Data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
         }
       } else {
-        data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
+        #data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
+        varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/NAME")
+        message("myVar: ", varUrl)
+        data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- merge(data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
       }
       naToNotSelected(data, col = "custom")
     } else if (category == "Observation") {
-      data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, longitudinal1)
+      #data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, longitudinal1)
+      varUrl <- paste0(serviceUrl, "/ObservationNames/", datasetDigest, "?timeSourceId=", longitudinal1)
+      message("myVar: ", varUrl)
+      data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
       if (is.null(data)) { return() }
       data <- merge(data, attributes.file, by = "OBSERVATION_ID", all=TRUE)
       if (!is.null(longitudinal1)) {

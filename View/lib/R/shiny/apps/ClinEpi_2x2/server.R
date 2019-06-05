@@ -8,7 +8,7 @@ lon2DataList <- list()
 hlon1DataList <- list()
 hlon2DataList <- list()
 
-dbDrv <- dbDriver("Oracle")
+#dbDrv <- dbDriver("Oracle")
 dbCon <- NULL
 
 shinyServer(function(input, output, session) {
