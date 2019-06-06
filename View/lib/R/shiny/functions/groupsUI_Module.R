@@ -44,9 +44,13 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   propUrl <<- getPropertiesUrl(session) 
   properties <- try(fread(propUrl))
 
-  if (grepl("Error", properties)) {
+  if (length(properties) > 0) {
+    if (grepl("Error", properties)) {
+      properties <- NULL
+    }
+  } else {
     properties <- NULL
-  }   
+  }
 
   groupRange <- reactiveValues()
   getMyGroups <- reactiveValues() 
@@ -184,9 +188,14 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       properties <- try(fread(propUrl))
     }
 
-    if (grepl("Error", properties)[1]) {
+    if (length(properties) > 0) {
+      if (grepl("Error", properties)[1]) {
+        properties <- NULL
+      }
+    } else {
       properties <- NULL
     }
+
     myGroup <- getMyGroups$val
     #if (!is.null(myGroup)) {
     #  category <- metadata.file$CATEGORY[metadata.file$SOURCE_ID == myGroup]
