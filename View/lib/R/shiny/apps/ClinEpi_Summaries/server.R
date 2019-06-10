@@ -8,6 +8,7 @@ lon2DataList <- list()
 hlon1DataList <- list()
 hlon2DataList <- list()
 
+model.prop <- NULL
 dbDrv <- dbDriver("Oracle")
 dbCon <- NULL
 

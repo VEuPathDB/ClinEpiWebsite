@@ -48,6 +48,7 @@ group <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
+        dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
         data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
@@ -170,6 +171,7 @@ axes <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
+        dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
         data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
