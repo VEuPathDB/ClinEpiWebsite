@@ -241,7 +241,7 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       }
       naToNotSelected(data, col = "custom")
     } else if (category == "Observation") {
-      data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, longitudinal1)
+      data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, NULL, longitudinal1)
       #varUrl <- paste0(serviceUrl, "/ObservationNames/", datasetDigest, "?timeSourceId=", longitudinal1)
       #message("myVar: ", varUrl)
       #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
