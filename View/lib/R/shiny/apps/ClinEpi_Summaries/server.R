@@ -56,6 +56,8 @@ shinyServer(function(input, output, session) {
   facet2Text <- NULL
   groupsText <- NULL
   yaxisStp2Text <- NULL
+  numXBins <- reactiveValues()
+  numXBins$val <- NULL
 
   source("../../functions/reactive_data_load.R", local = TRUE) 
  

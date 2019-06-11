@@ -189,6 +189,7 @@ axes <- reactive({
         xaxis_bins <- input$xaxis_stp2
         if (contLongitudinal) {
           tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
+          numXBins$val <<- uniqueN(tempData$XAXIS)
         }
 
         unique(tempData)
