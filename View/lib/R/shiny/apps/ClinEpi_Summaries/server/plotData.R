@@ -189,7 +189,12 @@ axes <- reactive({
         xaxis_bins <- input$xaxis_stp2
         if (contLongitudinal) {
           tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
-          numXBins$val <<- uniqueN(tempData$XAXIS)
+          #hackish way to force reactive update if use keeps trying to change the param back to higher val
+          tmp <- uniqueN(tempData$XAXIS)
+          if (xaxis_bins != tmp) {
+            numXBins$val <<- xaxis_bins
+            numXBins$val <<- tmp
+          } 
         }
 
         unique(tempData)
