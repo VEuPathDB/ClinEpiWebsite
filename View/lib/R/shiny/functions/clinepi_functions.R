@@ -5,6 +5,8 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
   if (is.na(sourceId)) { return() }
   if (sourceId == "TODO") { return() }
 
+  if (sourceId == timeSourceId) { timeSourceId <- "none" }
+
   if (queryName == "Participant") {
     if (timeSourceId == "none") {
       query <- paste0("select pa.name as Participant_Id",
