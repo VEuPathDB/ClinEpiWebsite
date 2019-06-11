@@ -156,7 +156,6 @@ axes <- reactive({
         return()
       }
 
-        #this needs revision since stp2 could have multiple values
         if (length(yaxis_stp2) > 1) {
           yaxisStp2Text <<- ""
           for (i in seq(length(yaxis_stp2))) {
@@ -189,7 +188,7 @@ axes <- reactive({
 
         xaxis_bins <- input$xaxis_stp2
         if (contLongitudinal) {
-          tempData$XAXIS <- cut(tempData$XAXIS, xaxis_bins)
+          tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
         }
 
         unique(tempData)
