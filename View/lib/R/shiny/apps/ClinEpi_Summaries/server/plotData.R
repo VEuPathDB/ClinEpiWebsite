@@ -246,10 +246,11 @@ axes <- reactive({
 	tempData <- axesData
 
         groupData <- group()
-        if (is.null(groupData)) {
-	  return()
-	}
-        tempData <- merge(tempData, groupData, by = aggKey)
+        if (!is.null(groupData)) {
+          tempData <- merge(tempData, groupData, by = aggKey)
+        } else {
+          tempData$GROUPS <- "All"
+        } 
 
         facetData <- facet1()
         if (!is.null(facetData)) {
