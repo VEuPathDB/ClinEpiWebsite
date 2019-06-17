@@ -14,15 +14,16 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
                      " from apidbtuning.", tblPrefix, "Participants pa",
                      " where pa.", sourceId, " is not null")
     } else {
-      query <- paste0("select pa.name as Participant_Id",
-                           ", pa.", sourceId,
-                           ", oa.", timeSourceId,
-                     " from apidbtuning.", tblPrefix, "Participants pa",
-                         ", apidbtuning.", tblPrefix, "Observations oa",
-                         ", apidbtuning.", tblPrefix, "PartObsIO io",
-                     " where pa.pan_id = io.participant_id",
-                     " and io.observation_id = oa.pan_id",
-                     " and pa.", sourceId, " is not null")
+      query <- paste0("select pa.name as participant_id",
+                           ", p.string_value as ", sourceId,
+                           ", o.string_value as ", timeSourceId,
+                     " from apidbtuning.", tblPrefix, "ParticipantMD p",
+                         ", apidbtuning.", tblPrefix, "ObservationMD o",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                     " where p.ontology_term_name = '", sourceId, "'",
+                     " and o.ontology_term_name = '", timeSourceId, "'",
+                     " and p.participant_id = o.participant_id",
+                     " and p.participant_id = pa.pan_id")
     }
   } else if (queryName == "Household") {
     if (timeSourceId == "none") {
