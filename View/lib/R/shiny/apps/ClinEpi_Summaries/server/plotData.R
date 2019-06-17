@@ -2,6 +2,23 @@ source("../../functions/timelineServer.R", local = TRUE)
 
 source("../../functions/facetServer.R", local = TRUE)
 
+groupQuery <- reactive({
+  groupsType <- input$groupsType
+    if (is.null(groupsType)) { return() }
+
+  if (groupsType == 'none') {
+    myGroups <- "none"
+  } else {
+    myGroups <- groupInfo()$group
+  }
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
+
 group <- reactive({
       groupsType <- input$groupsType
 	if (is.null(groupsType)) { return() }
@@ -48,8 +65,7 @@ group <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
-        dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-        data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        data <- groupQuery()
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
@@ -122,6 +138,15 @@ group <- reactive({
   outData
 })
 
+axesQuery <- reactive({
+  myY <- getMyY$val
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
 
 axes <- reactive({
       myY <- getMyY$val
@@ -170,8 +195,7 @@ axes <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
-        dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-        data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        data <- axesQuery()
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 	aggKey <- aggKey()

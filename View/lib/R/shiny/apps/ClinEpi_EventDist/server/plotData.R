@@ -2,14 +2,13 @@ source("../../functions/timelineServer.R", local = TRUE)
 
 source("../../functions/facetServer.R", local = TRUE)
 
-
-xAxis <- reactive({
+xQuery <- reactive({
   if (is.null(input$xaxis)) {
     return()
   }
 
   xType <- input$xaxis
-  myX <- input$xaxis  
+  myX <- input$xaxis
   if (myX == "direct" | myX == "makeGroups") {
     if (is.null(xaxisInfo()$group)) {
       return()
@@ -18,15 +17,11 @@ xAxis <- reactive({
       if (is.na(myX)) { return() }
     }
   }
-  mySubset <- current$subset
-  myTimeframe1 <- current$range1
-  myTimeframe2 <- current$range2 
 
-  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)  
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
- 
+
   strings <- getStrings(metadata.file)
   myCols <- c(aggKey(), myX)
   outData <- data[, myCols, with = FALSE]
@@ -38,6 +33,21 @@ xAxis <- reactive({
   }
   
   unique(outData)
+})
+
+xAxis <- reactive({
+  if (is.null(xQuery())) {
+    return()
+  }
+
+  mySubset <- current$subset
+  myTimeframe1 <- current$range1
+  myTimeframe2 <- current$range2 
+
+  data <- xQuery()  
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+ 
+  unique(data)
 })
 
 

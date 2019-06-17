@@ -1,3 +1,25 @@
+facet1Query <- reactive({
+  if (is.null(input$facetType)) {
+    return()
+  }
+  facetType <- input$facetType
+  if (facetType == "none") {
+    return()
+  } else {
+    myFacet <- facetInfo()$group
+    if (is.null(myFacet)) { return() }
+    if (length(myFacet) == 0) { return() }
+    if (is.na(myFacet)) { return() }
+    if (myFacet == "none") { return() }
+  }
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
+
 facet1 <- reactive({
   if (is.null(input$facetType)) {
     return()
@@ -40,8 +62,7 @@ facet1 <- reactive({
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)
 
-  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop) 
-  data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- facet1Query()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
@@ -90,7 +111,29 @@ facet1 <- reactive({
   outData
 })
 
+facet2Query <- reactive({
+  if (is.null(input$facet2Type)) {
+    return()
+  }
 
+  facet2Type <- input$facet2Type
+
+  if (input$facet2Type == "none") {
+    return()
+  } else {
+    myFacet2 <- facet2Info()$group
+    if (is.null(myFacet2)) { return() }
+    if (length(myFacet2) == 0) { return() }
+    if (is.na(myFacet2)) { return() }
+    if (myFacet2 == "none") { return() }
+  }
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
 
 facet2 <- reactive({
   if (is.null(input$facet2Type)) {
@@ -137,8 +180,7 @@ facet2 <- reactive({
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)
 
-  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- facet2Query()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
