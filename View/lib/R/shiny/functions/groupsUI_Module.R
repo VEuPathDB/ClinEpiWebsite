@@ -34,6 +34,8 @@ customGroupsUI <- function(id, colWidth = 6) {
 #make sure this returns inputs and range info 
 customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = reactive(NULL), timepoints = reactive(NULL)) {
   ns <- session$ns
+  needTreeUpdate <- reactiveValues()
+  needTreeUpdate$val <- FALSE
 
   force(timepoints())
   force(prtcpntView())
@@ -111,9 +113,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       attrChoiceList
     })
   }, once = TRUE)
-  #output$group <- renderEmptyTree()
 
-  observeEvent(groupsType() ,{
+  observeEvent({groupsType() 
+                needTreeUpdate$val}, {
     if (groupsType() == "makeGroups") {
       attrChoiceList <- getUIList(metadata.file = metadata.file, include = include(), timepoints.keep = timepoints())
     } else if (groupsType() == "direct") {
@@ -125,6 +127,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (!is.null(attrChoiceList)) {    
       updateTree(session, "group", data = attrChoiceList)
     }
+    needTreeUpdate$val <<- FALSE
   }, ignoreInit = TRUE)
   
   output$choose_group <- renderUI({
@@ -178,6 +181,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       }   
  
       getMyGroups$val <- nextGroup
+      needTreeUpdate$val <<- TRUE
     }
   })
 

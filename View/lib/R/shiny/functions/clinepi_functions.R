@@ -5,6 +5,8 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
   if (is.na(sourceId)) { return() }
   if (sourceId == "TODO") { return() }
 
+  if (sourceId == timeSourceId) { timeSourceId <- "none" }
+
   if (queryName == "Participant") {
     if (timeSourceId == "none") {
       query <- paste0("select pa.name as Participant_Id",
@@ -12,15 +14,16 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
                      " from apidbtuning.", tblPrefix, "Participants pa",
                      " where pa.", sourceId, " is not null")
     } else {
-      query <- paste0("select pa.name as Participant_Id",
-                           ", pa.", sourceId,
-                           ", oa.", timeSourceId,
-                     " from apidbtuning.", tblPrefix, "Participants pa",
-                         ", apidbtuning.", tblPrefix, "Observations oa",
-                         ", apidbtuning.", tblPrefix, "PartObsIO io",
-                     " where pa.pan_id = io.participant_id",
-                     " and io.observation_id = oa.pan_id",
-                     " and pa.", sourceId, " is not null")
+      query <- paste0("select pa.name as participant_id",
+                           ", p.string_value as ", sourceId,
+                           ", o.string_value as ", timeSourceId,
+                     " from apidbtuning.", tblPrefix, "ParticipantMD p",
+                         ", apidbtuning.", tblPrefix, "ObservationMD o",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                     " where p.ontology_term_name = '", sourceId, "'",
+                     " and o.ontology_term_name = '", timeSourceId, "'",
+                     " and p.participant_id = o.participant_id",
+                     " and p.participant_id = pa.pan_id")
     }
   } else if (queryName == "Household") {
     if (timeSourceId == "none") {
@@ -241,7 +244,7 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       }
       naToNotSelected(data, col = "custom")
     } else if (category == "Observation") {
-      data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, longitudinal1)
+      data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, NULL, longitudinal1)
       #varUrl <- paste0(serviceUrl, "/ObservationNames/", datasetDigest, "?timeSourceId=", longitudinal1)
       #message("myVar: ", varUrl)
       #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))

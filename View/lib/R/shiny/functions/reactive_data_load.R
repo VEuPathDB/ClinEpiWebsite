@@ -1,13 +1,9 @@
 reactiveDataFetcher = reactive({
 
-   if (is.null(dbCon)) {
-     model.prop <- fread(getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir), sep="=", header=FALSE, fill=TRUE)
-     gusHome <- model.prop$V2[model.prop$V1 == "gusHome"]
-     project_id <- model.prop$V2[model.prop$V1 == "PROJECT_ID"]
-     modelConfig <- paste0(gusHome, "/config/", project_id, "/model-config.xml")
-     appDbInfo <- appDbFromConfigXml(modelConfig)
-     dbCon <<- dbConnect(dbDrv, appDbInfo$login, appDbInfo$password, unlist(strsplit(appDbInfo$connectionUrl, '@', fixed = TRUE))[2])
+   if (is.null(model.prop)) {
+     model.prop <<- fread(getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir), sep="=", header=FALSE, fill=TRUE)
    }
+   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
 
    if (is.null(datasetName)) {
      custom.props <- try(fread(

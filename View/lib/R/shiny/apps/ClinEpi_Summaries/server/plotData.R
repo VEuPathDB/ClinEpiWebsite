@@ -2,6 +2,23 @@ source("../../functions/timelineServer.R", local = TRUE)
 
 source("../../functions/facetServer.R", local = TRUE)
 
+groupQuery <- reactive({
+  groupsType <- input$groupsType
+    if (is.null(groupsType)) { return() }
+
+  if (groupsType == 'none') {
+    myGroups <- "none"
+  } else {
+    myGroups <- groupInfo()$group
+  }
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
+
 group <- reactive({
       groupsType <- input$groupsType
 	if (is.null(groupsType)) { return() }
@@ -48,7 +65,7 @@ group <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
-        data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        data <- groupQuery()
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
@@ -121,6 +138,15 @@ group <- reactive({
   outData
 })
 
+axesQuery <- reactive({
+  myY <- getMyY$val
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
 
 axes <- reactive({
       myY <- getMyY$val
@@ -155,7 +181,6 @@ axes <- reactive({
         return()
       }
 
-        #this needs revision since stp2 could have multiple values
         if (length(yaxis_stp2) > 1) {
           yaxisStp2Text <<- ""
           for (i in seq(length(yaxis_stp2))) {
@@ -170,7 +195,7 @@ axes <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
-        data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        data <- axesQuery()
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 	aggKey <- aggKey()
@@ -187,7 +212,13 @@ axes <- reactive({
 
         xaxis_bins <- input$xaxis_stp2
         if (contLongitudinal) {
-          tempData$XAXIS <- cut(tempData$XAXIS, xaxis_bins)
+          tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
+          #hackish way to force reactive update if use keeps trying to change the param back to higher val
+          tmp <- uniqueN(tempData$XAXIS)
+          if (xaxis_bins != tmp) {
+            numXBins$val <<- xaxis_bins
+            numXBins$val <<- tmp
+          } 
         }
 
         unique(tempData)
@@ -244,10 +275,11 @@ axes <- reactive({
 	tempData <- axesData
 
         groupData <- group()
-        if (is.null(groupData)) {
-	  return()
-	}
-        tempData <- merge(tempData, groupData, by = aggKey)
+        if (!is.null(groupData)) {
+          tempData <- merge(tempData, groupData, by = aggKey)
+        } else {
+          tempData$GROUPS <- "All"
+        } 
 
         facetData <- facet1()
         if (!is.null(facetData)) {

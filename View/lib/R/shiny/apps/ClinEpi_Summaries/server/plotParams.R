@@ -80,12 +80,31 @@
         mySelected <- properties$selected[properties$input == "input$xaxis_stp2"]
       }
 
+      numXBins$val <<- mySelected
       sliderInput(inputId = "xaxis_stp2",
                   min = myMin,
                   max = myMax,
                   value = mySelected,
                   step = 1,
                   label = "number of bins:")
+    })
+
+    observeEvent(numXBins$val, {
+
+      myMin <- 2
+      myMax <- 40
+
+      if (metadata.file$NUMBER_DISTINCT_VALUES[metadata.file$SOURCE_ID == longitudinal1] <= 500) {
+        myMax <- 12
+      }
+
+      updateSliderInput(session, 
+                        inputId = "xaxis_stp2",
+                        min = myMin,
+                        max = myMax,
+                        value = numXBins$val,
+                        step = 1,
+                        label = "number of bins:")
     })
 
     output$xaxisBox <- renderUI({

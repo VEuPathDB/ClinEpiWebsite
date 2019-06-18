@@ -2,6 +2,23 @@ source("../../functions/timelineServer.R", local = TRUE)
 
 source("../../functions/facetServer.R", local = TRUE)
 
+attrQuery <- reactive({
+  if (is.null(attrInfo()$group)) {
+    return()
+  } else {
+    myAttr <- attrInfo()$group
+    if (length(myAttr) == 0) {
+      return ()
+    }
+  }
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
+
 attr <- reactive({
       if (is.null(attrInfo()$group)) {
         return()
@@ -36,8 +53,8 @@ attr <- reactive({
         mySubset <- current$subset
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
-
-        data <- queryTermData(dbCon, myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+ 
+        data <- attrQuery()
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
@@ -84,6 +101,23 @@ attr <- reactive({
        unique(attrData)
 })
 
+outQuery <- reactive({
+  if (is.null(outInfo()$group)) {
+    return()
+  } else {
+    myOut <- outInfo()$group
+    if (length(myOut) == 0) {
+      return()
+    }
+  }
+
+  dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
+  data <- queryTermData(dbCon, myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  if (is.null(data)) { return() }
+
+  data
+})
+
 out <- reactive({
       if (is.null(outInfo()$group)) {
         return()
@@ -121,7 +155,7 @@ out <- reactive({
         myTimeframe1 <- current$range1
         myTimeframe2 <- current$range2
 
-        data <- queryTermData(dbCon, myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+        data <- outQuery()
         if (is.null(data)) { return() }
         data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
