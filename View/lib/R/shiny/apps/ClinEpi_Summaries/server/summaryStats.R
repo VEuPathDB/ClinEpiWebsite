@@ -3,16 +3,21 @@
       if (is.null(plotData)) {
         return()
       }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- "FACET"
+      #TODO dont know i need axes, maybe just facets
+      if (is.null(validateAndDebounceAxes()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) {
+        return()
       }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- "FACET2"
-      }
+      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      myY <- myInputs$myY
+      yaxis_stp1 <- myInputs$yaxis_stp1
+      yaxis_stp2 <- myInputs$yaxis_stp2
+      yaxis_stp3 <- myInputs$yaxis_stp3
+      longitudinal <- myInputs$longitudinal
+      facetType <- myInputs$facetType
+      myFacet <- myInputs$myFacet
+      facet2Type <- myInputs$facet2Type
+      myFacet2 <- myInputs$myFacet2
+      
       if (!(myFacet %in% colnames(plotData)) & myFacet != "none") {
         return()
       }
@@ -79,12 +84,7 @@
           #data <- data[, -"temp"]
           data$Group[nrow(data)] <- "Totals"
         }
-        longitudinal <- longitudinal1
-        if (!is.null(input$xaxisVar)) {
-          if (input$xaxisVar == "ageVar") {
-            longitudinal <- longitudinal2
-          }
-        }
+        
         #temp placeholder for checking if data has time vars for x axis
         if (!contLongitudinal) {
           names(data)[names(data) == 'Line'] <- 'X-Axis'

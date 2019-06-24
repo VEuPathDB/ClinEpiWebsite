@@ -2,15 +2,41 @@ source("../../functions/timelineServer.R", local = TRUE)
 
 source("../../functions/facetServer.R", local = TRUE)
 
-attrQuery <- reactive({
-  if (is.null(attrInfo()$group)) {
+validateAndDebounceAttr <- debounce(reactive({
+  test2 <- input$`attr-group`
+  myAttr <- attrInfo()$group
+  attr_stp1 <- attrInfo()$group_stp1
+  attr_stp3 <- attrInfo()$group_stp3
+  attr_stp4 <- attrInfo()$group_stp4
+  attr_stp2 <- attrInfo()$group_stp2
+  
+  if (is.null(attr_stp1)) {
     return()
   } else {
-    myAttr <- attrInfo()$group
-    if (length(myAttr) == 0) {
-      return ()
+    if (attr_stp1 == 'any' | attr_stp1 == 'all') {
+      if (is.null(attr_stp2)) {
+        return()
+      } else {
+        if (attr_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+          if (is.null(attr_stp3)) {
+            return()
+          }
+        }
+      }
     }
   }
+  
+  list(myAttr = myAttr, 
+       attr_stp1 = attr_stp1, 
+       attr_stp2 = attr_stp2,
+       attr_stp3 = attr_stp3,
+       attr_stp4 = attr_stp4)
+}), 1000)
+
+attrQuery <- reactive({
+  if (is.null(validateAndDebounceAttr())) { return() }
+  myInputs <- validateAndDebounceAttr()
+  myAttr <- myInputs$myAttr
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
@@ -20,96 +46,72 @@ attrQuery <- reactive({
 })
 
 attr <- reactive({
-      if (is.null(attrInfo()$group)) {
-        return()
-      } else {
-        myAttr <- attrInfo()$group
-	if (length(myAttr) == 0) {
-	  return ()
-	}
-      }
-
-  if (is.null(attrInfo()$group_stp1)) {
-        print("attr stp1 is null")
-      } else {
-  if (attrInfo()$group_stp1 == 'any' | attrInfo()$group_stp1 == 'all') {
-          if (is.null(attrInfo()$group_stp2)) {
-            return()
-          } else {
-            if (attrInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(attrInfo()$group_stp3)) {
-                return()
-              }
-            }
-          }
-        }
-      }
-
-        attr_stp1 <- attrInfo()$group_stp1
-        attr_stp2 <- attrInfo()$group_stp2
-        attr_stp3 <- attrInfo()$group_stp3
-        attr_stp4 <- attrInfo()$group_stp4
-
-        mySubset <- current$subset
-        myTimeframe1 <- current$range1
-        myTimeframe2 <- current$range2
+  if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceTimeline())) { return() }
+  myInputs <- c(validateAndDebounceAttr(), validateAndDebounceTimeline())
+  myAttr <- myInputs$myAttr
+  attr_stp1 <- myInputs$attr_stp1
+  attr_stp2 <- myInputs$attr_stp2
+  attr_stp3 <- myInputs$attr_stp3
+  attr_stp4 <- myInputs$attr_stp4
+  mySubset <- myInputs$mySubset
+  myTimeframe1 <- myInputs$myTimeframe1
+  myTimeframe2 <- myInputs$myTimeframe2
  
-        data <- attrQuery()
-        if (is.null(data)) { return() }
-        data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  data <- attrQuery()
+  if (is.null(data)) { return() }
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
         #get attr col
 	aggKey <- aggKey()
-        myCols <- c(aggKey, myAttr)
-        attrData <- data[, myCols, with=FALSE]
+  myCols <- c(aggKey, myAttr)
+  attrData <- data[, myCols, with=FALSE]
 	attrData <- completeDT(attrData, myAttr)
-        attrData <- getFinalDT(attrData, metadata.file, myAttr)
+  attrData <- getFinalDT(attrData, metadata.file, myAttr)
 
-        numeric <- c("lessThan", "greaterThan", "equals")
-        anthro <- c("percentDays", "delta", "direct")
-        nums <- getNums(metadata.file)
-        dates <- getDates(metadata.file)
-
-        if (is.null(attr_stp1) | is.null(myAttr)) {
-            return()
-        } else {
-          if (attr_stp1 %in% numeric) {
-            if (is.null(attr_stp2)) {
-              return()
-            }
-          }
-          if (attr_stp1 %in% anthro) {
-            if (attr_stp1 == "percentDays") {
-              if (is.null(attr_stp4)) {
-                return()
-              }
-            } else {
-              if (is.null(attr_stp3)) {
-                return()
-              }
-            }
-          }
-        }
-
-        attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4, aggKey)
+  attrData <- makeGroups(attrData, metadata.file, myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4, aggKey)
 	if (is.null(attrData)) { return() }
-        observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
-        colnames(attrData) <- c(aggKey, "Attribute")
+  observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
+  colnames(attrData) <- c(aggKey, "Attribute")
         
-       attrText <<- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
-       print(attrData)
-       unique(attrData)
+  attrText <<- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+  unique(attrData)
 })
 
-outQuery <- reactive({
-  if (is.null(outInfo()$group)) {
+validateAndDebounceOut <- debounce(reactive({
+  test2 <- input$`out-group`
+  myOut <- outInfo()$group
+  out_stp1 <- outInfo()$group_stp1
+  out_stp3 <- outInfo()$group_stp3
+  out_stp4 <- outInfo()$group_stp4
+  out_stp2 <- outInfo()$group_stp2
+  
+  if (is.null(out_stp1)) {
     return()
   } else {
-    myOut <- outInfo()$group
-    if (length(myOut) == 0) {
-      return()
+    if (out_stp1 == 'any' | out_stp1 == 'all') {
+      if (is.null(out_stp2)) {
+        return()
+      } else {
+        if (out_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+          if (is.null(out_stp3)) {
+            return()
+          }
+        }
+      }
     }
   }
+  
+  list(myOut = myOut, 
+       out_stp1 = out_stp1, 
+       out_stp2 = out_stp2,
+       out_stp3 = out_stp3,
+       out_stp4 = out_stp4)
+}), 1000)
+
+outQuery <- reactive({
+  if (is.null(validateAndDebounceOut())) { return() }
+  myInputs <- validateAndDebounceOut()
+  myOut <- myInputs$myOut
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
@@ -119,176 +121,56 @@ outQuery <- reactive({
 })
 
 out <- reactive({
-      if (is.null(outInfo()$group)) {
-        return()
-      } else {
-        myOut <- outInfo()$group
-	if (length(myOut) == 0) {
-	  return()
-	}
-      }
-
-  if (is.null(outInfo()$group_stp1)) {
-        print("out stp1 is null")
-      } else {
-        if (outInfo()$group_stp1 == 'any' | outInfo()$group_stp1 == 'all') {
-          if (is.null(outInfo()$group_stp2)) {
-            return()
-          } else if (length(outInfo()$group_stp2) == 0) {
-	    return()
-	  } else {
-            if (outInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(outInfo()$group_stp3)) {
-                return()
-              }
-            }
-          }
-        }
-      }
-
-        out_stp1 <- outInfo()$group_stp1
-        out_stp3 <- outInfo()$group_stp3
-        out_stp4 <- outInfo()$group_stp4
-        out_stp2 <- outInfo()$group_stp2
-
-        mySubset <- current$subset
-        myTimeframe1 <- current$range1
-        myTimeframe2 <- current$range2
-
-        data <- outQuery()
-        if (is.null(data)) { return() }
-        data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-
-        #get outcome data
-	aggKey <- aggKey()
-        myCols <- c(aggKey, myOut)
-        outData <- data[, myCols, with=FALSE]
-	outData <- completeDT(outData, myOut)
-        outData <- getFinalDT(outData, metadata.file, myOut)
-
-        numeric <- c("lessThan", "greaterThan", "equals")
-        anthro <- c("percentDays", "delta", "direct")
-        nums <- getNums(metadata.file)
-        dates <- getDates(metadata.file)
-
-        if (is.null(out_stp1) | is.null(myOut)) {
-          return()
-        } else if (length(out_stp1) == 0 | length(myOut) == 0) {
-	  return()
-        } else {
-            if (out_stp1 %in% numeric) {
-              if (is.null(out_stp2)) {
-                return()
-              }
-            }
-            if (out_stp1 %in% anthro) {
-              if (out_stp1 == "percentDays") {
-                if (is.null(out_stp4)) {
-                  return()
-                }
-              } else {
-                if (is.null(out_stp3)) {
-                  return()
-                }
-              }
-            }
-          }
-
-        outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4, aggKey)
-	if (is.null(outData)) { return() }
-        observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
-        colnames(outData) <- c(aggKey, "Outcome")
-
-
-        print(outData)
-        outText <<- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)
-	unique(outData)
+  if (is.null(validateAndDebounceOut()) | is.null(validateAndDebounceTimeline())) { return() }
+  myInputs <- c(validateAndDebounceOut(), validateAndDebounceTimeline())
+  myOut <- myInputs$myOut
+  out_stp1 <- myInputs$out_stp1
+  out_stp2 <- myInputs$out_stp2
+  out_stp3 <- myInputs$out_stp3
+  out_stp4 <- myInputs$out_stp4
+  mySubset <- myInputs$mySubset
+  myTimeframe1 <- myInputs$myTimeframe1
+  myTimeframe2 <- myInputs$myTimeframe2
+  
+  data <- outQuery()
+  if (is.null(data)) { return() }
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  
+  #get out col
+  aggKey <- aggKey()
+  myCols <- c(aggKey, myOut)
+  outData <- data[, myCols, with=FALSE]
+  outData <- completeDT(outData, myOut)
+  outData <- getFinalDT(outData, metadata.file, myOut)
+  
+  outData <- makeGroups(outData, metadata.file, myOut, out_stp1, out_stp2, out_stp3, out_stp4, aggKey)
+  if (is.null(outData)) { return() }
+  observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
+  colnames(outData) <- c(aggKey, "Outcome")
+  
+  outText <<- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)
+  unique(outData)
 })
 
 
-    plotData <- reactive({
-
-	facetType <- input$facetType
-	if (is.null(facetType)) { return() } 
-	facet2Type <- input$facet2Type
-	if (is.null(facet2Type)) { return() }
-
-        if (facetType == "none") {
-  	  myFacet <- "none"
-  	} else {
-  	  myFacet <- facetInfo()$group
-	  if (is.null(myFacet)) { return() }
-	  if (length(myFacet) == 0) { return() }
-  	}
-        if (facet2Type == "none") {
-          myFacet2 <- "none"
-        } else {
-          myFacet2 <- facet2Info()$group
-          if (is.null(myFacet2)) { return() }
-          if (length(myFacet2) == 0) { return() }
-        }
-
-      if (is.null(outInfo()$group)) {
-        return()
-      } else {
-        myOut <- outInfo()$group
-        if (length(myOut) == 0) {
-          return()
-        }
-      }
-
-      if (is.null(attrInfo()$group)) {
-        return()
-      } else {
-        myAttr <- attrInfo()$group
-        if (length(myAttr) == 0) {
-          return ()
-        }
-      }
-
-    if (is.null(attrInfo()$group_stp1)) {
-        print("attr stp1 is null")
-    } else {
-      if (attrInfo()$group_stp1 == 'any' | attrInfo()$group_stp1 == 'all') {
-        if (is.null(attrInfo()$group_stp2)) {
-          return()
-        } else {
-          if (attrInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-            if (is.null(attrInfo()$group_stp3)) {
-              return()
-            }
-          }
-        }
-      }
-    }
-
-        attr_stp1 <- attrInfo()$group_stp1
-        attr_stp2 <- attrInfo()$group_stp2
-        attr_stp3 <- attrInfo()$group_stp3
-        attr_stp4 <- attrInfo()$group_stp4
-
-    if (is.null(outInfo()$group_stp1)) {
-      print("out stp1 is null")
-    }  else {
-      if (outInfo()$group_stp1 == 'any' | outInfo()$group_stp1 == 'all') {
-        if (is.null(outInfo()$group_stp2)) {
-          return()
-        } else if (length(outInfo()$group_stp2) == 0) {
-          return()
-        } else {
-          if (outInfo()$group_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-            if (is.null(outInfo()$group_stp3)) {
-              return()
-            }
-          }
-        }
-      }
-    }
-
-        out_stp1 <- outInfo()$group_stp1
-        out_stp3 <- outInfo()$group_stp3
-        out_stp4 <- outInfo()$group_stp4
-        out_stp2 <- outInfo()$group_stp2
+plotData <- reactive({
+  if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet())) { return() }
+  myInputs <- c(validateAndDebounceAttr(), validateAndDebounceOut(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+  
+	facetType <- myInputs$facetType
+	facet2Type <- myInputs$facet2Type
+  myFacet <- myInputs$myFacet
+  myFacet2 <- myInputs$myFacet2
+  myOut <- myInputs$myOut
+  myAttr <- myInputs$myAttr
+  attr_stp1 <- myInputs$attr_stp1
+  attr_stp2 <- myInputs$attr_stp2
+  attr_stp3 <- myInputs$attr_stp3
+  attr_stp4 <- myInputs$attr_stp4
+  out_stp1 <- myInputs$out_stp1
+  out_stp2 <- myInputs$out_stp2
+  out_stp3 <- myInputs$out_stp3
+  out_stp4 <- myInputs$out_stp4
 
         text <- paste0("input\tselected\n",
                        longitudinalText,
@@ -302,8 +184,8 @@ out <- reactive({
                        #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
-        PUT(propUrl, body = "")
-        PUT(propUrl, body = text)
+       # PUT(propUrl, body = "")
+       # PUT(propUrl, body = text)
         aggKey <- aggKey()
         attrData <- attr()
 	if (is.null(attrData)) { return() }
@@ -377,7 +259,6 @@ out <- reactive({
         returnData <- transform(returnData, "Exposure" = ifelse( Variable1 == "Attribute+", attrLabel[1], attrLabel[2]))
         returnData <- transform(returnData, "Outcome" = ifelse( Variable2 == "Outcome+", outLabel[1], outLabel[2]))
 
-        print(head(returnData))
         returnData
       
 

@@ -1,13 +1,8 @@
     output$individualPlot_stp1 <- renderUI({
-      if (is.null(input$facetType)) {
-        return()
-      }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-      }
-      facetType <- input$facetType
+      myInputs <- validateAndDebounceFacet()
+      if (is.null(myInputs)) { return() }
+      myFacet <- myInputs$myFacet
+      facetType <- myInputs$facetType
 
       if (myFacet == "none") {
         return()
@@ -39,15 +34,10 @@
     })
 
     output$individualPlot_stp2 <- renderUI({
-      if (is.null(input$facet2Type)) {
-        return()
-      }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-      }
-      facet2Type <- input$facet2Type
+      myInputs <- validateAndDebounceFacet2()
+      if (is.null(myInputs)) { return() }
+      myFacet2 <- myInputs$myFacet2
+      facet2Type <- myInputs$facet2Type
 
       if (myFacet2 == "none") {
         return()
@@ -75,42 +65,24 @@
     })
 
     output$individual_distribution <- renderPlotly({
-      if (is.null(input$xaxis)) {
-        return()
-      }
-      if (is.null(input$facetType)) {
-        return()
-      }
-      if (is.null(input$facet2Type)) {
-        return()
-      }
+      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      if (is.null(validateAndDebounceAxes()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
 
-      myX <- input$xaxis
-      if (myX == "direct" | myX == "makeGroups") {
-        if (is.null(xaxisInfo()$group)) {
-          return()
-        } else {
-          myX <- xaxisInfo()$group
-        }
-      }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
+      myX <- myInputs$myX
+      myFacet <- myInputs$myFacet
+      if (myFacet != "none") {
         if (is.null(input$individualPlot_stp1)) {
           return()
         }
       }
-      facetType <- input$facetType
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
+      facetType <- myInputs$facetType
+      myFacet2 <- myInputs$myFacet2
+      if (myFacet2 != "none") {
         if (is.null(input$individualPlot_stp2)) {
           return()
         }
       }
-      facet2Type <- input$facet2Type
+      facet2Type <- myInputs$facet2Type
       iPlot_stp1 <- input$individualPlot_stp1
       iPlot_stp2 <- input$individualPlot_stp2
 

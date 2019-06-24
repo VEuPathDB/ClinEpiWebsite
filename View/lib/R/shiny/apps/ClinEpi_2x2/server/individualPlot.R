@@ -1,14 +1,10 @@
 
     output$individualPlot_stp1 <- renderUI({
-      if (is.null(input$facetType)) {
-        return()
-      }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-      }
-      facetType <- input$facetType
+      if (is.null(validateAndDebounceFacet())) { return() }
+      myInputs <- c(validateAndDebounceFacet())
+      
+      facetType <- myInputs$facetType
+      myFacet <- myInputs$myFacet
       
       if (myFacet == "none") {
         return()
@@ -37,15 +33,11 @@
     })
 
     output$individualPlot_stp2 <- renderUI({
-      if (is.null(input$facet2Type)) {
-        return()
-      }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-      }
-      facet2Type <- input$facet2Type
+      if (is.null(validateAndDebounceFacet2())) { return() }
+      myInputs <- c(validateAndDebounceFacet2())
+      
+      facet2Type <- myInputs$facet2Type
+      myFacet2 <- myInputs$myFacet2
 
       if (myFacet2 == "none") {
         return()
@@ -74,33 +66,20 @@
     })
 
     output$individual_plot <- renderPlotly({
-      if (is.null(input$facetType)) {
+      if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
+      myInputs <- c(validateAndDebounceAttr(), validateAndDebounceOut(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      
+      facetType <- myInputs$facetType
+      facet2Type <- myInputs$facet2Type
+      myFacet <- myInputs$myFacet
+      myFacet2 <- myInputs$myFacet2
+      
+      if (is.null(input$individualPlot_stp1)) {
         return()
       }
-      if (is.null(input$facet2Type)) {
+      if (is.null(input$individualPlot_stp2)) {
         return()
       }
-      #if (is.null(input$individualPlot_stp1) & is.null(input$individualPlot_stp2)) {
-      #  return()
-      #}
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-        if (is.null(input$individualPlot_stp1)) {
-          return()
-        }
-      }
-      facetType <- input$facetType
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-        if (is.null(input$individualPlot_stp2)) {
-          return()
-        }
-      }
-      facet2Type <- input$facet2Type
       iPlot_stp1 <- input$individualPlot_stp1
       iPlot_stp2 <- input$individualPlot_stp2
 
@@ -126,8 +105,8 @@
         df <- df[keep2,]
       }
 
-      var1 <- attrInfo()$group
-      var2 <- outInfo()$group
+      var1 <- myInputs$myAttr
+      var2 <- myInputs$myOut
 
       #define axis labels here
       xlab <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == var2]

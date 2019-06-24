@@ -3,17 +3,11 @@
       if (is.null(plotData)) {
         return()
       }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-      }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-      }
-      myX <- xaxisInfo()$group
+      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      if (is.null(validateAndDebounceAxes()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
+      myFacet <- myInputs$myFacet
+      myFacet2 <- myInputs$myFacet2
+      myX <- myInputs$myX
       if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
       }

@@ -1,11 +1,12 @@
     output$individualPlot_stp1 <- renderUI({
-      if (is.null(input$facetType)) {
+      if (is.null(validateAndDebounceFacet())) {
         return()
       }
-      if (input$facetType == "none") {
-        return() 
+      myInputs <- validateAndDebounceFacet()
+      myFacet <- myInputs$myFacet
+      if (myFacet == "none") {
+        return()
       }
-
       myFacet <- "FACET" 
       #TODO try to save this globally and reactively have it update?? cause right now its called in three different places..
       df <- plotData()
@@ -28,20 +29,16 @@
     })
 
     output$individualPlot_stp2 <- renderUI({
-      if (is.null(input$facet2Type)) {
+      if (is.null(validateAndDebounceFacet2())) {
         return()
       }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- "FACET2"
-      }
-      facet2Type <- input$facet2Type
-
+      myInputs <- validateAndDebounceFacet2()
+      myFacet2 <- myInputs$myFacet2
       if (myFacet2 == "none") {
         return()
       }
-
+      myFacet2 <- "FACET2"
+      
       #TODO try to save this globally and reactively have it update?? cause right now its called in three different places..
       df <- plotData()
 
@@ -62,31 +59,32 @@
     })
 
     output$individual_plot <- renderPlotly({
-      if (is.null(input$yaxis_stp3)) {
+      if (is.null(validateAndDebounceAxes()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) {
         return()
-      } else {
-        plotType <- input$yaxis_stp3
       }
-      longitudinal <- longitudinal1
-      if (!is.null(input$xaxisVar)) {
-        xaxisVar <- input$xaxisVar
-        if (xaxisVar == "ageVar") {
-          longitudinal <- longitudinal2
-        }
-      }
-      xaxis_bins <- input$xaxis_stp2
-      if (input$facetType == "none") {
+      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      myY <- myInputs$myY
+      yaxis_stp1 <- myInputs$yaxis_stp1
+      yaxis_stp2 <- myInputs$yaxis_stp2
+      yaxis_stp3 <- myInputs$yaxis_stp3
+      plotType <- myInputs$yaxis_stp3
+      facetType <- myInputs$facetType
+      myFacet <- myInputs$myFacet
+      facet2Type <- myInputs$facet2Type
+      myFacet2 <- myInputs$myFacet2
+      longitudinal <- myInputs$longitudinal
+      xaxisVar <- myInputs$xaxisVar
+      xaxis_bins <- myInputs$xaxis_bins
+      if (facetType == "none") {
         myFacet <- "none"
       } else {
         myFacet <- "FACET"
       }
-      facetType <- input$facetType
-      if (input$facet2Type == "none") {
+      if (facet2Type == "none") {
         myFacet2 <- "none"
       } else {
         myFacet2 <- "FACET2"
       }
-      facet2Type <- input$facet2Type
 
       iPlot_stp1 <- input$individualPlot_stp1
       iPlot_stp2 <- input$individualPlot_stp2
@@ -118,13 +116,6 @@
           xlab = "Age"
         } else {
           xlab = "Time"
-        }
-
-        yaxis_stp1 <- input$yaxis_stp1
-        yaxis_stp2 <- input$yaxis_stp2
-        if (prtcpntView$val != TRUE) {
-          yaxis_stp2 <- input$yaxis_stp1
-          yaxis_stp1 <- "any"
         }
 
         ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
@@ -188,12 +179,7 @@
         # if y axis is numeric box plots otherwise bar pltos.
         #define axis labels here
         xlab <- ""
-        yaxis_stp1 <- input$yaxis_stp1
-        yaxis_stp2 <- input$yaxis_stp2
-        if (prtcpntView$val != TRUE) {
-          yaxis_stp2 <- input$yaxis_stp1
-          yaxis_stp1 <- "any"
-        }
+        
         #test if numeric, if yes then "Mean" else proportion if vals between 0 and 1 otherwise "Count"
         ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
         if (plotType == "proportion") {

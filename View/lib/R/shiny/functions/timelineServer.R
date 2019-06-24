@@ -1,3 +1,10 @@
+validateAndDebounceTimeline <- debounce(reactive({
+  print("validated timeline inputs")
+  list(mySubset = current$subset,
+       myTimeframe1 = current$range1,
+       myTimeframe2 = current$range2)
+}), 1000)
+
 timelineData <- function(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2){
 
   if (!all(c(longitudinal1, longitudinal2) %in% colnames(data))) { return(data) }

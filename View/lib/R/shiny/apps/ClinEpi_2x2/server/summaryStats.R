@@ -3,25 +3,23 @@
       if (is.null(plotData)) {
         return()
       }
+      if (is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
+      myInputs <- c(validateAndDebounceFacet(), validateAndDebounceFacet2())
+      
+      facetType <- myInputs$facetType
+      facet2Type <- myInputs$facet2Type
+      myFacet <- myInputs$myFacet
+      myFacet2 <- myInputs$myFacet2
+      
       if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
       }
       if ("FACET2" %in% colnames(plotData)) {
         myFacet2 <- "FACET2"
       }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-	if (!(myFacet %in% colnames(plotData))) { return() }
-      }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-        if (!(myFacet2 %in% colnames(plotData))) { return() }
-      }
-      myPrtcpntView <- prtcpntView$val
+      #if (!(myFacet %in% colnames(plotData))) { return() }
+      if (!(myFacet2 %in% colnames(plotData))) { return() }
+      #myPrtcpntView <- prtcpntView$val
 
       if (myFacet2 != "none") {
         if (myFacet != "none") {
@@ -44,9 +42,6 @@
 
       createUI <- function(id, data, facets) {
 
-        print(data)
-        #get or
-        #TODO double check i've pulled these out right !!!!
         a <- data$Proportion[data$Variable1 == "Attribute+" & data$Variable2 == "Outcome+"]
         b <- data$Proportion[data$Variable1 == "Attribute-" & data$Variable2 == "Outcome+"]
         c <- data$Proportion[data$Variable1 == "Attribute+" & data$Variable2 == "Outcome-"]

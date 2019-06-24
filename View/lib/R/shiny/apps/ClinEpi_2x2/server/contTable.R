@@ -3,16 +3,13 @@
       if (is.null(plotData)) {
         return()
       }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-      }
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-      }
+      if (is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
+      myInputs <- c(validateAndDebounceFacet(), validateAndDebounceFacet2())
+      
+      facetType <- myInputs$facetType
+      facet2Type <- myInputs$facet2Type
+      myFacet <- myInputs$myFacet
+      myFacet2 <- myInputs$myFacet2
       if ("FACET" %in% colnames(plotData)) {
         myFacet <- "FACET"
       }

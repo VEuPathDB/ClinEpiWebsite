@@ -1,29 +1,27 @@
     output$plot <- renderPlotly({
-      if (is.null(input$yaxis_stp3)) {
+      if (is.null(validateAndDebounceAxes()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) {
         return()
-      } else {
-        plotType <- input$yaxis_stp3
       }
-      longitudinal <- longitudinal1
-      if (!is.null(input$xaxisVar)) {
-        xaxisVar <- input$xaxisVar
-        if (xaxisVar == "ageVar") {
-          longitudinal <- longitudinal2
-        }
-      } 
-      xaxis_bins <- input$xaxis_stp2
-      if (input$facetType == "none") {
+      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      myY <- myInputs$myY
+      yaxis_stp1 <- myInputs$yaxis_stp1
+      yaxis_stp2 <- myInputs$yaxis_stp2
+      plotType <- myInputs$yaxis_stp3
+      longitudinal <- myInputs$longitudinal
+      facetType <- myInputs$facetType
+      myFacet <- myInputs$myFacet
+      facet2Type <- myInputs$facet2Type
+      myFacet2 <- myInputs$myFacet2
+      if (facetType == "none") {
         myFacet <- "none"
       } else {
         myFacet <- "FACET"
       }
-      if (input$facet2Type == "none") {
+      if (facet2Type == "none") {
         myFacet2 <- "none"
       } else {
         myFacet2 <- "FACET2"
       }
-      dummy <- facetInfo()$group
-        dummy <- facet2Info()$group
 
       dates <- getDates(metadata.file)
       nums <- getNums(metadata.file)
@@ -41,13 +39,6 @@
             xlab = "Age"
           } else {
             xlab = "Time"
-          }
-
-          yaxis_stp1 <- input$yaxis_stp1
-          yaxis_stp2 <- input$yaxis_stp2
-          if (prtcpntView$val != TRUE) {
-            yaxis_stp2 <- input$yaxis_stp1
-            yaxis_stp1 <- "any"
           }
 
           ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
