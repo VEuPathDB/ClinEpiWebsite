@@ -18,7 +18,7 @@
         myFacet2 <- "FACET2"
       }
       #if (!(myFacet %in% colnames(plotData))) { return() }
-      if (!(myFacet2 %in% colnames(plotData))) { return() }
+      #if (!(myFacet2 %in% colnames(plotData))) { return() }
       #myPrtcpntView <- prtcpntView$val
 
       if (myFacet2 != "none") {
