@@ -1,17 +1,52 @@
-facet1Query <- reactive({
+validateAndDebounceFacet <- debounce(reactive({
   if (is.null(input$facetType)) {
     return()
   }
+  
   facetType <- input$facetType
-  if (facetType == "none") {
-    return()
-  } else {
-    myFacet <- facetInfo()$group
+  test2 <- input$`facet-group`
+  myFacet <- facetInfo()$group
+  facet_stp1 <- facetInfo()$group_stp1
+  facet_stp3 <- facetInfo()$group_stp3
+  facet_stp4 <- facetInfo()$group_stp4
+  facet_stp2 <- facetInfo()$group_stp2
+  
+  if (facetType == "makeGroups") {
+    if (is.null(facet_stp1)) {
+      return()
+    } else {
+      if (facet_stp1 == 'any' | facet_stp1 == 'all') {
+        if (is.null(facet_stp2)) {
+          return()
+        } else {
+          if (facet_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+            if (is.null(facet_stp3)) {
+              return()
+            }
+          }
+        }
+      }
+    }
+  } else if (facetType == "direct") {
     if (is.null(myFacet)) { return() }
-    if (length(myFacet) == 0) { return() }
-    if (is.na(myFacet)) { return() }
-    if (myFacet == "none") { return() }
+  } else {
+    myFacet <- "none"
   }
+  
+  list(facetType = facetType, 
+       myFacet = myFacet, 
+       facet_stp1 = facet_stp1, 
+       facet_stp2 = facet_stp2,
+       facet_stp3 = facet_stp3,
+       facet_stp4 = facet_stp4)
+}), 1000)
+
+facet1Query <- reactive({
+  if (is.null(validateAndDebounceFacet())) {
+    return()
+  }
+  myInputs <- validateAndDebounceFacet()
+  myFacet <- myInputs$myFacet
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
@@ -21,44 +56,21 @@ facet1Query <- reactive({
 })
 
 facet1 <- reactive({
-  if (is.null(input$facetType)) {
+  if (is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceTimeline())) {
     return()
   }
-  facetType <- input$facetType
-  if (facetType == "none") {
-    return()
-  } else {
-    myFacet <- facetInfo()$group
-    if (is.null(myFacet)) { return() }
-    if (length(myFacet) == 0) { return() }
-    if (is.na(myFacet)) { return() }
-    if (myFacet == "none") { return() }
-  }
-  facet_stp1 <- facetInfo()$group_stp1
-  facet_stp3 <- facetInfo()$group_stp3
-  facet_stp4 <- facetInfo()$group_stp4
-  facet_stp2 <- facetInfo()$group_stp2
-
-    if (facetType == "makeGroups") {
-      if (is.null(facet_stp1)) {
-        return()
-      } else {
-        if (facet_stp1 == 'any' | facet_stp1 == 'all') {
-          if (is.null(facet_stp2)) {
-            return()
-          } else {
-            if (facet_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(facet_stp3)) {
-                return()
-              }
-            }
-          }
-        }
-      }
-    }
-  mySubset <- current$subset
-  myTimeframe1 <- current$range1
-  myTimeframe2 <- current$range2
+  myInputs <- c(validateAndDebounceFacet(), validateAndDebounceTimeline())
+  
+  facetType <- myInputs$facetType
+  myFacet <- myInputs$myFacet
+  facet_stp1 <- myInputs$facet_stp1
+  facet_stp3 <- myInputs$facet_stp3
+  facet_stp2 <- myInputs$facet_stp2
+  facet_stp4 <- myInputs$facet_stp4
+  mySubset <- myInputs$mySubset
+  myTimeframe1 <- myInputs$myTimeframe1
+  myTimeframe2 <- myInputs$myTimeframe2
+  
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)
 
@@ -76,57 +88,70 @@ facet1 <- reactive({
         myCols <- c(aggKey(), myFacet)
         outData <- unique(outData[, myCols, with=FALSE])
       } else if (facetType == "makeGroups") {
-        numeric <- c("lessThan", "greaterThan", "equals")
-        anthro <- c("percentDays", "delta", "direct")
-            if (facet_stp1 %in% numeric) {
-              if (is.null(facet_stp2)) {
-                return()
-              }
-            }
-            if (facet_stp1 %in% anthro) {
-              if (facet_stp1 == "percentDays") {
-                if (is.null(facet_stp4)) {
-                  return()
-                }
-              } else {
-                if (is.null(facet_stp3)) {
-                  return()
-                }
-              }
-            }
-          aggKey <- aggKey()
-          outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4, aggKey)
-	  if (is.null(outData)) {
-	    return()
-	  }
-          observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
-          label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = observations)
-          #add makeGroups data to df and return
-          colnames(outData) <- c(aggKey, "FACET")
-          outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
-          outData <- unique(outData)
+        aggKey <- aggKey()
+        outData <- makeGroups(data, metadata.file, myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4, aggKey)
+	      if (is.null(outData)) {
+	        return()
+	      }
+        observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
+        label <- makeGroupLabel(myFacet, metadata.file, facet_stp1, facet_stp2, facet_stp3, facet_stp4, event.list = observations)
+        #add makeGroups data to df and return
+        colnames(outData) <- c(aggKey, "FACET")
+        outData <- transform(outData, "FACET" = ifelse(as.numeric(FACET) == 0, label[2], label[1]))
+        outData <- unique(outData)
       }
 
   facetText <<- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
   outData
 })
 
-facet2Query <- reactive({
+validateAndDebounceFacet2 <- debounce(reactive({
   if (is.null(input$facet2Type)) {
     return()
   }
-
+  
   facet2Type <- input$facet2Type
-
-  if (input$facet2Type == "none") {
-    return()
-  } else {
-    myFacet2 <- facet2Info()$group
+  test <- input$`facet2-group`
+  myFacet2 <- facet2Info()$group
+  facet2_stp1 <- facet2Info()$group_stp1
+  facet2_stp3 <- facet2Info()$group_stp3
+  facet2_stp2 <- facet2Info()$group_stp2
+  facet2_stp4 <- facet2Info()$group_stp4
+  
+  if (facet2Type == "makeGroups") {
+    if (is.null(facet2_stp1)) {
+      return()
+    } else {
+      if (facet2_stp1 == 'any' | facet2_stp1 == 'all') {
+        if (is.null(facet2_stp2)) {
+          return()
+        } else {
+          if (facet2_stp2 %in% c("lessThan", "greaterThan", "equals")) {
+            if (is.null(facet2_stp3)) { return() }
+          }
+        }
+      }
+    }
+  } else if (facet2Type == "direct") {
     if (is.null(myFacet2)) { return() }
-    if (length(myFacet2) == 0) { return() }
-    if (is.na(myFacet2)) { return() }
-    if (myFacet2 == "none") { return() }
+  } else {
+    myFacet2 <- "none"
   }
+  
+  list(facet2Type = facet2Type, 
+       myFacet2 = myFacet2, 
+       facet2_stp1 = facet2_stp1, 
+       facet2_stp2 = facet2_stp2,
+       facet2_stp3 = facet2_stp3,
+       facet2_stp4 = facet2_stp4)
+}), 1000)
+
+facet2Query <- reactive({
+  if (is.null(validateAndDebounceFacet2())) {
+    return()
+  }
+  myInputs <- validateAndDebounceFacet2()
+  myFacet2 <- myInputs$myFacet2
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
@@ -136,46 +161,20 @@ facet2Query <- reactive({
 })
 
 facet2 <- reactive({
-  if (is.null(input$facet2Type)) {
+  if (is.null(validateAndDebounceFacet2()) | is.null(validateAndDebounceFacet2())) {
     return()
   }
+  myInputs <- c(validateAndDebounceFacet2(), validateAndDebounceTimeline())
 
-  facet2Type <- input$facet2Type
-  
-  if (input$facet2Type == "none") {
-    return()
-  } else {
-    myFacet2 <- facet2Info()$group
-    if (is.null(myFacet2)) { return() }
-    if (length(myFacet2) == 0) { return() }
-    if (is.na(myFacet2)) { return() }
-    if (myFacet2 == "none") { return() }
-  }
-  facet2_stp1 <- facet2Info()$group_stp1
-  facet2_stp3 <- facet2Info()$group_stp3
-  facet2_stp2 <- facet2Info()$group_stp2
-  facet2_stp4 <- facet2Info()$group_stp4
-
-    if (facet2Type == "makeGroups") {
-      if (is.null(facet2_stp1)) {
-        return()
-      } else {
-        if (facet2_stp1 == 'any' | facet2_stp1 == 'all') {
-          if (is.null(facet2_stp2)) {
-            return()
-          } else {
-            if (facet2_stp2 %in% c("lessThan", "greaterThan", "equals")) {
-              if (is.null(facet2_stp3)) {
-                return()
-              }
-            }
-          }
-        }
-      }
-    }
-  mySubset <- current$subset
-  myTimeframe1 <- current$range1
-  myTimeframe2 <- current$range2
+  facet2Type <- myInputs$facet2Type
+  myFacet2 <- myInputs$myFacet2
+  facet2_stp1 <- myInputs$facet2_stp1
+  facet2_stp3 <- myInputs$facet2_stp3
+  facet2_stp2 <- myInputs$facet2_stp2
+  facet2_stp4 <- myInputs$facet2_stp4
+  mySubset <- myInputs$mySubset
+  myTimeframe1 <- myInputs$myTimeframe1
+  myTimeframe2 <- myInputs$myTimeframe2
 
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)
@@ -194,25 +193,7 @@ facet2 <- reactive({
         myCols <- c(aggKey(), myFacet2)
         outData <- unique(outData[, myCols, with=FALSE])
       } else if (facet2Type == "makeGroups") {
-        numeric <- c("lessThan", "greaterThan", "equals")
-        anthro <- c("percentDays", "delta", "direct")
-            if (facet2_stp1 %in% numeric) {
-              if (is.null(facet2_stp2)) {
-                return()
-              }
-            }
-            if (facet2_stp1 %in% anthro) {
-              if (facet2_stp1 == "percentDays") {
-                if (is.null(facet2_stp4)) {
-                  return()
-                }
-              } else {
-                if (is.null(facet2_stp3)) {
-                  return()
-                }
-              }
-            }
-aggKey <- aggKey()
+          aggKey <- aggKey()
           outData <- makeGroups(data, metadata.file, myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4, aggKey)
 	  if (is.null(outData)) { return() }
           observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]

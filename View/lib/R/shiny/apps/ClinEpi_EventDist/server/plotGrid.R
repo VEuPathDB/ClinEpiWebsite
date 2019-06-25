@@ -1,37 +1,14 @@
 output$distribution <- renderPlotly({
-      if (is.null(input$xaxis)) {
-        return()
-      }
-      if (is.null(input$facetType)) {
-        return()
-      }
-      if (is.null(input$facet2Type)) {
-        return()
-      }
-      myX <- input$xaxis
-      if (myX == "direct" | myX == "makeGroups") {
-        if (is.null(xaxisInfo()$group)) {
-          return()
-        } else {
-          myX <- xaxisInfo()$group
-        }
-      }
-      if (input$facetType == "none") {
-        myFacet <- "none"
-      } else {
-        myFacet <- facetInfo()$group
-      }
-      facetType <- input$facetType
-      if (input$facet2Type == "none") {
-        myFacet2 <- "none"
-      } else {
-        myFacet2 <- facet2Info()$group
-      }
-      facet2Type <- input$facet2Type
+      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+      if (is.null(validateAndDebounceAxes()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
+      myX <- myInputs$myX
+      myFacet <- myInputs$myFacet
+      facetType <- myInputs$facetType
+      myFacet2 <- myInputs$myFacet2
+      facet2Type <- myInputs$facet2Type
       df <- plotData()
 
       if (is.null(df)) {
-	message("plotData null")
         return()
       }
 
@@ -63,8 +40,6 @@ output$distribution <- renderPlotly({
             facetType <- facet2Type
             facet2Type <- "none"
           }
-          print(facetType)
-          print(facet2Type)
           if (facet2Type == "none") {
             if (facetType == 'direct') {
               myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
@@ -79,7 +54,6 @@ output$distribution <- renderPlotly({
             if (facet2Type == "makeGroups") {
               myFacet2 <- "FACET2"
             }
-            print(reformulate(myFacet,myFacet2))
             myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
           }
 
@@ -91,8 +65,6 @@ output$distribution <- renderPlotly({
             facetType <- facet2Type
             facet2Type <- "none"
           }
-          print(facetType)
-          print(facet2Type)
           if (facet2Type == "none") {
             if (facetType == 'direct') {
               myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
@@ -107,7 +79,6 @@ output$distribution <- renderPlotly({
             if (facet2Type == "makeGroups") {
               myFacet2 <- "FACET2"
             }
-            print(reformulate(myFacet,myFacet2))
             myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
           }
 
@@ -130,7 +101,6 @@ output$distribution <- renderPlotly({
                        collapse = ""),
         size = 14
       )
-
       myPlotly <- ggplotly(myPlot, tooltip = c("text"), width = (0.70*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
       myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40),

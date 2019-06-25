@@ -220,7 +220,6 @@
       } else {
         facetType <- input$facetType
       }
-message("facetData: ", facetType)
       if (facetType == "direct") {
         dates <- getDates(metadata.file)$SOURCE_ID
         #ptmp <- prtcpnt.file[, !dates, with = FALSE]
@@ -233,7 +232,6 @@ message("facetData: ", facetType)
       } else {
         include <- c("all")
       }
-      message(include)
       return(include)
     })
 
@@ -321,18 +319,15 @@ message("facetData: ", facetType)
     #tried to wrap these three into one observer and it broke.. look again later
     observeEvent(xaxisInfo()$group, {
       #execute javascript to virtually click outside the dropdown
-      print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();
     })
 
     observeEvent(facetInfo()$group, {
       #execute javascript to virtually click outside the dropdown
-      print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();
     })
 
     observeEvent(facet2Info()$group, {
       #execute javascript to virtually click outside the dropdown
-      print("clicking!!!!!!!!!!!")
       js$virtualBodyClick();
     })

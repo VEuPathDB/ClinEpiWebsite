@@ -1,29 +1,19 @@
 
     output$plot <- renderPlotly({
-      print("about to render plot")
         df <- plotData()
         if (is.null(df)) {
           message("plotData returned null!")
           return()
         }
-        if (is.null(input$facetType)) {
-          return()
-        }
-        if (is.null(input$facet2Type)) {
-          return()
-        }
-        if (input$facetType == "none") {
-          myFacet <- "none"
-        } else {
-          myFacet <- facetInfo()$group
-        }
-        facetType <- input$facetType
-        if (input$facet2Type == "none") {
-          myFacet2 <- "none"
-        } else {
-          myFacet2 <- facet2Info()$group
-        }
-        facet2Type <- input$facet2Type
+       
+        if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet2())) { return() }
+        myInputs <- c(validateAndDebounceAttr(), validateAndDebounceOut(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+        
+        facetType <- myInputs$facetType
+        facet2Type <- myInputs$facet2Type
+        myFacet <- myInputs$myFacet
+        myFacet2 <- myInputs$myFacet2
+        
         if ("FACET" %in% colnames(df)) {
           myFacet <- "FACET"
         }
@@ -31,8 +21,8 @@
           myFacet2 <- "FACET2"
         }
        
-        var1 <- attrInfo()$group
-        var2 <- outInfo()$group 
+        var1 <- myInputs$myAttr
+        var2 <- myInputs$myOut 
  
         #define axis labels here
         xlab <- c(metadata.file$PROPERTY[metadata.file$SOURCE_ID == var2][1])

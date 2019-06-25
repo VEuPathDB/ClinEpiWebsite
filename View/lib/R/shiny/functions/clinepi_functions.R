@@ -81,16 +81,41 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
                      " where o.ontology_term_name = '", sourceId, "'",
                      " and o.participant_id = pa.pan_id")
     } else {
-      query <- paste0("select pa.name as participant_id",
-                           ", o1.string_value as ", sourceId,
-                           ", o2.string_value as ", timeSourceId,
-                     " from apidbtuning.", tblPrefix, "ObservationMD o1",
-                         ", apidbtuning.", tblPrefix, "ObservationMD o2",
-                         ", apidbtuning.", tblPrefix, "Participants pa",
-                     " where o1.ontology_term_name = '", sourceId, "'",
-                     " and o2.ontology_term_name = '", timeSourceId, "'",
-                     " and o1.sub_observation_id = o2.sub_observation_id",
-                     " and o1.participant_id = pa.pan_id")
+      query <- paste0("with termtime as (",
+                       " select o1.observation_id",
+                             ", o1.string_value as ", sourceId,
+                             ", o2.string_value as ", timeSourceId,
+                       " from apidbTuning.", tblPrefix, "ObservationMD o1",
+                           ", apidbTuning.", tblPrefix, "ObservationMD o2",
+                       " where o1.ontology_term_name = '", sourceId, "'",
+                       " and o2.ontology_term_name = '", timeSourceId, "'",
+                       " and o1.observation_id = o2.observation_id",
+                       " and exists (select ontology_term_name",
+                                   " from apidbTuning.", tblPrefix, "ObservationMD",
+                                   " where ontology_term_name = '", timeSourceId, "'",
+                                   " and observation_id = sub_observation_id)",
+                       " UNION ALL",
+                       " select o1.observation_id",
+                             ", o1.string_value as ", sourceId,
+                             ", o2.string_value as ", timeSourceId,
+                       " from apidbTuning.", tblPrefix, "ObservationMD o1",
+                           ", apidbTuning.", tblPrefix, "ObservationMD o2",
+                       " where o1.ontology_term_name = '", sourceId, "'",
+                       " and o2.ontology_term_name = '", timeSourceId, "'",
+                       " and o1.sub_observation_id = o2.sub_observation_id",
+                       " and not exists (select ontology_term_name",
+                                       " from apidbTuning.", tblPrefix, "ObservationMD",
+                                       " where ontology_term_name = '", timeSourceId, "'",
+                                       " and observation_id = sub_observation_id)",
+                     ")",
+                    " select p.name as participant_id",
+                          ", termtime.", sourceId,
+                          ", termtime.", timeSourceId,
+                    " from termtime",
+                        ", apidbTuning.", tblPrefix, "PartObsIO po",
+                        ", apidbTuning.", tblPrefix, "Participants p",
+                    " where termtime.observation_id = po.observation_id",
+                    " and po.participant_id = p.pan_id")
     }
   } else if (queryName == "ObservationNames") {
     if (timeSourceId == "none") {
@@ -552,6 +577,19 @@ makeGroups <- function(data, metadata.file, myGroups, groups_stp1, groups_stp2, 
   outData
 }
 
+myAnyStringGroups <- function(groups_stp1 = NULL, outData = NULL, aggStr = NULL, aggKey = NULL) {
+  if (is.null(groups_stp1)) { return() }
+  if (is.null(outData)) { return() }
+  if (is.null(aggStr)) { return() }
+  if (is.null(aggKey)) { return() }
+  
+  tempData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if(groups_stp1 %in% x) {1} else {0} })
+  colnames(tempData) <- c(aggKey, "GROUPS")
+  tempData$drop <- NULL
+  
+  tempData
+}
+
 anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey) {
   aggStr <- paste(myGroups, "~", paste(aggKey, collapse=" + "))
   #this if statement will have to change. handle dates first
@@ -569,7 +607,9 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) { 
       return()
     }
-    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
+    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
+    outData <- unique(outData[,list(GROUPS = (get(myGroups) < as.numeric(groups_stp2))), by = aggKey])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "greaterThan") {
     if (is.null(groups_stp2)) {
       return()
@@ -577,7 +617,9 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) {
       return()
     }
-    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
+    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
+    outData <- unique(outData[,list(GROUPS = (get(myGroups) > as.numeric(groups_stp2))), by = aggKey])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "equals") {
     if (is.null(groups_stp2)) {
       return()
@@ -585,13 +627,21 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) {
       return()
     }
-    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
+    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
+    outData <- unique(outData[,list(GROUPS = (get(myGroups) == as.numeric(groups_stp2))), by = aggKey])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
   }  else {
     mergeData <- NULL
     #for strings
+    print("anyGroups")
+    message(groups_stp1)
+    
     for (i in seq(length(groups_stp1))) {
-      tempData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
-      colnames(tempData) <- c(aggKey, "GROUPS")
+      tempData <- unique(outData[,list(GROUPS = (get(myGroups) == groups_stp1[[i]])), by = aggKey])
+      tempData$GROUPS[is.na(tempData$GROUPS)] = 0
+      print(head(tempData))
+      #tempData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
+      #colnames(tempData) <- c(aggKey, "GROUPS")
       tempData$drop <- NULL
       if (is.null(mergeData)) {
         mergeData <- tempData
@@ -636,21 +686,29 @@ allGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x < as.numeric(groups_stp2))) {1} else {0} })
+    #outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x < as.numeric(groups_stp2))) {1} else {0} })
+    outData <- unique(outData[,list(GROUPS = (get(myGroups) < as.numeric(groups_stp2))), by = 'PARTICIPANT_ID'])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "greaterThan") {
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x > as.numeric(groups_stp2))) {1} else {0} })
+    #outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x > as.numeric(groups_stp2))) {1} else {0} })
+    outData <- unique(outData[,list(GROUPS = (get(myGroups) > as.numeric(groups_stp2))), by = 'PARTICIPANT_ID'])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "equals") {
     if (is.null(groups_stp2)) {
       return()
     }
-    outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x == as.numeric(groups_stp2))) {1} else {0} })
+    #outData <- aggregate(outData, by=list(outData$PARTICIPANT_ID), FUN = function(x){ if (all(x == as.numeric(groups_stp2))) {1} else {0} })
+    outData <- unique(outData[,list(GROUPS = (get(myGroups) == as.numeric(groups_stp2))), by = 'PARTICIPANT_ID'])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
   }  else {
     #for strings
     aggStr <- paste0(myGroups, " ~ PARTICIPANT_ID")
-    outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(groups_stp1), all(sort(levels(as.factor(x))) == sort(groups_stp1)), FALSE) })
+    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(groups_stp1), all(sort(levels(as.factor(x))) == sort(groups_stp1)), FALSE) })
+    outData <- unique(outData[,list(GROUPS = all(sort(unique(get(myGroups))) == sort(groups_stp1))), by = 'PARTICIPANT_ID'])
+    outData$GROUPS[is.na(outData$GROUPS)] = 0
     colnames(outData) <- c("PARTICIPANT_ID", "GROUPS")
     outData <- transform(outData, "GROUPS" = ifelse(GROUPS == TRUE, 1, 0))
   }
@@ -700,41 +758,6 @@ makeGroupLabel <- function(myGroups, metadata.file, groups_stp1, groups_stp2, gr
         } else {
           label[1] <- paste0(obsFlag, " ", displayName, " = ", groups_stp2)
           label[2] <- paste0(obsFlag, " ", displayName, " != ", groups_stp2)
-        }
-      } else if (groups_stp1 %in% anthro) {
-        if (groups_stp1 == "direct") {
-          if (groups_stp2 == "lessThan") {
-            label[1] <- paste0(displayName, " < ", groups_stp3)
-            label[2] <- paste0(displayName, " >= ", groups_stp3)
-          } else if (groups_stp2 == "greaterThan") {
-            label[1] <- paste0(displayName, " > ", groups_stp3)
-            label[2] <- paste0(displayName, " <= ", groups_stp3)
-          } else {
-            label[1] <- paste0(displayName, " = ", groups_stp3)
-            label[2] <- paste0(displayName, " != ", groups_stp3)
-          }
-        } else if (groups_stp1 == "delta") {
-          if (groups_stp2 == "lessThan") {
-            label[1] <- paste0("Change in ", displayName, " over time < ", groups_stp3)
-            label[2] <- paste0("Change in ", displayName, " over time >= ", groups_stp3)
-          } else if (groups_stp2 == "greaterThan") {
-            label[1] <- paste0("Change in ", displayName, " over time > ", groups_stp3)
-            label[2] <- paste0("Change in ", displayName, " over time <= ", groups_stp3)
-          } else {
-            label[1] <- paste0("Change in ", displayName, " over time = ", groups_stp3)
-            label[2] <- paste0("Change in ", displayName, " over time != ", groups_stp3)
-          }
-        } else {
-          if (groups_stp3 == "lessThan") {
-            label[1] <- paste0(displayName, " < ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-            label[2] <- paste0(displayName, " >= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-          } else if (groups_stp3 == "greaterThan") {
-            label[1] <- paste0(displayName, " > ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-            label[2] <- paste0(displayName, " <= ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-          } else {
-            label[1] <- paste0(displayName, " = ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-            label[2] <- paste0(displayName, " != ", groups_stp4, " for more than ", groups_stp1, "% of days monitored")
-          }
         }
       } else {
         if (!any(c("POSIXct", "Date") %in% class(groups_stp1))) {
