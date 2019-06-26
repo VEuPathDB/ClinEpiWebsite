@@ -105,9 +105,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
       attrChoiceList <- NULL
       
       if (isolate(groupsType()) == "makeGroups") {
-        attrChoiceList <- getUIList(metadata.file = metadata.file, include = isolate(include()), timepoints.keep = isolate(timepoints()))
+        attrChoiceList <- suppressWarnings(getUIList(metadata.file = metadata.file, include = isolate(include()), timepoints.keep = isolate(timepoints())))
       } else if (isolate(groupsType()) == "direct") {
-        attrChoiceList <- getUIList(metadata.file = metadata.file, include = isolate(include()), maxLevels = 12, timepoints.keep = isolate(timepoints()))
+        attrChoiceList <- suppressWarnings(getUIList(metadata.file = metadata.file, include = isolate(include()), maxLevels = 12, timepoints.keep = isolate(timepoints())))
       }
 
       attrChoiceList
@@ -117,9 +117,9 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   observeEvent({groupsType() 
                 needTreeUpdate$val}, {
     if (groupsType() == "makeGroups") {
-      attrChoiceList <- getUIList(metadata.file = metadata.file, include = include(), timepoints.keep = timepoints())
+      attrChoiceList <- suppressWarnings(getUIList(metadata.file = metadata.file, include = include(), timepoints.keep = timepoints()))
     } else if (groupsType() == "direct") {
-      attrChoiceList <- getUIList(metadata.file = metadata.file, include = include(), maxLevels = 12, timepoints.keep = timepoints())
+      attrChoiceList <- suppressWarnings(getUIList(metadata.file = metadata.file, include = include(), maxLevels = 12, timepoints.keep = timepoints()))
     } else {
       attrChoiceList <- NULL 
     }
