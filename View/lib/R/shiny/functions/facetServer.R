@@ -5,6 +5,10 @@ validateAndDebounceFacet <- debounce(reactive({
   
   facetType <- input$facetType
   test2 <- input$`facet-group`
+  test2 <- input$`facet-group_stp1`
+  test2 <- input$`facet-group_stp2`
+  test2 <- input$`facet-group_stp3`
+  test2 <- input$`facet-group_stp4`
   myFacet <- facetInfo()$group
   facet_stp1 <- facetInfo()$group_stp1
   facet_stp3 <- facetInfo()$group_stp3
@@ -112,6 +116,10 @@ validateAndDebounceFacet2 <- debounce(reactive({
   
   facet2Type <- input$facet2Type
   test <- input$`facet2-group`
+  test <- input$`facet2-group_stp1`
+  test <- input$`facet2-group_stp2`
+  test <- input$`facet2-group_stp3`
+  test <- input$`facet2-group_stp4`
   myFacet2 <- facet2Info()$group
   facet2_stp1 <- facet2Info()$group_stp1
   facet2_stp3 <- facet2Info()$group_stp3

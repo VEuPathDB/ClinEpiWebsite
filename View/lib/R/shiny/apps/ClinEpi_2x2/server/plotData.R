@@ -4,6 +4,10 @@ source("../../functions/facetServer.R", local = TRUE)
 
 validateAndDebounceAttr <- debounce(reactive({
   test2 <- input$`attr-group`
+  test2 <- input$`attr-group_stp1`
+  test2 <- input$`attr-group_stp2`
+  test2 <- input$`attr-group_stp3`
+  test2 <- input$`attr-group_stp4`
   myAttr <- attrInfo()$group
   attr_stp1 <- attrInfo()$group_stp1
   attr_stp3 <- attrInfo()$group_stp3
@@ -79,6 +83,10 @@ attr <- reactive({
 
 validateAndDebounceOut <- debounce(reactive({
   test2 <- input$`out-group`
+  test2 <- input$`out-group_stp1`
+  test2 <- input$`out-group_stp2`
+  test2 <- input$`out-group_stp3`
+  test2 <- input$`out-group_stp4`
   myOut <- outInfo()$group
   out_stp1 <- outInfo()$group_stp1
   out_stp3 <- outInfo()$group_stp3
