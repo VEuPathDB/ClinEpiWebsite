@@ -1,4 +1,7 @@
 validateAndDebounceTimeline <- debounce(reactive({
+  test <- input$`timeline-subset`
+  test <- input$`timeline-range1`
+  test <- input$`timeline-range2`
   print("validated timeline inputs")
   list(mySubset = current$subset,
        myTimeframe1 = current$range1,
