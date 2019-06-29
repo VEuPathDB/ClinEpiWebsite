@@ -1,11 +1,10 @@
 getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceId = "none") {
   if (is.null(queryName)) { return() }
   if (is.null(tblPrefix)) { return() }
-  if (is.null(sourceId)) { return() }
-  if (is.na(sourceId)) { return() }
-  if (sourceId == "TODO") { return() }
 
-  if (sourceId == timeSourceId) { timeSourceId <- "none" }
+  if (!is.null(sourceId)) {
+    if (sourceId == timeSourceId) { timeSourceId <- "none" }
+  }
 
   if (queryName == "Participant") {
     if (timeSourceId == "none") {

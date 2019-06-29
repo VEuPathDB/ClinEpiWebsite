@@ -74,10 +74,10 @@
       myFacet <- myInputs$myFacet
       myFacet2 <- myInputs$myFacet2
       
-      if (is.null(input$individualPlot_stp1)) {
+      if (myFacet != "none" & is.null(input$individualPlot_stp1)) {
         return()
       }
-      if (is.null(input$individualPlot_stp2)) {
+      if (myFacet2 != "none" & is.null(input$individualPlot_stp2)) {
         return()
       }
       iPlot_stp1 <- input$individualPlot_stp1

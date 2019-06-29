@@ -9,6 +9,10 @@ validateAndDebounceGroup <- debounce(reactive({
   
   groupsType <- input$groupsType
   test2 <- input$`group-group`
+  test2 <- input$`group-group_stp1`
+  test2 <- input$`group-group_stp2`
+  test2 <- input$`group-group_stp3`
+  test2 <- input$`group-group_stp4`
   myGroup <- groupInfo()$group
   group_stp1 <- groupInfo()$group_stp1
   group_stp3 <- groupInfo()$group_stp3
