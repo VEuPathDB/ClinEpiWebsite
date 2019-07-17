@@ -591,10 +591,8 @@ myAnyStringGroups <- function(groups_stp1 = NULL, outData = NULL, aggStr = NULL,
 
 anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey) {
   aggStr <- paste(myGroups, "~", paste(aggKey, collapse=" + "))
-  #this if statement will have to change. handle dates first
   if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
-    #cols <- c("PARTICIPANT_ID", "GROUPS")
     cols <- c(aggKey, "GROUPS")
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
@@ -606,7 +604,6 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) { 
       return()
     }
-    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
     outData <- unique(outData[,list(GROUPS = (get(myGroups) < as.numeric(groups_stp2))), by = aggKey])
     outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "greaterThan") {
@@ -616,7 +613,6 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) {
       return()
     }
-    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
     outData <- unique(outData[,list(GROUPS = (get(myGroups) > as.numeric(groups_stp2))), by = aggKey])
     outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "equals") {
@@ -626,22 +622,17 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) {
       return()
     }
-    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
     outData <- unique(outData[,list(GROUPS = (get(myGroups) == as.numeric(groups_stp2))), by = aggKey])
     outData$GROUPS[is.na(outData$GROUPS)] = 0
   }  else {
     mergeData <- NULL
     #for strings
-    print("anyGroups")
     message(groups_stp1)
     
     for (i in seq(length(groups_stp1))) {
-      tempData <- unique(outData[,list(GROUPS = (get(myGroups) == groups_stp1[[i]])), by = aggKey])
-      tempData$GROUPS[is.na(tempData$GROUPS)] = 0
-      print(head(tempData))
-      #tempData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
-      #colnames(tempData) <- c(aggKey, "GROUPS")
-      tempData$drop <- NULL
+      tempData <- outData[,list(GROUPS = (get(myGroups) == groups_stp1[[i]])), by = aggKey]
+      tempData$GROUPS[is.na(tempData$GROUPS)] <- 0
+      tempData <- unique(tempData)
       if (is.null(mergeData)) {
         mergeData <- tempData
       } else {
@@ -654,13 +645,10 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- mergeData
   }
 
-  #if (ncol(outData) > 2) {
-    colnames(outData) <- c(aggKey, "GROUPS")
-  #}
-  
+  colnames(outData) <- c(aggKey, "GROUPS")
   outData <- as.data.table(outData)
   
-  if (any(colnames(outData) %in% "drop")) {
+  if ("drop" %in% colnames(outData)) {
     outData$drop <- NULL
   }
   

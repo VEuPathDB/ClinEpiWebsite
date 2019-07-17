@@ -32,7 +32,13 @@ validateAndDebounceFacet <- debounce(reactive({
       }
     }
   } else if (facetType == "direct") {
-    if (is.null(myFacet)) { return() }
+    if (is.null(myFacet)) { 
+      if (is.null(selectedFacet())) {
+	return() 
+      } else {
+ 	myFacet <- selectedFacet()
+      }
+    }
   } else {
     myFacet <- "none"
   }
@@ -141,7 +147,13 @@ validateAndDebounceFacet2 <- debounce(reactive({
       }
     }
   } else if (facet2Type == "direct") {
-    if (is.null(myFacet2)) { return() }
+    if (is.null(myFacet2)) { 
+      if (is.null(selectedFacet2())) {
+        return() 
+      } else {
+        myFacet2 <- selectedFacet2()
+      }
+    }
   } else {
     myFacet2 <- "none"
   }

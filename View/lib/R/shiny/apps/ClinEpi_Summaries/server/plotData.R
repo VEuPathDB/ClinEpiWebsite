@@ -37,7 +37,11 @@ validateAndDebounceGroup <- debounce(reactive({
     }
   } else if (groupsType == "direct") {
     if (is.null(myGroup)) { 
-      return() 
+      if (is.null(selectedGroup())) {
+        return() 
+      } else {
+	myGroup <- selectedGroup()
+      }
     }
   } else {
     myGroup <- "none"
