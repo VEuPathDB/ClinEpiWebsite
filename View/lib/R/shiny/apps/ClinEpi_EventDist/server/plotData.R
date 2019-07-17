@@ -6,8 +6,13 @@ validateAndDebounceAxes <- debounce(reactive({
   #hack to force reactivity. idk maybe its a shiny bug, but reactlog cant find the module inputs for this specific case without referencing directly
   test2 <- input$`group-group`
   myX <- xaxisInfo()$group
+
   if (is.null(myX)) {
-    return()
+    if (is.null(selectedGroup())) {
+      return()
+    } else {
+      myX <- selectedGroup()
+    }
   }
   
   list(myX = myX)
