@@ -219,6 +219,7 @@ axes <- reactive({
     colnames(tempData) <- c(aggKey, "YAXIS")
   }
 
+  tempData <- tempData[!is.na(tempData$XAXIS) ,]
   if (contLongitudinal) {
     tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
     #hackish way to force reactive update if use keeps trying to change the param back to higher val
@@ -279,8 +280,8 @@ tableData <- reactive({
   axesData <- axes()
   if (is.null(axesData)) {
     return()
-	}
-	tempData <- axesData
+  }
+  tempData <- axesData
 
   groupData <- group()
   if (!is.null(groupData)) {
