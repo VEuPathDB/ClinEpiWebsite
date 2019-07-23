@@ -372,11 +372,11 @@ sub finalProfileAdjustments{
 
 profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
 profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-#profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "Blood smear not indicated", ifelse(OPT_STATUS == 'Yes', "Febrile", ifelse(grepl("Blood smear positive",STATUS),"Not febrile and BS positive", "Not LAMP positive"))));
-#profile.df.full = transform(profile.df.full, "FILL"=ifelse(STATUS == "Blood smear not indicated", "None", ifelse(STATUS == "Blood smear indicated but not done", "BS indicated not done", ifelse(STATUS == "Symptomatic malaria", "Symptomatic malaria", ifelse(grepl("Blood smear positive",STATUS),"Blood smear positive", ifelse(grepl("LAMP positive", STATUS), "LAMP positive", "None"))))));
 profile.df.full$COLOR = profile.df.full$STATUS
 profile.df.full$FILL = profile.df.full$COLOR
-profile.df.full$FILL[profile.df.full$OPT_STATUS == "No"] <- "None"
+profile.df.full <- transform(profile.df.full, "FILL" = ifelse(OPT_STATUS == "Yes", paste0(FILL, " and Febrile"), "None"))
+profile.df.full <- transform(profile.df.full, "FILL" = ifelse(FILL == "Malaria and Febrile", "Malaria", FILL))
+profile.df.full <- transform(profile.df.full, "COLOR" = ifelse(COLOR == "Malaria", "Malaria Not Febrile", paste0(COLOR)))
 profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
 profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.df.full$OPT_STATUS)
 RADJUST
@@ -388,9 +388,9 @@ RADJUST
   $profile->setDefaultXMin($xmin);
   $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Date");
-  $profile->setColorVals("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\")");
-  $profile->setFillVals("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\", \"None\" = NA)");
-  $profile->setCustomBreaks("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\")");
+  $profile->setColorVals("c(\"Malaria Not Febrile\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected and Febrile\" = \"black\", \"Asymptomatic microscopic parasitemia and Febrile\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia and Febrile\" = \"#FECE91FF\", \"None\" = NA)");
+  $profile->setCustomBreaks("c(\"Malaria\", \"No parasites detected\", \"Asymptomatic microscopic parasitemia\", \"Sub-microscopic parasitemia\", \"Malaria\", \"No parasites detected and Febrile\", \"Asymptomatic microscopic parasitemia and Febrile\", \"Sub-microscopic parasitemia and Febrile\")");
   $profile->setForceNoLines(1);
 
   my $post = "
