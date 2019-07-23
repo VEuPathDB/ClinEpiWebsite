@@ -266,7 +266,7 @@ gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
 
 1;
 
-#icemr india
+#icemr india lon
 package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_05ea525fd3;
 use vars qw( @ISA );
 @ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
@@ -356,3 +356,49 @@ gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
 }
 
 1;
+
+#icemr prism2
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_51b40fe2e2;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+#profile.df.full = transform(profile.df.full, "COLOR"=ifelse(STATUS == "Blood smear not indicated", "Blood smear not indicated", ifelse(OPT_STATUS == 'Yes', "Febrile", ifelse(grepl("Blood smear positive",STATUS),"Not febrile and BS positive", "Not LAMP positive"))));
+#profile.df.full = transform(profile.df.full, "FILL"=ifelse(STATUS == "Blood smear not indicated", "None", ifelse(STATUS == "Blood smear indicated but not done", "BS indicated not done", ifelse(STATUS == "Symptomatic malaria", "Symptomatic malaria", ifelse(grepl("Blood smear positive",STATUS),"Blood smear positive", ifelse(grepl("LAMP positive", STATUS), "LAMP positive", "None"))))));
+profile.df.full$COLOR = profile.df.full$STATUS
+profile.df.full$FILL = profile.df.full$COLOR
+profile.df.full$FILL[profile.df.full$OPT_STATUS == "No"] <- "None"
+profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
+profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.df.full$OPT_STATUS)
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2019-12-31";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2017-09-01";
+  $profile->setDefaultXMax($xmax);
+  $profile->setDefaultXMin($xmin);
+  $profile->setTimeline('TRUE');
+  $profile->setXaxisLabel("Date");
+  $profile->setColorVals("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\", \"None\" = NA)");
+  $profile->setCustomBreaks("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\")");
+  $profile->setForceNoLines(1);
+
+  my $post = "
+gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+";
+  $profile->addRPostscript($post);
+
+}
+
+1;
+
