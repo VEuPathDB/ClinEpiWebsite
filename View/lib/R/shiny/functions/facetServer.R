@@ -112,7 +112,7 @@ facet1 <- reactive({
       }
 
   facetText <<- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-  outData
+  unique(outData)
 })
 
 validateAndDebounceFacet2 <- debounce(reactive({
@@ -225,6 +225,6 @@ facet2 <- reactive({
       }
 
   facet2Text <<- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
-  outData
+  unique(outData)
 })
 
