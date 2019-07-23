@@ -13,6 +13,7 @@ reactiveDataFetcher = reactive({
  
        metadata.file <<- fread(getWdkDatasetFile("ontologyMetadata.tab", session, FALSE, dataStorageDir))
        metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomological measurements",]
+       metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomology",]
        metadata.file <<- metadata.file[order(metadata.file$PROPERTY),]
 
      longitudinal.file <<- fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE)
