@@ -619,7 +619,7 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     message(groups_stp1)
     
     for (i in seq(length(groups_stp1))) {
-      tempData <- outData[,list(GROUPS = (get(myGroups) == groups_stp1[[i]])), by = aggKey]
+      tempData <- outData[,list(GROUPS = (any(get(myGroups) == groups_stp1[[i]]))), by = aggKey]
       tempData$GROUPS[is.na(tempData$GROUPS)] <- 0
       tempData <- unique(tempData)
       if (is.null(mergeData)) {
