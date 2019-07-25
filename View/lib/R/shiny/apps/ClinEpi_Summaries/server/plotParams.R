@@ -449,6 +449,7 @@
     })
 
     output$yaxis <- renderTree({
+      getMyY$val
 
       longitudinal <- longitudinal1
       if (!is.null(input$xaxisVar)) {
