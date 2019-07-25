@@ -206,8 +206,8 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  
-	aggKey <- aggKey()
+ 
+  aggKey <- aggKey()
   if (contLongitudinal) {
     myCols <- c(aggKey, myY, longitudinal)
     tempData <- data[, myCols, with=FALSE]
@@ -280,15 +280,15 @@ tableData <- reactive({
   axesData <- axes()
   if (is.null(axesData)) {
     return()
-	}
-	tempData <- axesData
+  }
+  tempData <- axesData
 
   groupData <- group()
   if (!is.null(groupData)) {
     tempData <- merge(tempData, groupData, by = aggKey)
   } else {
     tempData$GROUPS <- "All"
-  } 
+  }
 
   facetData <- facet1()
   if (!is.null(facetData)) {

@@ -469,7 +469,7 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = N
   
   #grrr recursion
   list <- setAttrDisabled(disabled, list)
-  
+
   list
 } 
 
