@@ -266,7 +266,7 @@ gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
 
 1;
 
-#icemr india
+#icemr india lon
 package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_05ea525fd3;
 use vars qw( @ISA );
 @ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
@@ -356,3 +356,49 @@ gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
 }
 
 1;
+
+#icemr prism2
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_51b40fe2e2;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+profile.df.full$COLOR = profile.df.full$STATUS
+profile.df.full$FILL = profile.df.full$COLOR
+profile.df.full <- transform(profile.df.full, "FILL" = ifelse(OPT_STATUS == "Yes", paste0(FILL, " and Febrile"), "None"))
+profile.df.full <- transform(profile.df.full, "FILL" = ifelse(FILL == "Malaria and Febrile", "Malaria", FILL))
+profile.df.full <- transform(profile.df.full, "COLOR" = ifelse(COLOR == "Malaria", "Malaria Not Febrile", paste0(COLOR)))
+profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
+profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Febrile: ", profile.df.full$OPT_STATUS)
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+  my $xmax = $self->getDefaultXMax() ? $self->getDefaultXMax() : "2019-12-31";
+  my $xmin = $self->getDefaultXMin() ? $self->getDefaultXMin() : "2017-09-01";
+  $profile->setDefaultXMax($xmax);
+  $profile->setDefaultXMin($xmin);
+  $profile->setTimeline('TRUE');
+  $profile->setXaxisLabel("Date");
+  $profile->setColorVals("c(\"Malaria Not Febrile\" = \"#CD4071FF\", \"No parasites detected\" = \"black\", \"Asymptomatic microscopic parasitemia\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia\" = \"#FECE91FF\")");
+  $profile->setFillVals("c(\"Malaria\" = \"#CD4071FF\", \"No parasites detected and Febrile\" = \"black\", \"Asymptomatic microscopic parasitemia and Febrile\" = \"#FA7C5EFF\", \"Sub-microscopic parasitemia and Febrile\" = \"#FECE91FF\", \"None\" = NA)");
+  $profile->setCustomBreaks("c(\"Malaria\", \"No parasites detected\", \"Asymptomatic microscopic parasitemia\", \"Sub-microscopic parasitemia\", \"Malaria\", \"No parasites detected and Febrile\", \"Asymptomatic microscopic parasitemia and Febrile\", \"Sub-microscopic parasitemia and Febrile\")");
+  $profile->setForceNoLines(1);
+
+  my $post = "
+gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+";
+  $profile->addRPostscript($post);
+
+}
+
+1;
+
