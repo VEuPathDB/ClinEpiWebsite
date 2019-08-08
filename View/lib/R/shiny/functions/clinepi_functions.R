@@ -428,12 +428,16 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = N
       choices <- choices[choices$CATEGORY %in% include,]
     }
   }
+  message("metadata to build tree")
+  message(names(choices))
+  message(head(choices))
+  message(unique(choices$timepoints))
 
-  if (!is.null(timepoints.keep)) {
-    if ("timepoints" %in% colnames(choices)) {
-      leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
-    }
-  }
+  #if (!is.null(timepoints.keep)) {
+  #  if ("timepoints" %in% colnames(choices)) {
+  #    leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
+  #  }
+  #}
 
   if (nrow(choices) == 0) {
     return()
