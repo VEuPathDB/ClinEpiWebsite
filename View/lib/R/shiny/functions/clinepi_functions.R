@@ -429,11 +429,11 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = N
     }
   }
 
-  if (!is.null(timepoints.keep)) {
-    if ("timepoints" %in% colnames(choices)) {
-      leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
-    }
-  }
+#  if (!is.null(timepoints.keep)) {
+#    if ("timepoints" %in% colnames(choices)) {
+#      leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
+#    }
+#  }
 
   if (nrow(choices) == 0) {
     return()
