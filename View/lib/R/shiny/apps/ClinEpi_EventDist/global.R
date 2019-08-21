@@ -13,6 +13,7 @@ require(digest)
 #require(jsonlite)
 require(ROracle)
 require(XML)
+require(shinycssloaders)
 source("../../functions/wdkDataset.R")
 source("config.R")
 source("../../functions/ebrc_functions.R")
@@ -49,6 +50,7 @@ t = setTimeout(logout, %s);  // time is in milliseconds (1000 is 1 second)
 idleTimer();", timeoutSeconds*1000, timeoutSeconds, timeoutSeconds*1000)
 
 #options(shiny.fullstacktrace = TRUE)
+#options(shiny.trace=TRUE)
 
 my.get_flatList <- function(nestedList, flatList = NULL, parent = "#") {
   for (name in names(nestedList)) {
