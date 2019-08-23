@@ -6,8 +6,13 @@ validateAndDebounceAxes <- debounce(reactive({
   #hack to force reactivity. idk maybe its a shiny bug, but reactlog cant find the module inputs for this specific case without referencing directly
   test2 <- input$`group-group`
   myX <- xaxisInfo()$group
+
   if (is.null(myX)) {
-    return()
+    if (is.null(selectedGroup())) {
+      return()
+    } else {
+      myX <- selectedGroup()
+    }
   }
   
   list(myX = myX)
@@ -63,20 +68,20 @@ plotData <- reactive({
       }
   
       #first thing is to save properties 
-      #text <- paste0("input\tselected\n",
-      #               longitudinalText,
-      #               facetText,
-      #               facet2Text,
-      #               "xaxisInfo()$group\t", xaxisInfo()$group, "\n",
-      #               "input$facetType\t", input$facetType, "\n",
-      #               "input$facet2Type\t", input$facet2Type, "\n",
-      #               "input$xaxis\t", input$xaxis
+      text <- paste0("input\tselected\n",
+                     longitudinalText,
+                     facetText,
+                     facet2Text,
+                     "xaxisInfo()$group\t", validateAndDebounceAxes()$myX, "\n",
+                     "input$facetType\t", input$facetType, "\n",
+                     "input$facet2Type\t", input$facet2Type, "\n",
+                     "input$xaxis\t", input$xaxis
                      #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                      #"input$individualPlot_stp2\t", input$individualPlot_stp2 
-      #              )
+                    )
 
-      #PUT(propUrl, body = "")
-      #PUT(propUrl, body = text)
+      PUT(propUrl, body = "")
+      PUT(propUrl, body = text)
 
       xData <- xAxis()
       facetData <- facet1()

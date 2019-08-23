@@ -13,6 +13,7 @@ require(digest)
 #require(jsonlite)
 require(ROracle)
 require(XML)
+require(shinycssloaders)
 source("../../functions/wdkDataset.R")
 source("config.R")
 source("../../functions/ebrc_functions.R")
@@ -50,6 +51,51 @@ t = setTimeout(logout, %s);  // time is in milliseconds (1000 is 1 second)
 idleTimer();", timeoutSeconds*1000, timeoutSeconds, timeoutSeconds*1000)
 
 #options(shiny.fullstacktrace = TRUE)
+
+my.get_flatList <- function(nestedList, flatList = NULL, parent = "#") {
+  for (name in names(nestedList)) {
+    additionalAttributes <- list(
+      "icon" = shinyTree:::fixIconName(attr(nestedList[[name]],"sticon")),
+      "type" = attr(nestedList[[name]],"sttype")
+    )
+    additionalAttributes <- additionalAttributes[which(sapply(additionalAttributes,Negate(is.null)))]
+    
+    data <- lapply(names(attributes(nestedList[[name]])),function(key){
+      if(key %in% c("icon","type","names","stopened","stselected","sttype", "stdisabled")){
+        NULL
+      }else{
+        attr(nestedList[[name]],key)
+      }
+    })
+    if(!is.null(data) && length(data) > 0){
+      names(data) <- names(attributes(nestedList[[name]]))
+      data <- data[which(sapply(data,Negate(is.null)))]
+    }
+    
+    nodeData <- append(
+      list(
+        id = as.character(length(flatList) + 1),
+        text = name,
+        parent = parent,
+        state = list(
+          opened   = isTRUE(attr(nestedList[[name]], "stopened")),
+          selected = isTRUE(attr(nestedList[[name]], "stselected")),
+	  disabled = isTRUE(attr(nestedList[[name]], "stdisabled"))
+        ),
+        data = data
+      ),
+      additionalAttributes
+    )
+
+    flatList = c(flatList,list(nodeData))
+    if (is.list(nestedList[[name]]))
+      flatList =
+        Recall(nestedList[[name]], flatList, parent = as.character(length(flatList)))
+  }
+  flatList
+}
+
+assignInNamespace("get_flatList", my.get_flatList, ns = "shinyTree")
 
 my.jsonToAttr <- function(json){
   ret <- list()

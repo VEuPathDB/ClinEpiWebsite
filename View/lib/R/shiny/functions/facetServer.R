@@ -32,7 +32,13 @@ validateAndDebounceFacet <- debounce(reactive({
       }
     }
   } else if (facetType == "direct") {
-    if (is.null(myFacet)) { return() }
+    if (is.null(myFacet)) { 
+      if (is.null(selectedFacet())) {
+	return() 
+      } else {
+ 	myFacet <- selectedFacet()
+      }
+    }
   } else {
     myFacet <- "none"
   }
@@ -106,7 +112,7 @@ facet1 <- reactive({
       }
 
   facetText <<- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-  outData
+  unique(outData)
 })
 
 validateAndDebounceFacet2 <- debounce(reactive({
@@ -141,7 +147,13 @@ validateAndDebounceFacet2 <- debounce(reactive({
       }
     }
   } else if (facet2Type == "direct") {
-    if (is.null(myFacet2)) { return() }
+    if (is.null(myFacet2)) { 
+      if (is.null(selectedFacet2())) {
+        return() 
+      } else {
+        myFacet2 <- selectedFacet2()
+      }
+    }
   } else {
     myFacet2 <- "none"
   }
@@ -213,6 +225,6 @@ facet2 <- reactive({
       }
 
   facet2Text <<- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
-  outData
+  unique(outData)
 })
 

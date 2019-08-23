@@ -37,7 +37,11 @@ validateAndDebounceGroup <- debounce(reactive({
     }
   } else if (groupsType == "direct") {
     if (is.null(myGroup)) { 
-      return() 
+      if (is.null(selectedGroup())) {
+        return() 
+      } else {
+	myGroup <- selectedGroup()
+      }
     }
   } else {
     myGroup <- "none"
@@ -202,8 +206,8 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  
-	aggKey <- aggKey()
+ 
+  aggKey <- aggKey()
   if (contLongitudinal) {
     myCols <- c(aggKey, myY, longitudinal)
     tempData <- data[, myCols, with=FALSE]
@@ -215,6 +219,7 @@ axes <- reactive({
     colnames(tempData) <- c(aggKey, "YAXIS")
   }
 
+  tempData <- tempData[!is.na(tempData$XAXIS) ,]
   if (contLongitudinal) {
     tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
     #hackish way to force reactive update if use keeps trying to change the param back to higher val
@@ -267,23 +272,23 @@ tableData <- reactive({
                       # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
 
-        #PUT(propUrl, body = "")
-        #PUT(propUrl, body = text)
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)
 
   aggKey <- aggKey()
 
   axesData <- axes()
   if (is.null(axesData)) {
     return()
-	}
-	tempData <- axesData
+  }
+  tempData <- axesData
 
   groupData <- group()
   if (!is.null(groupData)) {
     tempData <- merge(tempData, groupData, by = aggKey)
   } else {
     tempData$GROUPS <- "All"
-  } 
+  }
 
   facetData <- facet1()
   if (!is.null(facetData)) {

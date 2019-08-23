@@ -186,14 +186,14 @@ plotData <- reactive({
                        outText,
                        facetText,
                        facet2Text,
-                       "input$facetType\t", input$facetType, "\n",
-                       "input$facet2Type\t", input$facet2Type
+                       "input$facetType\t", facetType, "\n",
+                       "input$facet2Type\t", facet2Type
                        #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                        #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
-       # PUT(propUrl, body = "")
-       # PUT(propUrl, body = text)
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)
         aggKey <- aggKey()
         attrData <- attr()
 	if (is.null(attrData)) { return() }
