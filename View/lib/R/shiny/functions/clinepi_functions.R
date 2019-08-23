@@ -6,6 +6,8 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
     if (sourceId == timeSourceId) { timeSourceId <- "none" }
   }
 
+  message(Sys.time(), " Running query ", queryName, " with sourceId ", sourceId, " and timeSourceId ", timeSourceId, " for dataset ", tblPrefix)
+
   if (queryName == "Participant") {
     if (timeSourceId == "none") {
       query <- paste0("select pa.name as Participant_Id",
@@ -162,7 +164,7 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
                      " and sa.", sourceId, " is not null")
     }
   } else {
-    warning("Query name not recognized: ", queryName)
+    warning(Sys.time(), "Query name not recognized: ", queryName)
   }
 
   dt <- as.data.table(dbGetQuery(con, query))
@@ -245,6 +247,7 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       if (is.null(data)) { return() }
     }
   } else {
+    message(Sys.time(), " Using strategy results, no query necessary")
     if (category == "Participant") {
       if (!is.null(longitudinal1)) {
         if (!is.null(lon2Data)) {
@@ -288,7 +291,7 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
     }
   }
  
-  message("returning query data")
+  message(Sys.time(), " Returning query data")
   data
 }
 
@@ -299,7 +302,7 @@ setDTColType <- function(myVar, metadata.file, data) {
   } else if (colType == "number") {
     data <- data[, (myVar):=as.numeric(get(myVar))]
   } else {
-    data <- separate(data, myVar, c(myVar, "drop"), "[[:blank:]]")
+    data <- suppressWarnings(separate(data, myVar, c(myVar, "drop"), "[[:blank:]]"))
     data$drop <- NULL
     data <- data[, (myVar):=as.Date(get(myVar), format = "%Y-%m-%d")]
   }
@@ -428,10 +431,6 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = N
       choices <- choices[choices$CATEGORY %in% include,]
     }
   }
-  message("metadata to build tree")
-  message(names(choices))
-  message(head(choices))
-  message(unique(choices$timepoints))
 
   #if (!is.null(timepoints.keep)) {
   #  if ("timepoints" %in% colnames(choices)) {
@@ -620,7 +619,6 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
   }  else {
     mergeData <- NULL
     #for strings
-    message(groups_stp1)
     
     for (i in seq(length(groups_stp1))) {
       tempData <- outData[,list(GROUPS = (any(get(myGroups) == groups_stp1[[i]]))), by = aggKey]

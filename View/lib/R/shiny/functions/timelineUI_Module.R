@@ -17,7 +17,7 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
   ns <- session$ns
 
   propUrl <<- getPropertiesUrl(session)
-  properties <- try(fread(propUrl))
+  properties <- suppressWarnings(try(fread(propUrl)))
  
   if (length(properties) > 0) {
     if (grepl("Error", properties)) {

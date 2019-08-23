@@ -55,7 +55,7 @@ shinyServer(function(input, output, session) {
 	#TODO move withProgess to reactive data loader now that modules are initialized differently
     withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
       if (is.null(attributes.file)) {
-	message("reactive data fetcher")
+	message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
 	 reactiveDataFetcher()
       }
       incProgress(.45)
