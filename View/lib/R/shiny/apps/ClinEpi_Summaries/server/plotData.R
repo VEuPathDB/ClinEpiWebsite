@@ -272,8 +272,8 @@ tableData <- reactive({
                       # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
 
-        #PUT(propUrl, body = "")
-        #PUT(propUrl, body = text)
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)
 
   aggKey <- aggKey()
 
