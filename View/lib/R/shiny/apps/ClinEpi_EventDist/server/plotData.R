@@ -14,7 +14,9 @@ validateAndDebounceAxes <- debounce(reactive({
       myX <- selectedGroup()
     }
   }
-  
+
+  message(Sys.time(), " validated xaxis inputs:")
+  message("myX: ", myX)
   list(myX = myX)
 }), 1000)
 
@@ -25,6 +27,7 @@ xQuery <- reactive({
   myInputs <- validateAndDebounceAxes()
   myX <- myInputs$myX
 
+  message(Sys.time(), " Initiating query for xaxis data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }

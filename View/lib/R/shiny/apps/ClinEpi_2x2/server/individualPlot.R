@@ -155,7 +155,7 @@
 
       #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
       myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
-      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE)
       legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == var1]
       legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
       myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",

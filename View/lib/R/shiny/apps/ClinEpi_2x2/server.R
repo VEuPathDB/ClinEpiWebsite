@@ -15,7 +15,7 @@ dbCon <- NULL
 shinyServer(function(input, output, session) {
 
   observeEvent(input$timeOut, { 
-    print(paste0("Session (", session$token, ") timed out at: ", Sys.time()))
+    message("Session (", session$token, ") timed out at: ", Sys.time())
     showModal(modalDialog(
       title = "Timeout",
       paste("Session timeout due to", input$timeOut, "inactivity -", Sys.time()),
@@ -62,6 +62,7 @@ shinyServer(function(input, output, session) {
   output$title <- renderText({
     withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
       if (is.null(attributes.file)) {
+	message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
         reactiveDataFetcher()
       }
       incProgress(.45)
