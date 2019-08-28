@@ -30,20 +30,26 @@ help <-      tabItem(tabName = "help",
                  h4("Version Information"),
                  #h5(
                    p("Shiny Server: 1.5.6.875", br(),
-                     "R: 3.5.1 (2018-07-02)", br(),
+                     "R: 3.6.0 (2019-04-26)", br(),
                      "Packages:", br(),
                      tags$ul(
-                       tags$li("data.table: 1.11.4"),
-                       tags$li("DT: 0.4"),
-                       tags$li("ggplot2: 2.2.2.1"),
-                       tags$li("httr: 1.3.1"),
-                       tags$li("plotly: 4.7.1"),
-                       tags$li("shiny: 1.1.0"),
-                       tags$li("shinydashboard: 0.7.0"),
+                       tags$li("data.table: 1.12.2"),
+		       tags$li("data.tree: 0.7.8"),
+		       tags$li("DBI: 1.0.0"),
+		       tags$li("digest: 0.6.20"),
+                       tags$li("DT: 0.7"),
+                       tags$li("ggplot2: 3.2.0"),
+                       tags$li("httr: 1.4.0"),
+                       tags$li("plotly: 4.9.0"),
+		       tags$li("ROracle: 1.3-1"),
+                       tags$li("shiny: 1.3.2"),
+		       tags$li("shinycssloaders: 0.2.0"),
+                       tags$li("shinydashboard: 0.7.1"),
                        tags$li("shinyjs: 1.0"),
-                       tags$li("shinyTree: 0.2.2"),
-                       tags$li("tidyr: 0.8.1"),
-                       tags$li("viridisLite: 0.3.0")
+                       tags$li("shinyTree: 0.2.7"),
+                       tags$li("tidyr: 0.8.3"),
+                       tags$li("viridisLite: 0.3.0"),
+		       tags$li("XML: 3.98-1.20")
                      )
                    ) 
              )

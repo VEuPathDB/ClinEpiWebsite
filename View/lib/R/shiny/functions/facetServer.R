@@ -32,11 +32,24 @@ validateAndDebounceFacet <- debounce(reactive({
       }
     }
   } else if (facetType == "direct") {
-    if (is.null(myFacet)) { return() }
+    if (is.null(myFacet)) { 
+      if (is.null(selectedFacet())) {
+	return() 
+      } else {
+ 	myFacet <- selectedFacet()
+      }
+    }
   } else {
     myFacet <- "none"
   }
-  
+
+  message(Sys.time(), " validated facet1 inputs:")
+  message("input$facetType: ", facetType)
+  message("myFacet: ", myFacet)
+  message("facet_stp1: ", facet_stp1)
+  message("facet_stp2: ", facet_stp2)
+  message("facet_stp3: ", facet_stp3)
+  message("facet_stp4: ", facet_stp4)  
   list(facetType = facetType, 
        myFacet = myFacet, 
        facet_stp1 = facet_stp1, 
@@ -51,6 +64,12 @@ facet1Query <- reactive({
   }
   myInputs <- validateAndDebounceFacet()
   myFacet <- myInputs$myFacet
+
+  if (myFacet != "none") {
+    message(Sys.time(), " Initiating query for facet data")
+  } else {
+    return()
+  }
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
@@ -106,7 +125,7 @@ facet1 <- reactive({
       }
 
   facetText <<- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
-  outData
+  unique(outData)
 })
 
 validateAndDebounceFacet2 <- debounce(reactive({
@@ -141,11 +160,24 @@ validateAndDebounceFacet2 <- debounce(reactive({
       }
     }
   } else if (facet2Type == "direct") {
-    if (is.null(myFacet2)) { return() }
+    if (is.null(myFacet2)) { 
+      if (is.null(selectedFacet2())) {
+        return() 
+      } else {
+        myFacet2 <- selectedFacet2()
+      }
+    }
   } else {
     myFacet2 <- "none"
   }
   
+  message(Sys.time(), " validated facet2 inputs:")
+  message("input$facet2Type: ", facet2Type)
+  message("myFacet2: ", myFacet2)
+  message("facet2_stp1: ", facet2_stp1)      
+  message("facet2_stp2: ", facet2_stp2)
+  message("facet2_stp3: ", facet2_stp3)
+  message("facet2_stp4: ", facet2_stp4)
   list(facet2Type = facet2Type, 
        myFacet2 = myFacet2, 
        facet2_stp1 = facet2_stp1, 
@@ -160,6 +192,12 @@ facet2Query <- reactive({
   }
   myInputs <- validateAndDebounceFacet2()
   myFacet2 <- myInputs$myFacet2
+
+  if (myFacet2 != "none") {
+    message(Sys.time(), " Initiating query for facet2 data")
+  } else {
+    return()
+  }
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
@@ -213,6 +251,6 @@ facet2 <- reactive({
       }
 
   facet2Text <<- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
-  outData
+  unique(outData)
 })
 

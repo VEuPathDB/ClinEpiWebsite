@@ -6,6 +6,8 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
     if (sourceId == timeSourceId) { timeSourceId <- "none" }
   }
 
+  message(Sys.time(), " Running query ", queryName, " with sourceId ", sourceId, " and timeSourceId ", timeSourceId, " for dataset ", tblPrefix)
+
   if (queryName == "Participant") {
     if (timeSourceId == "none") {
       query <- paste0("select pa.name as Participant_Id",
@@ -162,7 +164,7 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
                      " and sa.", sourceId, " is not null")
     }
   } else {
-    warning("Query name not recognized: ", queryName)
+    warning(Sys.time(), "Query name not recognized: ", queryName)
   }
 
   dt <- as.data.table(dbGetQuery(con, query))
@@ -183,13 +185,17 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
   if (length(category) == 0) { return() }
   if (is.na(category)) { return() }
 
+  if (!is.null(longitudinal2)) {
+    if (myVar == longitudinal2) { return(lon2Data) }
+  }
+  if (!is.null(hlongitudinal2)) {
+    if (myVar == hlongitudinal2) { return(hlon2Data) }
+  }
+
   if (myVar != "custom") {
     if (!is.null(longitudinal1)) {
       if (category != "Household") {
         data <- getNamedQueryResult(con, category, datasetDigest, myVar, longitudinal1)
-        #varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", longitudinal1)
-        #message("myVar: ", varUrl)
-        #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- setDTColType(longitudinal1, metadata.file, data)
@@ -211,9 +217,6 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       } else {
         if (!is.null(hlongitudinal1)) {
           data <- getNamedQueryResult(con, category, datasetDigest, myVar, hlongitudinal1)
-          #varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar, "?timeSourceId=", hlongitudinal1)
-          #message("myVar: ", varUrl)
-          #data <- unique(as.data.table(stream_in(url(varUrl)), pagesize=10000))
           if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           data <- setDTColType(hlongitudinal1, metadata.file, data)
@@ -230,9 +233,6 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
 	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id
         } else {
           data <- getNamedQueryResult(con, category, datasetDigest, myVar)
-          #varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
-          #message("myVar: ", varUrl)
-          #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
           if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           if (!is.null(lon2Data)) {
@@ -244,12 +244,10 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       }
     } else {
       data <- getNamedQueryResult(con, category, datasetDigest, myVar)
-      #varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/", myVar)
-      #message("myVar: ", varUrl)
-      #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
       if (is.null(data)) { return() }
     }
   } else {
+    message(Sys.time(), " Using strategy results, no query necessary")
     if (category == "Participant") {
       if (!is.null(longitudinal1)) {
         if (!is.null(lon2Data)) {
@@ -259,9 +257,6 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
         }
       } else {
         data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
-        #varUrl <- paste0(serviceUrl, "/", category, "/", datasetDigest, "/NAME")
-        #message("myVar: ", varUrl)
-        #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- merge(data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
@@ -269,9 +264,6 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       naToNotSelected(data, col = "custom")
     } else if (category == "Observation") {
       data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, NULL, longitudinal1)
-      #varUrl <- paste0(serviceUrl, "/ObservationNames/", datasetDigest, "?timeSourceId=", longitudinal1)
-      #message("myVar: ", varUrl)
-      #data <- unique(as.data.table(stream_in(url(varUrl), pagesize=10000)))
       if (is.null(data)) { return() }
       data <- merge(data, attributes.file, by = "OBSERVATION_ID", all=TRUE)
       if (!is.null(longitudinal1)) {
@@ -299,7 +291,7 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
     }
   }
  
-  message("returning query data")
+  message(Sys.time(), " Returning query data")
   data
 }
 
@@ -310,7 +302,7 @@ setDTColType <- function(myVar, metadata.file, data) {
   } else if (colType == "number") {
     data <- data[, (myVar):=as.numeric(get(myVar))]
   } else {
-    data <- separate(data, myVar, c(myVar, "drop"), "[[:blank:]]")
+    data <- suppressWarnings(separate(data, myVar, c(myVar, "drop"), "[[:blank:]]"))
     data$drop <- NULL
     data <- data[, (myVar):=as.Date(get(myVar), format = "%Y-%m-%d")]
   }
@@ -440,11 +432,11 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = N
     }
   }
 
-  if (!is.null(timepoints.keep)) {
-    if ("timepoints" %in% colnames(choices)) {
-      leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
-    }
-  }
+  #if (!is.null(timepoints.keep)) {
+  #  if ("timepoints" %in% colnames(choices)) {
+  #    leaves <- subset(choices, sapply(choices$timepoints, FUN = function(x){any(timepoints.keep %in% x)}))
+  #  }
+  #}
 
   if (nrow(choices) == 0) {
     return()
@@ -480,7 +472,7 @@ getUIList <- function(metadata.file, minLevels = 1, maxLevels = Inf, include = N
   
   #grrr recursion
   list <- setAttrDisabled(disabled, list)
-  
+
   list
 } 
 
@@ -591,10 +583,8 @@ myAnyStringGroups <- function(groups_stp1 = NULL, outData = NULL, aggStr = NULL,
 
 anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4, aggKey) {
   aggStr <- paste(myGroups, "~", paste(aggKey, collapse=" + "))
-  #this if statement will have to change. handle dates first
   if (any(c("POSIXct", "Date") %in% class(groups_stp1))) {
     outData <- transform(data, "GROUPS" = ifelse(data[[myGroups]] < groups_stp1[2] & data[[myGroups]] > groups_stp1[1], 1, 0))
-    #cols <- c("PARTICIPANT_ID", "GROUPS")
     cols <- c(aggKey, "GROUPS")
     outData <- outData[, cols, with = FALSE]
     outData <- unique(outData)
@@ -606,7 +596,6 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) { 
       return()
     }
-    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x < as.numeric(groups_stp2))) {1} else {0} })
     outData <- unique(outData[,list(GROUPS = (get(myGroups) < as.numeric(groups_stp2))), by = aggKey])
     outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "greaterThan") {
@@ -616,7 +605,6 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) {
       return()
     }
-    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x > as.numeric(groups_stp2))) {1} else {0} })
     outData <- unique(outData[,list(GROUPS = (get(myGroups) > as.numeric(groups_stp2))), by = aggKey])
     outData$GROUPS[is.na(outData$GROUPS)] = 0
   } else if (groups_stp1 == "equals") {
@@ -626,22 +614,16 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     if (!is.numeric(groups_stp2)) {
       return()
     }
-    #outData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if (any(x == as.numeric(groups_stp2))) {1} else {0} })
     outData <- unique(outData[,list(GROUPS = (get(myGroups) == as.numeric(groups_stp2))), by = aggKey])
     outData$GROUPS[is.na(outData$GROUPS)] = 0
   }  else {
     mergeData <- NULL
     #for strings
-    print("anyGroups")
-    message(groups_stp1)
     
     for (i in seq(length(groups_stp1))) {
-      tempData <- unique(outData[,list(GROUPS = (get(myGroups) == groups_stp1[[i]])), by = aggKey])
-      tempData$GROUPS[is.na(tempData$GROUPS)] = 0
-      print(head(tempData))
-      #tempData <- aggregate(as.formula(aggStr), outData, FUN = function(x){ if(groups_stp1[[i]] %in% x) {1} else {0} })
-      #colnames(tempData) <- c(aggKey, "GROUPS")
-      tempData$drop <- NULL
+      tempData <- outData[,list(GROUPS = (any(get(myGroups) == groups_stp1[[i]]))), by = aggKey]
+      tempData$GROUPS[is.na(tempData$GROUPS)] <- 0
+      tempData <- unique(tempData)
       if (is.null(mergeData)) {
         mergeData <- tempData
       } else {
@@ -654,13 +636,10 @@ anyGroups <- function(outData, metadata.file, myGroups, groups_stp1, groups_stp2
     outData <- mergeData
   }
 
-  #if (ncol(outData) > 2) {
-    colnames(outData) <- c(aggKey, "GROUPS")
-  #}
-  
+  colnames(outData) <- c(aggKey, "GROUPS")
   outData <- as.data.table(outData)
   
-  if (any(colnames(outData) %in% "drop")) {
+  if ("drop" %in% colnames(outData)) {
     outData$drop <- NULL
   }
   

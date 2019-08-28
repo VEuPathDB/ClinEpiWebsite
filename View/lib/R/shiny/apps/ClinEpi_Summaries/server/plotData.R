@@ -37,12 +37,23 @@ validateAndDebounceGroup <- debounce(reactive({
     }
   } else if (groupsType == "direct") {
     if (is.null(myGroup)) { 
-      return() 
+      if (is.null(selectedGroup())) {
+        return() 
+      } else {
+	myGroup <- selectedGroup()
+      }
     }
   } else {
     myGroup <- "none"
   }
-  
+
+  message(Sys.time(), " validated group inputs:")
+  message("input$groupsType: ", groupsType)
+  message("myGroup: ", myGroup)
+  message("group_stp1: ", group_stp1)      
+  message("group_stp2: ", group_stp2)
+  message("group_stp3: ", group_stp3)
+  message("group_stp4: ", group_stp4)  
   list(groupsType = groupsType, 
        myGroups = myGroup, 
        groups_stp1 = group_stp1, 
@@ -58,6 +69,7 @@ groupQuery <- reactive({
   myInputs <- validateAndDebounceGroup()
   myGroups <- myInputs$myGroups
 
+  message(Sys.time(), " Initiating query for groups data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
@@ -151,6 +163,13 @@ validateAndDebounceAxes <- debounce(reactive({
     return()
   }
   
+  message(Sys.time(), " validated axes inputs:")
+  message("myY: ", myY)
+  message("yaxis_stp1: ", yaxis_stp1)
+  message("yaxis_stp2: ", yaxis_stp2)      
+  message("yaxis_stp3: ", yaxis_stp3)
+  message("myX: ", xaxisVar)
+  message("xaxis_bins: ", xaxis_stp2)
   list(myY = myY, 
        yaxis_stp1 = yaxis_stp1, 
        yaxis_stp2 = yaxis_stp2,
@@ -167,6 +186,7 @@ axesQuery <- reactive({
   myInputs <- validateAndDebounceAxes()
   myY <- myInputs$myY
 
+  message(Sys.time(), " Initiating query for axes data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
@@ -202,8 +222,8 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  
-	aggKey <- aggKey()
+ 
+  aggKey <- aggKey()
   if (contLongitudinal) {
     myCols <- c(aggKey, myY, longitudinal)
     tempData <- data[, myCols, with=FALSE]
@@ -215,6 +235,7 @@ axes <- reactive({
     colnames(tempData) <- c(aggKey, "YAXIS")
   }
 
+  tempData <- tempData[!is.na(tempData$XAXIS) ,]
   if (contLongitudinal) {
     tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
     #hackish way to force reactive update if use keeps trying to change the param back to higher val
@@ -267,23 +288,23 @@ tableData <- reactive({
                       # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
 
-        #PUT(propUrl, body = "")
-        #PUT(propUrl, body = text)
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)
 
   aggKey <- aggKey()
 
   axesData <- axes()
   if (is.null(axesData)) {
     return()
-	}
-	tempData <- axesData
+  }
+  tempData <- axesData
 
   groupData <- group()
   if (!is.null(groupData)) {
     tempData <- merge(tempData, groupData, by = aggKey)
   } else {
     tempData$GROUPS <- "All"
-  } 
+  }
 
   facetData <- facet1()
   if (!is.null(facetData)) {

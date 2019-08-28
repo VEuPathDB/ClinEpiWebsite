@@ -261,7 +261,7 @@
                                   x=1.02, xanchor = "left",
                                   y=.3, yanchor = "bottom",
                                   legendtitle=TRUE, showarrow=FALSE)
-      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE)
       myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 150, t = 40),
                          xaxis = x_list,
                          yaxis = y_list,

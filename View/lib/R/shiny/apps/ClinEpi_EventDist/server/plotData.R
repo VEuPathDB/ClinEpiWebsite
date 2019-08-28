@@ -6,10 +6,17 @@ validateAndDebounceAxes <- debounce(reactive({
   #hack to force reactivity. idk maybe its a shiny bug, but reactlog cant find the module inputs for this specific case without referencing directly
   test2 <- input$`group-group`
   myX <- xaxisInfo()$group
+
   if (is.null(myX)) {
-    return()
+    if (is.null(selectedGroup())) {
+      return()
+    } else {
+      myX <- selectedGroup()
+    }
   }
-  
+
+  message(Sys.time(), " validated xaxis inputs:")
+  message("myX: ", myX)
   list(myX = myX)
 }), 1000)
 
@@ -20,6 +27,7 @@ xQuery <- reactive({
   myInputs <- validateAndDebounceAxes()
   myX <- myInputs$myX
 
+  message(Sys.time(), " Initiating query for xaxis data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
@@ -63,20 +71,20 @@ plotData <- reactive({
       }
   
       #first thing is to save properties 
-      #text <- paste0("input\tselected\n",
-      #               longitudinalText,
-      #               facetText,
-      #               facet2Text,
-      #               "xaxisInfo()$group\t", xaxisInfo()$group, "\n",
-      #               "input$facetType\t", input$facetType, "\n",
-      #               "input$facet2Type\t", input$facet2Type, "\n",
-      #               "input$xaxis\t", input$xaxis
+      text <- paste0("input\tselected\n",
+                     longitudinalText,
+                     facetText,
+                     facet2Text,
+                     "xaxisInfo()$group\t", validateAndDebounceAxes()$myX, "\n",
+                     "input$facetType\t", input$facetType, "\n",
+                     "input$facet2Type\t", input$facet2Type, "\n",
+                     "input$xaxis\t", input$xaxis
                      #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                      #"input$individualPlot_stp2\t", input$individualPlot_stp2 
-      #              )
+                    )
 
-      #PUT(propUrl, body = "")
-      #PUT(propUrl, body = text)
+      PUT(propUrl, body = "")
+      PUT(propUrl, body = text)
 
       xData <- xAxis()
       facetData <- facet1()

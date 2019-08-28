@@ -10,15 +10,13 @@ reactiveDataFetcher = reactive({
         getWdkDatasetFile('customProps.txt', session, FALSE, dataStorageDir)))
      datasetName <<- colnames(custom.props)
      datasetDigest <<- paste0("D", substr(digest(datasetName, algo = "sha1", serialize=FALSE), 1, 10))
-     #model.prop <- fread(getWdkDatasetFile('model.prop', session, FALSE, dataStorageDir),
-     #                      sep="=", header=FALSE, fill=TRUE)
-     #  serviceUrl <<- paste0(model.prop$V2[model.prop$V1 == "LOCALHOST"], "/a/service/shiny") 
  
        metadata.file <<- fread(getWdkDatasetFile("ontologyMetadata.tab", session, FALSE, dataStorageDir))
        metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomological measurements",]
+       metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomology",]
        metadata.file <<- metadata.file[order(metadata.file$PROPERTY),]
 
-     longitudinal.file <<- fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE)
+     longitudinal.file <<- suppressWarnings(fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE))
      names(longitudinal.file) <<- c("dataset_name", "columns", "house_columns")
      longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
      longitudinal.file$columns[longitudinal.file$columns == "NA"] <<- NA
@@ -40,10 +38,8 @@ reactiveDataFetcher = reactive({
       }
       if (numTimelines == 1) {
         longitudinal1 <<- longitudinal.file$columns
-        message("lon data: ", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], ", ", datasetDigest, ", ", longitudinal1)
 	if (!datasetName %in% names(lon1DataList)) {
           lon1Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], datasetDigest, longitudinal1)
-          #lon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal1], "/", datasetDigest, "/", longitudinal1)), pagesize=10000)))
           lon1Data <<- lon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           lon1Data <<- setDTColType(longitudinal1, metadata.file, lon1Data)
 	  lon1DataList[[datasetName]] <<- lon1Data
@@ -56,10 +52,8 @@ reactiveDataFetcher = reactive({
 	  hlongitudinal1 <<- longitudinal.file$house_columns
 	}
         if (!is.null(hlongitudinal1)) { 
-          message("hlon data: ", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], ", ", datasetDigest, ", ", hlongitudinal1)
   	  if (!datasetName %in% names(hlon1DataList)) {
             hlon1Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], datasetDigest, hlongitudinal1)
-            #hlon1Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal1], "/", datasetDigest, "/", hlongitudinal1)), pagesize=10000)))
             hlon1Data <<- hlon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
             hlon1Data <<- setDTColType(hlongitudinal1, metadata.file, hlon1Data)
   	    hlon1DataList[[datasetName]] <<- hlon1Data
@@ -72,10 +66,8 @@ reactiveDataFetcher = reactive({
         longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
         
         longitudinal2 <<- subset(longitudinal.file, longitudinal.file$columns %in% nums)$columns
-        message("lon data: ", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], ", ", datasetDigest, ", ", longitudinal2, ", ", longitudinal1)
 	if (!datasetName %in% names(lon2DataList)) {
           lon2Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], datasetDigest, longitudinal2, longitudinal1)
-          #lon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == longitudinal2], "/", datasetDigest, "/", longitudinal2, "?timeSourceId=", longitudinal1)), pagesize=10000)))
           lon2Data <<- lon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           lon2Data <<- setDTColType(longitudinal1, metadata.file, lon2Data)
           lon2Data <<- setDTColType(longitudinal2, metadata.file, lon2Data)
@@ -86,10 +78,8 @@ reactiveDataFetcher = reactive({
         hlongitudinal1 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% dates)$house_columns
         if (length(hlongitudinal1) > 0) {
           hlongitudinal2 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% nums)$house_columns
-          message("hlon data: ", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], ", ", datasetDigest, ", ", hlongitudinal2, ", ", hlongitudinal1)
           if (!datasetName %in% names(hlon2DataList)) {
             hlon2Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], datasetDigest, hlongitudinal2, hlongitudinal1)
-            #hlon2Data <<- unique(as.data.table(stream_in(url(paste0(serviceUrl, "/", metadata.file$CATEGORY[metadata.file$SOURCE_ID == hlongitudinal2], "/", datasetDigest, "/", hlongitudinal2, "?timeSourceId=", hlongitudinal1)), pagesize=10000)))
             hlon2Data <<- hlon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
             hlon2Data <<- setDTColType(hlongitudinal1, metadata.file, hlon2Data)
             hlon2Data <<- setDTColType(hlongitudinal2, metadata.file, hlon2Data)
@@ -107,7 +97,7 @@ reactiveDataFetcher = reactive({
 
    if (is.null(propUrl)) {
       propUrl <<- getPropertiesUrl(session)
-      properties <<- try(fread(propUrl))
+      properties <<- suppressWarnings(try(fread(propUrl)))
       if (length(properties) > 0) {
         if (grepl("Error", properties)) {
           properties <<- NULL
@@ -116,7 +106,7 @@ reactiveDataFetcher = reactive({
         properties <<- NULL
       } 
     }
-    message(paste("propUrl:", propUrl))
+    message(Sys.time(), " propUrl: ", propUrl)
 
     if (is.null(attributes.file)) {
 
