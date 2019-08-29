@@ -298,7 +298,6 @@ tableData <- reactive({
     return()
   }
   tempData <- axesData
-  message("yaxis ", nrow(tempData))
 
   groupData <- group()
   if (!is.null(groupData)) {
@@ -306,8 +305,6 @@ tableData <- reactive({
   } else {
     tempData$GROUPS <- "All"
   }
-
-  message("xaxis ", nrow(tempData)) 
 
 
   facetData <- facet1()
