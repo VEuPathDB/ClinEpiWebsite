@@ -168,8 +168,8 @@ validateAndDebounceAxes <- debounce(reactive({
   message("yaxis_stp1: ", yaxis_stp1)
   message("yaxis_stp2: ", yaxis_stp2)      
   message("yaxis_stp3: ", yaxis_stp3)
-  message("myX: ", xaxisVar)
-  message("xaxis_bins: ", xaxis_stp2)
+  message("myX: ", input$xaxisVar)
+  message("xaxis_bins: ", input$xaxis_stp2)
   list(myY = myY, 
        yaxis_stp1 = yaxis_stp1, 
        yaxis_stp2 = yaxis_stp2,
