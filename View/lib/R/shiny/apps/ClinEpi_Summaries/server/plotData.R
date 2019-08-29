@@ -235,8 +235,8 @@ axes <- reactive({
     colnames(tempData) <- c(aggKey, "YAXIS")
   }
 
-  tempData <- tempData[!is.na(tempData$XAXIS) ,]
   if (contLongitudinal) {
+    tempData <- tempData[!is.na(tempData$XAXIS) ,]
     tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
     #hackish way to force reactive update if use keeps trying to change the param back to higher val
     tmp <- uniqueN(tempData$XAXIS)
@@ -298,6 +298,7 @@ tableData <- reactive({
     return()
   }
   tempData <- axesData
+  message("yaxis ", nrow(tempData))
 
   groupData <- group()
   if (!is.null(groupData)) {
@@ -305,6 +306,9 @@ tableData <- reactive({
   } else {
     tempData$GROUPS <- "All"
   }
+
+  message("xaxis ", nrow(tempData)) 
+
 
   facetData <- facet1()
   if (!is.null(facetData)) {
