@@ -224,20 +224,14 @@
 
       #should keep playing with this vs doing it with ggplot syntax. 
       x_list <- list(
-        title = paste0(c(rep("\n", 3),
-                         rep(" ", 10),
-                         xlab,
-                         rep(" ", 10)),
-                       collapse = ""),
-        size = 14
+        title = xlab,
+        size = 14,
+	automargin = TRUE
       )
       y_list <- list(
-        title = paste0(c(rep(" ", 10),
-                         ylab,
-                         rep(" ", 10),
-                         "\n"),
-                       collapse = ""),
-        size = 14
+        title = ylab,
+        size = 14,
+	automargin = TRUE
       )
 
       if (is.na(maxChars)) {
@@ -257,12 +251,12 @@
         legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == legendTitle]
         legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
       }
-      myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
-                                  x=1.02, xanchor = "left",
-                                  y=.3, yanchor = "bottom",
-                                  legendtitle=TRUE, showarrow=FALSE)
-      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 150, t = 40),
+      #myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
+      #                            x=1.02, xanchor = "left",
+      #                            y=.3, yanchor = "bottom",
+      #                            legendtitle=TRUE, showarrow=FALSE)
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, editable = TRUE, edits = list(shapePosition = FALSE))
+      myPlotly <- layout(myPlotly, margin = list(l = 150, r = 50, b = 150, t = 40),
                          xaxis = x_list,
                          yaxis = y_list,
                          legend = legend_list,
