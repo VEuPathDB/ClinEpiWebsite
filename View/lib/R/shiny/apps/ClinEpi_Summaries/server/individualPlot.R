@@ -98,6 +98,8 @@
         message("plotData returned null!")
         return()
       }
+      numColors <- uniqueN(df$GROUPS)
+      groups <- unique(df$GROUPS)
 
       names(df)[names(df) == 'GROUPS'] <- 'LINES'
       if (!is.null(iPlot_stp1)) {
@@ -108,6 +110,13 @@
         keep2 <- c(df[, myFacet2, with=FALSE] == iPlot_stp2)
         df <- df[keep2,]
       }
+      missingGroups <- groups[! groups %in% unique(df$LINES)]
+      addMissingGroup <- function(x) {
+        df <<- rbind(df, NA, fill=TRUE)
+	df$LINES[nrow(df)] <<- x
+        return(df)
+      }
+      lapply(missingGroups, addMissingGroup)
 
       if (contLongitudinal) {
         #define axis labels here
@@ -157,7 +166,6 @@
           myPlot <- myPlot + geom_smooth(span = .3, na.rm = TRUE)
         }
 
-        numColors <- length(levels(as.factor(df$LINES)))
         maxChars <- max(nchar(as.vector(df$LINES)))
 
         #find num colors needed
@@ -206,7 +214,6 @@
           myPlot <- myPlot + geom_boxplot()
         }
 
-        numColors <- length(levels(as.factor(df$XAXIS)))
         maxChars <- max(nchar(as.vector(df$XAXIS)))
 
         #find num colors needed
