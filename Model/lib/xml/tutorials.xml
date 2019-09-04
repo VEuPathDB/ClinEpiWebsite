@@ -37,6 +37,7 @@
 <!-- TUTORIALS :  order provided by ClinEPi Outreach
 -->
 
+<!--
 <record>
        <attribute name="title">ClinEpiDB dataset formatting guidelines for data providers</attribute>
        <attribute name="description">ClinEpiDB dataset formatting guidelines for data providers</attribute>
@@ -44,11 +45,12 @@
        <table name="files">
         <row>
            <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
-           <attribute name="fileName.pdf">General_1_create_personal_account.pdf</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBDatasetGuidelinesforDataProviders.pdf</attribute>
            <attribute name="size">Aug 28, 2019</attribute>
          </row>
        </table>
   </record>
+-->
 
 <record>
        <attribute name="title">Creating a personal account</attribute>
