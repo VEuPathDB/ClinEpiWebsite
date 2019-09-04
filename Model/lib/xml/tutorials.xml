@@ -36,7 +36,7 @@
 
 <!-- TUTORIALS :  order provided by ClinEPi Outreach
 -->
-
+<!--
 <record>
        <attribute name="title">ClinEpiDB dataset formatting guidelines for data providers</attribute>
        <attribute name="description">ClinEpiDB dataset formatting guidelines for data providers</attribute>
@@ -49,7 +49,7 @@
          </row>
        </table>
   </record>
-
+-->
 <record>
        <attribute name="title">Creating a personal account</attribute>
        <attribute name="description">Creating a personal account</attribute>
