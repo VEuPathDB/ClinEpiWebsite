@@ -13,11 +13,6 @@ output$distribution <- renderPlotly({
       }
 
       df <- completeDT(df, myX)
-	message("have df..")
-	message(nrow(df))
-	message(colnames(df))
-	message(head(df))
-
       nums <- getNums(metadata.file)
       dates <- getDates(metadata.file)
 
@@ -29,12 +24,10 @@ output$distribution <- renderPlotly({
         xlab <- subset(metadata.file, metadata.file$SOURCE_ID %in% myX)
         xlab <- as.character(xlab[1,2])
       }
-	message("have axes labels..")
 
       myPlot <- ggplot(data = subset(df, !is.na(get(myX))), aes_string(x = myX))
       myPlot <- myPlot + theme_bw()
       myPlot <- myPlot + labs(y = "", x = "")
-	message("built basic ggplot obj")
 
         #consider when facetType is makeGroups to use geom_density instead ??
         if ((myX %in% nums$SOURCE_ID | myX %in% dates$SOURCE_ID) & myX != myFacet) {
@@ -62,7 +55,6 @@ output$distribution <- renderPlotly({
             }
             myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
           }
-	message("built numeric xaxis")
 
         } else {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
@@ -90,36 +82,26 @@ output$distribution <- renderPlotly({
           }
 
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-	message("built categorical xaxis")
         }
 
       x_list <- list(
-        title = paste0(c(rep("\n", 3),
-                       rep(" ", 10),
-                       xlab,
-                       rep(" ", 10)),
-                       collapse = ""),
-        size = 14
+        title = xlab,
+        size = 14,
+	automargin = TRUE
       )
       y_list <- list(
-        title = paste0(c(rep(" ", 10),
-                       "Count",
-                       rep(" ", 10),
-                       "\n"),
-                       collapse = ""),
-        size = 14
+        title = "Count",
+        size = 14,
+	automargin = TRUE
       )
-	message("defined plotly axes")
 
       myPlotly <- ggplotly(myPlot, tooltip = c("text"), width = (0.70*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
-	message("converted with ggplotly")
-      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40),
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, editable = TRUE, edits = list(shapePosition = FALSE))
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 50),
                                    xaxis = x_list,
                                    yaxis = y_list,
                                    legend = list(x = 100, y = .5),
                                    autosize=TRUE)
-	message("set plotly config and returning")
 
       myPlotly
     })

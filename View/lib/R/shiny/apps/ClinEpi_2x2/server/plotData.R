@@ -29,7 +29,13 @@ validateAndDebounceAttr <- debounce(reactive({
       }
     }
   }
-  
+
+  message(Sys.time(), " validated attr inputs:")
+  message("myAttr: ", myAttr)
+  message("attr_stp1: ", attr_stp1)      
+  message("attr_stp2: ", attr_stp2)
+  message("attr_stp3: ", attr_stp3)
+  message("attr_stp4: ", attr_stp4)  
   list(myAttr = myAttr, 
        attr_stp1 = attr_stp1, 
        attr_stp2 = attr_stp2,
@@ -42,6 +48,7 @@ attrQuery <- reactive({
   myInputs <- validateAndDebounceAttr()
   myAttr <- myInputs$myAttr
 
+  message(Sys.time(), " Initiating query for attribute data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
@@ -109,6 +116,12 @@ validateAndDebounceOut <- debounce(reactive({
     }
   }
   
+  message(Sys.time(), " validated outcome inputs:")
+  message("myOut: ", myOut)
+  message("out_stp1: ", out_stp1)      
+  message("out_stp2: ", out_stp2)
+  message("out_stp3: ", out_stp3)
+  message("out_stp4: ", out_stp4)
   list(myOut = myOut, 
        out_stp1 = out_stp1, 
        out_stp2 = out_stp2,
@@ -121,6 +134,7 @@ outQuery <- reactive({
   myInputs <- validateAndDebounceOut()
   myOut <- myInputs$myOut
 
+  message(Sys.time(), " Initiating query for outcome data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
@@ -186,14 +200,14 @@ plotData <- reactive({
                        outText,
                        facetText,
                        facet2Text,
-                       "input$facetType\t", input$facetType, "\n",
-                       "input$facet2Type\t", input$facet2Type
+                       "input$facetType\t", facetType, "\n",
+                       "input$facet2Type\t", facet2Type
                        #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                        #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
-       # PUT(propUrl, body = "")
-       # PUT(propUrl, body = text)
+        PUT(propUrl, body = "")
+        PUT(propUrl, body = text)
         aggKey <- aggKey()
         attrData <- attr()
 	if (is.null(attrData)) { return() }

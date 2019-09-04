@@ -44,7 +44,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   force(selected())
 
   propUrl <<- getPropertiesUrl(session) 
-  properties <- try(fread(propUrl))
+  properties <- suppressWarnings(try(fread(propUrl)))
 
   if (length(properties) > 0) {
     if (grepl("Error", properties)) {
@@ -189,7 +189,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     
     if (is.null(properties)) {
       propUrl <<- getPropertiesUrl(session)
-      properties <- try(fread(propUrl))
+      properties <- suppressWarnings(try(fread(propUrl)))
     }
 
     if (length(properties) > 0) {

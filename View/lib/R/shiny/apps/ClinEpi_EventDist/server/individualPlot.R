@@ -128,25 +128,19 @@
       }
 
       x_list <- list(
-        title = paste0(c(rep("\n", 3),
-                         rep(" ", 10),
-                         xlab,
-                         rep(" ", 10)),
-                       collapse = ""),
-        size = 14
+        title = xlab,
+        size = 14,
+	automargin = TRUE
       )
       y_list <- list(
-        title = paste0(c(rep(" ", 10),
-                         "Count",
-                         rep(" ", 10),
-                         "\n"),
-                       collapse = ""),
-        size = 14
+        title = "Count",
+        size = 14,
+	automargin = TRUE
       )
 
       myPlotly <- ggplotly(myPlot, tooltip = c("text"), , width = (0.70*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
-      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, collaborate = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40),
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, editable = TRUE, edits = list(shapePosition = FALSE))
+      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 50),
                          xaxis = x_list,
                          yaxis = y_list,
                          legend = list(x = 100, y = .5),

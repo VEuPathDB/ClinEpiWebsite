@@ -142,9 +142,9 @@
         }
         myCols <- metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]
         temp <- temp[temp$SOURCE_ID %in% myCols]
-        parents <- temp$parentlabel
-        leaves <- temp[!temp$property %in% parents]
-        leaves <- leaves[order(leaves$property),]
+        parents <- temp$PARENTLABEL
+        leaves <- temp[!temp$PROPERTY %in% parents]
+        leaves <- leaves[order(leaves$PROPERTY),]
         leaves <- leaves$SOURCE_ID
         #remove dates
         dates <- getDates(metadata.file)$SOURCE_ID
@@ -178,9 +178,9 @@
             }
             myCols <- metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]
             temp <- temp[temp$SOURCE_ID %in% myCols]
-            parents <- temp$parentlabel
-            leaves <- temp[!temp$property %in% parents]
-            leaves <- leaves[order(leaves$property),]
+            parents <- temp$PARENTLABEL
+            leaves <- temp[!temp$PROPERTY %in% parents]
+            leaves <- leaves[order(leaves$PROPERTY),]
             leaves <- leaves$SOURCE_ID
             #remove dates
             dates <- getDates(metadata.file)$SOURCE_ID
@@ -257,9 +257,9 @@
             }
             myCols <- metadata.file$SOURCE_ID[!is.na(metadata.file$NUMBER_DISTINCT_VALUES)]
             temp <- temp[temp$SOURCE_ID %in% myCols]
-            parents <- temp$parentlabel
-            leaves <- temp[!temp$property %in% parents]
-            leaves <- leaves[order(leaves$property),]
+            parents <- temp$PARENTLABEL
+            leaves <- temp[!temp$PROPERTY %in% parents]
+            leaves <- leaves[order(leaves$PROPERTY),]
             leaves <- leaves$SOURCE_ID
             #remove dates
             dates <- getDates(metadata.file)$SOURCE_ID
