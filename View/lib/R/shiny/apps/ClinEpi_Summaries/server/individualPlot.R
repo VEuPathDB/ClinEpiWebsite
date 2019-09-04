@@ -170,12 +170,15 @@
 
         #find num colors needed
         if (numColors > 2) {
-          myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors))
+          colorVals <- viridis(numColors)
         } else if (numColors == 2) {
-          myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .25, end = .75))
+          colorVals <- viridis(numColors, begin = .25, end = .75)
         } else {
-          myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
+          colorVals <- viridis(numColors, begin = .5)
         }
+
+	names(colorVals) <- groups
+	myPlot <- myPlot + scale_color_manual(name = "", values=colorVals)
 
         if (!longitudinal %in% nums$SOURCE_ID) {
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -216,16 +219,17 @@
 
         maxChars <- max(nchar(as.vector(df$XAXIS)))
 
-        #find num colors needed
+	#find num colors needed
         if (numColors > 2) {
-          myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors))
+          colorVals <- viridis(numColors)
         } else if (numColors == 2) {
-
-          myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors, begin = .25, end = .75))
+          colorVals <- viridis(numColors, begin = .25, end = .75)
         } else {
-
-          myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors, begin = .5))
+          colorVals <- viridis(numColors, begin = .5)
         }
+
+        names(colorVals) <- groups
+        myPlot <- myPlot + scale_color_manual(name = "", values=colorVals)
 
       }
 
