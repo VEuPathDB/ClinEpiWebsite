@@ -222,7 +222,8 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
- 
+  if (myY == hlongitudinal1) { myY <- longitudinal1 }
+  
   aggKey <- aggKey()
   if (contLongitudinal) {
     myCols <- c(aggKey, myY, longitudinal)

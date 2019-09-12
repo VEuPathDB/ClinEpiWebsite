@@ -229,6 +229,8 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
             names(data)[names(data) == hlongitudinal1] <- longitudinal1
           }
           names(data)[names(data) == hlongitudinal1] <- longitudinal1
+	  if (myVar == hlongitudinal1) { myVar <- longitudinal1 }
+
         # assuming if we dont have a household longitudinal source id that households data is static
 	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id
         } else {
