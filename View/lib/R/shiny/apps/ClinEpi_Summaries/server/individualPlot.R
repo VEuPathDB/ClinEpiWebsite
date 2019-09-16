@@ -98,6 +98,8 @@
         message("plotData returned null!")
         return()
       }
+      numColors <- uniqueN(df$GROUPS)
+      groups <- unique(df$GROUPS)
 
       names(df)[names(df) == 'GROUPS'] <- 'LINES'
       if (!is.null(iPlot_stp1)) {
@@ -108,6 +110,13 @@
         keep2 <- c(df[, myFacet2, with=FALSE] == iPlot_stp2)
         df <- df[keep2,]
       }
+      missingGroups <- groups[! groups %in% unique(df$LINES)]
+      addMissingGroup <- function(x) {
+        df <<- rbind(df, NA, fill=TRUE)
+	df$LINES[nrow(df)] <<- x
+        return(df)
+      }
+      lapply(missingGroups, addMissingGroup)
 
       if (contLongitudinal) {
         #define axis labels here
@@ -157,17 +166,19 @@
           myPlot <- myPlot + geom_smooth(span = .3, na.rm = TRUE)
         }
 
-        numColors <- length(levels(as.factor(df$LINES)))
         maxChars <- max(nchar(as.vector(df$LINES)))
 
         #find num colors needed
         if (numColors > 2) {
-          myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors))
+          colorVals <- viridis(numColors)
         } else if (numColors == 2) {
-          myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .25, end = .75))
+          colorVals <- viridis(numColors, begin = .25, end = .75)
         } else {
-          myPlot <- myPlot + scale_color_manual(name = "", values = viridis(numColors, begin = .5))
+          colorVals <- viridis(numColors, begin = .5)
         }
+
+	names(colorVals) <- groups
+	myPlot <- myPlot + scale_color_manual(name = "", values=colorVals)
 
         if (!longitudinal %in% nums$SOURCE_ID) {
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -206,38 +217,32 @@
           myPlot <- myPlot + geom_boxplot()
         }
 
-        numColors <- length(levels(as.factor(df$XAXIS)))
         maxChars <- max(nchar(as.vector(df$XAXIS)))
 
-        #find num colors needed
+	#find num colors needed
         if (numColors > 2) {
-          myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors))
+          colorVals <- viridis(numColors)
         } else if (numColors == 2) {
-
-          myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors, begin = .25, end = .75))
+          colorVals <- viridis(numColors, begin = .25, end = .75)
         } else {
-
-          myPlot <- myPlot + scale_fill_manual(name = "", values = viridis(numColors, begin = .5))
+          colorVals <- viridis(numColors, begin = .5)
         }
+
+        names(colorVals) <- groups
+        myPlot <- myPlot + scale_color_manual(name = "", values=colorVals)
 
       }
 
       #should keep playing with this vs doing it with ggplot syntax. 
       x_list <- list(
-        title = paste0(c(rep("\n", 3),
-                         rep(" ", 10),
-                         xlab,
-                         rep(" ", 10)),
-                       collapse = ""),
-        size = 14
+        title = xlab,
+        size = 14,
+	automargin = TRUE
       )
       y_list <- list(
-        title = paste0(c(rep(" ", 10),
-                         ylab,
-                         rep(" ", 10),
-                         "\n"),
-                       collapse = ""),
-        size = 14
+        title = ylab,
+        size = 14,
+	automargin = TRUE
       )
 
       if (is.na(maxChars)) {
@@ -257,12 +262,12 @@
         legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == legendTitle]
         legend.title <- gsub('(.{1,15})(\\s|$)', '\\1\n', legend.title)
       }
-      myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
-                                  x=1.02, xanchor = "left",
-                                  y=.3, yanchor = "bottom",
-                                  legendtitle=TRUE, showarrow=FALSE)
-      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE)
-      myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 150, t = 40),
+      #myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
+      #                            x=1.02, xanchor = "left",
+      #                            y=.3, yanchor = "bottom",
+      #                            legendtitle=TRUE, showarrow=FALSE)
+      myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, editable = TRUE, edits = list(shapePosition = FALSE))
+      myPlotly <- layout(myPlotly, margin = list(l = 150, r = 50, b = 150, t = 40),
                          xaxis = x_list,
                          yaxis = y_list,
                          legend = legend_list,

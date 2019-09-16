@@ -180,13 +180,27 @@ assignInNamespace("get_selected_slices", my.get_selected_slices, ns = "shinyTree
   if (length(x) > 0 || plotly:::is_blank(x)) x else y
 }
 
+trimFacets <- function(dimensions) {
+  dimensions <- dimensions - .001
+  if (sum(dimensions) > 1) {
+    dimensions <- Recall(dimensions)
+  }
+  dimensions
+}
+
 my.get_domains <- function(nplots = 1, nrows = 1, margins = 0.01, 
                         widths = NULL, heights = NULL) {
   if (length(margins) == 1) margins <- rep(margins, 4)
   if (length(margins) != 4) stop("margins must be length 1 or 4", call. = FALSE)
   ncols <- ceiling(nplots / nrows)
   widths <- widths %||% rep(round(1 / ncols, 2), ncols)
+  if (sum(widths) > 1) {
+    widths <- trimFacets(widths)
+  }
   heights <- heights %||% rep(round(1 / nrows, 2), nrows)
+  if (sum(heights) > 1) {
+    heights <- trimFacets(heights)
+  }
   if (length(widths) != ncols) {
     stop("The length of the widths argument must be equal ",
          "to the number of columns", call. = FALSE)

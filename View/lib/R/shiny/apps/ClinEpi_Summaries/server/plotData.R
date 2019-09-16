@@ -168,8 +168,8 @@ validateAndDebounceAxes <- debounce(reactive({
   message("yaxis_stp1: ", yaxis_stp1)
   message("yaxis_stp2: ", yaxis_stp2)      
   message("yaxis_stp3: ", yaxis_stp3)
-  message("myX: ", xaxisVar)
-  message("xaxis_bins: ", xaxis_stp2)
+  message("myX: ", input$xaxisVar)
+  message("xaxis_bins: ", input$xaxis_stp2)
   list(myY = myY, 
        yaxis_stp1 = yaxis_stp1, 
        yaxis_stp2 = yaxis_stp2,
@@ -222,7 +222,8 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
- 
+  if (myY == hlongitudinal1) { myY <- longitudinal1 }
+  
   aggKey <- aggKey()
   if (contLongitudinal) {
     myCols <- c(aggKey, myY, longitudinal)
@@ -235,8 +236,8 @@ axes <- reactive({
     colnames(tempData) <- c(aggKey, "YAXIS")
   }
 
-  tempData <- tempData[!is.na(tempData$XAXIS) ,]
   if (contLongitudinal) {
+    tempData <- tempData[!is.na(tempData$XAXIS) ,]
     tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
     #hackish way to force reactive update if use keeps trying to change the param back to higher val
     tmp <- uniqueN(tempData$XAXIS)
@@ -305,6 +306,7 @@ tableData <- reactive({
   } else {
     tempData$GROUPS <- "All"
   }
+
 
   facetData <- facet1()
   if (!is.null(facetData)) {

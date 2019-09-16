@@ -62,20 +62,14 @@
         myPlot <- myPlot + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
         x_list <- list(
-          title = paste0(c(rep("\n", 3),
-                         rep(" ", 10),
-                         xlab,
-                         rep(" ", 10)),
-                         collapse = ""),
-          size = 14
+          title = xlab,
+          size = 14,
+	  automargin = TRUE
         )
         y_list <- list(
-          title = paste0(c(rep(" ", 10),
-                         ylab,
-                         rep(" ", 10),
-                         "\n"),
-                         collapse = ""),
-          size = 14
+          title = ylab,
+          size = 14,
+	  automargin = TRUE
         )
         maxChars <- max(nchar(as.vector(df$Exposure)))
         if (is.na(maxChars)) {
@@ -90,13 +84,13 @@
 
         #myPlotly <- ggplotly(myPlot, tooltip = c("text", "x"))
         myPlotly <- ggplotly(myPlot, width = (0.75*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
-        myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE)
+        myPlotly <- plotly:::config(myPlotly, displaylogo = FALSE, editable = TRUE, edits = list(shapePosition = FALSE))
         legend.title <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == var1]
         legend.title <- gsub('(.{1,35})(\\s|$)', '\\1\n', legend.title)
-        myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
-                                    x=1.02, xanchor = "left",
-                                    y=.7, yanchor = "bottom",
-                                    legendtitle=TRUE, showarrow=FALSE)
+        #myPlotly <- add_annotations(myPlotly, text = legend.title, xref="paper",
+        #                            x=1.02, xanchor = "left",
+        #                            y=.7, yanchor = "bottom",
+        #                            legendtitle=TRUE, showarrow=FALSE)
         myPlotly <- layout(myPlotly, margin = list(l = 70, r = 50, b = 200, t = 40),
                                      xaxis = x_list,
                                      yaxis = y_list,
