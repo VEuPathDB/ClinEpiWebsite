@@ -223,6 +223,52 @@ RADJUST
 }
 
 1;
+#maled 0-60 months #############################################################################################
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_5c41b87221;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub useWhoStandards {1}
+
+sub finalProfileAdjustments{
+
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+profile.df.full$ID[profile.df.full$STATUS == 'No'] <- NA
+profile.df.full$STATUS <- profile.df.full$ID
+profile.df.full$ID <- NULL
+
+profile.df.full$EVENT[profile.df.full$EVENT == "No"] <- NA
+profile.df.full$EVENT[profile.df.full$EVENT == "Day not in diarrheal episode"] <- NA
+profile.df.full$EVENT[profile.df.full$EVENT == ""] <- NA
+
+profile.df.full$oldLegend <- as.character(profile.df.full$LEGEND)
+
+profile.df.full <- transform(profile.df.full, "LEGEND" = ifelse(grepl("SD0", profile.df.full$PROFILE_FILE), "WHO Standards, Mean", ifelse(grepl("SD2neg", profile.df.full$PROFILE_FILE), "WHO Standards, -2SD", ifelse(grepl("SD2", profile.df.full$PROFILE_FILE), "WHO Standards, +2SD", oldLegend))))
+
+profile.df.full$oldLegend <- NULL
+
+
+
+RADJUST
+  my $colorValues = "c(\"WHO Standards, +2SD\" = \"red\",\"WHO Standards, -2SD\" = \"red\",\"WHO Standards, Mean\" = \"black\",\"Recumbent length (cm)\" = \"blue\", \"Weight (kg)\" = \"blue\", \"Length-for-age z-score\" = \"#56B4E9\", \"Weight-for-age z-score\" = \"#CC79A7\", \"Weight-for-length z-score\" = \"#0072B2\", \"Day in diarrheal episode\" = \"#000099\", \"Adenovirus, by ELISA\" = \"#FF0000FF\", \"Aeromonas, by bacteriology\" = \"#FF2100FF\", \"Ascaris lumbricoides, by microscopy\" = \"#FF4300FF\", \"Astrovirus, by ELISA\" = \"#FF6400FF\", \"Atypical EPEC, by PCR\" = \"#FF8500FF\", \"Balantidium coli, by microscopy\" = \"#FFA600FF\", \"Campylobacter, by ELISA\" = \"#FFC800FF\", \"Campylobacter, by bacteriology\" = \"#FFE900FF\", \"Chilomastix mesnili, by microscopy\" = \"#F4FF00FF\", \"Cryptosporidium, by ELISA\" = \"#D3FF00FF\", \"Cyclospora, by microscopy\" = \"#B1FF00FF\", \"EAEC aatA and aaiC pos, by PCR\" = \"#90FF00FF\", \"EAEC aatA or aaiC pos, by PCR\" = \"#6FFF00FF\", \"EIEC ipaH pos, by PCR\" = \"#4EFF00FF\", \"EPEC bfpA pos, by PCR\" = \"#2CFF00FF\", \"EPEC eae and bfpA pos, by PCR\" = \"#0BFF00FF\", \"EPEC eae pos, by PCR\" = \"#00FF16FF\", \"ETEC LT neg ST pos, by PCR\" = \"#00FF37FF\", \"ETEC LT or ST pos, by PCR\" = \"#00FF59FF\", \"ETEC LT pos ST neg, by PCR\" = \"#00FF7AFF\", \"Endolimax nana, by microscopy\" = \"#00FF9BFF\", \"Entamoeba coli, by microscopy\" = \"#00FFBCFF\", \"Entamoeba histolytica, by ELISA\" = \"#00FFDEFF\", \"Enterobius vermicularis, by microscopy\" = \"#00FFFFFF\", \"Escherichia coli, by bacteriology\" = \"#00DEFFFF\", \"Giardia, by ELISA\" = \"#00BCFFFF\", \"Hookworm, by microscopy\" = \"#009BFFFF\", \"Hymenolepis diminuta, by microscopy\" = \"#007AFFFF\", \"Hymenolepis nana, by microscopy\" = \"#0059FFFF\", \"Iodamoeba butschlii, by microscopy\" = \"#0037FFFF\", \"Isospora, by microscopy\" = \"#0016FFFF\", \"Norovirus GI, by RT-PCR\" = \"#0B00FFFF\", \"Norovirus GII, by RT-PCR\" = \"#2C00FFFF\", \"Norovirus, by RT-PCR\" = \"#4E00FFFF\", \"Other parasites, by microscopy\" = \"#6F00FFFF\", \"Plesiomonas shigelloides, by bacteriology\" = \"#9000FFFF\", \"Rotavirus, by ELISA\" = \"#B100FFFF\", \"STEC stx1 or stx2 pos, by PCR\" = \"#D300FFFF\", \"Salmonella, by bacteriology\" = \"#F400FFFF\", \"Schistosoma, by microscopy\" = \"#FF00E9FF\", \"Shigella, by bacteriology\" = \"#FF00C8FF\", \"Strongyloides stercoralis, by microscopy\" = \"#FF00A6FF\", \"Taenia, by microscopy\" = \"#FF0085FF\", \"Trichuris trichiura, by microscopy\" = \"#FF0064FF\", \"Vibrio, by bacteriology\" = \"#FF0043FF\", \"Yersinia enterocolitica, by bacteriology\" = \"#FF0021FF\")";
+ 
+  my $breaks = "c(\"WHO Standards, Mean\",\"WHO Standards, +2SD\",\"WHO Standards, -2SD\",\"Length-for-age z-score\", \"Weight-for-age z-score\", \"Weight-for-length z-score\",\"Weight (kg)\",\"Recumbent length (cm)\")";
+
+
+  $profile->addAdjustProfile($rAdjustString);
+  #$profile->setSubtitle("red lines = +/-2 sd; bars = diarrhea; dots = pathogen+");
+  $profile->setEventDurLegend("Diarrhea");
+  $profile->setStatusLegend("Pathogen+ (check the point for pathogen  information)");
+  $profile->setColorVals($colorValues);
+  $profile->setCustomBreaks($breaks);  
+}
+
+1;
 
 #icemr prism
 package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_0ad509829e;
