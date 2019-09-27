@@ -14,21 +14,25 @@
       yaxis_stp3 <- myInputs$yaxis_stp3
       longitudinal <- myInputs$longitudinal
       facetType <- myInputs$facetType
-      myFacet <- myInputs$myFacet
+      #myFacet <- myInputs$myFacet
+      myFacet <-"FACET"
       facet2Type <- myInputs$facet2Type
-      myFacet2 <- myInputs$myFacet2
+      #myFacet2 <- myInputs$myFacet2
+      myFacet2 <- "FACET2"
       
-      if (!(myFacet %in% colnames(plotData)) & myFacet != "none") {
-        return()
+      if (!(myFacet %in% colnames(plotData)) & facetType != "none"){
+       return()
       }
-      if (!(myFacet2 %in% colnames(plotData)) & myFacet2 != "none") {
+
+
+      if (!(myFacet2 %in% colnames(plotData)) & facet2Type != "none") {
         return()
       }    
- 
+
       myPrtcpntView <- prtcpntView$val
       
-      if (myFacet2 != "none") {
-        if (myFacet != "none") {
+      if (facet2Type != "none") {
+        if (facetType != "none") {
           dt_len <- uniqueN(plotData[, myFacet2, with=FALSE])
           dt_list <- unique(plotData[, myFacet2, with=FALSE]) 
         } else {
@@ -46,7 +50,6 @@
       dates <- getDates(metadata.file)
 
       createUI <- function(id, data, facets) {
-
         if (myPrtcpntView == TRUE) {
           countFun <- function(x){ length(unique(x)) }
           colName <- "# Participants: "
@@ -58,6 +61,8 @@
         if (any(colnames(data) %in% "FACET")) {
           data <- reshape(aggregate(PARTICIPANT_ID ~ FACET + GROUPS, data, FUN = countFun ),
                           timevar = "FACET", idvar = "GROUPS", v.names = "PARTICIPANT_ID", direction = "wide")
+
+
           colnames(data)[1] <- "Line"
           colnames(data) <- gsub("PARTICIPANT_ID.", colName, colnames(data))
           #give totals
@@ -116,7 +121,7 @@
             data <- plotData
             facets <- c()
           }
-          createUI(id, data, facets)
+	   createUI(id, data, facets)
         })
       })
     })
