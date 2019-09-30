@@ -46,7 +46,7 @@ timelineData <- function(mySubset, myTimeframe1, myTimeframe2, data, longitudina
     }
   }
 
-  longitudinalText <<- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
+  #longitudinalText <<- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
 
   data
 }
