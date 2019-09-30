@@ -31,17 +31,30 @@ validateAndDebounceFacet <- debounce(reactive({
         }
       }
     }
-  } else if (facetType == "direct") {
-    if (is.null(myFacet)) { 
-      if (is.null(selectedFacet())) {
-	return() 
+  }else if (facetType == "direct") {
+    if (is.null(myFacet)) {
+      if (is.null(properties)) {
+        myFacet = selectedFacet()
       } else {
- 	myFacet <- selectedFacet()
+        myFacet = properties$selected[properties$input == "facetInfo$group"]
       }
     }
   } else {
     myFacet <- "none"
   }
+
+
+#else if (facetType == "direct") {
+    #if (is.null(myFacet)) { 
+      #if (is.null(selectedFacet())) {
+	#return() 
+      #} else {
+ 	#myFacet <- selectedFacet()
+      #}
+    #}
+  #} else {
+    #myFacet <- "none"
+  #}
 
   message(Sys.time(), " validated facet1 inputs:")
   message("input$facetType: ", facetType)
@@ -124,7 +137,7 @@ facet1 <- reactive({
         outData <- unique(outData)
       }
 
-  facetText <<- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+  #facetText <<- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
   unique(outData)
 })
 
@@ -159,18 +172,33 @@ validateAndDebounceFacet2 <- debounce(reactive({
         }
       }
     }
-  } else if (facet2Type == "direct") {
-    if (is.null(myFacet2)) { 
-      if (is.null(selectedFacet2())) {
-        return() 
+  }else if (facet2Type == "direct") {
+    if (is.null(myFacet2)) {
+      if (is.null(properties)) {
+        myFacet2 = selectedFacet2()
       } else {
-        myFacet2 <- selectedFacet2()
+        myFacet2 = properties$selected[properties$input == "facet2Info$group"]
       }
     }
   } else {
     myFacet2 <- "none"
   }
-  
+
+
+################################################### teste for facet2 ######################
+  #} else if (facet2Type == "direct") {
+   # if (is.null(myFacet2)) { 
+    #  if (is.null(selectedFacet2())) {
+     #   return() 
+     # } else {
+      #  myFacet2 <- selectedFacet2()
+      #}
+    #}
+ # } else {
+  #  myFacet2 <- "none"
+  #}
+
+
   message(Sys.time(), " validated facet2 inputs:")
   message("input$facet2Type: ", facet2Type)
   message("myFacet2: ", myFacet2)
@@ -250,7 +278,7 @@ facet2 <- reactive({
           outData <- unique(outData)
       }
 
-  facet2Text <<- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
+  #facet2Text <<- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
   unique(outData)
 })
 
