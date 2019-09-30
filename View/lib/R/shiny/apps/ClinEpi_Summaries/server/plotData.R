@@ -318,13 +318,13 @@ tableData <- reactive({
                       # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
 
-message("What are the saved parameterssssssss: ", text)
+#message("What are the saved parameterssssssss: ", text)
 
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
 
 
-message("what is the propURLLLLLLLLLLLL: ", propUrl)
+#message("what is the propURLLLLLLLLLLLL: ", propUrl)
 
   aggKey <- aggKey()
 
