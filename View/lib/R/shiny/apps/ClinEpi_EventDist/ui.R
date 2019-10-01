@@ -22,6 +22,12 @@ shinyUI(
    tags$style(type = 'text/css', ".btn, .btn:hover {background: #ffffff; text-align:left; border-color: #cccccc; padding: 6px 12px;}"),
    tags$head(includeScript("../../functions/jstree.js")),
    tags$head(tags$style(
+     HTML("div#ss-connect-dialog {width: 60em; bottom: 15em; left: 0;}"),
+     HTML("div.modal-backdrop {display:none;}"),
+     HTML("div#shiny-disconnected-overlay {display:none;}"),
+     HTML("div#ss-overlay {z-index: 1;}"),
+     HTML("a#ss-reload-link {visibility:hidden;}"),
+     HTML("a#ss-reload-link::after {visibility:visible;content: 'Click to Reload ONLY if there was a Timeout. Otherwise please contact us with your selections.';}"),
      HTML(".js-irs-0 .irs-line-left {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),
      HTML(".js-irs-0 .irs-line-right {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),
      HTML(".js-irs-0 .irs-line-mid {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%); border: 0px;}"),
