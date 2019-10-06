@@ -17,7 +17,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$timeOut, { 
     message("Session (", session$token, ") timed out at: ", Sys.time())
     showModal(modalDialog(
-      title = "Timeout",
+      title = NULL,
       paste("Session timeout due to", input$timeOut, "inactivity -", Sys.time()),
       footer = NULL
     ))
