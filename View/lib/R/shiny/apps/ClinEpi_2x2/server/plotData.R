@@ -206,6 +206,7 @@ plotData <- reactive({
                        #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                       )
 
+         message("\n", Sys.time(), " ClinEpi_2x2/server/plotData.R: plotData: writing properties in propUrl:", propUrl, "\n", text)
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
         aggKey <- aggKey()

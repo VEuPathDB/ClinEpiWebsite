@@ -319,7 +319,7 @@ tableData <- reactive({
                    )
 
 #message("What are the saved parameterssssssss: ", text)
-
+        message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writing properties in propUrl:", propUrl, "\n", text)
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
 
