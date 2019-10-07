@@ -97,16 +97,19 @@ reactiveDataFetcher = reactive({
 
    if (is.null(propUrl)) {
       propUrl <<- getPropertiesUrl(session)
+      message("\n", Sys.time(), " functions/reactive_data_load.R: propUrl: ", propUrl)
       properties <<- suppressWarnings(try(fread(propUrl)))
       if (length(properties) > 0) {
+        message(Sys.time(), " functions/reactive_data_load.R: reading properties...")
         if (grepl("Error", properties)) {
+	  message(Sys.time(), " functions/reactive_data_load.R: Error! properties will not be used")
           properties <<- NULL
-        }
+        } else {message(Sys.time(), " functions/reactive_data_load.R: properties read:\n", properties)}
       } else {
+        message(Sys.time(), " functions/reactive_data_load.R: no properties! new analysis")
         properties <<- NULL
       } 
     }
-    message(Sys.time(), " propUrl: ", propUrl)
 
     if (is.null(attributes.file)) {
 

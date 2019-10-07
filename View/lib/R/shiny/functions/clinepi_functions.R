@@ -6,7 +6,7 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
     if (sourceId == timeSourceId) { timeSourceId <- "none" }
   }
 
-  message(Sys.time(), " Running query ", queryName, " with sourceId ", sourceId, " and timeSourceId ", timeSourceId, " for dataset ", tblPrefix)
+  message(Sys.time(), "functions/clinepi_functions.R:  Running query: ", queryName, " with sourceId: ", sourceId, " and timeSourceId: ", timeSourceId, " for dataset: ", tblPrefix)
 
   if (queryName == "Participant") {
     if (timeSourceId == "none") {

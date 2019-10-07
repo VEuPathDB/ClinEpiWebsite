@@ -17,16 +17,19 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
   ns <- session$ns
 
   propUrl <<- getPropertiesUrl(session)
-  properties <- suppressWarnings(try(fread(propUrl)))
- 
+  message("\n", Sys.time(), " functions/timelineUI_Module.R: propUrl: ", propUrl)
+  properties <<- suppressWarnings(try(fread(propUrl)))
   if (length(properties) > 0) {
+    message(Sys.time(), " functions/timelineUI_Module.R: reading properties...")
     if (grepl("Error", properties)) {
-      properties <- NULL
-    }
+      message(Sys.time(), " functions/timelineUI_Module.R: Error! properties will not be used")
+      properties <<- NULL
+    } else {message(Sys.time(), " functions/timelineUI_Module.R: properties read:\n", properties)}
   } else {
-    properties <- NULL
-  }
-
+    message(Sys.time(), " functions/timelineUI_Module.R: no properties! new analysis")
+    properties <<- NULL
+  } 
+ 
   dates <- getDates(metadata.file)$SOURCE_ID
   nums <- getNums(metadata.file)$SOURCE_ID
   strings <- getStrings(metadata.file)$SOURCE_ID
