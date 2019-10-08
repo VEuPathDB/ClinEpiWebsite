@@ -30,7 +30,6 @@ if (is.null(myX)) {
    }
 
 
-
   message(Sys.time(), " validated xaxis inputs:")
   message("myX: ", myX)
   list(myX = myX,
@@ -39,7 +38,11 @@ if (is.null(myX)) {
        groups_stp3 = group_stp3,
        groups_stp4 = group_stp4 
 )
+
+  message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: validateAndDebounceAxes, validated xaxis inputs: myX: -", myX, "-")
+  list(myX = myX)
 }), 1000)
+
 
 xQuery <- reactive({
   if (is.null(validateAndDebounceAxes())) {
@@ -48,7 +51,7 @@ xQuery <- reactive({
   myInputs <- validateAndDebounceAxes()
   myX <- myInputs$myX
 
-  message(Sys.time(), " Initiating query for xaxis data")
+  message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: xQuery:  Initiating query for xaxis data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
@@ -73,6 +76,8 @@ xAxis <- reactive({
   if (is.null(validateAndDebounceTimeline())) {
     return()
   }
+
+  message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R:: xAxis started") 
   myInputs <- validateAndDebounceTimeline()
   #myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
   #myX <- myInputs$myX
@@ -146,7 +151,7 @@ plotData <- reactive({
 
 #message("What are the saved parameterssssssss: ", text)
 
-
+      message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: plotData: writing properties in propUrl:", propUrl, "\n", text)
       PUT(propUrl, body = "")
       PUT(propUrl, body = text)
 

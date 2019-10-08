@@ -1,0 +1,35 @@
+/* disconnect css */
+
+
+div#ss-connect-dialog {
+  width: 28em;;  
+  bottom: 17em; 
+/*  left: 0; */
+}
+
+div#shiny-disconnected-overlay, div.modal-backdrop  {
+ /* display:none; */
+ /* background-color: lightgrey;*/
+  opacity: 0;
+}
+/*
+div#ss-overlay {
+  z-index: 1;
+}
+*/
+div.ss-gray-out {
+  opacity: 0.2;
+}
+
+/*
+a#ss-reload-link {
+  visibility: hidden;
+}
+
+a#ss-reload-link::after {
+  visibility: visible;
+  content: 'Please contact us with your selections.';
+  position: relative;
+  right: 3em;
+}
+*/

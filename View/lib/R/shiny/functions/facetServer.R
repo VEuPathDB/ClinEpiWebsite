@@ -4,6 +4,7 @@ validateAndDebounceFacet <- debounce(reactive({
   }
   
   facetType <- input$facetType
+  message("\n", Sys.time(), " functions/facetServer.R: validateAndDebounceFacet: facetType is: -", facetType, "-")
   test2 <- input$`facet-group`
   test2 <- input$`facet-group_stp1`
   test2 <- input$`facet-group_stp2`
@@ -37,6 +38,7 @@ validateAndDebounceFacet <- debounce(reactive({
         myFacet = selectedFacet()
       } else {
         myFacet = properties$selected[properties$input == "facetInfo$group"]
+        message(Sys.time(), " functions/facetServer.R: validateAndDebounceFacet: facetType direct, myFacet (read from properties) is: -", myFacet, "-")
       }
     }
   } else {
@@ -56,7 +58,7 @@ validateAndDebounceFacet <- debounce(reactive({
     #myFacet <- "none"
   #}
 
-  message(Sys.time(), " validated facet1 inputs:")
+  message(Sys.time(), " functions/facetServer.R: validateAndDebounceFacet: finished validation, validated facet inputs:")
   message("input$facetType: ", facetType)
   message("myFacet: ", myFacet)
   message("facet_stp1: ", facet_stp1)
@@ -77,17 +79,18 @@ facet1Query <- reactive({
   }
   myInputs <- validateAndDebounceFacet()
   myFacet <- myInputs$myFacet
-
+  message("\n", Sys.time(), " functions/facetServer.R: facet1Query: myFacet is: -", myFacet, "-")
   if (myFacet != "none") {
-    message(Sys.time(), " Initiating query for facet data")
+    message(Sys.time(), " (if not none) Initiating query for facet data")
   } else {
     return()
   }
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
-  if (is.null(data)) { return() }
-
+  if (is.null(data)) { message(Sys.time(), " functions/facetServer.R: facet1Query: query returned null")
+                       return() }
+  message(Sys.time(), " functions/facetServer.R: facet1Query: returning data")
   data
 })
 
@@ -96,7 +99,7 @@ facet1 <- reactive({
     return()
   }
   myInputs <- c(validateAndDebounceFacet(), validateAndDebounceTimeline())
-  
+  message(Sys.time(), " functions/facetServer.R: facet1 started") 
   facetType <- myInputs$facetType
   myFacet <- myInputs$myFacet
   facet_stp1 <- myInputs$facet_stp1
@@ -147,6 +150,7 @@ validateAndDebounceFacet2 <- debounce(reactive({
   }
   
   facet2Type <- input$facet2Type
+  message("\n", Sys.time(), " functions/facetServer.R: validatendDebounceFacet2:: facet2Type is: -", facet2Type, "-")
   test <- input$`facet2-group`
   test <- input$`facet2-group_stp1`
   test <- input$`facet2-group_stp2`
@@ -178,6 +182,7 @@ validateAndDebounceFacet2 <- debounce(reactive({
         myFacet2 = selectedFacet2()
       } else {
         myFacet2 = properties$selected[properties$input == "facet2Info$group"]
+        message(Sys.time(), " functions/facetServer.R: validateAndDebounceFacet2: facet2Type direct, myFacet2 (read from properties) is: -", myFacet2, "-")
       }
     }
   } else {
@@ -198,8 +203,7 @@ validateAndDebounceFacet2 <- debounce(reactive({
   #  myFacet2 <- "none"
   #}
 
-
-  message(Sys.time(), " validated facet2 inputs:")
+  message(Sys.time(), " functions/facetServer.R: validateAndDebounceFacet2: finished validation, validated facet2 inputs:")
   message("input$facet2Type: ", facet2Type)
   message("myFacet2: ", myFacet2)
   message("facet2_stp1: ", facet2_stp1)      
@@ -220,17 +224,19 @@ facet2Query <- reactive({
   }
   myInputs <- validateAndDebounceFacet2()
   myFacet2 <- myInputs$myFacet2
+  message("\n", Sys.time(), " functions/facetServer.R: facet2Query: myFacet2 is: -", myFacet2, "-")
 
   if (myFacet2 != "none") {
-    message(Sys.time(), " Initiating query for facet2 data")
+    message(Sys.time(), "(if not none) Initiating query for facet2 data")
   } else {
     return()
   }
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
-  if (is.null(data)) { return() }
-
+  if (is.null(data)) { message(Sys.time(), " functions/facetServer.R: facet2Query: query returned null")
+                       return() }
+  message(Sys.time(), " functions/facetServer.R: facet2Query: returning data")
   data
 })
 
@@ -239,7 +245,7 @@ facet2 <- reactive({
     return()
   }
   myInputs <- c(validateAndDebounceFacet2(), validateAndDebounceTimeline())
-
+  message(Sys.time(), " functions/facetServer.R: facet2 started") 
   facet2Type <- myInputs$facet2Type
   myFacet2 <- myInputs$myFacet2
   facet2_stp1 <- myInputs$facet2_stp1
