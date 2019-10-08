@@ -4,20 +4,41 @@ source("../../functions/facetServer.R", local = TRUE)
 
 validateAndDebounceAxes <- debounce(reactive({
   #hack to force reactivity. idk maybe its a shiny bug, but reactlog cant find the module inputs for this specific case without referencing directly
-  test2 <- input$`group-group`
-  myX <- xaxisInfo()$group
 
-  if (is.null(myX)) {
-    if (is.null(selectedGroup())) {
-      return()
-    } else {
-      myX <- selectedGroup()
-    }
-  }
+  test2 <- input$`group-group`
+
+  myX <- xaxisInfo()$group
+  group_stp1 <- xaxisInfo()$group_stp1
+  group_stp2 <- xaxisInfo()$group_stp2
+  group_stp3 <- xaxisInfo()$group_stp3
+  group_stp4 <- xaxisInfo()$group_stp4
+
+
+##### Keep Variable Label and Source_ID consistent ######################
+#########################################################################
+
+if (is.null(myX)) {
+    if (is.null(properties)) {
+       if (is.null(selectedGroup())) {
+          return()
+       }else{
+       myX <- selectedGroup()
+       }
+     }else {
+           myX = properties$selected[properties$input == "xaxisInfo()$group"]
+           }
+   }
+
+
 
   message(Sys.time(), " validated xaxis inputs:")
   message("myX: ", myX)
-  list(myX = myX)
+  list(myX = myX,
+       groups_stp1 = group_stp1, 
+       groups_stp2 = group_stp2,
+       groups_stp3 = group_stp3,
+       groups_stp4 = group_stp4 
+)
 }), 1000)
 
 xQuery <- reactive({
@@ -36,11 +57,11 @@ xQuery <- reactive({
   myCols <- c(aggKey(), myX)
   outData <- data[, myCols, with = FALSE]
 
-  if (myX %in% strings$SOURCE_ID) {
-    if (any(grepl("|", outData[[myX]], fixed=TRUE))) {
-      outData <- separate_rows(outData, myX, sep = "[|]+")
-    }
-  }
+  #if (myX %in% strings$SOURCE_ID) {
+  #  if (any(grepl("|", outData[[myX]], fixed=TRUE))) {
+  #    outData <- separate_rows(outData, myX, sep = "[|]+")
+  #  }
+  #}
   
   unique(outData)
 })
@@ -53,7 +74,9 @@ xAxis <- reactive({
     return()
   }
   myInputs <- validateAndDebounceTimeline()
-  
+  #myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
+  #myX <- myInputs$myX
+
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
@@ -69,12 +92,50 @@ plotData <- reactive({
       if (is.null(xAxis())) {
         return()
       }
+
+   
+   ########## copy all things and paste here to resolve propUrl
+   ############################################################
+   
+     myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
+
+     mySubset <- myInputs$mySubset
+     myTimeframe1 <- myInputs$myTimeframe1
+     myTimeframe2 <- myInputs$myTimeframe2
+
+     myFacet <- facetInfo()$group
+     facet_stp1 <- facetInfo()$group_stp1
+     facet_stp2 <- facetInfo()$group_stp2
+     facet_stp3 <- facetInfo()$group_stp3
+     facet_stp4 <- facetInfo()$group_stp4
+     
+     myFacet2 <- facet2Info()$group
+     facet2_stp1 <- facet2Info()$group_stp1
+     facet2_stp3 <- facet2Info()$group_stp3
+     facet2_stp2 <- facet2Info()$group_stp2
+     facet2_stp4 <- facet2Info()$group_stp4
+
+     myX <- myInputs$myX
+     groups_stp1 <- myInputs$groups_stp1
+     groups_stp3 <- myInputs$groups_stp3
+     groups_stp2 <- myInputs$groups_stp2
+     groups_stp4 <- myInputs$groups_stp4
+     #facet2Type <- myInputs$facet2Type
+
+
+      groupsText <- groupText("xaxisInfo", myX, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
+      longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
+      facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+      facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
+
+
   
       #first thing is to save properties 
       text <- paste0("input\tselected\n",
                      longitudinalText,
                      facetText,
                      facet2Text,
+		     groupsText,
                      "xaxisInfo()$group\t", validateAndDebounceAxes()$myX, "\n",
                      "input$facetType\t", input$facetType, "\n",
                      "input$facet2Type\t", input$facet2Type, "\n",
@@ -82,6 +143,9 @@ plotData <- reactive({
                      #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                      #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
+
+#message("What are the saved parameterssssssss: ", text)
+
 
       PUT(propUrl, body = "")
       PUT(propUrl, body = text)
