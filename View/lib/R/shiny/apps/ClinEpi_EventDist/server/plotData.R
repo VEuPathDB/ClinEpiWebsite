@@ -60,11 +60,11 @@ xQuery <- reactive({
   myCols <- c(aggKey(), myX)
   outData <- data[, myCols, with = FALSE]
 
-  #if (myX %in% strings$SOURCE_ID) {
-  #  if (any(grepl("|", outData[[myX]], fixed=TRUE))) {
-  #    outData <- separate_rows(outData, myX, sep = "[|]+")
-  #  }
-  #}
+  if (myX %in% strings$SOURCE_ID) {
+    if (any(grepl("|", outData[[myX]], fixed=TRUE))) {
+      outData <- separate_rows(outData, myX, sep = "[|]+")
+    }
+  }
   
   unique(outData)
 })
