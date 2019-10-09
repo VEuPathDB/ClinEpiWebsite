@@ -23,7 +23,7 @@ function myCheckForTimeout() {
   if(document.body.contains(document.getElementById('shiny-modal-wrapper'))){
     console.log('Timeout!');
     document.getElementById('ss-connect-dialog').style.fontSize = '140%';
-    document.getElementById('ss-reload-link').textContent = 'Inactivity timeout, you may reload the analysis.';
+    document.getElementById('ss-reload-link').textContent = 'Inactivity timeout; click to reload the analysis.';
     clearInterval(myShinyAppsVar);
   } else {
       //console.log('NO Timeout!');
@@ -31,7 +31,7 @@ function myCheckForTimeout() {
         clearInterval(myShinyAppsVar);
 	document.getElementById('ss-reload-link').style.display = 'none';
         var a = document.createElement('a');
-        var linkText = document.createTextNode("Server error, please contact us with your selections.");
+        var linkText = document.createTextNode("Server error; please contact us with your selections.");
         a.appendChild(linkText);
         a.target = "_blank";
 	a.href = "/a/app/contact-us";
