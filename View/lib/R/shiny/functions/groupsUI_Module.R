@@ -44,15 +44,19 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   force(selected())
 
   propUrl <<- getPropertiesUrl(session) 
-  properties <- suppressWarnings(try(fread(propUrl)))
-
+  message("\n", Sys.time(), " functions/groupsUI_Module.R: propUrl: ", propUrl)
+  properties <<- suppressWarnings(try(fread(propUrl)))
   if (length(properties) > 0) {
+    message(Sys.time(), " functions/groupsUI_Module.R: reading properties...")
     if (grepl("Error", properties)) {
-      properties <- NULL
-    }
+      message(Sys.time(), " functions/groupsUI_Module.R: Error! properties will not be used")
+      properties <<- NULL
+    } else {message(Sys.time(), " functions/groupsUI_Module.R: properties read:\n", properties)}
   } else {
-    properties <- NULL
-  }
+    message(Sys.time(), " functions/groupsUI_Module.R: no properties! new analysis")
+    properties <<- NULL
+  } 
+
 
   groupRange <- reactiveValues()
   getMyGroups <- reactiveValues() 
