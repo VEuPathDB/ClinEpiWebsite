@@ -5,6 +5,7 @@ import wrapStoreModules from './wrapStoreModules';
 import { wrapRoutes } from './routes';
 import { reduxMiddleware } from 'ebrc-client/App/DataRestriction/DataRestrictionUtils'
 
+
 initialize({
   componentWrappers,
   wrapStoreModules,
