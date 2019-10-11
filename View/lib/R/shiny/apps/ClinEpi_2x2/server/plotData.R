@@ -10,9 +10,10 @@ validateAndDebounceAttr <- debounce(reactive({
   test2 <- input$`attr-group_stp4`
   myAttr <- attrInfo()$group
   attr_stp1 <- attrInfo()$group_stp1
+  attr_stp2 <- attrInfo()$group_stp2
   attr_stp3 <- attrInfo()$group_stp3
   attr_stp4 <- attrInfo()$group_stp4
-  attr_stp2 <- attrInfo()$group_stp2
+
   
   if (is.null(attr_stp1)) {
     return()
@@ -29,6 +30,7 @@ validateAndDebounceAttr <- debounce(reactive({
       }
     }
   }
+
 
   message(Sys.time(), " validated attr inputs:")
   message("myAttr: ", myAttr)
@@ -84,7 +86,7 @@ attr <- reactive({
   observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
   colnames(attrData) <- c(aggKey, "Attribute")
         
-  attrText <<- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+  #attrText <<- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
   unique(attrData)
 })
 
@@ -150,6 +152,7 @@ out <- reactive({
   out_stp2 <- myInputs$out_stp2
   out_stp3 <- myInputs$out_stp3
   out_stp4 <- myInputs$out_stp4
+
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
@@ -170,29 +173,77 @@ out <- reactive({
   observations <- metadata.file$SOURCE_ID[metadata.file$CATEGORY == "Observation"]
   colnames(outData) <- c(aggKey, "Outcome")
   
-  outText <<- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)
+  #outText <<- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)
   unique(outData)
 })
 
 
 plotData <- reactive({
-  if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet()) | is.null(validateAndDebounceFacet())) { return() }
-  myInputs <- c(validateAndDebounceAttr(), validateAndDebounceOut(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+  if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet())| is.null(validateAndDebounceTimeline()) | is.null(validateAndDebounceFacet())) { return() }
+  myInputs <- c(validateAndDebounceAttr(), validateAndDebounceOut(), validateAndDebounceFacet(), validateAndDebounceFacet2(), validateAndDebounceTimeline())
   
-	facetType <- myInputs$facetType
-	facet2Type <- myInputs$facet2Type
+  facetType <- myInputs$facetType
+  facet2Type <- myInputs$facet2Type
+  #myFacet <- myInputs$myFacet
+  #myFacet2 <- myInputs$myFacet2
+  #myOut <- myInputs$myOut
+  #myAttr <- myInputs$myAttr
+  #attr_stp1 <- myInputs$attr_stp1
+  #attr_stp2 <- myInputs$attr_stp2
+  #attr_stp3 <- myInputs$attr_stp3
+  #attr_stp4 <- myInputs$attr_stp4
+  #out_stp1 <- myInputs$out_stp1
+  #out_stp2 <- myInputs$out_stp2
+  #out_stp3 <- myInputs$out_stp3
+  #out_stp4 <- myInputs$out_stp4
+###################################################### new codes to add ###############################
+#######################################################################################################
+
+  mySubset <- myInputs$mySubset
+  myTimeframe1 <- myInputs$myTimeframe1
+  myTimeframe2 <- myInputs$myTimeframe2
+
+
   myFacet <- myInputs$myFacet
+  facet_stp1 <- myInputs$facet_stp1
+  facet_stp3 <- myInputs$facet_stp3
+  facet_stp2 <- myInputs$facet_stp2
+  facet_stp4 <- myInputs$facet_stp4
+
+
+  #myFacet <- facetInfo()$group
+  #facet_stp1 <- facetInfo()$group_stp1
+  #facet_stp2 <- facetInfo()$group_stp2
+  #facet_stp3 <- facetInfo()$group_stp3
+  #facet_stp4 <- facetInfo()$group_stp4
+
   myFacet2 <- myInputs$myFacet2
-  myOut <- myInputs$myOut
-  myAttr <- myInputs$myAttr
-  attr_stp1 <- myInputs$attr_stp1
-  attr_stp2 <- myInputs$attr_stp2
-  attr_stp3 <- myInputs$attr_stp3
-  attr_stp4 <- myInputs$attr_stp4
-  out_stp1 <- myInputs$out_stp1
-  out_stp2 <- myInputs$out_stp2
-  out_stp3 <- myInputs$out_stp3
-  out_stp4 <- myInputs$out_stp4
+  facet2_stp1 <- myInputs$facet2_stp1
+  facet2_stp2 <- myInputs$facet2_stp2
+  facet2_stp3 <- myInputs$facet2_stp3
+  facet2_stp4 <- myInputs$facet2_stp4
+
+  myAttr <- attrInfo()$group
+  attr_stp1 <- attrInfo()$group_stp1
+  attr_stp2 <- attrInfo()$group_stp2
+  attr_stp3 <- attrInfo()$group_stp3
+  attr_stp4 <- attrInfo()$group_stp4
+
+
+  myOut <- outInfo()$group
+  out_stp1 <- outInfo()$group_stp1
+  out_stp3 <- outInfo()$group_stp3
+  out_stp4 <- outInfo()$group_stp4
+  out_stp2 <- outInfo()$group_stp2
+
+
+
+  longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
+  facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+  facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
+  attrText <- groupText("attrInfo", myAttr, attr_stp1, attr_stp2, attr_stp3, attr_stp4)
+  outText <- groupText("outInfo", myOut, out_stp1, out_stp2, out_stp3, out_stp4)
+   
 
         text <- paste0("input\tselected\n",
                        longitudinalText,
@@ -209,6 +260,13 @@ plotData <- reactive({
          message("\n", Sys.time(), " ClinEpi_2x2/server/plotData.R: plotData: writing properties in propUrl:", propUrl, "\n", text)
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
+
+
+
+#message("What are the saved parameterssssssss: ", text)
+
+
+
         aggKey <- aggKey()
         attrData <- attr()
 	if (is.null(attrData)) { return() }
