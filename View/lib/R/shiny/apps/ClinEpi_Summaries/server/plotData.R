@@ -209,11 +209,24 @@ axes <- reactive({
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
   
+  if (length(yaxis_stp2) > 1) {
+    yaxisStp2Text <<- ""
+    for (i in seq(length(yaxis_stp2))) {
+      yaxisStp2Text <<- paste0(yaxisStp2Text,
+      "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
+    }
+  } else {
+    yaxisStp2Text <<- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
+  }
 
   data <- axesQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  if (myY == hlongitudinal1) { myY <- longitudinal1 }
+  if (!is.null(hlongitudinal1)) {
+    if (myY == hlongitudinal1) { 
+      myY <- longitudinal1
+    }
+  }
   
   aggKey <- aggKey()
   if (contLongitudinal) {
@@ -249,9 +262,6 @@ tableData <- reactive({
     return()
   }
   myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline(), validateAndDebounceGroup(), validateAndDebounceFacet(), validateAndDebounceFacet2())
-
-####### copy all things and paste here 
-
   myY <- myInputs$myY
   yaxis_stp1 <- myInputs$yaxis_stp1
   yaxis_stp2 <- myInputs$yaxis_stp2
@@ -270,37 +280,29 @@ tableData <- reactive({
   groups_stp4 <- myInputs$groups_stp4
   facet2Type <- myInputs$facet2Type
 
+  mySubset <- myInputs$mySubset
+  myTimeframe1 <- myInputs$myTimeframe1
+  myTimeframe2 <- myInputs$myTimeframe2
+
   myFacet <- myInputs$myFacet
   facet_stp1 <- myInputs$facet_stp1
   facet_stp3 <- myInputs$facet_stp3
   facet_stp2 <- myInputs$facet_stp2
   facet_stp4 <- myInputs$facet_stp4
 
+  myFacet2 <- myInputs$myFacet2
+  facet2_stp1 <- myInputs$facet2_stp1
+  facet2_stp3 <- myInputs$facet2_stp3
+  facet2_stp2 <- myInputs$facet2_stp2
+  facet2_stp4 <- myInputs$facet2_stp4
 
-  myFacet2 <- facet2Info()$group
-  facet2_stp1 <- facet2Info()$group_stp1
-  facet2_stp3 <- facet2Info()$group_stp3
-  facet2_stp2 <- facet2Info()$group_stp2
-  facet2_stp4 <- facet2Info()$group_stp4
 
-
-  #groupsText <<- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
   groupsText <- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
-  facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)  
-  facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
   longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
+  facetText <- groupText("facetInfo", myFacet, facet_stp1, facet_stp2, facet_stp3, facet_stp4)
+  facet2Text <- groupText("facet2Info", myFacet2, facet2_stp1, facet2_stp2, facet2_stp3, facet2_stp4)
 
-  if (length(yaxis_stp2) > 1) {
-    yaxisStp2Text <- ""
-    for (i in seq(length(yaxis_stp2))) {
-      yaxisStp2Text <- paste0(yaxisStp2Text,
-      "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
-    }
-  } else {
-    yaxisStp2Text <- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
-  }
-
-          text <- paste0("input\tselected\n",
+        text <- paste0("input\tselected\n",
                        longitudinalText,
                        facetText,
                        facet2Text,
@@ -317,14 +319,11 @@ tableData <- reactive({
                       # "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                       # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
+#message("our saved params: ", text)
+message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writing properties in propUrl:", propUrl, "\n", text)  
 
-#message("What are the saved parameterssssssss: ", text)
-        message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writing properties in propUrl:", propUrl, "\n", text)
         PUT(propUrl, body = "")
         PUT(propUrl, body = text)
-
-
-#message("what is the propURLLLLLLLLLLLL: ", propUrl)
 
   aggKey <- aggKey()
 
@@ -340,7 +339,6 @@ tableData <- reactive({
   } else {
     tempData$GROUPS <- "All"
   }
-
 
 
   facetData <- facet1()
