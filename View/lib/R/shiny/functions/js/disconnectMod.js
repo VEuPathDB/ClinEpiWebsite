@@ -5,7 +5,7 @@ var myShinyAppsVar = setInterval(myCheckForTimeout, 1000);
 var myStyleApps = document.createElement('style');
 myStyleApps.innerHTML = `
 div#ss-connect-dialog {
-  width: 30em;
+  width: 28em;
   top: 10em;
   height: 6em;
   border: 2px solid blue;
@@ -34,20 +34,17 @@ document.head.appendChild(myStyleApps);
 function myCheckForTimeout() {
   if(document.body.contains(document.getElementById('shiny-modal-wrapper'))){
     console.log('Timeout!');
-    //document.getElementById('ss-connect-dialog').style.fontSize = '140%';
-    //document.getElementById('ss-reload-link').textContent = 'Timeout due to inactivity. Reload the analysis.';
-    document.querySelector('#ss-connect-dialog label').textContent = 'Timeout due to inactivity.';
-    document.getElementById('ss-reload-link').textContent = 'Reload the analysis.';
+    document.querySelector('#ss-connect-dialog label').textContent = 'Timeout due to 15mn of inactivity';
+    document.getElementById('ss-reload-link').textContent = 'Reload the analysis';
     clearInterval(myShinyAppsVar);
   } else {
       //console.log('NO Timeout!');
       if(document.body.contains(document.getElementById('ss-reload-link'))){
         clearInterval(myShinyAppsVar);
 	document.getElementById('ss-reload-link').style.display = 'none';
-        document.querySelector('#ss-connect-dialog label').textContent = 'You hit a bug: open a new analysis and select different parameters.';
+        document.querySelector('#ss-connect-dialog label').textContent = 'You hit a bug: open a new analysis and select different parameters';
         var a = document.createElement('a');
-        //var linkText = document.createTextNode("You hit a bug: open a new analysis and select different parameters. Please report this bug.");
-        var linkText = document.createTextNode("Please report this bug.");
+        var linkText = document.createTextNode("Please report this bug");
         a.appendChild(linkText);
         a.target = "_blank";
 	a.href = "/a/app/contact-us";
