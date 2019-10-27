@@ -1,7 +1,11 @@
-// check if timeout exists upon disconnect, if so offer to reload
-// if not a timeout, a bug, we offer link to contact us
+// check if timeout exists upon disconnect, if so we offer to reload
+// if not a timeout, it is a bug and we offer link to contact us
 
-var myShinyAppsVar = setInterval(myCheckForTimeout, 1000);
+// TODO: get this global var from R
+var timeoutSeconds = 15;
+
+var myShinyAppsVar = setInterval(myCheckForTimeout, 1000, timeoutSeconds);
+
 var myStyleApps = document.createElement('style');
 myStyleApps.innerHTML = `
 div#ss-connect-dialog {
@@ -31,10 +35,10 @@ div#ss-overlay {
 `;
 document.head.appendChild(myStyleApps);
 
-function myCheckForTimeout() {
+function myCheckForTimeout(timeoutSeconds) {
   if(document.body.contains(document.getElementById('shiny-modal-wrapper'))){
     console.log('Timeout!');
-    document.querySelector('#ss-connect-dialog label').textContent = 'Timeout due to 15mn of inactivity';
+    document.querySelector('#ss-connect-dialog label').textContent = 'Timeout due to ' + timeoutSeconds  + 'mn of inactivity';
     document.getElementById('ss-reload-link').textContent = 'Reload the analysis';
     clearInterval(myShinyAppsVar);
   } else {
