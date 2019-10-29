@@ -208,7 +208,7 @@ axes <- reactive({
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
-  
+
   if (length(yaxis_stp2) > 1) {
     yaxisStp2Text <<- ""
     for (i in seq(length(yaxis_stp2))) {
@@ -221,7 +221,28 @@ axes <- reactive({
 
   data <- axesQuery()
   if (is.null(data)) { return() }
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
+  if (contLongitudinal) {
+    data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  }
+  
+  if (!contLongitudinal) {
+    if(length(mySubset)==0){
+	data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+	}else{
+		for(i in 1:length(mySubset)){
+               	      if(mySubset[i]=='Enrollment'){
+                      mySubset[i]='enrollment'
+		      }
+		  }
+             data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+      
+       }
+  }
+
+
+  #data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  
   if (!is.null(hlongitudinal1)) {
     if (myY == hlongitudinal1) { 
       myY <- longitudinal1
