@@ -8,14 +8,14 @@
 ]>
 
 
-<!-- PLEASE ENTER TUTORIALS, and OTHER RESOURCES, SORTED in the order you want to see them -->
+<!-- PLEASE ENTER RESOURCES first, and TUTORIALS after, SORTED in the order you want to see them -->
 
 
 
 <xmlAnswer>
 
  
-<!-- Resources 
+<!-- Resources  ***********IMPORTANT**************
      UPDATE the page ClinEpiWebsite/Site/webapp/wdkCustomization/jsp/questions/XmlQuestions.Tutorials.jsp
        with the new number of resources.  
 -->
@@ -32,7 +32,18 @@
        </table>
   </record>
 
-
+  <record>
+       <attribute name="title">Data submission guidelines for data providers</attribute>
+       <attribute name="description">Data submission guidelines for data providers</attribute>
+       <attribute name="uid">t2</attribute>
+       <table name="files">
+        <row>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB</attribute>
+           <attribute name="fileName.pdf">ClinEpiDBDatasetGuidelinesforDataProviders.pdf</attribute>
+           <attribute name="size">Oct 28, 2019</attribute>
+         </row>
+       </table>
+  </record>
 
 <!-- TUTORIALS :  order provided by ClinEPi Outreach
 -->
