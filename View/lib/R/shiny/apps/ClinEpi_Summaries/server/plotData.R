@@ -224,15 +224,20 @@ axes <- reactive({
 
   if (contLongitudinal) {
     data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  }else{
-    
-    for(i in 1:length(mySubset)){
-    	  if(mySubset[i]=='Enrollment'){
-    	  mySubset[i]='enrollment'
-  	  }
-    }
-    data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  }
   
+  if (!contLongitudinal) {
+    if(length(mySubset)==0){
+	data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+	}else{
+		for(i in 1:length(mySubset)){
+               	      if(mySubset[i]=='Enrollment'){
+                      mySubset[i]='enrollment'
+		      }
+		  }
+             data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+      
+       }
   }
 
 
