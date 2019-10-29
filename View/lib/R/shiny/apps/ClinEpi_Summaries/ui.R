@@ -5,11 +5,11 @@ shinyUI(
    useShinyjs(),
    extendShinyjs(text="shinyjs.virtualBodyClick = function(){$(\"body\").trigger(\"click\")}", functions=c("virtualBodyClick")),
    theme = "cerulean.css",
-   tags$style(type="text/css",
-              ".shiny-output-error { visibility: hidden; }",
-              ".shiny-output-error:before { visibility: hidden; }",
-              ".dataTable {border: none;}"
-   ),
+ ##  tags$style(type="text/css",
+ ##             ".shiny-output-error { visibility: hidden; }",
+ ##             ".shiny-output-error:before { visibility: hidden; }",
+ ##             ".dataTable {border: none;}"
+ ##  ),
    tags$script(inactivity),
    tags$style(type = 'text/css', ".btn-default{width: 100%;}"),
    tags$style(type = 'text/css', ".btn .caret{position: relative; color: black; border-top: 5px solid; border-left: 5px solid transparent; border-right: 5px solid transparent;}"),
