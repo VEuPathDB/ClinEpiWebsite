@@ -25,7 +25,7 @@
        <attribute name="uid">r1</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">IRB_data_sharing_guidance.pdf</attribute>
            <attribute name="size">Oct 08, 2018</attribute>
          </row>
@@ -55,7 +55,7 @@
        <attribute name="uid">t20</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">ClinEpiDBDatasetGuidelinesforDataProviders.pdf</attribute>
            <attribute name="size">Aug 28, 2019</attribute>
          </row>
@@ -69,7 +69,7 @@
        <attribute name="uid">t1</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">General_1_create_personal_account.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -82,7 +82,7 @@
        <attribute name="uid">t2</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">General_2_get_help_or_submit_comment.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -95,7 +95,7 @@
        <attribute name="uid">t3</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">MALED_1_data_set_page.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -108,7 +108,7 @@
        <attribute name="uid">t4</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,,AllClinEpiDBICEMR,Gates</attribute>
            <attribute name="fileName.pdf">MALED_2_explore_data.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -121,7 +121,7 @@
        <attribute name="uid">t5</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">MALED_3_related_observations.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -134,7 +134,7 @@
        <attribute name="uid">t6</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">ClinEpiDBTutorial1.pdf</attribute>
            <attribute name="size">Mar 18, 2018</attribute>
          </row>
@@ -147,7 +147,7 @@
        <attribute name="uid">t7</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">ClinEpiDBTutorial2ResultstableanddownloadsFINAL.pdf</attribute>
            <attribute name="size">Apr 11, 2018</attribute>
          </row>
@@ -160,7 +160,7 @@
        <attribute name="uid">t8</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">PRISM_dwelling.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -173,7 +173,7 @@
        <attribute name="uid">t9</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">PRISM_asymptomaticAge.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -186,7 +186,7 @@
        <attribute name="uid">t10</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">India_longitudinal_bednet.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -199,7 +199,7 @@
        <attribute name="uid">t11</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">GEMS_DiarrheaDuration.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -212,7 +212,7 @@
        <attribute name="uid">t12</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">GEMS_Anthropometry.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
@@ -225,7 +225,7 @@
        <attribute name="uid">t13</attribute>
        <table name="files">
         <row>
-           <attribute name="projects">ClinEpiDB,ICEMR,Gates</attribute>
+           <attribute name="projects">ClinEpiDB,AllClinEpiDB,ICEMR,Gates</attribute>
            <attribute name="fileName.pdf">GEMS_GiardiaMatched.pdf</attribute>
            <attribute name="size">Apr 26, 2019</attribute>
          </row>
