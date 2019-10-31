@@ -222,27 +222,11 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
 
-  if (contLongitudinal) {
-    data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  }
-  
-  if (!contLongitudinal) {
-    if(length(mySubset)==0){
-	data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-	}else{
-		for(i in 1:length(mySubset)){
-               	      if(mySubset[i]=='Enrollment'){
-                      mySubset[i]='enrollment'
-		      }
-		  }
-             data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-      
-       }
-  }
+ data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
+#write.table(data,file="/var/www/linxu123.clinepidb.org/project_home/ClinEpiWebsite/View/lib/R/shiny/apps/ClinEpi_Summaries/server/axes.txt",sep="\t",row.names = FALSE,quote = FALSE)
 
 
-  #data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  
   if (!is.null(hlongitudinal1)) {
     if (myY == hlongitudinal1) { 
       myY <- longitudinal1
