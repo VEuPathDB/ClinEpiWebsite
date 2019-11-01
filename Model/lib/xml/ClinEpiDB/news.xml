@@ -25,7 +25,7 @@
 <section>
         <h3><b>New Features in this Release</b></h3>
         <ul>
-		<li>We have included a new search across different variables types in the Search Wizard. To use it, click on a participant, household, observation or light-trap icon to launch the Search Wizard and you will see a search box at the top of the page. Now, clicking in here and typing in a variable name of your choice will identify any variables within the datsat that contain that text string. If there is a match, a drop-down menu will appear and click on the variable will jump to that step in the Search Wizard and allow you to view the variable details.
+		<li>We have included a new search across different variables types in the Search Wizard. To use it, click on a participant, household, observation or light-trap icon to launch the Search Wizard and you will see a search box at the top of the page. Now, clicking in this box and typing in text of your choice will identify any variables within the datset that contain that text string. If there is a match, a drop-down menu will appear, clicking on the variable will jump to that step in the Search Wizard and allow you to view the variable details. You can watch a brief video tutorial of this feature here: XXXXXXXXXXXXXX
 </li>        
 </ul>
       </section>
