@@ -72,6 +72,8 @@ groupQuery <- reactive({
   message(Sys.time(), " Initiating query for groups data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+
+
   if (is.null(data)) { return() }
 
   data
@@ -126,6 +128,8 @@ group <- reactive({
 	  outData$GROUPS <- "All"
 	}
   outData <- unique(outData)
+
+
 
   #groupsText <<- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
   unique(outData)
@@ -222,9 +226,16 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
 
- data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  myY<- myY
+  names<-c(colnames(data))
+  num<-grep(myY, colnames(data))
 
-#write.table(data,file="/var/www/linxu123.clinepidb.org/project_home/ClinEpiWebsite/View/lib/R/shiny/apps/ClinEpi_Summaries/server/axes.txt",sep="\t",row.names = FALSE,quote = FALSE)
+  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
+      message("the selected Y-axis Variable has no data, please select another one ")
+      }
+
+
 
 
   if (!is.null(hlongitudinal1)) {
@@ -426,7 +437,7 @@ plotData <- reactive({
     aggStr1 <- paste0(aggStr1, " + " , paste(aggKey, collapse = " + "))
     countFun <- function(x) {length(x)}
   }
-
+ 
   if (myY %in% strings$SOURCE_ID) {
     mergeData <- NULL
     if (yaxis_stp1 == "any" | prtcpntView$val == FALSE) {
@@ -452,7 +463,7 @@ plotData <- reactive({
         }
       }
     } else {
-        mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) })
+        mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) }) 
         mergeData <- transform(mergeData, "YAXIS" = ifelse(YAXIS == TRUE, 1, 0))
     }
     mergeData <- aggregate(as.formula(aggStr3), mergeData, sum)
