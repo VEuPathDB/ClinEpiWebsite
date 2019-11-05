@@ -15,17 +15,18 @@
     </record>
 -->
 <record>
-  <attribute name="headline">ClinEpiDB 10 Released</attribute>
+  <attribute name="headline">ClinEpiDB 10 includes new study variable search</attribute>
   <attribute name="date">5 Nov 2019 13:00</attribute>
   <attribute name="tag">clinepidb_10_release</attribute>
   <attribute name="category">release</attribute>
   <attribute name="item">
     <![CDATA[
-      <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 9!</i></div>
+      <div style="font-size:130%"><i>We are pleased to announce the release of ClinEpiDB 10!</i></div>
 <section>
         <h3><b>New Features in this Release</b></h3>
         <ul>
-		<li>We have included a new search across different variables types in the Search Wizard. To use it, click on a participant, household, observation or light-trap icon to launch the Search Wizard and you will see a search box at the top of the page. Now, clicking in this box and typing in text of your choice will identify any variables within the datset that contain that text string. If there is a match, a drop-down menu will appear, clicking on the variable will jump to that step in the Search Wizard and allow you to view the variable details. You can watch a brief video tutorial of this feature here: XXXXXXXXXXXXXX
+		<li>We have included a new search across different variables types in the Search Wizard. To use it, click on a participant, household, observation or light-trap icon to launch the Search Wizard and you will see a search box at the top of the page. Now, clicking in this box and typing in text of your choice will identify any variables within the datset that contain that text string. If there is a match, a drop-down menu will appear, clicking on the variable will jump to that step in the Search Wizard and allow you to view the variable details. You can watch a brief video tutorial of this feature on our YouTube page or below: 
+		<iframe width="560" height="315" src="https://www.youtube.com/embed/nU0cWYyf62E"></iframe>
 </li>        
 </ul>
       </section>
