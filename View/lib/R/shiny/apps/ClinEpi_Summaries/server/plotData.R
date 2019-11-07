@@ -351,7 +351,7 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
 
   groupData <- group()
   if (!is.null(groupData)) {
-    tempData <- merge(tempData, groupData, by = aggKey)
+    tempData <- merge(tempData, groupData, by = aggKey, allow.cartesian = TRUE) ###To fix MAl-ED Y:Cumulative.. X:Floor material##
   } else {
     tempData$GROUPS <- "All"
   }
