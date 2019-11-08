@@ -360,13 +360,13 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
   facetData <- facet1()
   if (!is.null(facetData)) {
 	  colnames(facetData) <- c(aggKey, "FACET")
-    tempData <- merge(tempData, facetData, by = aggKey)
+    tempData <- merge(tempData, facetData, by = aggKey, allow.cartesian = TRUE)
   }
 
   facetData2 <- facet2()
   if (!is.null(facetData2)) {
 	  colnames(facetData2) <- c(aggKey, "FACET2")
-    tempData <- merge(tempData, facetData2, by = aggKey)
+    tempData <- merge(tempData, facetData2, by = aggKey, allow.cartesian = TRUE)
   }
 
   unique(tempData)
