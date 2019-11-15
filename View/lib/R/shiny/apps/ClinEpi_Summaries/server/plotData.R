@@ -108,10 +108,6 @@ group <- reactive({
       }
 
 
-
-
-
-
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)
   aggKey <- aggKey()
