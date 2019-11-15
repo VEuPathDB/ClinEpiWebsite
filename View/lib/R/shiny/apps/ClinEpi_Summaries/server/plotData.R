@@ -99,9 +99,22 @@ group <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
-	nums <- getNums(metadata.file)
-	dates <- getDates(metadata.file)
-	aggKey <- aggKey()
+  myGroups<- myGroups
+  names<-c(colnames(data))
+  num<-grep(myGroups, colnames(data))
+
+  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
+      message("the selected X-axis variable has no data, please select another one ")
+      }
+
+
+
+
+
+
+  nums <- getNums(metadata.file)
+  dates <- getDates(metadata.file)
+  aggKey <- aggKey()
   if (groupsType == "direct") {
     myCols <- c(aggKey, myGroups)
     outData <- data[, myCols, with=FALSE]
@@ -232,10 +245,8 @@ axes <- reactive({
   num<-grep(myY, colnames(data))
 
   if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
-      message("the selected Y-axis Variable has no data, please select another one ")
+      message("the selected Y-axis variable has no data, please select another one ")
       }
-
-
 
 
   if (!is.null(hlongitudinal1)) {
