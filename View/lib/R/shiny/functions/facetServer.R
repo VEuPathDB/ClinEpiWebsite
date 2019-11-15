@@ -117,6 +117,18 @@ facet1 <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
+
+  myFacet<- myFacet
+  names<-c(colnames(data))
+  num<-grep(myFacet, colnames(data))
+
+  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
+      message("the selected facet1 variable has no data, please select another one ")
+      }
+
+
+
+
   if (facetType == "direct") {
         outData <- data
         if (myFacet %in% nums$SOURCE_ID | myFacet %in% dates$SOURCE_ID) {
@@ -262,6 +274,18 @@ facet2 <- reactive({
   data <- facet2Query()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
+
+  myFacet2<- myFacet2
+  names<-c(colnames(data))
+  num<-grep(myFacet2, colnames(data))
+
+  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
+      message("the selected facet2 variable has no data, please select another one ")
+      }
+
+
+
 
   if (facet2Type == "direct") {
         outData <- data
