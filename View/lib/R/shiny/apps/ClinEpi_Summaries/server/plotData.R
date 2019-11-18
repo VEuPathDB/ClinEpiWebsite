@@ -72,6 +72,8 @@ groupQuery <- reactive({
   message(Sys.time(), " Initiating query for groups data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+
+
   if (is.null(data)) { return() }
 
   data
@@ -97,9 +99,18 @@ group <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
-	nums <- getNums(metadata.file)
-	dates <- getDates(metadata.file)
-	aggKey <- aggKey()
+  myGroups<- myGroups
+  names<-c(colnames(data))
+  num<-grep(myGroups, colnames(data))
+
+  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
+      message("the selected X-axis variable has no data, please select another one ")
+      }
+
+
+  nums <- getNums(metadata.file)
+  dates <- getDates(metadata.file)
+  aggKey <- aggKey()
   if (groupsType == "direct") {
     myCols <- c(aggKey, myGroups)
     outData <- data[, myCols, with=FALSE]
@@ -126,6 +137,8 @@ group <- reactive({
 	  outData$GROUPS <- "All"
 	}
   outData <- unique(outData)
+
+
 
   #groupsText <<- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
   unique(outData)
@@ -222,27 +235,16 @@ axes <- reactive({
   data <- axesQuery()
   if (is.null(data)) { return() }
 
-  if (contLongitudinal) {
-    data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  }
-  
-  if (!contLongitudinal) {
-    if(length(mySubset)==0){
-	data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-	}else{
-		for(i in 1:length(mySubset)){
-               	      if(mySubset[i]=='Enrollment'){
-                      mySubset[i]='enrollment'
-		      }
-		  }
-             data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-      
-       }
-  }
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  myY<- myY
+  names<-c(colnames(data))
+  num<-grep(myY, colnames(data))
+
+  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
+      message("the selected Y-axis variable has no data, please select another one ")
+      }
 
 
-  #data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  
   if (!is.null(hlongitudinal1)) {
     if (myY == hlongitudinal1) { 
       myY <- longitudinal1
@@ -356,7 +358,7 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
 
   groupData <- group()
   if (!is.null(groupData)) {
-    tempData <- merge(tempData, groupData, by = aggKey)
+    tempData <- merge(tempData, groupData, by = aggKey, allow.cartesian = TRUE) ###To fix MAl-ED Y:Cumulative.. X:Floor material##
   } else {
     tempData$GROUPS <- "All"
   }
@@ -365,13 +367,13 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
   facetData <- facet1()
   if (!is.null(facetData)) {
 	  colnames(facetData) <- c(aggKey, "FACET")
-    tempData <- merge(tempData, facetData, by = aggKey)
+    tempData <- merge(tempData, facetData, by = aggKey, allow.cartesian = TRUE)
   }
 
   facetData2 <- facet2()
   if (!is.null(facetData2)) {
 	  colnames(facetData2) <- c(aggKey, "FACET2")
-    tempData <- merge(tempData, facetData2, by = aggKey)
+    tempData <- merge(tempData, facetData2, by = aggKey, allow.cartesian = TRUE)
   }
 
   unique(tempData)
@@ -442,7 +444,7 @@ plotData <- reactive({
     aggStr1 <- paste0(aggStr1, " + " , paste(aggKey, collapse = " + "))
     countFun <- function(x) {length(x)}
   }
-
+ 
   if (myY %in% strings$SOURCE_ID) {
     mergeData <- NULL
     if (yaxis_stp1 == "any" | prtcpntView$val == FALSE) {
@@ -468,7 +470,7 @@ plotData <- reactive({
         }
       }
     } else {
-        mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) })
+        mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) }) 
         mergeData <- transform(mergeData, "YAXIS" = ifelse(YAXIS == TRUE, 1, 0))
     }
     mergeData <- aggregate(as.formula(aggStr3), mergeData, sum)
