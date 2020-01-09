@@ -13,22 +13,17 @@ validateAndDebounceAxes <- debounce(reactive({
   group_stp3 <- xaxisInfo()$group_stp3
   group_stp4 <- xaxisInfo()$group_stp4
 
-
-##### Keep Variable Label and Source_ID consistent ######################
-#########################################################################
-
-if (is.null(myX)) {
+  if (is.null(myX)) {
     if (is.null(properties)) {
-       if (is.null(selectedGroup())) {
-          return()
-       }else{
-       myX <- selectedGroup()
-       }
-     }else {
-           myX = properties$selected[properties$input == "xaxisInfo()$group"]
-           }
-   }
-
+      if (is.null(selectedGroup())) {
+        return()
+      } else {
+        myX <- selectedGroup()
+      }
+    } else {
+      myX = properties$selected[properties$input == "xaxisInfo()$group"]
+    }
+  }
 
   message(Sys.time(), " validated xaxis inputs:")
   message("myX: ", myX)
@@ -98,35 +93,31 @@ plotData <- reactive({
         return()
       }
 
-   
-   ########## copy all things and paste here to resolve propUrl
-   ############################################################
-   
      myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
 
      mySubset <- myInputs$mySubset
      myTimeframe1 <- myInputs$myTimeframe1
      myTimeframe2 <- myInputs$myTimeframe2
 
-     myFacet <- facetInfo()$group
-     facet_stp1 <- facetInfo()$group_stp1
-     facet_stp2 <- facetInfo()$group_stp2
-     facet_stp3 <- facetInfo()$group_stp3
-     facet_stp4 <- facetInfo()$group_stp4
-     
-     myFacet2 <- facet2Info()$group
-     facet2_stp1 <- facet2Info()$group_stp1
-     facet2_stp3 <- facet2Info()$group_stp3
-     facet2_stp2 <- facet2Info()$group_stp2
-     facet2_stp4 <- facet2Info()$group_stp4
+     facetType <- myInputs$facetType
+     myFacet <- myInputs$myFacet
+     facet_stp1 <- myInputs$facet_stp1
+     facet_stp3 <- myInputs$facet_stp3
+     facet_stp2 <- myInputs$facet_stp2
+     facet_stp4 <- myInputs$facet_stp4
+
+     facet2Type <- myInputs$facet2Type
+     myFacet2 <- myInputs$myFacet2
+     facet2_stp1 <- myInputs$facet2_stp1
+     facet2_stp3 <- myInputs$facet2_stp3
+     facet2_stp2 <- myInputs$facet2_stp2
+     facet2_stp4 <- myInputs$facet2_stp4
 
      myX <- myInputs$myX
      groups_stp1 <- myInputs$groups_stp1
      groups_stp3 <- myInputs$groups_stp3
      groups_stp2 <- myInputs$groups_stp2
      groups_stp4 <- myInputs$groups_stp4
-     #facet2Type <- myInputs$facet2Type
-
 
       groupsText <- groupText("xaxisInfo", myX, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
       longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)

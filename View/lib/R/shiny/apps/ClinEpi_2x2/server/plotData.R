@@ -179,63 +179,38 @@ out <- reactive({
 
 
 plotData <- reactive({
-  if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet())| is.null(validateAndDebounceTimeline()) | is.null(validateAndDebounceFacet())) { return() }
+  if (is.null(validateAndDebounceAttr()) | is.null(validateAndDebounceOut()) | is.null(validateAndDebounceFacet())| is.null(validateAndDebounceTimeline()) | is.null(validateAndDebounceFacet2())) { return() }
   myInputs <- c(validateAndDebounceAttr(), validateAndDebounceOut(), validateAndDebounceFacet(), validateAndDebounceFacet2(), validateAndDebounceTimeline())
   
-  facetType <- myInputs$facetType
-  facet2Type <- myInputs$facet2Type
-  #myFacet <- myInputs$myFacet
-  #myFacet2 <- myInputs$myFacet2
-  #myOut <- myInputs$myOut
-  #myAttr <- myInputs$myAttr
-  #attr_stp1 <- myInputs$attr_stp1
-  #attr_stp2 <- myInputs$attr_stp2
-  #attr_stp3 <- myInputs$attr_stp3
-  #attr_stp4 <- myInputs$attr_stp4
-  #out_stp1 <- myInputs$out_stp1
-  #out_stp2 <- myInputs$out_stp2
-  #out_stp3 <- myInputs$out_stp3
-  #out_stp4 <- myInputs$out_stp4
-###################################################### new codes to add ###############################
-#######################################################################################################
+  myAttr <- myInputs$myAttr
+  attr_stp1 <- myInputs$attr_stp1
+  attr_stp2 <- myInputs$attr_stp2
+  attr_stp3 <- myInputs$attr_stp3
+  attr_stp4 <- myInputs$attr_stp4
+
+  myOut <- myInputs$myOut
+  out_stp1 <- myInputs$out_stp1
+  out_stp2 <- myInputs$out_stp2
+  out_stp3 <- myInputs$out_stp3
+  out_stp4 <- myInputs$out_stp4
 
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
 
-
+  facetType <- myInputs$facetType
   myFacet <- myInputs$myFacet
   facet_stp1 <- myInputs$facet_stp1
   facet_stp3 <- myInputs$facet_stp3
   facet_stp2 <- myInputs$facet_stp2
   facet_stp4 <- myInputs$facet_stp4
 
-
-  #myFacet <- facetInfo()$group
-  #facet_stp1 <- facetInfo()$group_stp1
-  #facet_stp2 <- facetInfo()$group_stp2
-  #facet_stp3 <- facetInfo()$group_stp3
-  #facet_stp4 <- facetInfo()$group_stp4
-
+  facet2Type <- myInputs$facet2Type
   myFacet2 <- myInputs$myFacet2
   facet2_stp1 <- myInputs$facet2_stp1
   facet2_stp2 <- myInputs$facet2_stp2
   facet2_stp3 <- myInputs$facet2_stp3
   facet2_stp4 <- myInputs$facet2_stp4
-
-  myAttr <- attrInfo()$group
-  attr_stp1 <- attrInfo()$group_stp1
-  attr_stp2 <- attrInfo()$group_stp2
-  attr_stp3 <- attrInfo()$group_stp3
-  attr_stp4 <- attrInfo()$group_stp4
-
-
-  myOut <- outInfo()$group
-  out_stp1 <- outInfo()$group_stp1
-  out_stp3 <- outInfo()$group_stp3
-  out_stp4 <- outInfo()$group_stp4
-  out_stp2 <- outInfo()$group_stp2
-
 
 
   longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)

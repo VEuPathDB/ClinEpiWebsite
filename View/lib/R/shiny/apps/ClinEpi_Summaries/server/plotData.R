@@ -95,22 +95,26 @@ group <- reactive({
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
 
+  if (contLongitudinal) {
+    varName <- "variable for 'Stratify Line'"
+  } else {
+    varName <- "X-axis variable"
+  }
+
+  if (all(is.na(data[, myY, with=FALSE]))) {
+    showNotification(paste0("the ", varName , " has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    return()
+  }
+
   data <- groupQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
-  myGroups<- myGroups
-  names<-c(colnames(data))
-  num<-grep(myGroups, colnames(data))
-
-  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
-      message("the selected X-axis variable has no data, please select another one ")
-      }
-
-
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)
   aggKey <- aggKey()
+  message("aggKey: ", aggKey)
+  message("group query data: ", colnames(data))
   if (groupsType == "direct") {
     myCols <- c(aggKey, myGroups)
     outData <- data[, myCols, with=FALSE]
@@ -222,35 +226,22 @@ axes <- reactive({
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
 
-  if (length(yaxis_stp2) > 1) {
-    yaxisStp2Text <<- ""
-    for (i in seq(length(yaxis_stp2))) {
-      yaxisStp2Text <<- paste0(yaxisStp2Text,
-      "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
-    }
-  } else {
-    yaxisStp2Text <<- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
-  }
-
-  data <- axesQuery()
-  if (is.null(data)) { return() }
-
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  myY<- myY
-  names<-c(colnames(data))
-  num<-grep(myY, colnames(data))
-
-  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
-      message("the selected Y-axis variable has no data, please select another one ")
-      }
-
-
   if (!is.null(hlongitudinal1)) {
     if (myY == hlongitudinal1) { 
       myY <- longitudinal1
     }
   }
   
+  data <- axesQuery()
+  if (is.null(data)) { return() }
+
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
+  if (all(is.na(data[, myY, with=FALSE]))) {
+    showNotification("the Y-axis variable has no data for the timepoint(s) selected, please select another.", duration = NULL, type = "error")
+    return()
+  }
+
   aggKey <- aggKey()
   if (contLongitudinal) {
     myCols <- c(aggKey, myY, longitudinal)
@@ -285,40 +276,48 @@ tableData <- reactive({
     return()
   }
   myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline(), validateAndDebounceGroup(), validateAndDebounceFacet(), validateAndDebounceFacet2())
+
   myY <- myInputs$myY
   yaxis_stp1 <- myInputs$yaxis_stp1
   yaxis_stp2 <- myInputs$yaxis_stp2
   yaxis_stp3 <- myInputs$yaxis_stp3
   xaxisVar <- myInputs$xaxisVar
   xaxis_bins <- myInputs$xaxis_bins
-  mySubset <- myInputs$mySubset
-  myTimeframe1 <- myInputs$myTimeframe1
-  myTimeframe2 <- myInputs$myTimeframe2
-  facetType <- myInputs$facetType
+
   groupsType <- myInputs$groupsType
   myGroups <- myInputs$myGroups
   groups_stp1 <- myInputs$groups_stp1
   groups_stp3 <- myInputs$groups_stp3
   groups_stp2 <- myInputs$groups_stp2
   groups_stp4 <- myInputs$groups_stp4
-  facet2Type <- myInputs$facet2Type
 
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
 
+  facetType <- myInputs$facetType
   myFacet <- myInputs$myFacet
   facet_stp1 <- myInputs$facet_stp1
   facet_stp3 <- myInputs$facet_stp3
   facet_stp2 <- myInputs$facet_stp2
   facet_stp4 <- myInputs$facet_stp4
 
+  facet2Type <- myInputs$facet2Type
   myFacet2 <- myInputs$myFacet2
   facet2_stp1 <- myInputs$facet2_stp1
   facet2_stp3 <- myInputs$facet2_stp3
   facet2_stp2 <- myInputs$facet2_stp2
   facet2_stp4 <- myInputs$facet2_stp4
 
+  if (length(yaxis_stp2) > 1) {
+    yaxisStp2Text <<- ""
+    for (i in seq(length(yaxis_stp2))) {
+      yaxisStp2Text <<- paste0(yaxisStp2Text,
+      "input$yaxis_stp2\t", yaxis_stp2[i], "\n")
+    }
+  } else {
+    yaxisStp2Text <<- paste0("input$yaxis_stp2\t", yaxis_stp2, "\n")
+  }
 
   groupsText <- groupText("groupInfo", myGroups, groups_stp1, groups_stp2, groups_stp3, groups_stp4)
   longitudinalText <- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
@@ -342,7 +341,6 @@ tableData <- reactive({
                       # "input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                       # "input$individualPlot_stp2\t", input$individualPlot_stp2
                    )
-#message("our saved params: ", text)
 message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writing properties in propUrl:", propUrl, "\n", text)  
 
         PUT(propUrl, body = "")
@@ -354,26 +352,33 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
   if (is.null(axesData)) {
     return()
   }
-  tempData <- axesData
 
+  tempData <- axesData
+message("tempData: ", colnames(tempData))
+message(nrow(tempData))
+message(head(tempData))
   groupData <- group()
+message("groupData: ", colnames(groupData))
+message(nrow(groupData))
+message(head(groupData))
   if (!is.null(groupData)) {
-    tempData <- merge(tempData, groupData, by = aggKey, allow.cartesian = TRUE) ###To fix MAl-ED Y:Cumulative.. X:Floor material##
+    tempData <- merge(tempData, groupData, by = aggKey)
   } else {
     tempData$GROUPS <- "All"
   }
 
-
+message("facetData: ", colnames(facetData))
+message("tempData: ", colnames(tempData))
   facetData <- facet1()
   if (!is.null(facetData)) {
 	  colnames(facetData) <- c(aggKey, "FACET")
-    tempData <- merge(tempData, facetData, by = aggKey, allow.cartesian = TRUE)
+    tempData <- merge(tempData, facetData, by = aggKey)
   }
 
   facetData2 <- facet2()
   if (!is.null(facetData2)) {
 	  colnames(facetData2) <- c(aggKey, "FACET2")
-    tempData <- merge(tempData, facetData2, by = aggKey, allow.cartesian = TRUE)
+    tempData <- merge(tempData, facetData2, by = aggKey)
   }
 
   unique(tempData)

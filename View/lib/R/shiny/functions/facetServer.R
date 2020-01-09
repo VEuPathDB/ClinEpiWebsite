@@ -45,19 +45,6 @@ validateAndDebounceFacet <- debounce(reactive({
     myFacet <- "none"
   }
 
-
-#else if (facetType == "direct") {
-    #if (is.null(myFacet)) { 
-      #if (is.null(selectedFacet())) {
-	#return() 
-      #} else {
- 	#myFacet <- selectedFacet()
-      #}
-    #}
-  #} else {
-    #myFacet <- "none"
-  #}
-
   message(Sys.time(), " functions/facetServer.R: validateAndDebounceFacet: finished validation, validated facet inputs:")
   message("input$facetType: ", facetType)
   message("myFacet: ", myFacet)
@@ -117,17 +104,10 @@ facet1 <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
-
-  myFacet<- myFacet
-  names<-c(colnames(data))
-  num<-grep(myFacet, colnames(data))
-
-  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
-      message("the selected facet1 variable has no data, please select another one ")
-      }
-
-
-
+  if (all(is.na(data[, myFacet, with=FALSE]))) {
+    showNotification("the variable for Stratify Plot (1) has no data for the timepoint(s) selected, please select another.", duration = NULL, type = "error")
+    return()
+  }
 
   if (facetType == "direct") {
         outData <- data
@@ -201,20 +181,6 @@ validateAndDebounceFacet2 <- debounce(reactive({
     myFacet2 <- "none"
   }
 
-
-################################################### teste for facet2 ######################
-  #} else if (facet2Type == "direct") {
-   # if (is.null(myFacet2)) { 
-    #  if (is.null(selectedFacet2())) {
-     #   return() 
-     # } else {
-      #  myFacet2 <- selectedFacet2()
-      #}
-    #}
- # } else {
-  #  myFacet2 <- "none"
-  #}
-
   message(Sys.time(), " functions/facetServer.R: validateAndDebounceFacet2: finished validation, validated facet2 inputs:")
   message("input$facet2Type: ", facet2Type)
   message("myFacet2: ", myFacet2)
@@ -275,17 +241,10 @@ facet2 <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
-
-  myFacet2<- myFacet2
-  names<-c(colnames(data))
-  num<-grep(myFacet2, colnames(data))
-
-  if(sum(is.na(data[ ,num, with=FALSE])) == nrow(data)){
-      message("the selected facet2 variable has no data, please select another one ")
-      }
-
-
-
+  if (all(is.na(data[, myFacet, with=FALSE]))) {
+    showNotification("the variable for Stratify Plot (2) has no data for the timepoint(s) selected, please select another.", duration = NULL, type = "error")
+    return()
+  }
 
   if (facet2Type == "direct") {
         outData <- data
