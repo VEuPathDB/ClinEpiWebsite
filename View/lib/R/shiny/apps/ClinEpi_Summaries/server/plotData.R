@@ -101,14 +101,14 @@ group <- reactive({
     varName <- "X-axis variable"
   }
 
-  if (all(is.na(data[, myY, with=FALSE]))) {
-    showNotification(paste0("the ", varName , " has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
-    return()
-  }
-
   data <- groupQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
+  if (all(is.na(data[, myGroups, with=FALSE]))) {
+    showNotification(paste0("the ", varName , " has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    return()
+  }
 
   nums <- getNums(metadata.file)
   dates <- getDates(metadata.file)

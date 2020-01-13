@@ -241,7 +241,7 @@ facet2 <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
-  if (all(is.na(data[, myFacet, with=FALSE]))) {
+  if (all(is.na(data[, myFacet2, with=FALSE]))) {
     showNotification("the variable for Stratify Plot (2) has no data for the timepoint(s) selected, please select another.", duration = NULL, type = "error")
     return()
   }
