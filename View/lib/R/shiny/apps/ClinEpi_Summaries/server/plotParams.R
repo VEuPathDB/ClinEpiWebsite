@@ -149,13 +149,13 @@
       if (is.null(properties)) {
           selectInput(inputId = "groupsType",
                       label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
       } else {
           selectInput(inputId = "groupsType",
                       label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                       selected = mySelected,
                       width = '100%')
       }
@@ -170,20 +170,20 @@
         if (isParticipant) {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                       selected = "makeGroups",
                       width = '100%')
         }
       } else {
         selectInput(inputId = "facetType",
                     label = NULL,
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                     selected = mySelected,
                     width = '100%')
       }
@@ -214,14 +214,11 @@
       }
 
       if (facetType == "direct") {
-        dates <- getDates(metadata.file)$SOURCE_ID
-        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        #if (house.file.exists) {
-          #htmp <- house.file[, !dates, with = FALSE]
+	if (is.null(hlongitudinal1)) {
           include <- c("Participant", "Household")
-        #} else {
-        #  include <- c("Participant")
-        #}
+        } else {
+	  include <- c("Participant")
+        }
       } else {
         include <- c("all")
       }
@@ -234,13 +231,13 @@
       if (is.null(properties)) {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                     selected = "none",
                     width = '100%')
       } else {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                     selected = mySelected,
                     width = '100%')
       }
@@ -271,14 +268,11 @@
       }
 
       if (facet2Type == "direct") {
-        dates <- getDates(metadata.file)$SOURCE_ID
-        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        #if (house.file.exists) {
-        #htmp <- house.file[, !dates, with = FALSE]
-        include <- c("Participant", "Household")
-        #} else {
-        #  include <- c("Participant")
-        #}
+        if (is.null(hlongitudinal1)) {
+          include <- c("Participant", "Household")
+        } else {
+          include <- c("Participant")
+        }
       } else {
         include <- c("all")
       }
@@ -325,10 +319,7 @@
       }
 
       if (groupsType == "direct") {
-        dates <- getDates(metadata.file)$SOURCE_ID
-        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if ("Household" %in% metadata.file$CATEGORY) {
-          #htmp <- house.file[, !dates, with = FALSE]
+        if (is.null(hlongitudinal1)) {
           include <- c("Participant", "Household")
         } else {
           include <- c("Participant")

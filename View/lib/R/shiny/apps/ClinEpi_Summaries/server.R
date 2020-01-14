@@ -1,8 +1,5 @@
 ## server.r
 
-#source("../../functions/static_data_load.R")
-#staticDataFetcher() 
-
 lon1DataList <- list()
 lon2DataList <- list()
 hlon1DataList <- list()

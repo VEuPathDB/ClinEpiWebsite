@@ -45,13 +45,13 @@
         if (is.null(properties)) {
           selectInput(inputId = "xaxis",
                       label = NULL,
-                      choices = c("All possible" = "direct"),
+                      choices = c("All possible ..." = "direct"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "xaxis",
                       label = NULL,
-                      choices = c("All possible" = "direct"),
+                      choices = c("All possible ..." = "direct"),
                       selected = mySelected,
                       width = '100%')
         }
@@ -64,20 +64,20 @@
         if (isParticipant) {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                       selected = "makeGroups",
                       width = '100%')
         }
       } else {
         selectInput(inputId = "facetType",
                     label = NULL,
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                     selected = mySelected,
                     width = '100%')
       }
@@ -89,13 +89,13 @@
       if (is.null(properties)) {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                     selected = "none",
                     width = '100%')
       } else {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("All possible" = "direct", "Make my own" = "makeGroups", "None" = "none"),
+                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
                     selected = mySelected,
                     width = '100%')
       }
@@ -221,10 +221,7 @@
         facetType <- input$facetType
       }
       if (facetType == "direct") {
-        dates <- getDates(metadata.file)$SOURCE_ID
-        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if ("Household" %in% metadata.file$CATEGORY) {
-          #htmp <- house.file[, !dates, with = FALSE]
+        if (is.null(hlongitudinal1)) {
           include <- c("Participant", "Household")
         } else {
           include <- c("Participant")
@@ -301,10 +298,7 @@
       }
 
       if (facet2Type == "direct") {
-        dates <- getDates(metadata.file)$SOURCE_ID
-        #ptmp <- prtcpnt.file[, !dates, with = FALSE]
-        if ("Household" %in% metadata.file$CATEGORY) {
-          #htmp <- house.file[, !dates, with = FALSE]
+        if (is.null(hlongitudinal1)) {
           include <- c("Participant", "Household")
         } else {
           include <- c("Participant")

@@ -73,9 +73,8 @@ xAxis <- reactive({
   }
 
   message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R:: xAxis started") 
-  myInputs <- validateAndDebounceTimeline()
-  #myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
-  #myX <- myInputs$myX
+  myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
+  myX <- myInputs$myX
 
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
@@ -83,6 +82,11 @@ xAxis <- reactive({
 
   data <- xQuery()  
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+
+  if (all(is.na(data[, myX, with=FALSE]))) {
+    showNotification(paste0("the X-Axis variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    return()
+  }
  
   unique(data)
 })

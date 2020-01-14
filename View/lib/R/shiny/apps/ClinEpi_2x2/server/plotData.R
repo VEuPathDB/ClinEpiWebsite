@@ -74,6 +74,11 @@ attr <- reactive({
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
+  if (all(is.na(data[, myAttr, with=FALSE]))) {
+    showNotification(paste0("the Independent/Exposure variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    return()
+  }
+
         #get attr col
 	aggKey <- aggKey()
   myCols <- c(aggKey, myAttr)
@@ -160,7 +165,12 @@ out <- reactive({
   data <- outQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-  
+ 
+  if (all(is.na(data[, myOut, with=FALSE]))) {
+    showNotification(paste0("the Dependent/Outcome variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    return()
+  }
+ 
   #get out col
   aggKey <- aggKey()
   myCols <- c(aggKey, myOut)
