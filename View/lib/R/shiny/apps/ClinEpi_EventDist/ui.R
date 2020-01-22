@@ -7,8 +7,8 @@ shinyUI(
    theme = "cerulean.css",
    tags$script(inactivity),
    tags$style(type="text/css",
-              ".shiny-output-error { visibility: hidden; }",
-              ".shiny-output-error:before { visibility: hidden; }",
+#              ".shiny-output-error { visibility: hidden; }",
+#              ".shiny-output-error:before { visibility: hidden; }",
               "#distribution{height:auto !important;}",
               ".dataTable {border: none;}"
    ),
