@@ -6,8 +6,8 @@ shinyUI(
     extendShinyjs(text="shinyjs.virtualBodyClick = function(){$(\"body\").trigger(\"click\")}", functions=c("virtualBodyClick")),
     theme = "cerulean.css",
     tags$style(type="text/css",
-              ".shiny-output-error { visibility: hidden; }",
-              ".shiny-output-error:before { visibility: hidden; }",
+#              ".shiny-output-error { visibility: hidden; }",
+#              ".shiny-output-error:before { visibility: hidden; }",
               ".dataTable {border: none;}"
     ),
    tags$script(inactivity),
