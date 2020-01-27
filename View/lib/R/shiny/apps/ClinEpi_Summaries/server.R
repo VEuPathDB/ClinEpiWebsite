@@ -55,24 +55,40 @@ shinyServer(function(input, output, session) {
   yaxisStp2Text <- NULL
   numXBins <- reactiveValues()
   numXBins$val <- NULL
+  #test for completion of loading
+  timelineInit <- reactiveValues()
+  timelineInit$val <- 0
+  timelineInit$done <- FALSE
+  facet1Init <- reactiveValues()
+  facet1Init$val <- 0
+  facet1Init$done <- FALSE
 
   source("../../functions/reactive_data_load.R", local = TRUE) 
- 
+
+  progress <- Progress$new(session, min = 0, max = 1, style = "old") 
   output$title <- renderText({
-    withProgress(message = 'Loading... ', value = 0, style = "old", {
-      if (is.null(attributes.file)) {
-	message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
-        reactiveDataFetcher()
-      } 
-      incProgress(.45)
-      #timelineInit()
-      incProgress(.15)
-      #groupInit()
-      incProgress(.25)
-      #facetInit()
-      #facet2Init()
-      incProgress(.15)
-    })
+    if (is.null(attributes.file)) {
+      message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
+      reactiveDataFetcher()
+    } 
+    progress$inc(.60, "Loading ... ")
+
+    message("timelineInit value: ", isolate(timelineInit$val))
+    if (timelineInit$val == 2 & !timelineInit$done) {
+      progress$inc(.25, "Loading ... ")
+      timelineInit$done <<- TRUE
+    }
+
+    message("facet1Init value: ", isolate(facet1Init$val))
+    if (facet1Init$val == 1 & !facet1Init$done) {
+      progress$inc(.15, "Loading ...")
+      facet1Init$done <<- TRUE
+    }
+
+    if (timelineInit$done & facet1Init$done) {
+      progress$close()
+    }
+
     c("Data Summaries")
   })
 
