@@ -35,3 +35,6 @@ node_modules/
 # Exported from svn:ignore
 #
 target
+
+# MacOS files
+*.DS_Store
