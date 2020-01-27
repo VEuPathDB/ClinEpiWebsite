@@ -7,6 +7,10 @@ validateAndDebounceTimeline <- debounce(reactive({
   message("current$subset: ", current$subset)
   message("current$range1: ", current$range1)
   message("current$range2: ", current$range2)
+
+  if (!timelineInit$done) {
+    timelineInit$val <<- isolate(timelineInit$val) + 1 
+  }
   list(mySubset = current$subset,
        myTimeframe1 = current$range1,
        myTimeframe2 = current$range2)

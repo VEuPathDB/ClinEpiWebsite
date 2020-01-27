@@ -52,6 +52,10 @@ validateAndDebounceFacet <- debounce(reactive({
   message("facet_stp2: ", facet_stp2)
   message("facet_stp3: ", facet_stp3)
   message("facet_stp4: ", facet_stp4)  
+
+  if (!facet1Init$done) {
+    facet1Init$val <<- isolate(facet1Init$val) + 1
+  }
   list(facetType = facetType, 
        myFacet = myFacet, 
        facet_stp1 = facet_stp1, 
@@ -188,6 +192,7 @@ validateAndDebounceFacet2 <- debounce(reactive({
   message("facet2_stp2: ", facet2_stp2)
   message("facet2_stp3: ", facet2_stp3)
   message("facet2_stp4: ", facet2_stp4)
+
   list(facet2Type = facet2Type, 
        myFacet2 = myFacet2, 
        facet2_stp1 = facet2_stp1, 

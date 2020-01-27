@@ -54,6 +54,7 @@ validateAndDebounceGroup <- debounce(reactive({
   message("group_stp2: ", group_stp2)
   message("group_stp3: ", group_stp3)
   message("group_stp4: ", group_stp4)  
+
   list(groupsType = groupsType, 
        myGroups = myGroup, 
        groups_stp1 = group_stp1, 
@@ -187,6 +188,7 @@ validateAndDebounceAxes <- debounce(reactive({
   message("yaxis_stp3: ", yaxis_stp3)
   message("myX: ", input$xaxisVar)
   message("xaxis_bins: ", input$xaxis_stp2)
+
   list(myY = myY, 
        yaxis_stp1 = yaxis_stp1, 
        yaxis_stp2 = yaxis_stp2,

@@ -8,10 +8,6 @@ validateAndDebounceAxes <- debounce(reactive({
   test2 <- input$`group-group`
 
   myX <- xaxisInfo()$group
-  group_stp1 <- xaxisInfo()$group_stp1
-  group_stp2 <- xaxisInfo()$group_stp2
-  group_stp3 <- xaxisInfo()$group_stp3
-  group_stp4 <- xaxisInfo()$group_stp4
 
   if (is.null(myX)) {
     if (is.null(properties)) {
@@ -25,16 +21,9 @@ validateAndDebounceAxes <- debounce(reactive({
     }
   }
 
-  message(Sys.time(), " validated xaxis inputs:")
-  message("myX: ", myX)
-  list(myX = myX,
-       groups_stp1 = group_stp1, 
-       groups_stp2 = group_stp2,
-       groups_stp3 = group_stp3,
-       groups_stp4 = group_stp4 
-)
-
   message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: validateAndDebounceAxes, validated xaxis inputs: myX: -", myX, "-")
+
+  if (!xaxisInit$done) {xaxisInit$val <<- isolate(xaxisInit$val) + 1}
   list(myX = myX)
 }), 1000)
 
@@ -97,7 +86,7 @@ plotData <- reactive({
         return()
       }
 
-     myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline())
+     myInputs <- c(validateAndDebounceAxes(), validateAndDebounceTimeline(), validateAndDebounceFacet(), validateAndDebounceFacet2())
 
      mySubset <- myInputs$mySubset
      myTimeframe1 <- myInputs$myTimeframe1

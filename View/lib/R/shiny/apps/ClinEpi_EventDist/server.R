@@ -48,26 +48,50 @@ shinyServer(function(input, output, session) {
   hlon2Data <- NULL
   attributes.file <- NULL
   isParticipant <- NULL
+  #test for completion of loading
+  timelineInit <- reactiveValues()
+  timelineInit$val <- 0
+  timelineInit$done <- FALSE
+  facet1Init <- reactiveValues()
+  facet1Init$val <- 0
+  facet1Init$done <- FALSE
+  xaxisInit <- reactiveValues()
+  xaxisInit$val <- 0
+  xaxisInit$done <- FALSE
 
   source("../../functions/reactive_data_load.R", local = TRUE)
 
+  progress <- Progress$new(session, min = 0, max = 1, style = "old")
   output$title <- renderText({
-	#TODO move withProgess to reactive data loader now that modules are initialized differently
-    withProgress(message = 'Loading... May take a minute', value = 0, style = "old", {
-      if (is.null(attributes.file)) {
-	message(Sys.time(), "ClinEpi_EventDist/server.R:  Starting reactive data fetcher for new session ", session$token)
-	 reactiveDataFetcher()
-      }
-      incProgress(.45)
-      #timelineInit()
-      incProgress(.15)
-      #xaxisInit()
-      incProgress(.25)
-      #facetInit()
-      #facet2Init() 
-      incProgress(.15)
-    })
-    c("Data Distributions")
+    if (is.null(attributes.file)) {
+      message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
+      reactiveDataFetcher()
+    }  
+    progress$inc(.45, "Loading ... ")
+
+    message("timelineInit value: ", isolate(timelineInit$val))
+    if (timelineInit$val == 2 & !timelineInit$done) {
+      progress$inc(.25, "Loading ... ")
+      timelineInit$done <<- TRUE
+    }
+
+    message("facet1Init value: ", isolate(facet1Init$val))
+    if (facet1Init$val == 1 & !facet1Init$done) {
+      progress$inc(.15, "Loading ...")
+      facet1Init$done <<- TRUE
+    }
+
+    message("xaxisInit value: ", isolate(xaxisInit$val))
+    if (xaxisInit$val == 1 & !xaxisInit$done) {
+      progress$inc(.15, "Loading ...")
+      xaxisInit$done <<- TRUE
+    }
+
+    if (timelineInit$done & facet1Init$done & xaxisInit$done) {
+      progress$close()
+    }
+ 
+   c("Data Distributions")
   })
 
   source("server/plotParams.R", local = TRUE)
