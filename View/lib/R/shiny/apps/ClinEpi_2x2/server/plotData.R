@@ -129,6 +129,8 @@ validateAndDebounceOut <- debounce(reactive({
   message("out_stp2: ", out_stp2)
   message("out_stp3: ", out_stp3)
   message("out_stp4: ", out_stp4)
+
+  if (!outInit$done) {outInit$val <<- isolate(outInit$val) + 1}
   list(myOut = myOut, 
        out_stp1 = out_stp1, 
        out_stp2 = out_stp2,
