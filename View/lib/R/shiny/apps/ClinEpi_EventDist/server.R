@@ -61,37 +61,43 @@ shinyServer(function(input, output, session) {
 
   source("../../functions/reactive_data_load.R", local = TRUE)
 
-  progress <- Progress$new(session, min = 0, max = 1, style = "old")
+  progress <- Progress$new(session, min = 0, max = 1, style = "notification")
+  progress$set(message = "Loading data for this new session ...", value = 0)
+
   output$title <- renderText({
     if (is.null(attributes.file)) {
       message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
       reactiveDataFetcher()
     }  
-    progress$inc(.45, "Loading ... ")
+    progress$inc(.35)
+    #Sys.sleep(5)
 
-    message("timelineInit value: ", isolate(timelineInit$val))
+    message(Sys.time(), " timelineInit value: ", isolate(timelineInit$val))
     if (timelineInit$val == 2 & !timelineInit$done) {
-      progress$inc(.25, "Loading ... ")
+      progress$inc(.20, "Timeline done...")
       timelineInit$done <<- TRUE
-    }
+    } else { message("******Distributions-server.R: timeline still unfinished or was done" )}
 
-    message("facet1Init value: ", isolate(facet1Init$val))
+    message(Sys.time(), " facet1Init value: ", isolate(facet1Init$val))
     if (facet1Init$val == 1 & !facet1Init$done) {
-      progress$inc(.15, "Loading ...")
+      progress$inc(.20, "Strata done...")
       facet1Init$done <<- TRUE
-    }
+    } else {message("******Distributions-server.R: facet1 still unfinished or was done" )}
 
-    message("xaxisInit value: ", isolate(xaxisInit$val))
+    message(Sys.time(), " xaxisInit value: ", isolate(xaxisInit$val))
     if (xaxisInit$val == 1 & !xaxisInit$done) {
-      progress$inc(.15, "Loading ...")
+      progress$inc(.20, "X-Axis done ...")
       xaxisInit$done <<- TRUE
-    }
+    } else {message("******Distributions-server.R: xaxis unfinished or was done" )}
 
     if (timelineInit$done & facet1Init$done & xaxisInit$done) {
+      progress$inc(.5) 
+      message("******Distributions-server.R: DONE with three parameters" )
       progress$close()
-    }
- 
+    } else {message("******Distributions-server.R: STILL NOT FINISHED" )}
+
    c("Data Distributions")
+
   })
 
   source("server/plotParams.R", local = TRUE)
@@ -110,8 +116,8 @@ shinyServer(function(input, output, session) {
     return(aggKey)
   })
     
-
   source("server/individualPlot.R", local = TRUE)
+
   #TODO consolidate code between two plots
   source("server/plotGrid.R", local = TRUE)
     
@@ -119,5 +125,7 @@ shinyServer(function(input, output, session) {
    
   #all roads lead to rome
   source("server/plotData.R", local = TRUE)
- 
+
 })
+
+

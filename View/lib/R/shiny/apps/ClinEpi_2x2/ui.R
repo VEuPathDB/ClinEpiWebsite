@@ -20,6 +20,10 @@ shinyUI(
    tags$style(type = 'text/css', ".btn, .btn:hover {background: #ffffff; text-align:left; border-color: #cccccc; padding: 6px 12px;}"),
    tags$head(includeScript("../../functions/jstree.js")),
    tags$head(includeScript("../../functions/js/disconnectMod.js")),
+   ## common to all apps
+   tags$head(
+     tags$link(rel = "stylesheet", type = "text/css", href = "../common.css")
+   ),
     tags$head(tags$style(
       HTML("input[type='search']:disabled {visibility:hidden}"),
       HTML(".js-irs-0 .irs-line-left {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),

@@ -107,7 +107,7 @@ group <- reactive({
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
   if (all(is.na(data[, myGroups, with=FALSE]))) {
-    showNotification(paste0("the ", varName , " has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    showNotification(paste0("The ", varName , " has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "warning")
     return()
   }
 

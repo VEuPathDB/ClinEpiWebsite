@@ -66,29 +66,30 @@ shinyServer(function(input, output, session) {
 
   source("../../functions/reactive_data_load.R", local = TRUE)
  
-  progress <- Progress$new(session, min = 0, max = 1, style = "old")
+  progress <- Progress$new(session, min = 0, max = 1, style = "notification")
+  progress$set(message = "Loading data for this new session ...", value = 0)
   output$title <- renderText({
     if (is.null(attributes.file)) {
       message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
       reactiveDataFetcher()
     }  
-    progress$inc(.45, "Loading ... ")
+    progress$inc(.40)
 
     message("timelineInit value: ", isolate(timelineInit$val))
     if (timelineInit$val == 2 & !timelineInit$done) {
-      progress$inc(.25, "Loading ... ")
+      progress$inc(.20, "Timeline done ... ")
       timelineInit$done <<- TRUE
     }
 
     message("facet1Init value: ", isolate(facet1Init$val))
     if (facet1Init$val == 1 & !facet1Init$done) {
-      progress$inc(.15, "Loading ...")
+      progress$inc(.20, "Strata done ...")
       facet1Init$done <<- TRUE
     }
 
     message("outInit value: ", isolate(outInit$val))
     if (outInit$val == 1 & !outInit$done) {
-      progress$inc(.15, "Loading ...")
+      progress$inc(.20, "Dependent/Outcome done ...")
       outInit$done <<- TRUE
     }
 

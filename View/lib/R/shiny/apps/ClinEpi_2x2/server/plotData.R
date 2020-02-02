@@ -75,7 +75,7 @@ attr <- reactive({
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
   if (all(is.na(data[, myAttr, with=FALSE]))) {
-    showNotification(paste0("the Independent/Exposure variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    showNotification(paste0("The Independent/Exposure variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "warning")
     return()
   }
 

@@ -73,7 +73,7 @@ xAxis <- reactive({
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
   if (all(is.na(data[, myX, with=FALSE]))) {
-    showNotification(paste0("the X-Axis variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
+    showNotification(paste0("The X-Axis variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "warning")
     return()
   }
  

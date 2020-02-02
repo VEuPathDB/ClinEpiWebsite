@@ -21,10 +21,10 @@ shinyUI(
    tags$style(type = 'text/css', ".btn, .btn:hover {background: #ffffff; text-align:left; border-color: #cccccc; padding: 6px 12px;}"),
    tags$head(includeScript("../../functions/jstree.js")),
    tags$head(includeScript("../../functions/js/disconnectMod.js")),
-   ## css file in www, one per app
-   ##tags$head(
-   ## tags$link(rel = "stylesheet", type = "text/css", href = "myModals.css")
-   ##),
+   ## common to all apps
+   tags$head(
+     tags$link(rel = "stylesheet", type = "text/css", href = "../common.css")
+   ),
    tags$head(tags$style(
      HTML(".js-irs-0 .irs-line-left {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),
      HTML(".js-irs-0 .irs-line-right {background: linear-gradient(to bottom, #DDD -50%, #FFF 150%);}"),

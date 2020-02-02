@@ -1,0 +1,37 @@
+.shiny-notification {
+  width: 400px;
+  font-weight: 400;
+  font-size: 140%;
+  color: #233358; /* #0275D8;*/
+  position:fixed;
+  top: calc(35%);
+  left: calc(35%);
+  opacity: 1;
+  border: 1px solid #233358;
+  border-radius: 0.5em;
+}
+.recalculating:after {
+  content: ' loading...';
+}
+.recalculating {
+  opacity: 1;
+  font-size: 80%;
+  animation: blinkingText 1.2s infinite;
+}
+@keyframes blinkingText{
+  0%{     color: #fff;    }
+  49%{    color: #fff;    }
+  60%{    color: transparent; }
+  99%{    color:transparent;  }
+  100%{   color: #fff;    }
+}
+.shiny-notification-warning .shiny-notification-content-text {
+  font-size: 85%;
+}
+.shiny-notification-content .shiny-progress-notification .progress {
+  height: 16px;
+}
+.shiny-progress-notification .progress-text .progress-message {
+  font-weight: 400;
+}
+
