@@ -101,7 +101,6 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     
   })
   
-  #make sure ranges are updated when attr or out change
   observeEvent(getMyGroups$val, setGroupVals())
  
   observeEvent(groupsType(), {
@@ -159,7 +158,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                        status = "default", 
                        tags$div(
                          class = "treeContainer",
-                         shinyTree(ns("group"), search = TRUE, themeIcon=FALSE, themeDots = FALSE)
+                         withSpinner(shinyTree(ns("group"), search = TRUE, themeIcon=FALSE, themeDots = FALSE), type=5, size=.5)
                        )),
         style="margin-bottom: 10px"
       )
@@ -205,12 +204,6 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     }
 
     myGroup <- getMyGroups$val
-    #if (!is.null(myGroup)) {
-    #  category <- metadata.file$CATEGORY[metadata.file$SOURCE_ID == myGroup]
-    #  if (category %in% c("Observation", "Sample") & groupsType() == "direct") {
-    #    myGroup <- NULL
-    #  }
-    #}
 
     if (!is.null(groupsTypeID)) {
       groupsTypeSelected <- properties$selected[properties$input == groupsTypeID]

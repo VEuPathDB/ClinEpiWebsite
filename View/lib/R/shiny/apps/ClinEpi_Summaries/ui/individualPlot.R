@@ -9,7 +9,7 @@ individualPlot <- tabItem(tabName = "individualPlot",
                                      uiOutput("individualPlot_stp2")
                               )
                             ),
-                            withSpinner(plotlyOutput("individual_plot",  height="auto", width="auto", inline=T))
+                            withSpinner(plotlyOutput("individual_plot",  height="auto", width="auto", inline=T), type=5)
                         )
                       )
 )
