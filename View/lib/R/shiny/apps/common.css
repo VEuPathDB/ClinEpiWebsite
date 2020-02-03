@@ -16,7 +16,7 @@
 .recalculating {
   opacity: 1;
   font-size: 80%;
-  animation: blinkingText 1.2s infinite;
+  /*animation: blinkingText 1.2s infinite;*/
 }
 @keyframes blinkingText{
   0%{     color: #fff;    }

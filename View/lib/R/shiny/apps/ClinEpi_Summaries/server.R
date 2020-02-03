@@ -66,14 +66,14 @@ shinyServer(function(input, output, session) {
   source("../../functions/reactive_data_load.R", local = TRUE) 
 
   progress <- Progress$new(session, min = 0, max = 1, style = "notification") 
-  progress$set(message = "Loading data for this new session ...", value = 0)
+  progress$set(message = "Loading data for this new session ...", value = .10)
 
   output$title <- renderText({
     if (is.null(attributes.file)) {
       message(Sys.time(), " Starting reactive data fetcher for new session ", session$token)
       reactiveDataFetcher()
     } 
-    progress$inc(.50)
+    progress$inc(.40)
 
     message("timelineInit value: ", isolate(timelineInit$val))
     if (timelineInit$val == 2 & !timelineInit$done) {
