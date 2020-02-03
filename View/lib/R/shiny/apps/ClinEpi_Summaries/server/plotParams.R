@@ -470,7 +470,7 @@
                          status = "default",
                          tags$div(
                            class = "treeContainer",
-                           withSpinner(shinyTree("yaxis", search = TRUE, themeIcon = FALSE, themeDots = FALSE), type=5, size = .5)
+                           shinyTree("yaxis", search = TRUE, themeIcon = FALSE, themeDots = FALSE)
                          )),
           style="margin-bottom: 10px"
         )

@@ -69,6 +69,12 @@ attr <- reactive({
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
+
+  if (!is.null(hlongitudinal1)) {
+    if (myAttr == hlongitudinal1) {
+      myAttr <- longitudinal1
+    }
+  }
  
   data <- attrQuery()
   if (is.null(data)) { return() }
@@ -79,8 +85,8 @@ attr <- reactive({
     return()
   }
 
-        #get attr col
-	aggKey <- aggKey()
+  #get attr col
+  aggKey <- aggKey()
   myCols <- c(aggKey, myAttr)
   attrData <- data[, myCols, with=FALSE]
 	attrData <- completeDT(attrData, myAttr)
@@ -164,6 +170,12 @@ out <- reactive({
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
   
+  if (!is.null(hlongitudinal1)) {
+    if (myOut == hlongitudinal1) {
+      myOut <- longitudinal1
+    }
+  }
+
   data <- outQuery()
   if (is.null(data)) { return() }
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
