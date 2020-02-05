@@ -14,6 +14,7 @@ modelconfig_userDb_maxIdle: 10
 modelconfig_commentdb.maxIdle: 10
 
 modelprop:
+  COMMUNITY_SITE: clinepidb.static-content.veupathdb.org
   USER_DBLINK: '@{{ modelconfig_appDb_userDbLink }}'
   ACCT_DBLINK: '@{{ modelconfig_appDb_acctDbLink }}'
   GOOGLE_ANALYTICS_ID:  "{{ lookup('euparc',
