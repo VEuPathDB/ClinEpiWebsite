@@ -158,7 +158,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                        status = "default", 
                        tags$div(
                          class = "treeContainer",
-                         shinyTree(ns("group"), search = TRUE, themeIcon=FALSE, themeDots = FALSE)
+                         withSpinner(shinyTree(ns("group"), search = TRUE, themeIcon=FALSE, themeDots = FALSE), type=5, size=.5)
                        )),
         style="margin-bottom: 10px"
       )
