@@ -34,11 +34,17 @@ xQuery <- reactive({
   }
   myInputs <- validateAndDebounceAxes()
   myX <- myInputs$myX
-
+  
   message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: xQuery:  Initiating query for xaxis data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
   if (is.null(data)) { return() }
+
+  if (!is.null(hlongitudinal1)) {
+    if (myX == hlongitudinal1) {
+      myX <- longitudinal1
+    }
+  } 
 
   strings <- getStrings(metadata.file)
   myCols <- c(aggKey(), myX)
@@ -68,6 +74,12 @@ xAxis <- reactive({
   mySubset <- myInputs$mySubset
   myTimeframe1 <- myInputs$myTimeframe1
   myTimeframe2 <- myInputs$myTimeframe2
+
+  if (!is.null(hlongitudinal1)) {
+    if (myX == hlongitudinal1) {
+      myX <- longitudinal1
+    }
+  }
 
   data <- xQuery()  
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)

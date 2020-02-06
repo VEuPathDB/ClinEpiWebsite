@@ -12,6 +12,12 @@ output$distribution <- renderPlotly({
         return()
       }
 
+      if (!is.null(hlongitudinal1)) {
+        if (myX == hlongitudinal1) {
+          myX <- longitudinal1
+        }
+      }
+
       df <- completeDT(df, myX)
       nums <- getNums(metadata.file)
       dates <- getDates(metadata.file)
