@@ -10,7 +10,7 @@
   border: 1px solid #233358;
   border-radius: 0.5em;
 }
-.recalculating:after {
+span.logo .recalculating:after {
   content: ' loading...';
 }
 .recalculating {
