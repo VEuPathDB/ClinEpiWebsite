@@ -93,6 +93,12 @@
         myFacet2 <- "FACET2"
       }
 
+      if (!is.null(hlongitudinal1)) {
+        if (myX == hlongitudinal1) {
+          myX <- longitudinal1
+        }
+      }
+
       nums <- getNums(metadata.file)
       dates <- getDates(metadata.file)
       if (myX == 'ageDays') {
