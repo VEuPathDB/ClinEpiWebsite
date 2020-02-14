@@ -213,14 +213,15 @@
         facetType <- input$facetType
       }
 
-      if (facetType == "direct") {
-	if (is.null(hlongitudinal1)) {
-          include <- c("Participant", "Household")
-        } else {
-	  include <- c("Participant")
+      include <- c("all")
+      if (isParticipant) {
+        if (facetType == "direct") {
+          if (is.null(hlongitudinal1)) {
+            include <- c("Participant", "Household")
+          } else {
+	    include <- c("Participant")
+          }
         }
-      } else {
-        include <- c("all")
       }
 
       return(include)
@@ -267,14 +268,15 @@
         facet2Type <- input$facet2Type
       }
 
-      if (facet2Type == "direct") {
-        if (is.null(hlongitudinal1)) {
-          include <- c("Participant", "Household")
-        } else {
-          include <- c("Participant")
+      include <- c("all")
+      if (isParticipant) {
+        if (facet2Type == "direct") {
+          if (is.null(hlongitudinal1)) {
+            include <- c("Participant", "Household")
+          } else {
+            include <- c("Participant")
+          }
         }
-      } else {
-        include <- c("all")
       }
 
       return(include)
@@ -318,14 +320,15 @@
         groupsType <- input$groupsType
       }
 
-      if (groupsType == "direct") {
-        if (is.null(hlongitudinal1)) {
-          include <- c("Participant", "Household")
-        } else {
-          include <- c("Participant")
+      include <- c("all")
+      if (isParticipant) {
+        if (groupsType == "direct") {
+          if (is.null(hlongitudinal1)) {
+            include <- c("Participant", "Household")
+          } else {
+            include <- c("Participant")
+          }
         }
-      } else {
-        include <- c("all")
       }
 
       return(include)

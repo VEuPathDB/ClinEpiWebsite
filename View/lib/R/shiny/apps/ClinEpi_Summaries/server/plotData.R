@@ -422,9 +422,11 @@ plotData <- reactive({
     dropCols <- c(aggKey, "YAXIS")
     if (any(colnames(plotData) %in% "XAXIS")) {
       aggStr1 <- paste("YAXIS ~ GROUPS + XAXIS + ", facetStr)
+      aggStr4 <- paste("SIZE ~ GROUPS + XAXIS + ", facetStr)
       mergeBy2 <- c("GROUPS", "XAXIS", facetCols)
     } else {
       aggStr1 <- paste("YAXIS ~ GROUPS + ", facetStr)
+      aggStr4 <- paste("SIZE ~ GROUPS + ", facetStr)
       mergeBy2 <- c("GROUPS", facetCols)
     }
   } else {
@@ -434,9 +436,11 @@ plotData <- reactive({
     dropCols <- c(aggKey, "YAXIS")
     if (any(colnames(plotData) %in% "XAXIS")) {
       aggStr1 <- "YAXIS ~ GROUPS + XAXIS"
+      aggStr4 <- "SIZE ~ GROUPS + XAXIS"
       mergeBy2 <- c("GROUPS", "XAXIS")
     } else {
       aggStr1 <- "YAXIS ~ GROUPS"
+      aggStr4 <- "SIZE ~ GROUPS"
       mergeBy2 <- c("GROUPS")
     }
   }
@@ -455,13 +459,13 @@ plotData <- reactive({
   if (myY %in% strings$SOURCE_ID) {
     mergeData <- NULL
     if (yaxis_stp1 == "any" | prtcpntView$val == FALSE) {
-      #will have to replace all instances of myY with 1 and all else with 0 before can sum
       for (i in seq(length(yaxis_stp2))) {
-        tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))
-        #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
+        tempData <- transform(plotData, "YAXIS" = ifelse(YAXIS == yaxis_stp2[i], 1, 0))        
+        groupSize <- aggregate(as.formula(aggStr1), tempData, length)
+        names(groupSize)[length(names(groupSize))] <- "SIZE"
         tempData <- aggregate(as.formula(aggStr1), tempData, sum)
         tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
-        #tempData <- aggregate(as.formula(paste0(aggStr1, " + PARTICIPANT_ID")), plotData, FUN = function(x){ if(yaxis_stp2[[i]] %in% x) {1} else {0} })
+        tempData <- merge(tempData, groupSize, by = mergeBy2)
         if (is.null(mergeData)) {
           mergeData <- tempData
         } else {
@@ -471,24 +475,30 @@ plotData <- reactive({
           mergeData <- merge(mergeData, tempData, by = aggKey)
           mergeData <- transform(mergeData, "YAXIS" = ifelse(prevY == 1 | YAXIS == 1, 1, 0))
           mergeData$prevY <- NULL
-          #the following to get proportions of prtcpnts with matching observatio rather than proportion of matching observations.
+          groupSize <- aggregate(as.formula(aggStr1), mergeData, length)
+          names(groupSize)[length(names(groupSize))] <- "SIZE"
           mergeData <- aggregate(as.formula(aggStr1), mergeData, sum)
           mergeData <- transform(mergeData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
+          mergeData <- merge(mergeData, groupSize, by = mergeBy2)
         }
       }
     } else {
-        mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(length(levels(as.factor(x))) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) }) 
+        mergeData <- aggregate(as.formula(aggStr1), plotData, FUN = function(x){ ifelse(uniqueN(x) == length(yaxis_stp2), all(sort(levels(as.factor(x))) == sort(yaxis_stp2)), FALSE) }) 
         mergeData <- transform(mergeData, "YAXIS" = ifelse(YAXIS == TRUE, 1, 0))
     }
+    if ("SIZE" %in% colnames(mergeData)) {
+      groupSize <- aggregate(as.formula(aggStr4), mergeData, sum)
+    } else {
+      groupSize <- aggregate(as.formula(aggStr3), mergeData, length)
+      names(groupSize)[length(names(groupSize))] <- "SIZE"
+    }
     mergeData <- aggregate(as.formula(aggStr3), mergeData, sum)
+    mergeData <- merge(mergeData, groupSize, by = mergeBy2)
     if (yaxis_stp3 == "proportion") {
-      groupSum <- as.data.table(aggregate(as.formula(aggStr2), plotData, FUN = countFun))
-      colnames(groupSum) <- sumCols
-      mergeData <- as.data.table(mergeData)
-      mergeData <- merge(mergeData, groupSum, by = mergeBy)
-      proportion <- mergeData$YAXIS / mergeData$SUM
-      mergeData$YAXIS <- proportion
-      mergeData$SUM <- NULL
+      mergeData$YAXIS <- mergeData$YAXIS / mergeData$SIZE
+      mergeData$SIZE <- NULL
+    } else {
+      mergeData$SIZE <- NULL
     }
   }
   if (yaxis_stp3 == "smooth" | yaxis_stp3 == "mean") {
