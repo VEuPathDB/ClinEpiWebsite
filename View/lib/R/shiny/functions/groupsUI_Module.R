@@ -46,6 +46,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
   propUrl <<- getPropertiesUrl(session) 
   message("\n", Sys.time(), " functions/groupsUI_Module.R: propUrl: ", propUrl)
   properties <<- suppressWarnings(try(fread(propUrl)))
+  properties <<- unique(properties)
   if (length(properties) > 0) {
     message(Sys.time(), " functions/groupsUI_Module.R: reading properties...")
     if (grepl("Error", properties)) {
@@ -196,6 +197,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     }
 
     if (length(properties) > 0) {
+      properties <- unique(properties)
       if (grepl("Error", properties)[1]) {
         properties <- NULL
       }

@@ -20,11 +20,14 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
   message("\n", Sys.time(), " functions/timelineUI_Module.R: propUrl: ", propUrl)
   properties <<- suppressWarnings(try(fread(propUrl)))
   if (length(properties) > 0) {
+    properties <- unique(properties)
     message(Sys.time(), " functions/timelineUI_Module.R: reading properties...")
     if (grepl("Error", properties)) {
       message(Sys.time(), " functions/timelineUI_Module.R: Error! properties will not be used")
       properties <<- NULL
-    } else {message(Sys.time(), " functions/timelineUI_Module.R: properties read:\n", properties)}
+    } else {
+      message(Sys.time(), " functions/timelineUI_Module.R: properties read:\n", properties)
+    }
   } else {
     message(Sys.time(), " functions/timelineUI_Module.R: no properties! new analysis")
     properties <<- NULL
