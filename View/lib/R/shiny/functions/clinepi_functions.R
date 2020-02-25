@@ -199,34 +199,14 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- setDTColType(longitudinal1, metadata.file, data)
-	if (category != "Participant") {
-          if (!is.null(lon2Data)) {
-            data <- merge(data, lon2Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
-          } else {
-            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
-          }
-        } else {
-	  data[[longitudinal1]] <- NULL
-	  data <- unique(data)
-	  if (!is.null(lon2Data)) {
-            data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
-          } else {
-            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID"), all = TRUE)
-          }
-        }
       } else {
         if (!is.null(hlongitudinal1)) {
           data <- getNamedQueryResult(con, category, datasetDigest, myVar, hlongitudinal1)
           if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           data <- setDTColType(hlongitudinal1, metadata.file, data)
-          if (!is.null(hlon2Data)) {
-            data <- merge(data, hlon2Data, by = c("PARTICIPANT_ID", hlongitudinal1))
+          if (!is.null(hlongitudinal2)) {
             names(data)[names(data) == hlongitudinal2] <- longitudinal2
-            names(data)[names(data) == hlongitudinal1] <- longitudinal1
-          } else {
-            data <- merge(data, hlon1Data, by = c("PARTICIPANT_ID", hlongitudinal1))
-            names(data)[names(data) == hlongitudinal1] <- longitudinal1
           }
           names(data)[names(data) == hlongitudinal1] <- longitudinal1
 	  if (myVar == hlongitudinal1) { myVar <- longitudinal1 }
@@ -237,11 +217,6 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
           data <- getNamedQueryResult(con, category, datasetDigest, myVar)
           if (is.null(data)) { return() }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
-          if (!is.null(lon2Data)) {
-             data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
-          } else {
-            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID"), all = TRUE)
-          }
         }
       }
     } else {
@@ -251,13 +226,7 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
   } else {
     message(Sys.time(), " Using strategy results, no query necessary")
     if (category == "Participant") {
-      if (!is.null(longitudinal1)) {
-        if (!is.null(lon2Data)) {
-          data <- merge(lon2Data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
-        } else {
-          data <- merge(lon1Data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
-        }
-      } else {
+      if (is.null(longitudinal1)) {
         data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
@@ -270,11 +239,6 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
       data <- merge(data, attributes.file, by = "OBSERVATION_ID", all=TRUE)
       if (!is.null(longitudinal1)) {
         data <- setDTColType(longitudinal1, metadata.file, data)
-        if (!is.null(lon2Data)) {
-          data <- merge(data, lon2Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
-        } else {
-          data <- merge(data, lon1Data, by = c("PARTICIPANT_ID", longitudinal1), all = TRUE)
-        }
       }
       naToNotSelected(data, col = "custom")
     }

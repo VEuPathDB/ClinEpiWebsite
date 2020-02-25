@@ -276,10 +276,10 @@ plotData <- reactive({
 
         data <- merge(attrData, outData, by = aggKey, all = TRUE)
         if (!is.null(facetData)) {
-          data <- merge(data, facetData, by = aggKey, all = TRUE)
+          data <- merge(data, facetData, by = aggKey, all.x = TRUE)
         }
         if (!is.null(facet2Data)) {
-          data <- merge(data, facet2Data, by = aggKey, all = TRUE)
+          data <- merge(data, facet2Data, by = aggKey, all.x = TRUE)
         }
 
         #naToZero(data)

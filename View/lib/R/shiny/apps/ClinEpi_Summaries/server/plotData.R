@@ -208,7 +208,9 @@ axesQuery <- reactive({
   message(Sys.time(), " Initiating query for axes data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
   data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
-  if (is.null(data)) { return() }
+  if (is.null(data)) { 
+    return() 
+  }
 
   data
 })
@@ -236,7 +238,6 @@ axes <- reactive({
   
   data <- axesQuery()
   if (is.null(data)) { return() }
-
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
 
   if (all(is.na(data[, myY, with=FALSE]))) {
@@ -259,14 +260,13 @@ axes <- reactive({
   if (contLongitudinal) {
     tempData <- tempData[!is.na(tempData$XAXIS) ,]
     tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
-    #hackish way to force reactive update if use keeps trying to change the param back to higher val
+    #hackish way to force reactive update if user keeps trying to change the param back to higher val
     tmp <- uniqueN(tempData$XAXIS)
     if (xaxis_bins != tmp) {
       numXBins$val <<- xaxis_bins
       numXBins$val <<- tmp
     } 
   }
-
   unique(tempData)
 })
 
@@ -356,40 +356,35 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
   }
 
   tempData <- axesData
-message("tempData: ", colnames(tempData))
-message(nrow(tempData))
-message(head(tempData))
   groupData <- group()
-message("groupData: ", colnames(groupData))
-message(nrow(groupData))
-message(head(groupData))
   if (!is.null(groupData)) {
-    tempData <- merge(tempData, groupData, by = aggKey)
+    if (contLongitudinal) {
+      tempData <- merge(tempData, groupData, by = aggKey, all.x = TRUE)
+    } else {
+      tempData <- merge(tempData, groupData, by = aggKey, all = TRUE)
+    }
   } else {
     tempData$GROUPS <- "All"
   }
 
-message("facetData: ", colnames(facetData))
-message("tempData: ", colnames(tempData))
   facetData <- facet1()
   if (!is.null(facetData)) {
 	  colnames(facetData) <- c(aggKey, "FACET")
-    tempData <- merge(tempData, facetData, by = aggKey)
+    tempData <- merge(tempData, facetData, by = aggKey, all.x = TRUE)
   }
 
   facetData2 <- facet2()
   if (!is.null(facetData2)) {
 	  colnames(facetData2) <- c(aggKey, "FACET2")
-    tempData <- merge(tempData, facetData2, by = aggKey)
+    tempData <- merge(tempData, facetData2, by = aggKey, all.x = TRUE)
   }
-
+ 
   unique(tempData)
 })
 
 plotData <- reactive({
   plotData <- tableData()
   if (is.null(plotData)) { return() } 
-    #collecting inputs .. i think these are the only ones i need here.. well see
   if (is.null(validateAndDebounceAxes())) {
     return()
   }
@@ -455,7 +450,6 @@ plotData <- reactive({
     aggStr1 <- paste0(aggStr1, " + " , paste(aggKey, collapse = " + "))
     countFun <- function(x) {length(x)}
   }
- 
   if (myY %in% strings$SOURCE_ID) {
     mergeData <- NULL
     if (yaxis_stp1 == "any" | prtcpntView$val == FALSE) {
@@ -465,21 +459,20 @@ plotData <- reactive({
         names(groupSize)[length(names(groupSize))] <- "SIZE"
         tempData <- aggregate(as.formula(aggStr1), tempData, sum)
         tempData <- transform(tempData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
-        tempData <- merge(tempData, groupSize, by = mergeBy2)
+        tempData <- merge(tempData, groupSize, by = c(aggKey(), mergeBy2))
         if (is.null(mergeData)) {
           mergeData <- tempData
         } else {
           names(tempData)[names(tempData) == "YAXIS"] <- "prevY"
           cols <- c(aggKey, "prevY")
           tempData <- tempData[, cols]
+	message("merging to prev axes data..")
           mergeData <- merge(mergeData, tempData, by = aggKey)
           mergeData <- transform(mergeData, "YAXIS" = ifelse(prevY == 1 | YAXIS == 1, 1, 0))
           mergeData$prevY <- NULL
-          groupSize <- aggregate(as.formula(aggStr1), mergeData, length)
-          names(groupSize)[length(names(groupSize))] <- "SIZE"
+	message("recalculating yaxis")
           mergeData <- aggregate(as.formula(aggStr1), mergeData, sum)
           mergeData <- transform(mergeData, "YAXIS"=ifelse(YAXIS >= 1, 1, 0))
-          mergeData <- merge(mergeData, groupSize, by = mergeBy2)
         }
       }
     } else {

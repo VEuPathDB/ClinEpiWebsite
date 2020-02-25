@@ -156,12 +156,12 @@ plotData <- reactive({
       facet2Data <- facet2()
 
       if (!is.null(facetData)) {
-        data <- merge(xData, facetData, by = aggKey())
+        data <- merge(xData, facetData, by = aggKey(), all.x = TRUE)
       } else {
         data <- xData
       }
       if (!is.null(facet2Data)) {
-        data <- merge(data, facet2Data, by = aggKey())
+        data <- merge(data, facet2Data, by = aggKey(), all.x = TRUE)
       } else {
       }
       
