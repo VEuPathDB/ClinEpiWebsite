@@ -569,7 +569,7 @@
         if (dontUseProps) {
           if (!myY %in% nums$SOURCE_ID) {
             selectInput(inputId = "yaxis_stp1",
-                        label = "are / is",
+                        label = NULL,
                         choices = list("always" = "all", "at least once" = "any"),
                         selected = "any",
                         width = '100%')
@@ -577,7 +577,7 @@
         } else {
           if (!myY %in% nums$SOURCE_ID) {
             selectInput(inputId = "yaxis_stp1",
-                        label = "are / is",
+                        label = NULL,
                         choices = list("always" = "all", "at least once" = "any"),
                         selected = mySelected,
                         width = '100%')
@@ -588,7 +588,7 @@
         if (dontUseProps) {
           if (!myY %in% nums$SOURCE_ID) {
             selectizeInput(inputId = "yaxis_stp1",
-                           label = "are / is",
+                           label = NULL,
                            choices = attrStp1List,
                            selected = "EUPATH_0000338",
                            width = '100%',
@@ -599,7 +599,7 @@
         } else {
           if (!myY %in% nums$SOURCE_ID) {
             selectizeInput(inputId = "yaxis_stp1",
-                           label = "are / is",
+                           label = NULL,
                            choices = attrStp1List,
                            selected = mySelected,
                            width = '100%',

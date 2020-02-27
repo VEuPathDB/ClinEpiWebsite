@@ -73,7 +73,12 @@ shinyServer(function(input, output, session) {
     #Sys.sleep(5)
 
     message(Sys.time(), " timelineInit value: ", isolate(timelineInit$val))
-    if (timelineInit$val == 2 & !timelineInit$done) {
+    if (is.null(longitudinal1)) { 
+      timelineCount <- 1 
+    } else {  
+      timelineCount <- 2
+    }
+    if (timelineInit$val == timelineCount & !timelineInit$done) {
       progress$inc(.15, "Timeline done...")
       timelineInit$done <<- TRUE
     } else { message("******Distributions-server.R: timeline still unfinished or was done" )}
