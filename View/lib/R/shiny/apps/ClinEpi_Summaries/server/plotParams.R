@@ -3,15 +3,15 @@
   }, once = TRUE)
 
   observeEvent(input$groupsType, {
-      groupInfo <<- callModule(customGroups, "group", groupLabel = groupLabel, metadata.file = metadata.file, include = groupData, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
+      groupInfo <<- callModule(customGroups, "group", groupLabel = reactive(NULL), metadata.file = metadata.file, include = groupData, selected = selectedGroup, groupsType = reactive(input$groupsType), groupsTypeID = "input$groupsType", moduleName = "groupInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
   }, once = TRUE)
 
   observeEvent(input$facetType, {
-      facetInfo <<- callModule(customGroups, "facet", groupLabel = facetLabel, metadata.file = metadata.file, include = facetData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
+      facetInfo <<- callModule(customGroups, "facet", groupLabel = reactive(NULL), metadata.file = metadata.file, include = facetData, selected = selectedFacet, groupsType = reactive(input$facetType), groupsTypeID = "input$facetType", moduleName = "facetInfo", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
   }, once = TRUE)
 
   observeEvent(input$facet2Type, {
-      facet2Info <<- callModule(customGroups, "facet2", groupLabel = facet2Label, metadata.file = metadata.file, include = facet2Data, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
+      facet2Info <<- callModule(customGroups, "facet2", groupLabel = reactive(NULL), metadata.file = metadata.file, include = facet2Data, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
   }, once = TRUE)
 
   output$prtcpntViewSwitch <- renderUI({
@@ -149,13 +149,13 @@
       if (is.null(properties)) {
           selectInput(inputId = "groupsType",
                       label = NULL,
-                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                       selected = "direct",
                       width = '100%')
       } else {
           selectInput(inputId = "groupsType",
                       label = NULL,
-                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                       selected = mySelected,
                       width = '100%')
       }
@@ -170,20 +170,20 @@
         if (isParticipant) {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                       selected = "makeGroups",
                       width = '100%')
         }
       } else {
         selectInput(inputId = "facetType",
                     label = NULL,
-                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                    choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                     selected = mySelected,
                     width = '100%')
       }
@@ -232,13 +232,13 @@
       if (is.null(properties)) {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                    choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                     selected = "none",
                     width = '100%')
       } else {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("All possible ..." = "direct", "Make my own ..." = "makeGroups", "None" = "none"),
+                    choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
                     selected = mySelected,
                     width = '100%')
       }
@@ -452,7 +452,6 @@
         }
       }
 
-      #dont remember why this is
       if (contLongitudinal) {
         include <- c("Observation", "Sample")
       } else {
@@ -485,7 +484,11 @@
 
       if (is.null(myY)) {
         if (is.null(properties)) {
-          label <- "Please select one"
+          if (contLongitudinal) {
+            label <- "Select a longitudinal variable"
+          } else {
+            label <- "Select a variable"
+          }
         } else {
           myYSourceId <- properties$selected[properties$input == "input$yaxis"]
           label <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myYSourceId]
@@ -567,7 +570,7 @@
           if (!myY %in% nums$SOURCE_ID) {
             selectInput(inputId = "yaxis_stp1",
                         label = "are / is",
-                        choices = list("always" = "all", "ever" = "any"),
+                        choices = list("always" = "all", "at least once" = "any"),
                         selected = "any",
                         width = '100%')
           }
@@ -575,7 +578,7 @@
           if (!myY %in% nums$SOURCE_ID) {
             selectInput(inputId = "yaxis_stp1",
                         label = "are / is",
-                        choices = list("always" = "all", "ever" = "any"),
+                        choices = list("always" = "all", "at least once" = "any"),
                         selected = mySelected,
                         width = '100%')
           }

@@ -226,12 +226,10 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
   } else {
     message(Sys.time(), " Using strategy results, no query necessary")
     if (category == "Participant") {
-      if (is.null(longitudinal1)) {
-        data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
-        if (is.null(data)) { return() }
-        data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
-        data <- merge(data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
-      }
+      data <- getNamedQueryResult(con, category, datasetDigest, "NAME")
+      if (is.null(data)) { return() }
+      data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+      data <- merge(data, attributes.file, by = "PARTICIPANT_ID", all = TRUE) 
       naToNotSelected(data, col = "custom")
     } else if (category == "Observation") {
       data <- getNamedQueryResult(con, "ObservationNames", datasetDigest, NULL, longitudinal1)

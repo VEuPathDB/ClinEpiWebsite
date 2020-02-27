@@ -100,20 +100,11 @@ reactiveDataFetcher = reactive({
         if ('PARTICIPANT_ID' %in% colnames(attributes.file)) {
           attributes.file <<- attributes.file[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
           isParticipant <<- TRUE
-          metadata.file <<- rbind(metadata.file, list("custom", "Selected Participants", "string", "Participants", "Participant", "null", "null", "null", "null", "null", 2, "Selected|Not Selected", "null"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Participants", "string", "Search Results", "Participant", "null", "null", "null", "null", "null", "null", "null", "null"))
-          metadata.file <<- rbind(metadata.file, list("dontcare2", "Dynamic Attributes", "string", "Search Results", "Participant", "null", "null", "null", "null", "null", "null", "null", "null"))
-          metadata.file <<- rbind(metadata.file, list("dontcare3", "Search Results", "string", "null", "Participant", "null", "null", "null", "null", "null", "null", "null", "null"))
-          #TODO figure out what we want to do here for the dy"null"mic ones. for now "null"
-          metadata.file <<- rbind(metadata.file, list("Avg_Female_Anopheles", "Avg Female Anopheles", "number", "Dynamic Attributes", "Participant", "null", "null", "null", "null", "null", "null", "null", "null"))
-          metadata.file <<- rbind(metadata.file, list("Matching_Observations_/_Year", "Matching Observations / Year", "number", "Dynamic Attributes", "Participant", "null", "null", "null", "null", "null", "null", "null", "null"))
-          metadata.file <<- rbind(metadata.file, list("Years_of_Observation", "Years of Observations", "number", "Dynamic Attributes", "Participant", "null", "null", "null", "null", "null", "null", "null", "null"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search results (selected participants)", "string", "null", "Participant", "null", "null", "null", "null", "null", 2, "Selected|Not Selected", "null"))
           } else {
           attributes.file = attributes.file[, OBSERVATION_ID:=as.character(OBSERVATION_ID)]
           isParticipant <<- FALSE
-          metadata.file <<- rbind(metadata.file, list("custom", "Selected Observations", "string", "Observations", "Observation", "null", "null", "null", "null", "null", 2, "Selected|Not Selected", "null"))
-          metadata.file <<- rbind(metadata.file, list("dontcare", "Observations", "string", "Search Results", "Observation", "null", "null", "null", "null", "null", "null", "null", "null"))
-          metadata.file <<- rbind(metadata.file, list("dontcare2", "Search Results", "string", "null", "Observation", "null", "null", "null", "null", "null", "null", "null", "null"))
+          metadata.file <<- rbind(metadata.file, list("custom", "Search results (selected observations)", "string", "null", "Observation", "null", "null", "null", "null", "null", 2, "Selected|Not Selected", "null"))
         }
       }
     }

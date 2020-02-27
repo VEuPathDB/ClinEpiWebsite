@@ -1,15 +1,9 @@
 # shiny module to create the 5 ui necessary for making custom groups
-#check it has access to the functions files. source those in global.R before this file, rather than in the server.R file
-#server logic should return inputs and range info
-
-#fix ui options. all possible facets shows more steps than necessary.
-#check out the width of cols. its not consistent.
 
 customGroupsUI <- function(id, colWidth = 6) {
   #need a namespace
   ns <- NS(id)
   
-  #here use uiOutput and maybe also taglist.. not sure yet how to get it into a column
   tagList(
     column(colWidth, align = "left",
            fluidRow(
@@ -31,7 +25,6 @@ customGroupsUI <- function(id, colWidth = 6) {
   )
 }
 
-#make sure this returns inputs and range info 
 customGroups <- function(input, output, session, groupLabel = "Name Me!!", metadata.file, include, selected = reactive("custom"), groupsType = reactive("makeGroups"), groupsTypeID = NULL, moduleName, prtcpntView = reactive(NULL), timepoints = reactive(NULL)) {
   ns <- session$ns
   needTreeUpdate <- reactiveValues()
@@ -329,8 +322,8 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
                       width = '100%')
     } else if (obs){
        selectInput(inputId = ns("group_stp1"),
-                   label = "are / is",
-                   choices = list("always" = "all", "ever" = "any"),
+                   label = NULL,
+                   choices = list("always" = "all", "at least once" = "any"),
                    selected = mySelected,
                    width = '100%')
     } else {
@@ -354,13 +347,13 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
         maxInputs <- length(attrStp1List) -1
         if (maxInputs == 1) {
           selectInput(inputId = ns("group_stp1"),
-                      label = "are / is",
+                      label = NULL,
                       choices = attrStp1List,
                       selected = mySelected,
                       width = '100%')
         } else {
           selectizeInput(inputId = ns("group_stp1"),
-                    label = "are / is",
+                    label = NULL,
                     choices = attrStp1List,
                     selected = mySelected,
                     width = '100%',
@@ -558,7 +551,7 @@ customGroups <- function(input, output, session, groupLabel = "Name Me!!", metad
     if (myStp1Val %in% anthro) {
       if (myStp1Val == "percentDays") {
         selectInput(inputId = ns("group_stp3"),
-                    label = "are",
+                    label = NULL,
                     choices = list('<' = 'lessThan', '>' = 'greaterThan', '=' = 'equals'),
                     selected = mySelected,
                     width = '100%')
