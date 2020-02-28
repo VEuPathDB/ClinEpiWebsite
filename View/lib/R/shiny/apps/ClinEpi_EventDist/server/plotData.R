@@ -4,7 +4,6 @@ source("../../functions/facetServer.R", local = TRUE)
 
 validateAndDebounceAxes <- debounce(reactive({
   #hack to force reactivity. idk maybe its a shiny bug, but reactlog cant find the module inputs for this specific case without referencing directly
-
   test2 <- input$`group-group`
 
   myX <- xaxisInfo()$group
@@ -155,12 +154,12 @@ plotData <- reactive({
       facetData <- facet1()
       facet2Data <- facet2()
 
-      if (!is.null(facetData)) {
+      if (!is.null(facetData) && myX != myFacet) {
         data <- merge(xData, facetData, by = aggKey(), all.x = TRUE)
       } else {
         data <- xData
       }
-      if (!is.null(facet2Data)) {
+      if (!is.null(facet2Data) && myX != myFacet2) {
         data <- merge(data, facet2Data, by = aggKey(), all.x = TRUE)
       } else {
       }
