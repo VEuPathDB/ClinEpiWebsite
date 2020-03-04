@@ -143,19 +143,33 @@
       }
     })
 
+   typeChoices <- reactive({
+     
+     label <- "Select a non-longitudinal variable to stratify on"
+ 
+     if (!isParticipant & !prtcpntView$val) {
+       label <- "Select a variable to stratify on"
+     }
+
+     myChoices <- c(label = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none")
+     names(myChoices)[names(myChoices) == "label"] <- label
+
+     myChoices
+   })
+
     output$groups_type <- renderUI({
       mySelected <- properties$selected[properties$input == "input$groupsType"]
 
       if (is.null(properties)) {
           selectInput(inputId = "groupsType",
                       label = NULL,
-                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                      choices = typeChoices(),
                       selected = "direct",
                       width = '100%')
       } else {
           selectInput(inputId = "groupsType",
                       label = NULL,
-                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                      choices = typeChoices(),
                       selected = mySelected,
                       width = '100%')
       }
@@ -165,25 +179,26 @@
     output$facet_type <- renderUI({
       mySelected <- properties$selected[properties$input == "input$facetType"]
       if (is.null(isParticipant)) { return() }
+      
 
       if (is.null(properties)) {
         if (isParticipant) {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                      choices = typeChoices(),
                       selected = "direct",
                       width = '100%')
         } else {
           selectInput(inputId = "facetType",
                       label = NULL,
-                      choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                      choices = typeChoices(),
                       selected = "makeGroups",
                       width = '100%')
         }
       } else {
         selectInput(inputId = "facetType",
                     label = NULL,
-                    choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                    choices = typeChoices(),
                     selected = mySelected,
                     width = '100%')
       }
@@ -232,13 +247,13 @@
       if (is.null(properties)) {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                    choices = typeChoices(),
                     selected = "none",
                     width = '100%')
       } else {
         selectInput(inputId = "facet2Type",
                     label = NULL,
-                    choices = c("Select an existing non-longitudinal variable to stratify on" = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none"),
+                    choices = typeChoices(),
                     selected = mySelected,
                     width = '100%')
       }
