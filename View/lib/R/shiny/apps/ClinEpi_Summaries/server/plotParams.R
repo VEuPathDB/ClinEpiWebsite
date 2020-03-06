@@ -229,7 +229,7 @@
       }
 
       include <- c("all")
-      if (isParticipant) {
+      if (isParticipant | prtcpntView$val) {
         if (facetType == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
@@ -284,7 +284,7 @@
       }
 
       include <- c("all")
-      if (isParticipant) {
+      if (isParticipant | prtcpntView$val) {
         if (facet2Type == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
@@ -327,7 +327,6 @@
         return(label)
     })
 
-#figure how to remove dates 
     groupData <- reactive({
       if (is.null(input$groupsType)) {
         return()
@@ -336,7 +335,7 @@
       }
 
       include <- c("all")
-      if (isParticipant) {
+      if (isParticipant | prtcpntView$val) {
         if (groupsType == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
