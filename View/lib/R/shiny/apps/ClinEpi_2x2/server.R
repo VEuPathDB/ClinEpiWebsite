@@ -1,9 +1,9 @@
 # server.r
 
-#lon1DataList <- list()
-#lon2DataList <- list()
-#hlon1DataList <- list()
-#hlon2DataList <- list()
+lon1DataList <- list()
+lon2DataList <- list()
+hlon1DataList <- list()
+hlon2DataList <- list()
 
 model.prop <- NULL
 dbDrv <- dbDriver("Oracle")
@@ -34,12 +34,12 @@ shinyServer(function(input, output, session) {
   properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
-  #lon2Data <- NULL
-  #lon1Data <- NULL
+  lon2Data <- NULL
+  lon1Data <- NULL
   hlongitudinal1 <- NULL
   hlongitudinal2 <- NULL
-  #hlon2Data <- NULL
-  #hlon1Data <- NULL
+  hlon2Data <- NULL
+  hlon1Data <- NULL
   project.id <- NULL
   isParticipant <- NULL
   model.prop <- NULL

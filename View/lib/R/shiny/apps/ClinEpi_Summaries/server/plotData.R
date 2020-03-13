@@ -104,8 +104,8 @@ group <- reactive({
 
   data <- groupQuery()
   if (is.null(data)) { return() }
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
-
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2, lon1Data, lon2Data)
+message("data after timeline filter: ", names(data))
   if (all(is.na(data[, myGroups, with=FALSE]))) {
     showNotification(paste0("The ", varName , " has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "warning")
     return()
@@ -238,7 +238,7 @@ axes <- reactive({
   
   data <- axesQuery()
   if (is.null(data)) { return() }
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2, lon1Data, lon2Data)
 
   if (all(is.na(data[, myY, with=FALSE]))) {
     showNotification("the Y-axis variable has no data for the timepoint(s) selected, please select another.", duration = NULL, type = "error")

@@ -1,9 +1,9 @@
 ## server.r
 
-#lon1DataList <- list()
-#lon2DataList <- list()
-#hlon1DataList <- list()
-#hlon2DataList <- list()
+lon1DataList <- list()
+lon2DataList <- list()
+hlon1DataList <- list()
+hlon2DataList <- list()
 
 model.prop <- NULL
 dbDrv <- dbDriver("Oracle")
@@ -32,12 +32,12 @@ shinyServer(function(input, output, session) {
   properties <- NULL
   longitudinal1 <- NULL
   longitudinal2 <- NULL
-  #lon2Data <- NULL
-  #lon1Data <- NULL
+  lon2Data <- NULL
+  lon1Data <- NULL
   hlongitudinal1 <- NULL
   hlongitudinal2 <- NULL
-  #hlon2Data <- NULL
-  #hlon1Data <- NULL
+  hlon2Data <- NULL
+  hlon1Data <- NULL
   project.id <- NULL
   isParticipant <- NULL
   legendTitle <- NULL
@@ -64,7 +64,7 @@ shinyServer(function(input, output, session) {
   facet1Init$done <- FALSE
 
   source("../../functions/reactive_data_load.R", local = TRUE) 
-
+message("lon1Data cols: ", names(lon1Data))
   progress <- Progress$new(session, min = 0, max = 1, style = "notification") 
   progress$set(message = "Loading data for this new session ...", value = .10)
 

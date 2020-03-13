@@ -78,7 +78,7 @@ attr <- reactive({
  
   data <- attrQuery()
   if (is.null(data)) { return() }
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2, lon1Data, lon2Data)
 
   if (all(is.na(data[, myAttr, with=FALSE]))) {
     showNotification(paste0("The Independent/Exposure variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "warning")
@@ -178,7 +178,7 @@ out <- reactive({
 
   data <- outQuery()
   if (is.null(data)) { return() }
-  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2)
+  data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2, lon1Data, lon2Data)
  
   if (all(is.na(data[, myOut, with=FALSE]))) {
     showNotification(paste0("the Dependent/Outcome variable has no data for the timepoint(s) selected, please select another."), duration = NULL, type = "error")
