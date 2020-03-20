@@ -70,15 +70,15 @@
       js$virtualBodyClick();
     })
 
-   typeChoices <- reactive({
+    typeChoices <- reactive({
 
-     label <- "Select a non-longitudinal variable to stratify on"
+     label <- "Stratify by a non-longitudinal variable"
 
      if (!isParticipant & !prtcpntView$val) {
-       label <- "Select a variable to stratify on"
+       label <- "Stratify by a variable"
      }
 
-     myChoices <- c(label = "direct", "Select a variable to transform into binary categories" = "makeGroups", "Do not stratify" = "none")
+     myChoices <- c(label = "direct", "Stratify by a variable you will dichotomize" = "makeGroups", "Do not stratify" = "none")
      names(myChoices)[names(myChoices) == "label"] <- label
 
      myChoices
