@@ -373,9 +373,8 @@
         leaves <- leaves[!leaves %in% dates]
         selected <- leaves[1]
       }
-
-      #return(selected)
-      return("custom")
+      
+      return(selected)
     })
 
     selectedFacet <- reactive({
