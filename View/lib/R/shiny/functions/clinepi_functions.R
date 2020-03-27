@@ -216,6 +216,11 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
         } else {
           data <- getNamedQueryResult(con, category, datasetDigest, myVar)
           if (is.null(data)) { return() }
+          if (!is.null(lon2Data)) {
+            data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          } else {
+            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          }
           data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         }
       }
