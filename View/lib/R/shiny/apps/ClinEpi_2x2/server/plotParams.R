@@ -18,23 +18,25 @@
      facet2Info <<- callModule(customGroups, "facet2", groupLabel = reactive(NULL), metadata.file = metadata.file, include = facet2Data, selected = selectedFacet2, groupsType = reactive(input$facet2Type), groupsTypeID = "input$facet2Type", moduleName = "facet2Info", prtcpntView = reactive(prtcpntView$val), timepoints = reactive(current$subset))
   }, once = TRUE)
 
-  output$prtcpntViewSwitch <- renderUI({
-    if (isParticipant != TRUE) {
-      tagList(
-        box(width = 6, status = "primary", title = "Unit of Analysis",
-          radioButtons(inputId = "prtcpntViewSwitch",
-                      label = NULL,
-                      choiceNames = c("Participant View", "Observation View"),
-                      choiceValues = c(TRUE, FALSE),
-                      selected = "FALSE",
-                      inline = TRUE)
-        )
-      )
-    }
-  })
+#  output$prtcpntViewSwitch <- renderUI({
+#    if (isParticipant != TRUE) {
+#      tagList(
+#        box(width = 6, status = "primary", title = "Unit of Analysis",
+#          radioButtons(inputId = "prtcpntViewSwitch",
+#                      label = NULL,
+#                      choiceNames = c("Participant View", "Observation View"),
+#                      choiceValues = c(TRUE, FALSE),
+#                      selected = "FALSE",
+#                      inline = TRUE)
+#        )
+#      )
+#    }
+#  })
 
-  observeEvent(input$prtcpntViewSwitch, {
-    if (input$prtcpntViewSwitch == "TRUE" | input$prtcpntViewSwitch == TRUE) {
+#  observeEvent(input$prtcpntViewSwitch, {
+#    if (input$prtcpntViewSwitch == "TRUE" | input$prtcpntViewSwitch == TRUE) {
+  observeEvent(isParticipant, {
+    if (isParticipant) {
       prtcpntView$val <- TRUE
     } else {
       prtcpntView$val <- FALSE
