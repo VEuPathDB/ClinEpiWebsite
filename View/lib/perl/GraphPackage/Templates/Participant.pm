@@ -446,5 +446,35 @@ gp <- gp + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
 
 }
 
+#icemr COVID-19
+package ClinEpiWebsite::View::GraphPackage::Templates::Participant::DS_78edfbb53d;
+use vars qw( @ISA );
+@ISA = qw( ClinEpiWebsite::View::GraphPackage::Templates::Participant );
+use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
+
+use strict;
+
+sub finalProfileAdjustments{
+  my ($self, $profile) = @_;
+
+  my $rAdjustString = << 'RADJUST';
+
+profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
+profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
+profile.df.full$COLOR = profile.df.full$STATUS
+profile.df.full$FILL = profile.df.full$COLOR
+profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
+profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Ct value: ", profile.df.full$OPT_STATUS)
+RADJUST
+
+  $profile->addAdjustProfile($rAdjustString);
+#  $profile->setDefaultXMax($xmax);
+#  $profile->setDefaultXMin($xmin);
+#  $profile->setTimeline('TRUE');
+  $profile->setXaxisLabel("Day");
+  $profile->setForceNoLines(1);
+
+}
+
 1;
 
