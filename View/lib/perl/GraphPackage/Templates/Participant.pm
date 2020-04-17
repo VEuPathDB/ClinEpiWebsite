@@ -459,20 +459,16 @@ sub finalProfileAdjustments{
 
   my $rAdjustString = << 'RADJUST';
 
-profile.df.full$ELEMENT_NAMES = as.Date(profile.df.full$ELEMENT_NAMES, '%d-%b-%y');
-profile.df.full$ELEMENT_NAMES_NUMERIC = NA;
-profile.df.full$COLOR = profile.df.full$STATUS
-profile.df.full$FILL = profile.df.full$COLOR
-profile.df.full$COLOR = as.factor(profile.df.full$COLOR);
-profile.df.full$TOOLTIP = paste0(profile.df.full$STATUS, "| Ct value: ", profile.df.full$OPT_STATUS)
+profile.df.full$VALUE = as.numeric(profile.df.full$STATUS)
+profile.df.full$STATUS = NULL
+profile.df.full$LEGEND = NULL
+profile.df.full$TOOLTIP = paste0("Ct value: ", profile.df.full$STATUS)
 RADJUST
 
+  $profile->setDefaultXMax(6);
   $profile->addAdjustProfile($rAdjustString);
-#  $profile->setDefaultXMax($xmax);
-#  $profile->setDefaultXMin($xmin);
-#  $profile->setTimeline('TRUE');
   $profile->setXaxisLabel("Day");
-  $profile->setForceNoLines(1);
+  $profile->setYaxisLabel("Ct value, by qRT-PCR result");
 
 }
 
