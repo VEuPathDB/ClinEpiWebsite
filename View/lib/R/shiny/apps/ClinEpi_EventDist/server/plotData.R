@@ -46,16 +46,14 @@ xQuery <- reactive({
   } 
 
   strings <- getStrings(metadata.file)
-  myCols <- c(aggKey(), myX)
-  outData <- data[, myCols, with = FALSE]
 
   if (myX %in% strings$SOURCE_ID) {
-    if (any(grepl("|", outData[[myX]], fixed=TRUE))) {
-      outData <- separate_rows(outData, myX, sep = "[|]+")
+    if (any(grepl("|", data[[myX]], fixed=TRUE))) {
+      data <- separate_rows(data, myX, sep = "[|]+")
     }
   }
   
-  unique(outData)
+  unique(data)
 })
 
 xAxis <- reactive({
@@ -80,7 +78,7 @@ xAxis <- reactive({
     }
   }
 
-  data <- xQuery()  
+  data <- xQuery() 
   data <- timelineData(mySubset, myTimeframe1, myTimeframe2, data, longitudinal1, longitudinal2, lon1Data, lon2Data)
 
   if (all(is.na(data[, myX, with=FALSE]))) {
@@ -143,8 +141,6 @@ plotData <- reactive({
                      #"input$individualPlot_stp1\t", input$individualPlot_stp1, "\n",
                      #"input$individualPlot_stp2\t", input$individualPlot_stp2 
                     )
-
-#message("What are the saved parameterssssssss: ", text)
 
       message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: plotData: writing properties in propUrl:", propUrl, "\n", text)
       PUT(propUrl, body = "")
