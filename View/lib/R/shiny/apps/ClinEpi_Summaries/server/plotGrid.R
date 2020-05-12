@@ -84,7 +84,7 @@
             myPlot <- myPlot + geom_smooth(span = .3, na.rm = TRUE)
           }
 
-          numColors <- length(levels(as.factor(df$LINES)))
+          numColors <- uniqueN(df$LINES)
           maxChars <- max(nchar(as.vector(df$LINES)))
 
 	  #find num colors needed
@@ -143,7 +143,7 @@
             myPlot <- myPlot + geom_boxplot()
           }
 
-          numColors <- length(levels(as.factor(df$XAXIS)))
+          numColors <- uniqueN(df$XAXIS)
           maxChars <- max(nchar(as.vector(df$XAXIS)))
 
 	  #find num colors needed
