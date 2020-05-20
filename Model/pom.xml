@@ -13,6 +13,22 @@
   <packaging>jar</packaging>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>fgputil-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>fgputil-db</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.gusdb</groupId>
+      <artifactId>fgputil-accountdb</artifactId>
+    </dependency>
+
   </dependencies>
 
 </project>
