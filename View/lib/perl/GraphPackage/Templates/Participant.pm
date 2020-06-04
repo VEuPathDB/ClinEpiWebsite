@@ -8,9 +8,9 @@ use EbrcWebsiteCommon::View::GraphPackage::MixedPlotSet;
 
 use EbrcWebsiteCommon::View::GraphPackage::Util;
 
-use EbrcWebsiteCommon::View::GraphPackage::BarPlot;
-use EbrcWebsiteCommon::View::GraphPackage::LinePlot;
-use EbrcWebsiteCommon::View::GraphPackage::ScatterPlot;
+use EbrcWebsiteCommon::View::GraphPackage::LegacyGGBarPlot;
+use EbrcWebsiteCommon::View::GraphPackage::LegacyGGLinePlot;
+use EbrcWebsiteCommon::View::GraphPackage::LegacyGGScatterPlot;
 use EbrcWebsiteCommon::View::GraphPackage::GGScatterPlot;
 use EbrcWebsiteCommon::View::GraphPackage::GGLinePlot;
 use EbrcWebsiteCommon::View::GraphPackage::GGBarPlot;
@@ -160,8 +160,13 @@ sub init {
   }
 
   my $participantProfile = EbrcWebsiteCommon::View::GraphPackage::Util::makeNodeMetadataSet(\@nodeMetadata, $nodeMetadataEvent, $nodeMetadataStatus, \@nodeMetadataSampleInfo);
-  my $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
-  
+  my $line;
+  if ($self->useLegacy) {
+    $line = EbrcWebsiteCommon::View::GraphPackage::LegacyGGLinePlot::ParticipantSummary->new(@_);
+  } else {
+    $line = EbrcWebsiteCommon::View::GraphPackage::GGLinePlot::ParticipantSummary->new(@_);
+  }  
+
   if (defined $profileSets ){
       push @{$participantProfile},@{$profileSets};
   }                                                             
@@ -185,6 +190,7 @@ use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
+sub useLegacy { return 1; }
 sub useWhoStandards {1}
 
 sub finalProfileAdjustments{
@@ -231,6 +237,7 @@ use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
+sub useLegacy { return 1; }
 sub useWhoStandards {1}
 
 sub finalProfileAdjustments{
@@ -278,6 +285,8 @@ use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
+sub useLegacy { return 1; }
+
 sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
@@ -320,6 +329,8 @@ use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
+sub useLegacy { return 1; }
+
 sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
@@ -360,6 +371,8 @@ use vars qw( @ISA );
 use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
+
+sub useLegacy { return 1; }
 
 sub finalProfileAdjustments{
   my ($self, $profile) = @_;
@@ -411,6 +424,8 @@ use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
 
+sub useLegacy { return 1; }
+
 sub finalProfileAdjustments{
   my ($self, $profile) = @_;
 
@@ -453,6 +468,8 @@ use vars qw( @ISA );
 use ClinEpiWebsite::View::GraphPackage::Templates::Participant;
 
 use strict;
+
+sub useLegacy { return 1; }
 
 sub finalProfileAdjustments{
   my ($self, $profile) = @_;
