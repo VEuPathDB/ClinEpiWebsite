@@ -63,12 +63,12 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
       } else {
         myMin <- unique(metadata.file$MIN[metadata.file$SOURCE_ID == selected])
         myMax <- unique(metadata.file$MAX[metadata.file$SOURCE_ID == selected])
-     
+   message("my max orig: ", myMax)  
         if (length(longitudinal1$columns) == 1) {
           label <- paste0("Filter by ", metadata.file$PROPERTY[metadata.file$SOURCE_ID == longitudinal1$columns[1]])
 	  if (longitudinal1$columns[1] %in% dates) {
-	    myMin <- as.Date(myMin, format = "%d-%b-%y")
-            myMax <- as.Date(myMax, format = "%d-%b-%y")
+	    myMin <- as.Date(myMin, format = "%Y-%m-%d")
+            myMax <- as.Date(myMax, format = "%Y-%m-%d")
           } else {
 	    myMin <- as.numeric(myMin)
             myMax <- as.numeric(myMax)
@@ -76,8 +76,8 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
         } else {
           if (all(longitudinal1$columns %in% dates)) {
             label <- "Date Variable:"
-	    myMin <- as.Date(myMin, format = "%d-%b-%y")
-	    myMax <- as.Date(myMax, format = "%d-%b-%y")
+	    myMin <- as.Date(myMin, format = "%Y-%m-%d")
+	    myMax <- as.Date(myMax, format = "%Y-%m-%d")
           } else {
             label <- "Age Variable:"
 	    myMin <- as.numeric(myMin)
@@ -103,7 +103,8 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
         }
       }
     }
- 
+ message("timeline 1 max: " , selectedMax)
+
     #timeline2
     if(is.null(longitudinal2)) {
       timeline2 <- NULL 
@@ -119,8 +120,8 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
         if (length(longitudinal2$columns) == 1) {
           label2 <- paste0("Filter by ", metadata.file$PROPERTY[metadata.file$SOURCE_ID == longitudinal2$columns[1]])
  	  if (longitudinal2$columns[1] %in% dates) {
-            myMin2 <- as.Date(myMin2, format = "%d-%b-%y")
-            myMax2 <- as.Date(myMax2, format = "%d-%b-%y")
+            myMin2 <- as.Date(myMin2, format = "%Y-%m-%d")
+            myMax2 <- as.Date(myMax2, format = "%Y-%m-%d")
           } else {
 	    myMin2 <- as.numeric(myMin2)
             myMax2 <- as.numeric(myMax2)
@@ -128,8 +129,8 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
         } else {
           if (all(longitudinal2$columns %in% dates)) {
             label2 <- "Date Variable:"
-            myMin2 <- as.Date(myMin2, format = "%d-%b-%y")
-            myMax2 <- as.Date(myMax2, format = "%d-%b-%y")
+            myMin2 <- as.Date(myMin2, format = "%Y-%m-%d")
+            myMax2 <- as.Date(myMax2, format = "%Y-%m-%d")
           } else {
             label2 <- "Age Variable:"
             myMin2 <- as.numeric(myMin2)
