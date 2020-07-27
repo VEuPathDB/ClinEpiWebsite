@@ -103,7 +103,6 @@ timeline <- function(input, output, session, longitudinal, metadata.file) {
         }
       }
     }
- message("timeline 1 max: " , selectedMax)
 
     #timeline2
     if(is.null(longitudinal2)) {
