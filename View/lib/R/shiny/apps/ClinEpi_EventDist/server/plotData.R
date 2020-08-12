@@ -150,15 +150,30 @@ plotData <- reactive({
       facetData <- facet1()
       facet2Data <- facet2()
 
+      myCols <- c(aggKey(), myX)
+
       if (!is.null(facetData) && myX != myFacet) {
         data <- merge(xData, facetData, by = aggKey(), all.x = TRUE)
+        if ("FACET" %in% names(facetData)) {
+          myCols <- c(myCols, "FACET")
+        } else {
+          myCols <- c(myCols, myFacet)
+        }
       } else {
         data <- xData
       }
       if (!is.null(facet2Data) && myX != myFacet2) {
         data <- merge(data, facet2Data, by = aggKey(), all.x = TRUE)
-      } else {
+        if ("FACET2" %in% names(facetData)) {
+          myCols <- c(myCols, "FACET2")
+        } else {  
+          myCols <- c(myCols, myFacet2)
+        }
       }
-      
+   
+      myCols <- unique(myCols)
+	message("needed cols: ", myCols)
+	message("cols in data: ", names(data)) 
+      data <- data[, myCols, with=FALSE]
       unique(data)
     })
