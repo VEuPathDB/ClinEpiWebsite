@@ -374,7 +374,7 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
   }
 
   facetData2 <- facet2()
-  if (!is.null(facetData2)) {
+  if (!is.null(facetData2) && myFacet != myFacet2) {
 	  colnames(facetData2) <- c(aggKey, "FACET2")
     tempData <- merge(tempData, facetData2, by = aggKey, all.x = TRUE)
   }
