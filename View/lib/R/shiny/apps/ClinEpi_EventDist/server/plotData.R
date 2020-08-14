@@ -164,7 +164,7 @@ plotData <- reactive({
       }
       if (!is.null(facet2Data) && myX != myFacet2) {
         data <- merge(data, facet2Data, by = aggKey(), all.x = TRUE)
-        if ("FACET2" %in% names(facetData)) {
+        if ("FACET2" %in% names(facet2Data)) {
           myCols <- c(myCols, "FACET2")
         } else {  
           myCols <- c(myCols, myFacet2)
