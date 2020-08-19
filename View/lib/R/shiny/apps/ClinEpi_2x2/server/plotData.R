@@ -278,7 +278,7 @@ plotData <- reactive({
         if (!is.null(facetData)) {
           data <- merge(data, facetData, by = aggKey, all.x = TRUE)
         }
-        if (!is.null(facet2Data)) {
+        if (!is.null(facet2Data) && myFacet != myFacet2) {
           data <- merge(data, facet2Data, by = aggKey, all.x = TRUE)
         }
 
