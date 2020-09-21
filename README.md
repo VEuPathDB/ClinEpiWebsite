@@ -1,2 +1,2 @@
 # ClinEpiWebsite
-frontend pages (html, jsp, js, css) that add or modify EbrWebsiteCommmon and WDKClient, used in ClinEpiDB.org.
+frontend pages (js, images, css, html) that add or modify EbrWebsiteCommmon and WDKClient, used in ClinEpiDB.org.
