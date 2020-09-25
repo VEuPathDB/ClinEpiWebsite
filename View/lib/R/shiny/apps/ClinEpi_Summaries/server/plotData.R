@@ -123,8 +123,8 @@ message("data after timeline filter: ", names(data))
     colnames(outData) <- c(aggKey, "GROUPS")
 
     if (myGroups %in% nums$SOURCE_ID | myGroups %in% dates$source_id) {
-      if (length(levels(as.factor(outData$GROUPS))) >= 4) {
-        outData$GROUPS <- rcut_number(outData$GROUPS)
+      if (length(levels(as.factor(outData$GROUPS))) > 5) {
+        outData$GROUPS <- rcut_number(outData$GROUPS, 5)
       } else {
         outData$GROUPS <- as.factor(outData$GROUPS)
       }

@@ -116,7 +116,9 @@ facet1 <- reactive({
   if (facetType == "direct") {
         outData <- data
         if (myFacet %in% nums$SOURCE_ID | myFacet %in% dates$SOURCE_ID) {
-          outData[[myFacet]] <- rcut_number(outData[[myFacet]],4)
+          if (uniqueN(outData[[myFacet]]) > 5) {
+            outData[[myFacet]] <- rcut_number(outData[[myFacet]],5)
+          }
         }
         displayLabel <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myFacet]
         outData[[myFacet]] <- paste0(displayLabel, ": ", outData[[myFacet]])
@@ -254,7 +256,9 @@ facet2 <- reactive({
   if (facet2Type == "direct") {
         outData <- data
         if (myFacet2 %in% nums$SOURCE_ID | myFacet2 %in% dates$SOURCE_ID) {
-          outData[[myFacet2]] <- rcut_number(outData[[myFacet2]],4)
+          if (uniqueN(outData[[myFacet2]]) > 5) {
+            outData[[myFacet2]] <- rcut_number(outData[[myFacet2]],5)
+          }
         }
         displayLabel <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == myFacet2]
         outData[[myFacet2]] <- paste0(displayLabel, ": ", outData[[myFacet2]])
