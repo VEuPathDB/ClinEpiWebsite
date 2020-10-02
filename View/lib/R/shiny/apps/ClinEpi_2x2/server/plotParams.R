@@ -195,7 +195,7 @@
       }
 
       include <- c("all")
-      if (isParticipant | prtcpntView$val) {
+      if (isParticipant & !is.null(longitudinal1)) {
         if (facetType == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
@@ -273,7 +273,7 @@
       }
 
       include <- c("all")
-      if (isParticipant | prtcpntView$val) {
+      if (isParticipant & !is.null(longitudinal1)) {
         if (facet2Type == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")

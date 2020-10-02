@@ -123,8 +123,8 @@ message("data after timeline filter: ", names(data))
     colnames(outData) <- c(aggKey, "GROUPS")
 
     if (myGroups %in% nums$SOURCE_ID | myGroups %in% dates$source_id) {
-      if (length(levels(as.factor(outData$GROUPS))) >= 4) {
-        outData$GROUPS <- rcut_number(outData$GROUPS)
+      if (length(levels(as.factor(outData$GROUPS))) > 5) {
+        outData$GROUPS <- rcut_number(outData$GROUPS, 5)
       } else {
         outData$GROUPS <- as.factor(outData$GROUPS)
       }
@@ -374,7 +374,7 @@ message("\n", Sys.time(), " ClinEpi_Summaries/server/plotData.R: tableData: writ
   }
 
   facetData2 <- facet2()
-  if (!is.null(facetData2)) {
+  if (!is.null(facetData2) && myFacet != myFacet2) {
 	  colnames(facetData2) <- c(aggKey, "FACET2")
     tempData <- merge(tempData, facetData2, by = aggKey, all.x = TRUE)
   }

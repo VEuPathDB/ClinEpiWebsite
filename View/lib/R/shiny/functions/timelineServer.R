@@ -60,7 +60,6 @@ timelineData <- function(mySubset, myTimeframe1, myTimeframe2, data, longitudina
     }
     if (!is.null(longitudinal2)) {
       if (!is.null(myTimeframe2)) {
-message("data to subset: ", names(data))  
       data <- subsetDataFetcher(min = myTimeframe2[1], max = myTimeframe2[2], myData = data, col = longitudinal2)
         message(Sys.time(), " functions/timelineServer.R: timelineData: subsetting data by second longitudinal variable..")
         if (nrow(data) == 0) {
@@ -70,8 +69,6 @@ message("data to subset: ", names(data))
       }
     }
   }
-
-  #longitudinalText <<- longitudinalText(mySubset, myTimeframe1, myTimeframe2)
 
   data
 }
