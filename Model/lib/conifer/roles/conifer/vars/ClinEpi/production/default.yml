@@ -20,7 +20,6 @@ modelprop:
   'attr=google_analytics_id xpath=sites/site[@hostname=\"{}\"] default='.format( hostname|swap_hostname(_host_frontends) )
   )
 }}"
-
   COMMUNITY_SITE: "//{{ community_env_map[prefix]|default(community_env_map['default']) }}"
 
 # the below extends the w_ q_ prefix pattern used for workspace_env_map, which
