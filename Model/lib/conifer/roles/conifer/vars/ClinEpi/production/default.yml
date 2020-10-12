@@ -22,6 +22,9 @@ modelprop:
 }}"
   COMMUNITY_SITE: "//{{ community_env_map[prefix]|default(community_env_map['default']) }}"
 
+# construct a prefix from hostname, like w_prefix, q_prefix
+prefix: "{{ hostname | regex_replace('^([a-z])[0-9].*','\\1_prefix') }}"
+
 # the below extends the w_ q_ prefix pattern used for workspace_env_map, which
 # really feels like a bad idea.  please don't let this cancer spread.  Find a
 # generalized way to do this in the future... 
