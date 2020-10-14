@@ -231,7 +231,7 @@
       }
 
       include <- c("all")
-      if (isParticipant | prtcpntView$val) {
+      if (isParticipant & !is.null(longitudinal1)) {
         if (facetType == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
@@ -286,7 +286,7 @@
       }
 
       include <- c("all")
-      if (isParticipant | prtcpntView$val) {
+      if (isParticipant & !is.null(longitudinal1)) {
         if (facet2Type == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
@@ -335,9 +335,11 @@
       } else {
         groupsType <- input$groupsType
       }
-
+      message("groupsType: ", groupsType)
+      message("isParticipant: ", isParticipant)
+      message("hlongitudinal1:", hlongitudinal1)
       include <- c("all")
-      if (isParticipant | prtcpntView$val) {
+      if (isParticipant & !is.null(longitudinal1)) {
         if (groupsType == "direct") {
           if (is.null(hlongitudinal1)) {
             include <- c("Participant", "Household")
@@ -346,7 +348,7 @@
           }
         }
       }
-
+	message("group include: ", include)
       return(include)
     })
 
