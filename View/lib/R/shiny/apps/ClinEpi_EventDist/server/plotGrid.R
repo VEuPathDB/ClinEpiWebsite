@@ -65,25 +65,22 @@ output$distribution <- renderPlotly({
         } else {
           myPlot <- myPlot + geom_histogram(aes(text = paste0("Count: ", ..count..)), stat = "count", fill = viridis(1, end = .25, direction = -1))
           myPlot <- myPlot + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+          if (facetType == "makeGroups") {
+            myFacet <- "FACET"
+          }
+          if (facet2Type == "makeGroups") {
+            myFacet2 <- "FACET2"
+          }
           if (facetType == "none" & facet2Type != "none") {
             myFacet <- myFacet2
             facetType <- facet2Type
             facet2Type <- "none"
           }
           if (facet2Type == "none") {
-            if (facetType == 'direct') {
-              myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
-              # scale_fill_brewer(palette = cbPalette)
-            } else if (facetType == 'makeGroups') {
-              myPlot <- myPlot + facet_wrap(~ FACET, ncol = 1)
-            }
+            myPlot <- myPlot + facet_wrap(reformulate(myFacet), ncol = 1)
           } else {
-            if (facetType == "makeGroups") {
-              myFacet <- "FACET"
-            }
-            if (facet2Type == "makeGroups") {
-              myFacet2 <- "FACET2"
-            }
+
             myPlot <- myPlot + facet_grid(reformulate(myFacet, myFacet2))
           }
 
