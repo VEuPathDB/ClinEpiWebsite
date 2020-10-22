@@ -97,11 +97,19 @@
       df <- as.data.table(df)
 
       if (!is.null(iPlot_stp1)) {
-        keep <- c(df[, myFacet, with=FALSE] == iPlot_stp1)
+        if (iPlot_stp1 == 'NA') {
+          keep <- c(is.na(df[, myFacet, with=FALSE]))
+        } else {
+          keep <- c(df[, myFacet, with=FALSE] == iPlot_stp1)
+        }
         df <- df[keep,]
       }
       if (!is.null(iPlot_stp2)) {
-        keep2 <- c(df[, myFacet2, with=FALSE] == iPlot_stp2)
+        if (iPlot_stp2 == 'NA') {
+          keep2 <- c(is.na(df[, myFacet2, with=FALSE]))
+        } else {
+          keep2 <- c(df[, myFacet2, with=FALSE] == iPlot_stp2)
+        }
         df <- df[keep2,]
       }
 
