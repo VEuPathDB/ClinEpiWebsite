@@ -4,6 +4,8 @@ lon1DataList <- list()
 lon2DataList <- list()
 hlon1DataList <- list()
 hlon2DataList <- list()
+clon1DataList <- list()
+clon2DataList <- list()
 
 model.prop <- NULL
 dbDrv <- dbDriver("Oracle")
@@ -40,6 +42,10 @@ shinyServer(function(input, output, session) {
   hlongitudinal2 <- NULL
   hlon2Data <- NULL
   hlon1Data <- NULL
+  clongitudinal1 <- NULL
+  clongitudinal2 <- NULL
+  clon2Data <- NULL
+  clon1Data <- NULL
   project.id <- NULL
   isParticipant <- NULL
   model.prop <- NULL

@@ -49,7 +49,8 @@ reactiveDataFetcher = reactive({
           lon1Data <<- lon1DataList[[datasetName]]
         }
         longitudinal2 <<- NULL
-        hlongitudinal1 <<- NULL 
+
+        hlongitudinal1 <<- NULL
         if(!is.na(longitudinal.file$house_columns)) {
 	  hlongitudinal1 <<- longitudinal.file$house_columns
 	}
@@ -64,6 +65,23 @@ reactiveDataFetcher = reactive({
           }
         }
         hlongitudinal2 <<- NULL
+
+        clongitudinal1 <<- NULL 
+        if(!is.na(longitudinal.file$community_columns)) {
+          clongitudinal1 <<- longitudinal.file$community_columns
+        }
+        if (!is.null(clongitudinal1)) { 
+          if (!datasetName %in% names(clon1DataList)) {
+            clon1Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == clongitudinal1], datasetDigest, clongitudinal1)
+            clon1Data <<- clon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+            clon1Data <<- setDTColType(clongitudinal1, metadata.file, clon1Data)
+            clon1DataList[[datasetName]] <<- clon1Data
+          } else {
+            clon1Data <<- clon1DataList[[datasetName]]
+          }
+        }
+        clongitudinal2 <<- NULL
+
       } else {
         longitudinal1 <<- subset(longitudinal.file, longitudinal.file$columns %in% dates)$columns
         
@@ -77,6 +95,7 @@ reactiveDataFetcher = reactive({
         } else {
           lon2Data <<- lon2DataList[[datasetName]]
         }
+
         hlongitudinal1 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% dates)$house_columns
         if (length(hlongitudinal1) > 0) {
           hlongitudinal2 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% nums)$house_columns
@@ -92,6 +111,23 @@ reactiveDataFetcher = reactive({
         } else {
           hlongitudinal1 <<- NULL
           hlongitudinal2 <<- NULL
+        }
+
+        clongitudinal1 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% dates)$house_columns
+        if (length(clongitudinal1) > 0) {
+          clongitudinal2 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% nums)$house_columns
+          if (!datasetName %in% names(clon2DataList)) {
+            clon2Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == clongitudinal2], datasetDigest, clongitudinal2, clongitudinal1)
+            clon2Data <<- clon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+            clon2Data <<- setDTColType(clongitudinal1, metadata.file, clon2Data)
+            clon2Data <<- setDTColType(clongitudinal2, metadata.file, clon2Data)
+            clon2DataList[[datasetName]] <<- clon2DataList
+          } else {
+            clon2Data <<- clon2DataList[[datasetName]]
+          }
+        } else { 
+           clongitudinal1 <<- NULL
+           clongitudinal2 <<- NULL
         }
       }
     } 

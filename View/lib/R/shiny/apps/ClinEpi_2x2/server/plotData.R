@@ -52,7 +52,7 @@ attrQuery <- reactive({
 
   message(Sys.time(), " Initiating query for attribute data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myAttr, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
   if (is.null(data)) { return() }
 
   data
@@ -151,7 +151,7 @@ outQuery <- reactive({
 
   message(Sys.time(), " Initiating query for outcome data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myOut, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
   if (is.null(data)) { return() }
 
   data

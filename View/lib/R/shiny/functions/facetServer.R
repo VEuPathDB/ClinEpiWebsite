@@ -78,7 +78,7 @@ facet1Query <- reactive({
   }
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myFacet, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
   if (is.null(data)) { message(Sys.time(), " functions/facetServer.R: facet1Query: query returned null")
                        return() }
   message(Sys.time(), " functions/facetServer.R: facet1Query: returning data")
@@ -218,7 +218,7 @@ facet2Query <- reactive({
   }
 
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myFacet2, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
   if (is.null(data)) { message(Sys.time(), " functions/facetServer.R: facet2Query: query returned null")
                        return() }
   message(Sys.time(), " functions/facetServer.R: facet2Query: returning data")

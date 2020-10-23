@@ -36,7 +36,7 @@ xQuery <- reactive({
   
   message("\n", Sys.time(), " ClinEpi_EventDist/server/plotData.R: xQuery:  Initiating query for xaxis data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myX, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
   if (is.null(data)) { return() }
 
   if (!is.null(hlongitudinal1)) {
