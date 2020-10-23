@@ -17,7 +17,7 @@ reactiveDataFetcher = reactive({
        metadata.file <<- metadata.file[order(metadata.file$PROPERTY),]
 
      longitudinal.file <<- suppressWarnings(fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE))
-     names(longitudinal.file) <<- c("dataset_name", "columns", "house_columns")
+     names(longitudinal.file) <<- c("dataset_name", "columns", "house_columns", "community_columns")
      longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
      longitudinal.file$columns[longitudinal.file$columns == "NA"] <<- NA
      longitudinal.file$house_columns[longitudinal.file$house_columns == "NA"] <<- NA
