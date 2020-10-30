@@ -72,7 +72,7 @@ groupQuery <- reactive({
 
   message(Sys.time(), " Initiating query for groups data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myGroups, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
 
 
   if (is.null(data)) { return() }
@@ -207,7 +207,7 @@ axesQuery <- reactive({
 
   message(Sys.time(), " Initiating query for axes data")
   dbCon <<- manageOracleConnection(dbDrv, dbCon, model.prop)
-  data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data)
+  data <- queryTermData(dbCon, myY, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data)
   if (is.null(data)) { 
     return() 
   }

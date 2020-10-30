@@ -26,6 +26,48 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
                      " and p.participant_id = o.participant_id",
                      " and p.participant_id = pa.pan_id")
     }
+  } else if (queryName == "Community") {
+    if (timeSourceId == "none") {
+      query <- paste0("select pa.name as Participant_Id",
+                            ", c.string_value as ", sourceId,
+                     " from apidbtuning.", tblPrefix, "CommunityMD c",
+                         ", apidbtuning.", tblPrefix, "ComPartIO cp",
+                         ", apidbtuning.", tblPrefix, "Participants pa",
+                     " where c.ontology_term_name = '", sourceId, "'",
+                     " and cp.community_id = c.community_id",
+                     " and cp.participant_id = pa.pan_id")
+    } else {
+      query <- paste0("with termtime as (",
+                       " select c.community_id",
+                             ", c.string_value as ", sourceId,
+                             ", co.string_value as ", timeSourceId,
+                       " from apidbTuning.", tblPrefix, "CommunityMD c",
+                           ", apidbTuning.", tblPrefix, "CommunityObsMD co",
+                           ", apidbTuning.", tblPrefix, "ComComObsIO cco",
+                       " where c.ontology_term_name = '", sourceId, "'",
+                       " and co.ontology_term_name = '", timeSourceId, "'",
+                       " and c.community_id = cco.community_id",
+                       " and cco.community_observation_id = co.community_observation_id",
+                       " UNION ALL",
+                       " select distinct cco.community_id",
+                             ", co1.string_value as ", sourceId,
+                             ", co2.string_value as ", timeSourceId,
+                       " from apidbTuning.", tblPrefix, "CommunityObsMD co1",
+                           ", apidbTuning.", tblPrefix, "CommunityObsMD co2",
+                           ", apidbTuning.", tblPrefix, "ComComObsIO cco",
+                       " where co1.ontology_term_name = '", sourceId, "'",
+                       " and co2.ontology_term_name = '", timeSourceId, "'",
+                       " and co1.community_observation_id = co2.community_observation_id",
+                       " and co1.community_observation_id = cco.community_observation_id)",
+                    " select p.name as participant_id",
+                          ", termtime.", sourceId,
+                          ", termtime.", timeSourceId,
+                    " from termtime",
+                        ", apidbTuning.", tblPrefix, "ComPartIO cp",
+                        ", apidbTuning.", tblPrefix, "Participants p",
+                    " where termtime.community_id = cp.community_id",
+                    " and cp.participant_id = p.pan_id")
+    }
   } else if (queryName == "Household") {
     if (timeSourceId == "none") {
       query <- paste0("select pa.name as Participant_Id",
@@ -173,7 +215,7 @@ getNamedQueryResult <- function(con, queryName, tblPrefix, sourceId, timeSourceI
 }
 
 #TODO revisit this name later
-queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data) {
+queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.file, longitudinal1, longitudinal2, lon2Data, lon1Data, hlongitudinal1, hlongitudinal2, hlon2Data, hlon1Data, clongitudinal1, clongitudinal2, clon2Data, clon1Data) {
 
   if (is.null(myVar)) { return() }
   if (length(myVar) == 0) { return() } 
@@ -191,15 +233,18 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
   if (!is.null(hlongitudinal2)) {
     if (myVar == hlongitudinal2) { return(hlon2Data) }
   }
+  if (!is.null(clongitudinal2)) {
+    if (myVar == clongitudinal2) { return(clon2Data) }
+  }
 
   if (myVar != "custom") {
     if (!is.null(longitudinal1)) {
-      if (category != "Household") {
+      if (!category %in% c("Household", "Community")) {
         data <- getNamedQueryResult(con, category, datasetDigest, myVar, longitudinal1)
         if (is.null(data)) { return() }
         data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
         data <- setDTColType(longitudinal1, metadata.file, data)
-      } else {
+      } else if (category != "Community") {
         if (!is.null(hlongitudinal1)) {
           data <- getNamedQueryResult(con, category, datasetDigest, myVar, hlongitudinal1)
           if (is.null(data)) { return() }
@@ -210,6 +255,30 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
           }
           names(data)[names(data) == hlongitudinal1] <- longitudinal1
 	  if (myVar == hlongitudinal1) { myVar <- longitudinal1 }
+
+        # assuming if we dont have a household longitudinal source id that households data is static
+	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id
+        } else {
+          data <- getNamedQueryResult(con, category, datasetDigest, myVar)
+          if (is.null(data)) { return() }
+          if (!is.null(lon2Data)) {
+            data <- merge(data, lon2Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          } else {
+            data <- merge(data, lon1Data, by = c("PARTICIPANT_ID"), all = TRUE)
+          }
+          data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+        }
+      } else {
+        if (!is.null(clongitudinal1)) {
+          data <- getNamedQueryResult(con, category, datasetDigest, myVar, clongitudinal1)
+          if (is.null(data)) { return() }
+          data <- data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
+          data <- setDTColType(clongitudinal1, metadata.file, data)
+          if (!is.null(clongitudinal2)) {
+            names(data)[names(data) == clongitudinal2] <- longitudinal2
+          }
+          names(data)[names(data) == clongitudinal1] <- longitudinal1
+	  if (myVar == clongitudinal1) { myVar <- longitudinal1 }
 
         # assuming if we dont have a household longitudinal source id that households data is static
 	# if household table has a column for date/age include it in longitudinal.tab even if its identical to the obs source id

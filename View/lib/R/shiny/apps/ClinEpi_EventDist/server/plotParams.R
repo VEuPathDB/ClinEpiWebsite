@@ -240,10 +240,12 @@
       include <- c("all")
       if (isParticipant & !is.null(longitudinal1)) {
         if (facetType == "direct") {
+          include <- c("Participant")
           if (is.null(hlongitudinal1)) {
-            include <- c("Participant", "Household")
-          } else {
-            include <- c("Participant")
+            include <- c(include, "Household")
+          } 
+          if (is.null(clongitudinal1)) {
+            include <- c(include, "Community")
           }
         }
       }    
@@ -319,10 +321,12 @@
       include <- c("all")
       if (isParticipant & !is.null(longitudinal1)) {
         if (facet2Type == "direct") {
+          include <- c("Participant")
           if (is.null(hlongitudinal1)) {
-            include <- c("Participant", "Household")
-          } else {
-            include <- c("Participant")
+            include <- c(include, "Household")
+          } 
+          if (is.null(clongitudinal1)) {
+            include <- c(include, "Community")
           }
         }
       }
