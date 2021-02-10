@@ -21,6 +21,7 @@ reactiveDataFetcher = reactive({
      longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]
      longitudinal.file$columns[longitudinal.file$columns == "NA"] <<- NA
      longitudinal.file$house_columns[longitudinal.file$house_columns == "NA"] <<- NA
+     longitudinal.file$community_columns[longitudinal.file$community_columns == "NA"] <<- NA
      longitudinal.file <<- setDT(longitudinal.file)[, lapply(.SD, function(x) unlist(tstrsplit(x, "|", fixed=TRUE))), by = setdiff(names(longitudinal.file), c("columns", "house_columns"))][!is.na(longitudinal.file$columns)]
 
     nums <- getNums(metadata.file)$SOURCE_ID
@@ -70,7 +71,7 @@ reactiveDataFetcher = reactive({
         if(!is.na(longitudinal.file$community_columns)) {
           clongitudinal1 <<- longitudinal.file$community_columns
         }
-        if (!is.null(clongitudinal1)) { 
+        if (!is.null(clongitudinal1) & length(clongitudinal1) > 0) { 
           if (!datasetName %in% names(clon1DataList)) {
             clon1Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == clongitudinal1], datasetDigest, clongitudinal1)
             clon1Data <<- clon1Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
@@ -113,9 +114,9 @@ reactiveDataFetcher = reactive({
           hlongitudinal2 <<- NULL
         }
 
-        clongitudinal1 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% dates)$house_columns
-        if (length(clongitudinal1) > 0) {
-          clongitudinal2 <<- subset(longitudinal.file, longitudinal.file$house_columns %in% nums)$house_columns
+        clongitudinal1 <<- subset(longitudinal.file, longitudinal.file$community_columns %in% dates)$community_columns
+        if (!is.null(clongitudinal1) & length(clongitudinal1) > 0) {
+          clongitudinal2 <<- subset(longitudinal.file, longitudinal.file$community_columns %in% nums)$community_columns
           if (!datasetName %in% names(clon2DataList)) {
             clon2Data <<- getNamedQueryResult(dbCon, metadata.file$CATEGORY[metadata.file$SOURCE_ID == clongitudinal2], datasetDigest, clongitudinal2, clongitudinal1)
             clon2Data <<- clon2Data[, PARTICIPANT_ID:=as.character(PARTICIPANT_ID)]
