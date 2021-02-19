@@ -129,13 +129,7 @@
 
       if (contLongitudinal) {
         #define axis labels here
-        xAxisType <- metadata.file$TYPE[metadata.file$SOURCE_ID == longitudinal]
-        if (xAxisType == "number") {
-          xlab = "Age"
-        } else {
-          xlab = "Time"
-        }
-
+        xlab <- metadata.file$PROPERTY[metadata.file$SOURCE_ID == longitudinal]
         ylab <- makeGroupLabel(getMyY$val, metadata.file, yaxis_stp1, yaxis_stp2, NULL, NULL, NULL, useGroup = TRUE)[1]
         if (plotType == "proportion") {
           ylab <- paste("Proportion where", ylab)

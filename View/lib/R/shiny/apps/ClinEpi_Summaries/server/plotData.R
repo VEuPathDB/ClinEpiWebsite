@@ -259,7 +259,12 @@ axes <- reactive({
 
   if (contLongitudinal) {
     tempData <- tempData[!is.na(tempData$XAXIS) ,]
-    tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
+    tmp <- uniqueN(tempData$XAXIS)
+	message("considering binning ", tmp, " unique values!!!")
+    if (tmp > 4 | xaxis_bins < tmp) {
+      tempData$XAXIS <- rcut(tempData$XAXIS, xaxis_bins)
+       message("binned into ", uniqueN(tempData$XAXIS), " unique groups where ", xaxis_bins, " groups were requested!!!!")
+    }
     #hackish way to force reactive update if user keeps trying to change the param back to higher val
     tmp <- uniqueN(tempData$XAXIS)
     if (xaxis_bins != tmp) {
