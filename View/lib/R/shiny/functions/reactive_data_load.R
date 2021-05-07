@@ -11,10 +11,16 @@ reactiveDataFetcher = reactive({
      datasetName <<- colnames(custom.props)
      datasetDigest <<- paste0("D", substr(digest(datasetName, algo = "sha1", serialize=FALSE), 1, 10))
  
-       metadata.file <<- fread(getWdkDatasetFile("ontologyMetadata.tab", session, FALSE, dataStorageDir))
-       metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomological measurements",]
-       metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomology",]
-       metadata.file <<- metadata.file[order(metadata.file$PROPERTY),]
+     metadata.file <<- fread(getWdkDatasetFile("ontologyMetadata.tab", session, FALSE, dataStorageDir))
+     metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomological measurements",]
+     metadata.file <<- metadata.file[metadata.file$CATEGORY != "Entomology",]
+     metadata.file <<- metadata.file[order(metadata.file$PROPERTY),]
+
+     if (datasetName == "ISASimple_Gates_WASHb_Bangladesh_rct_RSRC") {
+       metadata.file <<- metadata.file[metadata.file$SOURCE_ID != 'EUPATH_0044124']
+       metadata.file <<- rbind(metadata.file, list("custom2", "Study Details", "null", "null", "Study", "null", "null", "null", "null", "null", "null", "null"))
+       metadata.file <<- rbind(metadata.file, list("EUPATH_0044124", "Cluster study arm", "string", "Study Details", "Study", "null", "null", "null", "null", "null", 7, "Control|Handwashing|Nutrition|Nutrition, water, sanitation, and handwashing|Sanitation|Water|Water, sanitation, and handwashing|"))
+     }
 
      longitudinal.file <<- suppressWarnings(fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE))
      names(longitudinal.file) <<- c("dataset_name", "columns", "house_columns", "community_columns")
