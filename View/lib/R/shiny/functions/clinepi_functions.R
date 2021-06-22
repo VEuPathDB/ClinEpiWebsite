@@ -230,6 +230,9 @@ queryTermData <- function(con, myVar, attributes.file, datasetDigest, metadata.f
   if (datasetDigest == 'Dc56b76b581' & myVar == 'EUPATH_0044124') {
     category <- 'Community'
   }
+  if (datasetDigest %in% c('D841a9f5259', 'D2a6ace17a1', 'D221d2bcac4', 'D6a93753102') & myVar == 'ENVO_00000004') {
+    category <- 'Household'
+  }
 
   if (!is.null(longitudinal2)) {
     if (myVar == longitudinal2) { return(lon2Data) }
