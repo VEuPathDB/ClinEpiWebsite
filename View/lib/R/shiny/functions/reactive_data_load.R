@@ -22,6 +22,12 @@ reactiveDataFetcher = reactive({
        metadata.file <<- rbind(metadata.file, list("EUPATH_0044124", "Cluster study arm", "string", "Study Details", "Study", "null", "null", "null", "null", "null", 7, "Control|Handwashing|Nutrition|Nutrition, water, sanitation, and handwashing|Sanitation|Water|Water, sanitation, and handwashing|"))
      }
 
+     if (grepl("GEMS", datasetName)) {
+       metadata.file <<- metadata.file[metadata.file$SOURCE_ID != 'ENVO_00000004']
+       metadata.file <<- rbind(metadata.file, list("custom3", "Geographic Region", "null", "null", "GeographicLocation", "null", "null", "null", "null", "null", "null", "null"))
+       metadata.file <<- rbind(metadata.file, list("ENVO_00000004", "Country", "string", "Geographic Region", "GeographicLocation", "null", "null", "null", "null", "null", 7, "Bangladesh|India|Kenya|Mali|Mozambique|Pakistan|The Gambia"))
+     }
+
      longitudinal.file <<- suppressWarnings(fread("../../functions/longitudinal.tab", blank.lines.skip = TRUE))
      names(longitudinal.file) <<- c("dataset_name", "columns", "house_columns", "community_columns")
      longitudinal.file <<- longitudinal.file[longitudinal.file$dataset_name == datasetName]

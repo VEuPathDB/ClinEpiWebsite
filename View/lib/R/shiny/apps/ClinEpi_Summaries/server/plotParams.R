@@ -233,12 +233,12 @@
       include <- c("all")
       if (isParticipant & !is.null(longitudinal1)) {
         if (facetType == "direct") {
-          include <- c("Participant", "Study")
+          include <- c("Participant", "Study", "GeographicLocation")
           if (is.null(hlongitudinal1)) {
-            include <- c(include, "Household", "Study")
+            include <- c(include, "Household", "Study", "GeographicLocation")
           }
           if (is.null(clongitudinal1)) {
-            include <- c(include, "Community", "Study")
+            include <- c(include, "Community", "Study", "GeographicLocation")
           }
         }
       }
@@ -290,12 +290,12 @@
       include <- c("all")
       if (isParticipant & !is.null(longitudinal1)) {
         if (facet2Type == "direct") {
-          include <- c("Participant", "Study")
+          include <- c("Participant", "Study", "GeographicLocation")
           if (is.null(hlongitudinal1)) {
-            include <- c(include, "Household", "Study")
+            include <- c(include, "Household", "Study", "GeographicLocation")
           }
           if (is.null(clongitudinal1)) {
-            include <- c(include, "Community", "Study")
+            include <- c(include, "Community", "Study", "GeographicLocation")
           }
         }
       }
@@ -345,12 +345,12 @@
       include <- c("all")
       if (isParticipant & !is.null(longitudinal1)) {
         if (groupsType == "direct") {
-          include <- c("Participant", "Study")
+          include <- c("Participant", "Study", "GeographicLocation")
           if (is.null(hlongitudinal1)) {
-            include <- c(include, "Household", "Study")
+            include <- c(include, "Household", "Study", "GeographicLocation")
           }
           if (is.null(clongitudinal1)) {
-            include <- c(include, "Community", "Study")
+            include <- c(include, "Community", "Study", "GeographicLocation")
           }
         }
       }
