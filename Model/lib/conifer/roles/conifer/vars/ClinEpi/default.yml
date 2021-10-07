@@ -11,7 +11,7 @@ modelprop:
   YOUTUBE_URL: https://www.youtube.com/playlist?list=PLWzQB3i5sYAIp4urzLGB8jxvVZr6jvkZh
   CLINEPI_ACCESS_REQUEST_EMAIL: help@clinepidb.org
   USE_EDA: "true"
-  EDA_EXAMPLE_ANALYSES_AUTHOR: 1926010
+  EDA_EXAMPLE_ANALYSES_AUTHOR: 854899613
 modelconfig_oauthUrl: https://eupathdb.org/oauth
 modelconfig_authenticationMethod: oauth2
 modelconfig_oauthClientId: apiComponentSite
