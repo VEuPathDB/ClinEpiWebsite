@@ -30,5 +30,5 @@ prefix: "{{ hostname | regex_replace('^([a-z])[0-9].*','\\1_prefix') }}"
 # generalized way to do this in the future... 
 community_env_map:
   w_prefix: static-content.veupathdb.org/
-  b_prefix: static-content.veupathdb.org/
+  b_prefix: beta.static-content.veupathdb.org/
   default: qa.static-content.veupathdb.org/
