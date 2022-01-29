@@ -23,7 +23,7 @@ _showUnreleasedDataFlag:
   qa.restricted.clinepidb.org: true
   feature.clinepidb.org: true
 
-_showUnreleasedData: "{{ _showUnreleasedDataFlag[hostname]|'false' }}"
+showUnreleasedData: "{{ _showUnreleasedDataFlag[hostname]|'false' }}"
 
 modelprop:
   USER_DBLINK: '@{{ modelconfig_appDb_userDbLink }}'
