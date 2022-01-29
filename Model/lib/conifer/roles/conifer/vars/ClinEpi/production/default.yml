@@ -14,14 +14,14 @@ modelconfig_userDb_maxIdle: 10
 modelconfig_commentdb.maxIdle: 10
 
 _showUnreleasedDataFlag:
-  integrate.clinepidb.org: true
-  q1.restricted.clinepidb.org: true
-  q2.restricted.clinepidb.org: true
-  w1.restricted.clinepidb.org: true
-  w2.restricted.clinepidb.org: true
-  restricted.clinepidb.org: true
-  qa.restricted.clinepidb.org: true
-  feature.clinepidb.org: true
+  integrate.clinepidb.org: 'true'
+  q1.restricted.clinepidb.org: 'true'
+  q2.restricted.clinepidb.org: 'true'
+  w1.restricted.clinepidb.org: 'true'
+  w2.restricted.clinepidb.org: 'true'
+  restricted.clinepidb.org: 'true'
+  qa.restricted.clinepidb.org: 'true'
+  feature.clinepidb.org: 'true'
 
 showUnreleasedData: "{{ _showUnreleasedDataFlag[hostname]|'false' }}"
 
