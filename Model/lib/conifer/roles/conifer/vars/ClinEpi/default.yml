@@ -3,6 +3,7 @@
 product: ClinEpiDB
 _self_url_scheme: https
 modelconfig_modelName: clinEpiModel
+showUnreleasedData: 'false'
 modelprop:
   USER_DBLINK: '@{{ modelconfig_appDb_userDbLink }}'
   ACCT_DBLINK: '@{{ modelconfig_appDb_acctDbLink }}'
@@ -10,6 +11,7 @@ modelprop:
   TWITTER_URL: https://twitter.com/ClinEpiDB
   YOUTUBE_URL: https://www.youtube.com/playlist?list=PLWzQB3i5sYAIp4urzLGB8jxvVZr6jvkZh
   CLINEPI_ACCESS_REQUEST_EMAIL: help@clinepidb.org
+  SHOW_UNRELEASED_DATA: '{{ showUnreleasedData }}'
 eda:
   enabled: "true"
   example_analyses_author: 854899613
