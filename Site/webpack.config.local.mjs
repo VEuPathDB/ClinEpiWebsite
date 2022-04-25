@@ -1,6 +1,7 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import webpack from 'webpack';
 
 import {
   makeCommonDevServerConfig,
@@ -8,8 +9,7 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const { webpack } = await import('../../install/base.webpack.config.js');
-const { default: configure } = await import('../../EbrcWebsiteCommon/Site/site.webpack.config.js');
+const { default: configure } = await import('@veupathdb/site-webpack-config');
 const { additionalConfig } = await import('./webpack.config.js');
 
 export default configure({

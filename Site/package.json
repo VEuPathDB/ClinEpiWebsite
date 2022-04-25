@@ -9,6 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
+  "browserslist": [
+    "extends @veupathdb/browserslist-config"
+  ],
   "dependencies": {
     "@emotion/react": "^11.7.0",
     "@emotion/serialize": "^1.0.2",
