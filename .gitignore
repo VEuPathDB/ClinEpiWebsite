@@ -45,5 +45,6 @@ Site/htdocs/.DS_Store
 Site/htdocs/documents/.DS_Store
 
 # Environment files
+.env
 .env.local
 .env.*.local
