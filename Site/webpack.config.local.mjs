@@ -36,9 +36,16 @@ export default configure({
         twitterUrl: process.env.TWITTER_URL,
         youtubeUrl: process.env.YOUTUBE_URL,
         communitySite: process.env.COMMUNITY_SITE,
-        useEda: Boolean(process.env.EDA_ENABLED),
-        edaExampleAnalysesAuthor: process.env.EDA_EXAMPLE_ANALYSES_AUTHOR,
-        edaServiceUrl: process.env.EDA_SERVICE_ENDPOINT,
+        ...(
+          process.env.EDA_ENABLED === 'true'
+            ? {
+                useEda: true,
+                edaExampleAnalysesAuthor: process.env.EDA_EXAMPLE_ANALYSES_AUTHOR,
+                edaServiceUrl: process.env.EDA_SERVICE_ENDPOINT,
+                edaSingleAppMode: process.env.EDA_SINGLE_APP_MODE,
+              }
+            : { useEda: false }
+        )
       })
     }),
     new HtmlWebpackPlugin({
