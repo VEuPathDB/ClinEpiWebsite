@@ -17,7 +17,7 @@ eda:
   example_analyses_author: 854899613
   single_app_mode: pass
 user_datasets_workspace:
-  enabled: "true"
+  enabled: "false"
 modelconfig_oauthUrl: https://eupathdb.org/oauth
 modelconfig_authenticationMethod: oauth2
 modelconfig_oauthClientId: apiComponentSite
