@@ -14,10 +14,9 @@
 
   <target name="ClinEpiWebsite-Installation" depends="ClinEpiModel-Installation,
                                                       EbrcWebsiteCommon-Installation,
-                                                      ClinEpiWebsite-MavenInstallation,
                                                       ClinEpiWebsite/View-Installation,
                                                       ClinEpiWebsite/Site-Installation,
-                  ClinEpiWebsite/Model-Installation">
+                                                      ClinEpiWebsite/Model-Installation">
 
     <ant target="defaultProjectInstall">
       <property name="project" value="ClinEpiWebsite" />
@@ -29,15 +28,8 @@
 
   </target>
 
+
   <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
-
-  <target name="ClinEpiWebsite-MavenInstallation">
-    <ant target="mavenBuildProject">
-      <property name="project" value="ClinEpiWebsite" />
-    </ant>
-    <property name="alreadyBuilt" value="true" />
-  </target>
-
 
   <target name="ClinEpiWebsite/Site-Installation">
     <ant target="defaultComponentInstall">
@@ -45,7 +37,6 @@
       <property name="component" value="Site" />
     </ant>
   </target>
-
 
   <target name="ClinEpiWebsite/View-Installation">
     <ant target="defaultComponentInstall">
@@ -65,12 +56,12 @@
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <target name="ClinEpiWebsite-WebInstallation" depends="EbrcWebsiteCommon-WebInstallation,
-                                                           ClinEpiWebsite-Installation,
-                                                           ClinEpiWebsite/View-WebInstallation,
-                                                           ClinEpiWebsite/Site-WebInstallation">
-  </target>
 
+  <target name="ClinEpiWebsite-WebInstallation" depends="EbrcWebsiteCommon-WebInstallation,
+                                                         ClinEpiWebsite-Installation,
+                                                         ClinEpiWebsite/View-WebInstallation,
+                                                         ClinEpiWebsite/Site-WebInstallation">
+  </target>
 
   <target name="ClinEpiWebsite/Site-WebInstallation">
 
@@ -93,31 +84,6 @@
       <property name="component" value="View" />
     </ant>
 
-  </target>
-
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooo  Release  ooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <target name="ClinEpiWebsite-Release">
-
-    <ant target="defaultProjectRelease">
-      <property name="cvsroot" value=":ext:cvs.sanger.ac.uk:/cvsroot/GUS" />
-    </ant>
-  </target>
-
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooo  Distributable  ooooooooooooooooooooooooo -->
-  <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
-
-  <target name="ClinEpiWebsite-Distributable">
-
-    <copy todir="${targetDir}">
-      <fileset dir="${projectsDir}">
-        <exclude name="**/CVS/*" />
-      </fileset>
-    </copy>
   </target>
 
 </project>
