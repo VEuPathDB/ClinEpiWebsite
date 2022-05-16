@@ -1,4 +1,4 @@
-<project name="ClinEpiWebsite" default="Installation" basedir=".">
+<project name="ClinEpiWebsite" basedir=".">
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Dependencies  oooooooooooooooooooooooooo -->
@@ -6,7 +6,6 @@
 
   <import file="${projectsDir}/ClinEpiModel/build.xml" />
   <import file="${projectsDir}/EbrcWebsiteCommon/build.xml" />
-
 
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooo  Installation  oooooooooooooooooooooooooo -->
@@ -17,7 +16,6 @@
                                                       ClinEpiWebsite/View-Installation,
                                                       ClinEpiWebsite/Site-Installation,
                                                       ClinEpiWebsite/Model-Installation">
-
     <ant target="defaultProjectInstall">
       <property name="project" value="ClinEpiWebsite" />
     </ant>
@@ -25,9 +23,7 @@
     <!-- TODO Move from ApiCommonWebsite to EbrcWebsiteCommon
     <antcall target="ApiCommonWebsite-Glossary"/>
     -->
-
   </target>
-
 
   <!-- ooooooooooooooooooooooo  Install Components  ooooooooooooooooooooooo -->
 
@@ -52,7 +48,6 @@
     </ant>
   </target>
 
-
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooo  Web Installation  oooooooooooooooooooooooo -->
   <!-- oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo -->
@@ -60,8 +55,7 @@
   <target name="ClinEpiWebsite-WebInstallation" depends="EbrcWebsiteCommon-WebInstallation,
                                                          ClinEpiWebsite-Installation,
                                                          ClinEpiWebsite/View-WebInstallation,
-                                                         ClinEpiWebsite/Site-WebInstallation">
-  </target>
+                                                         ClinEpiWebsite/Site-WebInstallation"/>
 
   <target name="ClinEpiWebsite/Site-WebInstallation">
 
