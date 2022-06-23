@@ -45,8 +45,11 @@ community_env_map:
   b_prefix: static-content.veupathdb.org/
   default: qa.static-content.veupathdb.org/
 
+# The implementation of the UserDatasetStore goes largely unused in the site.
+# The TypeHandlers are the only part of the store that are currently used outside
+# the installer, which is run as a dedicated Jenkins job with its own conifer config.
 modelconfig_userDatasetStoreConfig: >
-  <userDatasetStore implementation="org.gusdb.wdk.model.user.dataset.filesys.FilesysUserDatasetStore">
+  <userDatasetStore implementation="org.gusdb.wdk.model.user.dataset.irods.IrodsUserDatasetStore">
     <property name="rootPath">/var/www/Common/workspaces/users</property>
     <typeHandler type="ISA" version="0.0"
       implementation="org.apidb.apicommon.model.userdataset.ISASimpleTypeHandler"/>
