@@ -90,9 +90,7 @@ modelconfig_userDatasetStoreConfig_irods_rootPath: "{{ workspace_env['rootPath']
 modelconfig_userDatasetStoreConfig_irods_zone: "{{ workspace_env['zone'] }}"
 modelconfig_userDatasetStoreConfig_irods_port: "{{ workspace_env['port'] }}"
 
-# The implementation of the UserDatasetStore goes largely unused in the site.
-# The TypeHandlers are the only part of the store that are currently used outside
-# the installer, which is run as a dedicated Jenkins job with its own conifer config.
+# The IrodsUserDatasetStore implementation is needed to connect to IRODS and list user datasets in WDK sites.
 modelconfig_userDatasetStoreConfig: >
   <userDatasetStore implementation="org.gusdb.wdk.model.user.dataset.irods.IrodsUserDatasetStore">
    <property name="login">{{ modelconfig_userDatasetStoreConfig_irods_login }}</property>
