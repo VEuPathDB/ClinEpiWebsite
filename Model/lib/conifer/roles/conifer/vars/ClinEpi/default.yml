@@ -18,7 +18,7 @@ eda:
   example_analyses_author: 854899613
   single_app_mode: pass
 user_datasets_workspace:
-  enabled: "false"
+  enabled: "true"
 modelconfig_oauthUrl: https://eupathdb.org/oauth
 modelconfig_authenticationMethod: oauth2
 modelconfig_oauthClientId: apiComponentSite
@@ -29,3 +29,10 @@ modelconfig_oauthClientSecret: "{{ lookup('csvfile',
     delimiter=:') | trim
   }}"
 modelconfig_changePasswordUrl: "{{ modelconfig_oauthUrl }}/assets/eupathdb-changePassword.html?returnUrl={{ '{{' }}returnUrl}}&amp;suggestedUsername={{ '{{' }}suggestedUsername}}"
+
+modelconfig_userDatasetStoreConfig: >
+  <userDatasetStore implementation="org.gusdb.wdk.model.user.dataset.filesys.FilesysUserDatasetStore">
+    <property name="rootPath">/var/www/Common/workspaces/users</property>
+    <typeHandler type="ISA" version="0.0"
+      implementation="org.apidb.apicommon.model.userdataset.ISASimpleTypeHandler"/>
+  </userDatasetStore>
