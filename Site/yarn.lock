@@ -2164,10 +2164,10 @@
     react-responsive-modal "^6.2.0"
     react-table "^7.7.0"
 
-"@veupathdb/eda@3.8.20-patch.0":
-  version "3.8.20-patch.0"
-  resolved "https://registry.yarnpkg.com/@veupathdb/eda/-/eda-3.8.20-patch.0.tgz#b8e501d8f6a10fdd1716d6d50cf141a39743b4c5"
-  integrity sha512-cy37MfAT065yXKQ46gEOoJSmbY3o7rBp4FcoV/v6Uzd0+0/IHjBC23ygsyy0ZGzDL80I4Nuar7vTVlrSy8xqRA==
+"@veupathdb/eda@3.8.20-patch.1":
+  version "3.8.20-patch.1"
+  resolved "https://registry.yarnpkg.com/@veupathdb/eda/-/eda-3.8.20-patch.1.tgz#13f5b6bc3746df3f9f8f8091985873ca21e531da"
+  integrity sha512-2cndtOAqAPI1F8KIpBGOQByVBzOlafVuCx9/e3hRBS26svxhkhFszPFYxDn34YYrr6z67PabRX8nkbaQghnHXQ==
   dependencies:
     debounce-promise "^3.1.2"
     fp-ts "^2.9.3"
@@ -2215,10 +2215,10 @@
   resolved "https://registry.yarnpkg.com/@veupathdb/site-webpack-config/-/site-webpack-config-0.1.0.tgz#b63464c5ce70297102aecd700069f1059f371fe9"
   integrity sha512-J8sPtD8+Zp1ZBhgU+mX7O737zaZ28s7P/9RJjbh5nXYB5IgP6yRm+bvj0ewmW7W9NBAPUHJzeEDxMbYDExb85g==
 
-"@veupathdb/study-data-access@^0.3.5":
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/@veupathdb/study-data-access/-/study-data-access-0.3.5.tgz#753eff861b8ce72238fde30a7d96d7460b5cc0ac"
-  integrity sha512-mtJO3glTHn7AnaL25c2HGoKSpZ0hqWfHX63cp7IfTIGkpzedeXwriJL1PmQwEUEqb5+jZGyQuKAN2S07L5XxQA==
+"@veupathdb/study-data-access@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@veupathdb/study-data-access/-/study-data-access-0.3.6.tgz#e9c1bcbe909b5f2ff78b5c76c203c0374158b031"
+  integrity sha512-E9HWKifUoak3gHV4dprUfHnb3r6tYHjG7LFqNAIOCPRD0ZJW8FHtwvT9v9ctEMqrzrLAYtkFPxq4i5MUPbW2qg==
   dependencies:
     fp-ts "^2.11.5"
     io-ts "^2.2.16"
