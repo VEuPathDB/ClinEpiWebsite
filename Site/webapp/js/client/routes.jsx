@@ -9,6 +9,6 @@ export const wrapRoutes = ebrcRoutes => {
       component: props => <AccessRequestController {...props.match.params}/>
     },
 
-    ...ebrcRoutes
+    ...ebrcRoutes.filter(route => !route.path.startsWith('/download'))
   ];
 };
