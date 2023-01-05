@@ -103,3 +103,7 @@ modelconfig_userDatasetStoreConfig: >
    <property name="rootPath">{{ modelconfig_userDatasetStoreConfig_irods_rootPath }}</property>    
    <typeHandler type="ISA" version="0.0"  implementation="org.apidb.apicommon.model.userdataset.ISASimpleTypeHandler"/>
   </userDatasetStore>
+
+eda:
+  # Disable full screen apps for w sites, until they pass qa
+  enableFullScreenApps: "{{ 'false' if prefix == 'w_prefix' else 'true' }}"
