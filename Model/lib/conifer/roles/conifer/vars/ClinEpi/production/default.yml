@@ -24,6 +24,18 @@ _showUnreleasedDataFlag:
   qa.restricted.clinepidb.org: 'true'
   feature.clinepidb.org: 'true'
 
+requireLogin: "{{ _requireLoginFlag[hostname] | default('false') }}"
+
+_requireLoginFlag:
+  integrate.clinepidb.org: 'true'
+  q1.restricted.clinepidb.org: 'true'
+  q2.restricted.clinepidb.org: 'true'
+  w1.restricted.clinepidb.org: 'true'
+  w2.restricted.clinepidb.org: 'true'
+  restricted.clinepidb.org: 'true'
+  qa.restricted.clinepidb.org: 'true'
+  feature.clinepidb.org: 'true'
+
 showUnreleasedData: "{{ _showUnreleasedDataFlag[hostname] | default('false') }}"
 
 modelprop:
