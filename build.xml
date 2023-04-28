@@ -64,9 +64,6 @@
       <property name="component" value="Site" />
     </ant>
     <copy todir="${webappTargetDir}">
-      <fileset dir="${projectsDir}/ClinEpiWebsite/Site/node_modules/@veupathdb/clinepi-site/webapp" />
-    </copy>
-    <copy todir="${webappTargetDir}/bundles">
       <fileset dir="${projectsDir}/ClinEpiWebsite/Site/node_modules/@veupathdb/clinepi-site/dist" />
     </copy>
 
