@@ -63,9 +63,11 @@
       <property name="project" value="ClinEpiWebsite" />
       <property name="component" value="Site" />
     </ant>
-    <copy todir="${webappTargetDir}">
-      <fileset dir="${projectsDir}/ClinEpiWebsite/Site/node_modules/@veupathdb/clinepi-site/dist" />
-    </copy>
+
+    <ant target="installWebAssets">
+      <property name="project" value="ClinEpiWebsite" />
+      <property name="sitePackageName" value="clinepi-site"/>
+    </ant>
 
   </target>
 
