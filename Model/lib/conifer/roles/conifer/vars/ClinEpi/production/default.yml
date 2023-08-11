@@ -23,6 +23,7 @@ _showUnreleasedDataFlag:
   restricted.clinepidb.org: 'true'
   qa.restricted.clinepidb.org: 'true'
   feature.clinepidb.org: 'true'
+  b2.clinepidb.org: 'true'
 
 requireLogin: "{{ _requireLoginFlag[hostname] | default('false') }}"
 
@@ -35,6 +36,7 @@ _requireLoginFlag:
   restricted.clinepidb.org: 'true'
   qa.restricted.clinepidb.org: 'true'
   feature.clinepidb.org: 'true'
+  b2.clinepidb.org: 'true'
 
 showUnreleasedData: "{{ _showUnreleasedDataFlag[hostname] | default('false') }}"
 
