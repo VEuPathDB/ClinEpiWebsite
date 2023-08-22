@@ -124,6 +124,9 @@ public class AccessRequestSubmitter {
     String website = wdkModel.getDisplayName();
     String supportEmail = wdkModel.getProperties().get("CLINEPI_ACCESS_REQUEST_EMAIL");
     String requesterEmail = params.getRequesterEmail();
+    String providerEmail = params.getProviderEmail();
+
+
     String datasetName = params.getDatasetName();
 
     LOG.debug("emailAccessRequest() -- requesterEmail: " + requesterEmail);
@@ -138,33 +141,38 @@ public class AccessRequestSubmitter {
       datasetName
     );
     LOG.debug("emailAccessRequest() -- here are the formFields: " + formFields);
-    String body = createAccessRequestEmailBody(bodyTemplate, formFields, datasetName);
+    String requesterBody = createAccessRequestEmailBody(bodyTemplate, formFields, datasetName);
+    String managerBody = createAccessRequestEmailBody(params.getRequestEmailBodyManager(), formFields, datasetName);
 
-    String replyEmail = requesterEmail;
     String metaInfo =
-        "ReplyTo: " + replyEmail + "\n" +
+        "ReplyTo: " + requesterEmail + "\n" +
         "WDK Model version: " + version;
-
-    String redmineContent = "****THIS IS NOT A REPLY****" +
-                            "This is an automatic response, that includes your message for your records, to let you " +
-                            "know that we have received your email and will get back to you as " +
-                            "soon as possible. Thanks so much for contacting us!" +
-                            "This was your message:" + "\n\n" + body + "\n";
 
     String redmineMetaInfo = "Project: clinepidb\n" + "Category: " +
         website + "\n" + "\n" +
         metaInfo + "\n";
     String smtpServer = modelConfig.getSmtpServer();
 
-    // Send auto-reply
+    // Send auto-reply to requester
     emailSender.sendEmail(
       smtpServer,
-      replyEmail,    //to
-      supportEmail,  //reply (from)
+      requesterEmail, //to
+      supportEmail,   //reply (from)
       subject,
-      escapeHtml(metaInfo) + "\n\n" + redmineContent + "\n\n",
+      escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(requesterBody) + "\n\n",
       null,null,
       null
+    );
+
+    // Send auto-reply to provider
+    emailSender.sendEmail(
+        smtpServer,
+        providerEmail, //to
+        supportEmail,   //reply (from)
+        subject,
+        escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(managerBody) + "\n\n",
+        null,null,
+        null
     );
 
     // Send support email (help@)
@@ -173,7 +181,7 @@ public class AccessRequestSubmitter {
       supportEmail, //or params.getProviderEmail(),
       requesterEmail,
       subject,
-      body,
+      requesterBody,
       null, //not needed, already sent to support
       params.getBccEmail(),
       null
@@ -185,10 +193,18 @@ public class AccessRequestSubmitter {
       wdkModel.getProperties().get("REDMINE_TO_EMAIL"),   //sendTos
       wdkModel.getProperties().get("REDMINE_FROM_EMAIL"), //reply
       subject,
-      escapeHtml(redmineMetaInfo) + "\n\n" + body + "\n\n",
+      escapeHtml(redmineMetaInfo) + "\n\n" + requesterBody + "\n\n",
       null,null,null
     );
 
+  }
+
+  private static String wrapContentWithAutoResponse(String content) {
+    return "****THIS IS NOT A REPLY****" +
+        "This is an automatic response, that includes your message for your records, to let you " +
+        "know that we have received your email and will get back to you as " +
+        "soon as possible. Thanks so much for contacting us!" +
+        "This was your message:" + "\n\n" + content + "\n";
   }
 
   private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> formFields, String datasetName) {

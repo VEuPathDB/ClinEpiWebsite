@@ -42,6 +42,8 @@ public class AccessRequestService extends UserService {
     public String getRequestEmailBcc() throws WdkModelException, WdkUserException;
     public String getRequestEmailBody() throws WdkModelException, WdkUserException;
     public Integer getRequestNeedsApproval() throws WdkModelException, WdkUserException;
+    String getRequestEmailBodyManager() throws WdkModelException, WdkUserException;
+    String getRequestEmailBodyRequester() throws WdkModelException, WdkUserException;
   }
 
   public AccessRequestService(@PathParam(USER_ID_PATH_PARAM) String userId) {
@@ -141,6 +143,16 @@ public class AccessRequestService extends UserService {
       public Integer getRequestNeedsApproval() throws NumberFormatException, WdkModelException, WdkUserException {
         return Integer.parseInt(getAttributeValueString("request_needs_approval"));
       }
+
+      @Override
+      public String getRequestEmailBodyManager() throws WdkModelException, WdkUserException {
+        return getAttributeValueString("request_email_body_manager");
+      }
+
+      @Override
+      public String getRequestEmailBodyRequester() throws WdkModelException, WdkUserException {
+        return getAttributeValueString("request_email_body_requester");
+      }
     };
   }
 
@@ -170,6 +182,8 @@ public class AccessRequestService extends UserService {
       datasetAttributes.getRequestEmailBcc(),
       datasetAttributes.getRequestEmailBody(),
       datasetAttributes.getRequestNeedsApproval(),
+      datasetAttributes.getRequestEmailBodyRequester(),
+      datasetAttributes.getRequestEmailBodyManager(),
       JsonUtil.parseProperties(requestJson)
     );
   }
