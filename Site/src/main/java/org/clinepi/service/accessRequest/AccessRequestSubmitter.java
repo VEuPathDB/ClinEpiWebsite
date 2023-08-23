@@ -141,8 +141,8 @@ public class AccessRequestSubmitter {
       datasetName
     );
     LOG.debug("emailAccessRequest() -- here are the formFields: " + formFields);
-    String requesterBody = createAccessRequestEmailBody(bodyTemplate, formFields, datasetName);
-    String managerBody = createAccessRequestEmailBody(params.getRequestEmailBodyManager(), formFields, datasetName);
+    String requesterBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyRequester(), formFields, datasetName);
+    String managerBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyManager(), formFields, datasetName);
 
     String metaInfo =
         "ReplyTo: " + requesterEmail + "\n" +
