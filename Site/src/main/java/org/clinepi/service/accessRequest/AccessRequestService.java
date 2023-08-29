@@ -123,7 +123,7 @@ public class AccessRequestService extends UserService {
             .filter(e -> e.getValue().getAttributeField().getDataType() == AttributeFieldDataType.STRING)
             .collect(Collectors.toMap(Map.Entry::getKey, e -> {
               try {
-                return e.getValue().getValue();
+                return e.getValue().getValue() != null ? e.getValue().getValue() : "";
               } catch (Exception ex) {
                 throw new RuntimeException(ex);
               }
