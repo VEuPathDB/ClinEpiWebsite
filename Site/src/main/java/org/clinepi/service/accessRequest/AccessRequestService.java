@@ -119,9 +119,15 @@ public class AccessRequestService extends UserService {
 
       @Override
       public Map<String, String> getDatasetProperties() {
-        return record.getAttributeFieldMap().entrySet().stream()
-            .filter(e -> e.getValue().getDataType() == AttributeFieldDataType.STRING)
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+        return record.entrySet().stream()
+            .filter(e -> e.getValue().getAttributeField().getDataType() == AttributeFieldDataType.STRING)
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> {
+              try {
+                return e.getValue().getValue();
+              } catch (Exception ex) {
+                throw new RuntimeException(ex);
+              }
+            }));
       }
 
       @Override
