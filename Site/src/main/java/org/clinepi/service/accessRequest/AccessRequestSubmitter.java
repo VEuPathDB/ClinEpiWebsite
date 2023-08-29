@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.eupathdb.common.model.contact.EmailSender;
@@ -133,16 +135,18 @@ public class AccessRequestSubmitter {
     LOG.debug("emailAccessRequest() -- providerEmail: not needed" + params.getProviderEmail());
 
     String bodyTemplate = params.getBodyTemplate();
-    Map<String, String> formFields = params.getFormFields();
+    Map<String, String> templateSubs = Stream.concat(params.getFormFields().entrySet().stream(), params.getDatasetProperties().entrySet().stream())
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     String subject = String.format(
       "%s (%s) Requests Access to ClinEpiDB Dataset %s",
       params.getRequesterName(),
       requesterEmail,
       datasetName
     );
-    LOG.debug("emailAccessRequest() -- here are the formFields: " + formFields);
-    String requesterBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyRequester(), formFields, datasetName);
-    String managerBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyManager(), formFields, datasetName);
+    LOG.debug("emailAccessRequest() -- here are the template substitutions: " + templateSubs);
+    String requesterBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyRequester(), templateSubs, datasetName);
+    String managerBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyManager(), templateSubs, datasetName);
 
     String metaInfo =
         "ReplyTo: " + requesterEmail + "\n" +
@@ -168,7 +172,7 @@ public class AccessRequestSubmitter {
     emailSender.sendEmail(
         smtpServer,
         providerEmail, //to
-        supportEmail,   //reply (from)
+        supportEmail,  //reply (from)
         subject,
         escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(managerBody) + "\n\n",
         null,null,
@@ -207,8 +211,8 @@ public class AccessRequestSubmitter {
         "This was your message:" + "\n\n" + content + "\n";
   }
 
-  private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> formFields, String datasetName) {
-    String bodyWithFilledOutFormFields = formFields.entrySet().stream().reduce(
+  private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> templateSubs, String datasetName) {
+    String bodyWithFilledOutFormFields = templateSubs.entrySet().stream().reduce(
       bodyTemplate,
       (body, entry) -> body.replaceAll(
         "\\$\\$" + entry.getKey().toUpperCase() + "\\$\\$",

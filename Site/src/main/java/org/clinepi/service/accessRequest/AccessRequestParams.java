@@ -18,6 +18,7 @@ public class AccessRequestParams {
   private final String requestEmailBodyRequester;
   private final String requestEmailBodyManager;
 
+  private final Map<String, String> datasetProperties;
   private final Map<String, String> formFields;
   
   public AccessRequestParams(
@@ -32,6 +33,7 @@ public class AccessRequestParams {
       int approvalType,
       String requestEmailBodyRequester,
       String requestEmailBodyManager,
+      Map<String, String> datasetProperties,
       Map<String, String> formFields) {
     this.testing = testing;
 
@@ -46,6 +48,7 @@ public class AccessRequestParams {
     this.approvalType = approvalType;
     this.requestEmailBodyRequester = requestEmailBodyRequester;
     this.requestEmailBodyManager = requestEmailBodyManager;
+    this.datasetProperties = datasetProperties;
     this.formFields = formFields;
   }
 
@@ -95,6 +98,10 @@ public class AccessRequestParams {
 
   public boolean approvalNeeded() {
     return approvalType != 0;
+  }
+
+  public Map<String, String> getDatasetProperties() {
+    return datasetProperties;
   }
 
   public Map<String, String> getFormFields() {

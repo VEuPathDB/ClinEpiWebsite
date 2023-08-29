@@ -2,6 +2,8 @@ package org.clinepi.service.accessRequest;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -22,6 +24,7 @@ import org.gusdb.wdk.model.WdkUserException;
 import org.gusdb.wdk.model.record.PrimaryKeyValue;
 import org.gusdb.wdk.model.record.RecordClass;
 import org.gusdb.wdk.model.record.RecordInstance;
+import org.gusdb.wdk.model.record.attribute.AttributeFieldDataType;
 import org.gusdb.wdk.service.request.RecordRequest;
 import org.gusdb.wdk.service.request.exception.ConflictException;
 import org.gusdb.wdk.service.request.exception.DataValidationException;
@@ -36,6 +39,8 @@ public class AccessRequestService extends UserService {
   private static final String DATASET_RECORD_CLASS = "dataset";
 
   interface DatasetAccessRequestAttributes {
+    Map<String, String> getDatasetProperties();
+
     public String getStudyAccess() throws WdkModelException, WdkUserException;
     public String getDisplayName() throws WdkModelException, WdkUserException;
     public String getRequestEmail() throws WdkModelException, WdkUserException;
@@ -113,6 +118,13 @@ public class AccessRequestService extends UserService {
       }
 
       @Override
+      public Map<String, String> getDatasetProperties() {
+        return record.getAttributeFieldMap().entrySet().stream()
+            .filter(e -> e.getValue().getDataType() == AttributeFieldDataType.STRING)
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+      }
+
+      @Override
       public String getStudyAccess() throws WdkModelException, WdkUserException {
       // return getAttributeValueString("restriction_level");
       // the form does not currently include the user request for a specific study access, we always grant public access
@@ -184,6 +196,7 @@ public class AccessRequestService extends UserService {
       datasetAttributes.getRequestNeedsApproval(),
       datasetAttributes.getRequestEmailBodyRequester(),
       datasetAttributes.getRequestEmailBodyManager(),
+      datasetAttributes.getDatasetProperties(),
       JsonUtil.parseProperties(requestJson)
     );
   }
