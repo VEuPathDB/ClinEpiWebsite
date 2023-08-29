@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.eupathdb.common.model.contact.EmailSender;
@@ -124,47 +126,57 @@ public class AccessRequestSubmitter {
     String website = wdkModel.getDisplayName();
     String supportEmail = wdkModel.getProperties().get("CLINEPI_ACCESS_REQUEST_EMAIL");
     String requesterEmail = params.getRequesterEmail();
+    String providerEmail = params.getProviderEmail();
+
+
     String datasetName = params.getDatasetName();
 
     LOG.debug("emailAccessRequest() -- requesterEmail: " + requesterEmail);
     LOG.debug("emailAccessRequest() -- providerEmail: not needed" + params.getProviderEmail());
 
     String bodyTemplate = params.getBodyTemplate();
-    Map<String, String> formFields = params.getFormFields();
+    Map<String, String> templateSubs = Stream.concat(params.getFormFields().entrySet().stream(), params.getDatasetProperties().entrySet().stream())
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     String subject = String.format(
       "%s (%s) Requests Access to ClinEpiDB Dataset %s",
       params.getRequesterName(),
       requesterEmail,
       datasetName
     );
-    LOG.debug("emailAccessRequest() -- here are the formFields: " + formFields);
-    String body = createAccessRequestEmailBody(bodyTemplate, formFields, datasetName);
+    LOG.debug("emailAccessRequest() -- here are the template substitutions: " + templateSubs);
+    String requesterBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyRequester(), templateSubs, datasetName);
+    String managerBody = createAccessRequestEmailBody(bodyTemplate + params.getRequestEmailBodyManager(), templateSubs, datasetName);
 
-    String replyEmail = requesterEmail;
     String metaInfo =
-        "ReplyTo: " + replyEmail + "\n" +
+        "ReplyTo: " + requesterEmail + "\n" +
         "WDK Model version: " + version;
-
-    String redmineContent = "****THIS IS NOT A REPLY****" +
-                            "This is an automatic response, that includes your message for your records, to let you " +
-                            "know that we have received your email and will get back to you as " +
-                            "soon as possible. Thanks so much for contacting us!" +
-                            "This was your message:" + "\n\n" + body + "\n";
 
     String redmineMetaInfo = "Project: clinepidb\n" + "Category: " +
         website + "\n" + "\n" +
         metaInfo + "\n";
     String smtpServer = modelConfig.getSmtpServer();
 
-    // Send auto-reply
+    // Send auto-reply to requester
     emailSender.sendEmail(
       smtpServer,
-      replyEmail,    //to
-      supportEmail,  //reply (from)
+      requesterEmail, //to
+      supportEmail,   //reply (from)
       subject,
-      escapeHtml(metaInfo) + "\n\n" + redmineContent + "\n\n",
+      escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(requesterBody) + "\n\n",
       null,null,
       null
+    );
+
+    // Send auto-reply to provider
+    emailSender.sendEmail(
+        smtpServer,
+        providerEmail, //to
+        supportEmail,  //reply (from)
+        subject,
+        escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(managerBody) + "\n\n",
+        null,null,
+        null
     );
 
     // Send support email (help@)
@@ -173,7 +185,7 @@ public class AccessRequestSubmitter {
       supportEmail, //or params.getProviderEmail(),
       requesterEmail,
       subject,
-      body,
+      requesterBody,
       null, //not needed, already sent to support
       params.getBccEmail(),
       null
@@ -185,14 +197,22 @@ public class AccessRequestSubmitter {
       wdkModel.getProperties().get("REDMINE_TO_EMAIL"),   //sendTos
       wdkModel.getProperties().get("REDMINE_FROM_EMAIL"), //reply
       subject,
-      escapeHtml(redmineMetaInfo) + "\n\n" + body + "\n\n",
+      escapeHtml(redmineMetaInfo) + "\n\n" + requesterBody + "\n\n",
       null,null,null
     );
 
   }
 
-  private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> formFields, String datasetName) {
-    String bodyWithFilledOutFormFields = formFields.entrySet().stream().reduce(
+  private static String wrapContentWithAutoResponse(String content) {
+    return "****THIS IS NOT A REPLY****" +
+        "This is an automatic response, that includes your message for your records, to let you " +
+        "know that we have received your email and will get back to you as " +
+        "soon as possible. Thanks so much for contacting us!" +
+        "This was your message:" + "\n\n" + content + "\n";
+  }
+
+  private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> templateSubs, String datasetName) {
+    String bodyWithFilledOutFormFields = templateSubs.entrySet().stream().reduce(
       bodyTemplate,
       (body, entry) -> body.replaceAll(
         "\\$\\$" + entry.getKey().toUpperCase() + "\\$\\$",

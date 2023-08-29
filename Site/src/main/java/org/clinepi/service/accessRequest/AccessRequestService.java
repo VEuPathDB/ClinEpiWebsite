@@ -2,6 +2,8 @@ package org.clinepi.service.accessRequest;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -22,6 +24,7 @@ import org.gusdb.wdk.model.WdkUserException;
 import org.gusdb.wdk.model.record.PrimaryKeyValue;
 import org.gusdb.wdk.model.record.RecordClass;
 import org.gusdb.wdk.model.record.RecordInstance;
+import org.gusdb.wdk.model.record.attribute.AttributeFieldDataType;
 import org.gusdb.wdk.service.request.RecordRequest;
 import org.gusdb.wdk.service.request.exception.ConflictException;
 import org.gusdb.wdk.service.request.exception.DataValidationException;
@@ -36,12 +39,16 @@ public class AccessRequestService extends UserService {
   private static final String DATASET_RECORD_CLASS = "dataset";
 
   interface DatasetAccessRequestAttributes {
+    Map<String, String> getDatasetProperties();
+
     public String getStudyAccess() throws WdkModelException, WdkUserException;
     public String getDisplayName() throws WdkModelException, WdkUserException;
     public String getRequestEmail() throws WdkModelException, WdkUserException;
     public String getRequestEmailBcc() throws WdkModelException, WdkUserException;
     public String getRequestEmailBody() throws WdkModelException, WdkUserException;
     public Integer getRequestNeedsApproval() throws WdkModelException, WdkUserException;
+    String getRequestEmailBodyManager() throws WdkModelException, WdkUserException;
+    String getRequestEmailBodyRequester() throws WdkModelException, WdkUserException;
   }
 
   public AccessRequestService(@PathParam(USER_ID_PATH_PARAM) String userId) {
@@ -111,6 +118,19 @@ public class AccessRequestService extends UserService {
       }
 
       @Override
+      public Map<String, String> getDatasetProperties() {
+        return record.entrySet().stream()
+            .filter(e -> e.getValue().getAttributeField().getDataType() == AttributeFieldDataType.STRING)
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> {
+              try {
+                return e.getValue().getValue() != null ? e.getValue().getValue() : "";
+              } catch (Exception ex) {
+                throw new RuntimeException(ex);
+              }
+            }));
+      }
+
+      @Override
       public String getStudyAccess() throws WdkModelException, WdkUserException {
       // return getAttributeValueString("restriction_level");
       // the form does not currently include the user request for a specific study access, we always grant public access
@@ -141,6 +161,16 @@ public class AccessRequestService extends UserService {
       public Integer getRequestNeedsApproval() throws NumberFormatException, WdkModelException, WdkUserException {
         return Integer.parseInt(getAttributeValueString("request_needs_approval"));
       }
+
+      @Override
+      public String getRequestEmailBodyManager() throws WdkModelException, WdkUserException {
+        return getAttributeValueString("request_email_body_manager");
+      }
+
+      @Override
+      public String getRequestEmailBodyRequester() throws WdkModelException, WdkUserException {
+        return getAttributeValueString("request_email_body_requester");
+      }
     };
   }
 
@@ -170,6 +200,9 @@ public class AccessRequestService extends UserService {
       datasetAttributes.getRequestEmailBcc(),
       datasetAttributes.getRequestEmailBody(),
       datasetAttributes.getRequestNeedsApproval(),
+      datasetAttributes.getRequestEmailBodyRequester(),
+      datasetAttributes.getRequestEmailBodyManager(),
+      datasetAttributes.getDatasetProperties(),
       JsonUtil.parseProperties(requestJson)
     );
   }
