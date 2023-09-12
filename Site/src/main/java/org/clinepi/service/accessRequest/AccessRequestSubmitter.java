@@ -164,7 +164,7 @@ public class AccessRequestSubmitter {
       supportEmail,   //reply (from)
       subject,
       escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(requesterBody) + "\n\n",
-      null,null,
+      providerEmail,null,
       null
     );
 
