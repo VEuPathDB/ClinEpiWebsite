@@ -196,8 +196,8 @@ public class AccessRequestService extends UserService {
       datasetId,
       datasetAttributes.getDisplayName(),
       datasetAttributes.getStudyAccess(),
-      datasetAttributes.getRequestEmail(),
-      datasetAttributes.getRequestEmailBcc(),
+      datasetAttributes.getRequestEmailBcc(), //managers in dashboard -> providerEmail in AccessRequestParams
+      datasetAttributes.getRequestEmail(),  //prop in presenter -> bccEmail  in AccessRequestParams (help@, staff)
       datasetAttributes.getRequestEmailBody(),
       datasetAttributes.getRequestNeedsApproval(),
       datasetAttributes.getRequestEmailBodyRequester(),
