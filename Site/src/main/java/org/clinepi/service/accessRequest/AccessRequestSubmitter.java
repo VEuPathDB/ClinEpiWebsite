@@ -132,7 +132,7 @@ public class AccessRequestSubmitter {
     String datasetName = params.getDatasetName();
 
     LOG.debug("emailAccessRequest() -- requesterEmail: " + requesterEmail);
-    LOG.debug("emailAccessRequest() -- providerEmail: not needed" + params.getProviderEmail());
+    LOG.debug("emailAccessRequest() -- providerEmail: " + params.getProviderEmail());
 
     String bodyTemplate = params.getBodyTemplate();
     Map<String, String> templateSubs = Stream.concat(params.getFormFields().entrySet().stream(), params.getDatasetProperties().entrySet().stream())
@@ -164,8 +164,9 @@ public class AccessRequestSubmitter {
       supportEmail,   //reply (from)
       subject,
       escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(requesterBody) + "\n\n",
-      providerEmail,null,
-      null
+      null,  // cc
+      null,  // bcc
+      null   // attachments
     );
 
     // Send auto-reply to provider
@@ -175,19 +176,20 @@ public class AccessRequestSubmitter {
         supportEmail,  //reply (from)
         subject,
         escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(managerBody) + "\n\n",
-        null,null,
+        params.getBccEmail(), // requestEmail in presenter: help@ and staff
+        null,
         null
     );
 
     // Send support email (help@)
     emailSender.sendEmail(
       smtpServer,
-      supportEmail, //or params.getProviderEmail(),
+      supportEmail, 
       requesterEmail,
       subject,
       requesterBody,
       null, //not needed, already sent to support
-      params.getBccEmail(),
+      null,
       null
     );
 
