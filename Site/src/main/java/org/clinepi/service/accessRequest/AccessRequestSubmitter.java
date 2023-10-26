@@ -214,18 +214,18 @@ public class AccessRequestSubmitter {
   }
 
   private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> templateSubs, String datasetName) {
-    String bodyWithFilledOutFormFields = templateSubs.entrySet().stream().reduce(
-      bodyTemplate,
+    String bodyWithDatasetName = bodyTemplate.replaceAll(
+        "\\$\\$DATASET_NAME\\$\\$",
+        escapeHtml(datasetName)
+    );
+
+    return templateSubs.entrySet().stream().reduce(
+        bodyWithDatasetName,
       (body, entry) -> body.replaceAll(
         "\\$\\$" + entry.getKey().toUpperCase() + "\\$\\$",
         escapeHtml(entry.getValue())
       ),
       String::concat
-    );
-
-    return bodyWithFilledOutFormFields.replaceAll(
-      "\\$\\$DATASET_NAME\\$\\$",
-      escapeHtml(datasetName)
     );
   }
 }
