@@ -175,7 +175,7 @@ public class AccessRequestSubmitter {
         providerEmail, //to
         supportEmail,  //reply (from)
         subject,
-        escapeHtml(metaInfo) + "\n\n" + wrapContentWithAutoResponse(managerBody) + "\n\n",
+        escapeHtml(metaInfo) + "\n\n" + managerBody + "\n\n",
         params.getBccEmail(), // requestEmail in presenter: help@ and staff
         null,
         null
@@ -206,12 +206,13 @@ public class AccessRequestSubmitter {
   }
 
   private static String wrapContentWithAutoResponse(String content) {
-    return "****THIS IS NOT A REPLY****" +
-        "This is an automatic response, that includes your message for your records, to let you " +
+    return "\n****THIS IS NOT A REPLY****" +
+        "\nThis is an automatic response, that includes your message for your records, to let you " +
         "know that we have received your email and will get back to you as " +
         "soon as possible. Thanks so much for contacting us!" +
         "This was your message:" + "\n\n" + content + "\n";
   }
+
 
   private static String createAccessRequestEmailBody(String bodyTemplate, Map<String, String> templateSubs, String datasetName) {
     String bodyWithDatasetName = bodyTemplate.replaceAll(
