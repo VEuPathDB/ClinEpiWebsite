@@ -1,0 +1,105 @@
+name,label,data_type,value_labels,n_missing,complete_rate,min,median,max,mean,sd,hist,format.stata
+site,UMSP MRC ID number,numeric,,0,1, 11.000,  79.50, 116.00,77.15625,25.0323683046874,▁▃▆▇▆,%9.0g
+NEWsiteID,New MRC ID number,numeric,"1. Kasambya HCIII (Mubende District),
+2. Kiyuni HCIII (Mubende District),
+3. Bbaale HCIV (Kayunga District),
+4. Kangulumira HCIV (Kayunga District),
+5. Kyegegwa HCIV (Kyegegwa District),
+6. Kakabara HCIII (Kyegegwa District),
+7. Kibaale HCIV (Kibaale District),
+8. Kyebando HCIII (Kibaale District),
+9. Kigorobya HCIV (Hoima District),
+10. Butema HCIII (Hoima District),
+11. Bwijanga HCIV (Masindi District),
+12. Kyatiri HCIII (Masindi District),
+13. Kigumba HCIII (Kiryandongo District),
+14. Diima HCIII (Kiryandongo District),
+15. Opia HCIII (Arua District),
+16. Cilio HCIII (Arua District),
+17. Lobule HCIII (Koboko District),
+18. Ayipe HCIII (Koboko District),
+19. Metu HCIII (Moyo District),
+20. Lefori HCIII (Moyo District),
+21. Koch Goma HCIV (Nwoya District),
+22. Alero HCIII (Nwoya District),
+23. Atiak HCIV (Amuru District),
+24. Amuru HCIII (Amuru District),
+25. Awach HCIV (Gulu District),
+26. Pabwo HCIII (Gulu District),
+27. Lalogi HCIV (Omoro District),
+28. Bobi HCIII (Omoro District),
+29. Padibe HCIV (Lamwo District),
+30. Madi-Opei HCIII (Lamwo District),
+31. Namokora HCIV (Kitgum District),
+32. Kitgum-Matidi HCIII (Kitgum District),
+33. Patongo HCIII (Agago District),
+34. Lira-Kato HCIII (Agago District),
+35. Anyeke HCIV (Oyam District),
+36. Otwal HCIII (Oyam District),
+37. Aboke HCIV (Kole District),
+38. Bala HCIII (Kole District),
+39. Teboke HCIII (Apac District),
+40. Akokoro HCIII (Apac District),
+41. Aduku HCIV (Kwania District),
+42. Apwori HCIII (Kwania District),
+43. Lokolia HCIII (Kaabong District),
+44. Kalapata HCIII (Kaabong District),
+45. Kapelebyong HCIV (Kapelebyong District),
+46. Obalanga HCIII (Kapelebyong District),
+47. Morungatuny HCIII (Amuria District),
+48. Asamuk HCIII (Amuria District),
+49. Kamaca HCIII (Kumi District),
+50. Omatenga HCIII (Kumi District),
+51. Kolir HCIII (Bukedea District),
+52. Bukedea HCIII (Bukedea District),
+53. Kidera HCIV (Buyende District),
+54. Bugaya HCIII (Buyende District),
+55. Bumanya HCIV (Kaliro District),
+56. Nawaikoke HCIII (Kaliro District),
+57. Kiyunga HCIV (Luuka District),
+58. Ikumbya HCIV (Luuka District),
+59. Budondo HCIV (Jinja District),
+60. Butagaya HCIII (Jinja District),
+61. Buwaiswa HCIV (Mayuge District),
+62. Kigandalo HCIII (Mayuge District),
+63. Lumino HCIII (Busia District),
+64. Busitema HCIII (Busia District),
+65. Kihihi HCIV (Kanungu District),
+66. Amolatar HCIV (Amolatar District),
+67. Dokolo HCIV (Dokolo District),
+68. Alebtong HCIV (Alebtong District),
+69. Orum HCIV (Otuke District),
+70. Nagongera HCIV (Tororo District)",0,1,  1.000,  32.50,  64.00,32.5,18.4783007062067,▇▇▇▇▇,%39.0g
+Region,Region of country,numeric,"1. North Buganda / Tooro,
+2. Bunyoro,
+3. West Nile,
+4. Acholi,
+5. Lango,
+6. Teso / Karamoja,
+7. Busoga / Bukedi,
+8. Kigezi,
+9. IRS Districts",0,1,  1.000,   4.00,   7.00,4.375,1.93301250590945,▅▂▅▃▇,%21.0g
+LLINEUP2,If included in LLINEUP2 RCT,numeric,"0. Not included,
+1. Included",0,1,  1.000,   1.00,   1.00,1,0,▁▁▇▁▁,%12.0g
+LLINarm,Type of LLIN randomized to,numeric,"1. PBO,
+2. Royal Guard",0,1,  1.000,   1.50,   2.00,1.5,0.500144738749594,▇▁▁▁▇,%11.0g
+monthyear,Month and year,numeric,,0,1,728.000, 742.00, 758.00,742.40625,7.94555928022833,▇▇▇▇▅,%tmMon_YY
+LLINdistmonth,Month LLINs distributed,numeric,,0,1,730.000, 731.00, 734.00,731.40625,1.55888333603131,▇▇▁▁▅,%tmMon_YY
+timing,Months since LLIN distribution,numeric,,0,1, -2.000,  11.00,  24.00,11,7.79113566948146,▇▇▇▇▇,%9.0g
+visits,Total number of visits,numeric,,0,1,187.000,1215.00,3821.00,1351.86226851852,616.160283227073,▅▇▅▁▁,%9.0g
+malariasuspected,Total number of visits with malaria suspected,numeric,,0,1, 72.000, 911.00,3216.00,973.527777777776,494.627151413332,▆▇▃▁▁,%9.0g
+propsuspected,Proportion of total with malaria suspected,numeric,,0,1,  0.138,   0.75,   1.00,0.720601664864698,0.186787773108903,▁▂▅▇▇,%9.0g
+TPRdenom,Number tested for malaria,numeric,,0,1, 72.000, 908.50,3216.00,968.565393518519,495.269794589626,▆▇▃▁▁,%9.0g
+proptested,Proportion of suspected tested for malaria,numeric,,0,1,  0.332,   1.00,   1.00,0.993605313081018,0.0394287344362162,▁▁▁▁▇,%9.0g
+TPRnum,Number testing positive for malaria,numeric,,0,1,  4.000, 470.00,2009.00,537.874421296298,349.772194661499,▇▇▃▁▁,%14.0g
+TPR,Test positivity rate,numeric,,0,1,  0.043,   0.54,   0.95,0.524440153027643,0.15992763295704,▁▅▇▇▁,%9.0g
+RDT,Total number of RDT tests,numeric,,0,1,  0.000, 736.00,3174.00,785.039930555552,512.731808546668,▇▇▂▁▁,%9.0g
+propRDT,Proportion tested with RDT done,numeric,,0,1,  0.000,   0.96,   1.00,0.793314589111105,0.289485589405744,▁▁▁▁▇,%9.0g
+TPRdenomCA,Number tested for malaria from catchment area,numeric,,0,1,  1.000, 205.00, 864.00,218.57349537037,132.303236179117,▇▇▂▁▁,%9.0g
+TPRnumCA,Number testing positive for malaria from catchment area,numeric,,0,1,  0.000, 106.00, 612.00,125.329861111111,93.4771955666493,▇▅▂▁▁,%9.0g
+TPRCA,Test positivity rate from catchment area,numeric,,0,1,  0.000,   0.55,   0.96,0.534007120850557,0.170152144526896,▁▃▇▇▁,%9.0g
+RDTCA,Total number of RDT tests from catchment area,numeric,,0,1,  0.000, 162.50, 816.00,185.255787037037,139.869073824296,▇▆▂▁▁,%9.0g
+propRDTCA,Proportion tested with RDT done from catchment area,numeric,,0,1,  0.000,   0.95,   1.00,0.791592559235276,0.288601028469465,▁▁▁▁▇,%9.0g
+totaladj,Total episodes of malaria from target area,numeric,,0,1,  0.000, 108.00, 612.00,126.590203216575,94.318983693169,▇▅▂▁▁,%9.0g
+targetpopulation,Population estimate of target area,numeric,,0,1,751.443,2905.86,9286.97,3103.2989176291,1556.33675766994,▆▇▁▁▁,%9.0g
+MI1000,Malaria incidence per 1000 PY from target area,numeric,,0,1,  0.000, 453.00,3768.00,556.447916666666,456.174532391501,▇▂▁▁▁,%9.0g

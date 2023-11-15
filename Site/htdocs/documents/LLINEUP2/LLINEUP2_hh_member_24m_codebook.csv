@@ -1,0 +1,333 @@
+name,label,data_type,value_labels,n_missing,complete_rate,n_unique,empty,min,median,max,mean,sd,whitespace,hist,format.stata
+starttime,Date/time of start,character,,0,1,16652,0,23,,23,,,0,,%23s
+date,Date of visit,Date,,0,1,73,,2022-11-23,2023-01-19,2023-03-20,,,,,%d
+mrccode,MRC code,numeric,"1. Kasambya HCIII (Mubende District),
+2. Kiyuni HCIII (Mubende District),
+3. Bbaale HCIV (Kayunga District),
+4. Kangulumira HCIV (Kayunga District),
+5. Kyegegwa HCIV (Kyegegwa District),
+6. Kakabara HCIII (Kyegegwa District),
+7. Kibaale HCIV (Kibaale District),
+8. Kyebando HCIII (Kibaale District),
+9. Kigorobya HCIV (Hoima District),
+10. Butema HCIII (Hoima District),
+11. Bwijanga HCIV (Masindi District),
+12. Kyatiri HCIII (Masindi District),
+13. Kigumba HCIII (Kiryandongo District),
+14. Diima HCIII (Kiryandongo District),
+15. Opia HCIII (Arua District),
+16. Cilio HCIII (Arua District),
+17. Lobule HCIII (Koboko District),
+18. Ayipe HCIII (Koboko District),
+19. Metu HCIII (Moyo District),
+20. Lefori HCIII (Moyo District),
+21. Koch Goma HCIV (Nwoya District),
+22. Alero HCIII (Nwoya District),
+23. Atiak HCIV (Amuru District),
+24. Amuru HCIII (Amuru District),
+25. Awach HCIV (Gulu District),
+26. Pabwo HCIII (Gulu District),
+27. Lalogi HCIV (Omoro District),
+28. Bobi HCIII (Omoro District),
+29. Padibe HCIV (Lamwo District),
+30. Madi-Opei HCIII (Lamwo District),
+31. Namokora HCIV (Kitgum District),
+32. Kitgum-Matidi HCIII (Kitgum District),
+33. Patongo HCIII (Agago District),
+34. Lira-Kato HCIII (Agago District),
+35. Anyeke HCIV (Oyam District),
+36. Otwal HCIII (Oyam District),
+37. Aboke HCIV (Kole District),
+38. Bala HCIII (Kole District),
+39. Teboke HCIII (Apac District),
+40. Akokoro HCIII (Apac District),
+41. Aduku HCIV (Kwania District),
+42. Apwori HCIII (Kwania District),
+43. Lokolia HCIII (Kaabong District),
+44. Kalapata HCIII (Kaabong District),
+45. Kapelebyong HCIV (Kapelebyong District),
+46. Obalanga HCIII (Kapelebyong District),
+47. Morungatuny HCIII (Amuria Distric),
+48. Asamuk HCIII (Amuria Distric),
+49. Kamaca HCIII (Kumi District),
+50. Omatenga HCIII (Kumi District),
+51. Kolir HCIII (Bukedea District),
+52. Bukedea HCIII (Bukedea District),
+53. Kidera HCIV (Buyende District),
+54. Bugaya HCIII (Buyende District),
+55. Bumanya HCIV (Kaliro District),
+56. Nawaikoke HCIII (Kaliro District),
+57. Kiyunga HCIV (Luuka District),
+58. Ikumbya HCIV (Luuka District),
+59. Budondo HCIV (Jinja District),
+60. Butagaya HCIII (Jinja District),
+61. Buwaiswa HCIV (Mayuge District),
+62. Kigandalo HCIII (Mayuge District),
+63. Lumino HCIII (Busia District),
+64. Busitema HCIII (Busia District),
+65. Kihihi HCIV (Kanungu District),
+66. Amolatar HCIV (Amolatar District),
+67. Dokolo HCIV (Dokolo District),
+68. Alebtong HCIV (Alebtong District),
+69. Orum HCIV (Otuke District),
+70. Nagongera HCIV (Tororo District)",0,1,,, 1.0e+00, 3.3e+01, 6.4e+01,33.1152280617784,17.9444538307882,,▇▇▇▇▇,%39.0g
+Region,Region of country,numeric,"1. North Buganda / Tooro,
+2. Bunyoro,
+3. West Nile,
+4. Acholi,
+5. Lango,
+6. Teso / Karamoja,
+7. Busoga / Bukedi,
+8. Kigezi,
+9. IRS Districts",0,1,,, 1.0e+00, 4.0e+00, 7.0e+00,4.45893690889474,1.87767696911082,,▅▂▆▂▇,%21.0g
+LLINarm,Type of LLIN randomized to,numeric,"1. PBO,
+2. Royal Guard",0,1,,, 1.0e+00, 1.0e+00, 2.0e+00,1.49718663953071,0.50000705005857,,▇▁▁▁▇,%11.0g
+LLINdistmonth,Month LLINs distributed,numeric,,0,1,,, 7.3e+02, 7.3e+02, 7.3e+02,731.389919789297,1.54327115959757,,▆▇▁▁▅,%tmMon_YY
+hhid,Household ID,numeric,,0,1,,, 3.0e+08, 3.3e+08, 3.6e+08,333135068.033825,17944929.5938832,,▇▇▇▇▇,%16.0f
+linenum,HH member line number,numeric,,0,1,,, 1.0e+00, 3.0e+00, 1.8e+01,3.46953190470491,2.231914466851,,▇▂▁▁▁,%8.0g
+uniqueid,Unique HH member ID (hhid + linenum),numeric,,0,1,,, 3.0e+10, 3.3e+10, 3.6e+10,33313506806.8515,1794492959.52293,,▇▇▇▇▇,%13.0f
+participantsname,HH member name,character,,0,1,15643,0,4,,29,,,0,,%29s
+gender,Gender of participant,numeric,"1. Male,
+2. Female",0,1,,, 1.0e+00, 2.0e+00, 2.0e+00,1.54172153717227,0.498271185915516,,▇▁▁▁▇,%8.0g
+hoh,Head of household,numeric,"0. Not head of household,
+1. Head of household",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.201783790254998,0.401343660837716,,▇▁▁▁▂,%21.0g
+relation,Participant relationship to head of household,numeric,"0. Self (household head),
+1. husband/wife,
+2. son/daughter,
+3. father/mother,
+4. grandson/granddaughter/great-grandson/great-granddaughter,
+5. grandmother/grandfather/great-grandmother/great-grandfather,
+6. Brother/Sister,
+7. Aunt/Uncle,
+8. Cousin,
+9. Niece/Nephew,
+10. Stepchild,
+11. Foster child,
+12. Girlfriend,
+13. Boyfriend,
+14. House helper,
+15. Employee,
+16. Renter,
+17. Student-boarder,
+18. Other,
+19. In-law,
+20. Other not related",0,1,,, 0.0e+00, 2.0e+00, 2.0e+01,2.17927690650067,2.63921643184896,,▇▁▁▁▁,%59.0g
+relation_oth,Participant's relationship to the household head,character,,0,1,7,0,2,,14,,,0,,%14s
+relationCAT,Relationship categories,numeric,"1. Head of household,
+2. 1st degree relative,
+3. 2nd degree relative,
+4. Not related",0,1,,, 1.0e+00, 2.0e+00, 4.0e+00,1.96983119837184,0.640019965828005,,▂▇▁▂▁,%19.0g
+lessthantwo,participant less than 2yrs,numeric,"-9. Skipped (for HoH),
+0. No,
+1.  Yes",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.0509397821142103,0.219881365175207,,▇▁▁▁▁,%17.0g
+age,Age in years if >=2,numeric,,0,1,,,-9.0e+00, 1.4e+01, 1.0e+02,19.5444750389082,18.3919634451635,,▇▆▂▁▁,%8.0g
+agemonths,agein months if <2,numeric,,0,1,,,-9.0e+00,-9.0e+00, 2.3e+01,-8.02181850832038,4.4313770425783,,▇▁▁▁▁,%8.0g
+ageforlogic,Age in years again,numeric,,0,1,,, 0.0e+00, 1.4e+01, 1.0e+02,20.002933077936,17.7765586515083,,▇▃▂▁▁,%8.0g
+ageyrs,Age in years,numeric,,0,1,,, 4.2e-02, 1.4e+01, 1.0e+02,20.0462433656357,17.7290942103681,,▇▃▂▁▁,%9.0g
+agecat,Age categories,numeric,"1. < 5 years,
+2. 5-15 years,
+3. 16 years or older",0,1,,, 1.0e+00, 2.0e+00, 3.0e+00,2.2882796600024,0.758534999950263,,▃▁▆▁▇,%17.0g
+hm_malaria,Treated for malaria in last 6 months?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-7.0e+00, 0.0e+00, 1.0e+00,0.41386328265294,0.538077172554197,,▁▁▁▁▇,%10.0g
+hm_malaria_mrc,"If treated for malaria, at MRC?",numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.0e+00,-9.0e+00, 1.0e+00,-4.8899197892973,4.83988815569386,,▇▁▁▁▆,%10.0g
+hm_seekcare,"If not at MRC, where treated?",numeric,"-7. Don’t know,
+0. specific UMSP MRC,
+1. Other public health facility,
+2. Traditional healer,
+3. Private pharmacy,
+4. Private health facility,
+5. Community Health Worker,
+6. Self-treatment with none of the above involved,
+7. Other, specify,
+8. NGO health facility,
+9. Dispensary,
+10. Shop/Kiosk,
+11. Petty Trader,
+12. Neighbor,
+13. Traditional Healer",0,1,,,-9.0e+00,-9.0e+00, 8.0e+00,-7.84418771698784,3.77376869696936,,▇▁▁▁▁,%46.0g
+seekcare_oth,Other place malaria treated,character,,0,1,7,0,2,,13,,,0,,%13s
+mainactivity,What is the main activity of this individual (during this season)?,numeric,"1. Farmer,
+2. Laborer,
+3. Shopkeeper/ retail,
+4. Business,
+5. Childcare,
+6. Student,
+7. Civil servant,
+8. Child (not studying),
+9. No occupation,
+10. Other",0,1,,, 1.0e+00, 6.0e+00, 1.0e+01,5.57937268047408,2.93080177285485,,▆▁▇▃▅,%20.0g
+otheractivity,Specify [[participantsname]]'s other activity during this season,character,,0,1,84,0,2,,28,,,0,,%28s
+fever2wks,Fever in the last 2 weeks?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.175445947563756,0.380359470776439,,▇▁▁▁▂,%10.0g
+treatmentyn,Did they get treatmet from someone?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.0e+00,-9.0e+00, 1.0e+00,-8.64461869986835,1.82901391517189,,▇▁▁▁▁,%10.0g
+hm_covidvac,Vaccinated for COVID?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-7.0e+00, 0.0e+00, 1.0e+00,0.0442356039746209,1.23314278116801,,▁▁▁▁▇,%10.0g
+hm_covidvacdoses,Number of vaccine doses,numeric,,0,1,,,-9.0e+00,-9.0e+00, 3.0e+00,-6.60229857536217,4.40809350410078,,▇▁▁▁▂,%8.0g
+hm_covidvac_type,Type of vaccine (first dose),numeric,"-7. Don't know,
+1. Astra-Zeneca,
+2. Sinovac/Sinopharm,
+3. Novavax,
+4. mRNA,
+5. Other (specify),
+6. Pfizer/BioNtech,
+7. Janssen (Johnson&Johnson)",0,1,,,-9.0e+00,-9.0e+00, 7.0e+00,-6.05351370764996,5.64034383031012,,▇▁▁▁▁,%25.0g
+hm_covidvac_oth,Other type of vaccine (first dose),numeric,,0,1,,,-9.0e+00,-9.0e+00,-9.0e+00,-9,0,,▁▁▇▁▁,%8.0g
+hm_covidvacdate,Date of vaccine (first dose),character,,0,1,677,0,2,,11,,,0,,%11s
+hm_covidvac_type2,Type of vaccine (2nd dose),numeric,"-7. Don't know,
+1. Astra-Zeneca,
+2. Sinovac/Sinopharm,
+3. Novavax,
+4. mRNA,
+5. Other (specify),
+6. Pfizer/BioNtech,
+7. Janssen (Johnson&Johnson)",0,1,,,-9.0e+00,-9.0e+00, 7.0e+00,-7.89075781156468,3.45425168662157,,▇▁▁▁▁,%25.0g
+othhm_covidvac_type2,Other type of vaccine (2nd dose),numeric,,0,1,,,-9.0e+00,-9.0e+00,-9.0e+00,-9,0,,▁▁▇▁▁,%8.0g
+hm_covidvacdate2,Date of vaccine (2nd dose),character,,0,1,506,0,2,,11,,,0,,%11s
+hm_covidvac_type3,Which COVID-19 vaccine did you receive? (Third dose),numeric,,0,1,,,-9.0e+00,-9.0e+00, 7.0e+00,-8.88465222075901,1.18694698724013,,▇▁▁▁▁,%8.0g
+othhm_covidvac_type3,"If other, specify type of vaccine received",numeric,,0,1,,,-9.0e+00,-9.0e+00,-9.0e+00,-9,0,,▁▁▇▁▁,%8.0g
+hm_covidvacdate3,"If yes, record date of Third vaccination (if known)",character,,0,1,113,0,2,,11,,,0,,%11s
+age5to18,Whether 5-18 years of age and eligible for school survey,numeric,"0. Not 5-18 years of age,
+1. 5-18 years of age",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.395546510235842,0.48898239326747,,▇▁▁▁▅,%21.0g
+membereduclevel,What is [[participantsname]] education level?,numeric,"-9. skiped,
+0. No education/Never gone to school,
+1. Nursery,
+2. Primary,
+3. Secondary,
+4. Vocational",0,1,,,-9.0e+00,-9.0e+00, 4.0e+00,-4.78001915479469,5.24237203517234,,▇▁▁▁▃,%33.0g
+membergoschool,Does [[participantsname]] go to school? (Fields Yes/No),numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.0e+00,-9.0e+00, 1.0e+00,-5.51364779121273,4.73507288151663,,▇▁▁▁▅,%10.0g
+schlinsubcounty,If yes: Is the school within this subcounty ( fields Yes/No),numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.0e+00,-9.0e+00, 1.0e+00,-5.8270681192386,4.63134434928775,,▇▁▁▁▃,%10.0g
+schoolname,If [[participantsname]] goes to school: What is the name of the school,character,,0,1,1534,0,1,,47,,,0,,%47s
+memberclass,If Yes; Which class is [[participantsname]] ( Fields- Nursery to P1 - S6),numeric,"0. Nursery,
+1. Primary One,
+2. Primary Two,
+3. Primary Three,
+4. Primary Four,
+5. Primary Five,
+6. Primary Six,
+7. Primary Seven,
+8. Senior One,
+9. Senior Two,
+10. Senior Three,
+11. Senior Four,
+12. Senior Five,
+13. Senior Six",0,1,,,-9.0e+00,-9.0e+00, 1.3e+01,-5.09355920028733,5.88520721733853,,▇▁▃▁▁,%13.0g
+mrctype,Residents eligible for clinical surveys,numeric,"0. Focussed,
+1. Expanded",0,1,,, 0.0e+00, 0.0e+00, 0.0e+00,0,0,,▁▁▇▁▁,%9.0g
+brandnetlastnight,Brand of net slept under last night,numeric,"1. Royal Guard,
+2. PermaNet 2.0,
+3. PermaNet 3.0,
+4. Olyset Net,
+5. Olyset Net Plus,
+6. Duranet,
+7. Interceptor,
+8. Netprotect,
+9. KO net,
+10. MAGNet,
+11. Iconet,
+12. Safi net,
+13. B52,
+14. Bamboo hut,
+15. Century,
+16. Lucky net,
+17. Victoria,
+18. Homemade net,
+19. Dawa net,
+20. Iconlife,
+21. Yorkool,
+22. Safe net,
+23. DK,
+24. Kooper net,
+25. Royal Sentry Net,
+26. LLIN NOS,
+27. Untreated net NOS,
+28. No label,
+29. Not observed,
+30. TANA LLIN,
+96. Other brand",6067,0.636837064527715,,, 1.0e+00, 3.0e+00, 2.9e+01,3.31920293260644,4.97347718968844,,▇▁▁▁▁,%17.0g
+netlastnight,Slept under bednet last night,numeric,,0,1,,, 0.0e+00, 1.0e+00, 1.0e+00,0.636837064527716,0.480925630909551,,▅▁▁▁▇,%9.0g
+LLINlastnight,Slept under LLIN last night,numeric,,0,1,,, 0.0e+00, 1.0e+00, 1.0e+00,0.626002633784268,0.483877413654316,,▅▁▁▁▇,%9.0g
+intnum,Interviewer's Number,numeric,,10726,0.357955225667425,,, 1.0e+01, 3.4e+01, 4.0e+01,34.7078595317726,3.30038821990308,,▁▁▁▇▇,%8.0g
+age2to10,Whether 2-10 years of age and eligible for clinical survey,numeric,"0. Not 2-10 years of age,
+1. 2-10 years of age",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.357955225667425,0.479413224513952,,▇▁▁▁▅,%21.0g
+age2to10consented,Age 2-10 years and consented for clinical survey,numeric,,0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.2705016161858,0.444232264122165,,▇▁▁▁▃,%9.0g
+inclusion_criteria,Is participant eligible for Clinical Survey,numeric,"0. No,
+1. Yes",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.357955225667425,0.479413224513952,,▇▁▁▁▅,%8.0g
+ageclinical,Age in years from clinical survey,numeric,,10726,0.357955225667425,,, 2.0e+00, 6.0e+00, 1.0e+01,5.67157190635451,2.51341832069496,,▇▇▃▇▆,%8.0g
+consent,Participant consent to lab testing,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+0. No,
+1. Yes,
+2. Not at home",10726,0.357955225667425,,, 0.0e+00, 1.0e+00, 2.0e+00,1.24230769230769,0.43085079288282,,▁▁▇▁▂,%14.0g
+consent2,Participant consent to future use of biological specimens,numeric,"-9. Skipped,
+0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00, 1.0e+00, 1.0e+00,-1.44314381270903,4.29715886676235,,▂▁▁▁▇,%14.0g
+bsbarcode1,Barcode for blood smear,character,,0,1,4521,10726,0,,5,,,0,,%9s
+bsbarcode2,Reenter barcode for blood smear,character,,0,1,4521,10726,0,,5,,,0,,%9s
+fpbarcode1,Barcode for filter paper,character,,0,1,4521,10726,0,,5,,,0,,%9s
+fpbarcode2,Reenter barcode for filter paper,character,,0,1,4521,10726,0,,5,,,0,,%9s
+fever,particiapant have fever in the last 48 hours,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00, 0.0e+00, 1.0e+00,-1.80200668896321,4.11605303789441,,▂▁▁▁▇,%14.0g
+temperature,Temperature of participant,numeric,-8.  Refused,10726,0.357955225667425,,,-9.0e+00, 3.7e+01, 4.1e+01,25.8217391393655,19.8090915878685,,▂▁▁▁▇,%9.0g
+elevatedtemp,Temperature >= 38.0,numeric,"0. No,
+1. Yes",12187,0.270501616185801,,, 0.0e+00, 0.0e+00, 1.0e+00,0.0995795529984505,0.299471720625389,,▇▁▁▁▁,%9.0g
+febrile,Subjective fever or elevated temperature,numeric,"0. No,
+1. Yes",12187,0.270501616185801,,, 0.0e+00, 1.0e+00, 1.0e+00,0.545917238327071,0.497942240403483,,▆▁▁▁▇,%9.0g
+rdtdone,RDT Done,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-4.87458193979925,4.92332812249825,,▇▁▁▁▆,%14.0g
+RDTiffebrile,RDT done if febrile,numeric,"0. No,
+1. Yes",14239,0.14767149527116,,, 1.0e+00, 1.0e+00, 1.0e+00,1,0,,▁▁▇▁▁,%9.0g
+rdtrslt,Result of RDT,numeric,"-9. Skipped,
+0. Negative,
+1. Positive",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-4.99949832775913,4.7833651110292,,▇▁▁▁▆,%14.0g
+BSdone,Whether or not BS done if consented,numeric,,12187,0.270501616185801,,, 1.0e+00, 1.0e+00, 1.0e+00,1,0,,▁▁▇▁▁,%9.0g
+parasitedensity,Parasite density,numeric,,12187,0.270501616185801,,, 0.0e+00, 0.0e+00, 7.0e+06,5601.29807479527,105266.641016973,,▇▁▁▁▁,%12.0g
+gametocytes,Whether gametocytes present,numeric,"0. Absent,
+1. Present",12187,0.270501616185801,,, 0.0e+00, 0.0e+00, 1.0e+00,0.0309803053772965,0.17328349807595,,▇▁▁▁▁,%8.0g
+BSdich,Blood smear dichotomized,numeric,"0. Negative,
+1. Positive",12187,0.270501616185801,,, 0.0e+00, 0.0e+00, 1.0e+00,0.277273733126793,0.447702316732077,,▇▁▁▁▃,%9.0g
+requireweight,Does this child need their weight measured,character,,0,1,5,10726,0,,4,,,0,,%9s
+weight,Weight in kg,numeric,-9. Refused,10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 4.2e+01,2.37988294630152,14.0630458111905,,▇▁▃▂▁,%9.0g
+meds,medication prescribed to participant,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-4.62842809364547,4.84905742973422,,▇▁▁▁▆,%14.0g
+whichmeds,Which medication was prescribed?,character,,0,1,8,10726,0,,13,,,0,,%13s
+al,Artemether-lumefantrine given,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-5.74331103678934,4.64874193149674,,▇▁▁▁▃,%14.0g
+panadol,Panadol given,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-5.70668896321064,4.69913559112824,,▇▁▁▁▃,%14.0g
+other,Other med given,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-6.03361204013386,4.23273909869561,,▇▁▁▁▃,%14.0g
+descothermed,Other medication,character,,0,1,10,10726,0,,29,,,0,,%29s
+referred,Was participant referred for additional care?,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 1.0e+00,-4.94966555183948,4.48494255323548,,▇▁▁▁▆,%14.0g
+whyreferred,Why referred,character,,0,1,30,10726,0,,61,,,0,,%61s
+age2to4,Whether 2-4 years of age,numeric,"0. Not 2-4 years of age,
+1. 2-4 years of age",0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.1341434215252,0.340816544394115,,▇▁▁▁▁,%20.0g
+age2to4consented,Age 2-4 years and consented for clinical survey,numeric,,0,1,,, 0.0e+00, 0.0e+00, 1.0e+00,0.114809050640489,0.318800903723647,,▇▁▁▁▁,%9.0g
+hemocue,Hemocue testing,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+1. Tested,
+2. Not enough blood drawn,
+3. Test Failed",10726,0.357955225667425,,,-9.0e+00,-9.0e+00, 3.0e+00,-5.78979933110368,4.67267391814123,,▇▁▁▁▃,%22.0g
+hbdone,Hemoglobin measured,numeric,"0. No,
+1. Yes",10726,0.357955225667425,,, 0.0e+00, 0.0e+00, 1.0e+00,0.319063545150502,0.466152696893407,,▇▁▁▁▃,%9.0g
+hemoglobin,hemoglobin level in gm/dL,numeric,,14798,0.114210463306596,,, 5.3e+00, 1.2e+01, 1.6e+01,11.9097484242741,1.24965830269312,,▁▁▆▇▁,%9.0g
+anemia11,Anemia defined as Hb < 11,numeric,"0. No,
+1. Yes",14798,0.114210463306596,,, 0.0e+00, 0.0e+00, 1.0e+00,0.193396226415094,0.395064459074362,,▇▁▁▁▂,%9.0g
+anemia10,Anemia defined as Hb < 10,numeric,"0. No,
+1. Yes",14798,0.114210463306596,,, 0.0e+00, 0.0e+00, 1.0e+00,0.0649895178197063,0.246571987540179,,▇▁▁▁▁,%9.0g
+anemia8,Anemia defined as Hb < 8,numeric,"0. No,
+1. Yes",14798,0.114210463306596,,, 0.0e+00, 0.0e+00, 1.0e+00,0.00838574423480093,0.0912128499841168,,▇▁▁▁▁,%9.0g
+stoptime,End time of interview,character,,0,1,5977,10726,0,,23,,,0,,%23s

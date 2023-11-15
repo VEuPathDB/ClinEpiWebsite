@@ -1,0 +1,604 @@
+name,label,data_type,value_labels,n_missing,complete_rate,n_unique,empty,min,median,max,mean,sd,whitespace,hist,format.stata
+mrctype,Residents eligible for clinical surveys,numeric,"0. Focussed,
+1. Expanded",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.459571314,0.498378234,,▇▁▁▁▇,%8.0g
+starttime,Date/time of start,character,,0,1,16145,0,23,,23,,,0,,%23s
+date,Date of visit,Date,,0,1,94,,11/24/21,1/18/22,3/27/22,,,,,%d
+mrccode,MRC code,numeric,"1. Kasambya HCIII (Mubende District),
+2. Kiyuni HCIII (Mubende District),
+3. Bbaale HCIV (Kayunga District),
+4. Kangulumira HCIV (Kayunga District),
+5. Kyegegwa HCIV (Kyegegwa District),
+6. Kakabara HCIII (Kyegegwa District),
+7. Kibaale HCIV (Kibaale District),
+8. Kyebando HCIII (Kibaale District),
+9. Kigorobya HCIV (Hoima District),
+10. Butema HCIII (Hoima District),
+11. Bwijanga HCIV (Masindi District),
+12. Kyatiri HCIII (Masindi District),
+13. Kigumba HCIII (Kiryandongo District),
+14. Diima HCIII (Kiryandongo District),
+15. Opia HCIII (Arua District),
+16. Cilio HCIII (Arua District),
+17. Lobule HCIII (Koboko District),
+18. Ayipe HCIII (Koboko District),
+19. Metu HCIII (Moyo District),
+20. Lefori HCIII (Moyo District),
+21. Koch Goma HCIV (Nwoya District),
+22. Alero HCIII (Nwoya District),
+23. Atiak HCIV (Amuru District),
+24. Amuru HCIII (Amuru District),
+25. Awach HCIV (Gulu District),
+26. Pabwo HCIII (Gulu District),
+27. Lalogi HCIV (Omoro District),
+28. Bobi HCIII (Omoro District),
+29. Padibe HCIV (Lamwo District),
+30. Madi-Opei HCIII (Lamwo District),
+31. Namokora HCIV (Kitgum District),
+32. Kitgum-Matidi HCIII (Kitgum District),
+33. Patongo HCIII (Agago District),
+34. Lira-Kato HCIII (Agago District),
+35. Anyeke HCIV (Oyam District),
+36. Otwal HCIII (Oyam District),
+37. Aboke HCIV (Kole District),
+38. Bala HCIII (Kole District),
+39. Teboke HCIII (Apac District),
+40. Akokoro HCIII (Apac District),
+41. Aduku HCIV (Kwania District),
+42. Apwori HCIII (Kwania District),
+43. Lokolia HCIII (Kaabong District),
+44. Kalapata HCIII (Kaabong District),
+45. Kapelebyong HCIV (Kapelebyong District),
+46. Obalanga HCIII (Kapelebyong District),
+47. Morungatuny HCIII (Amuria Distric),
+48. Asamuk HCIII (Amuria Distric),
+49. Kamaca HCIII (Kumi District),
+50. Omatenga HCIII (Kumi District),
+51. Kolir HCIII (Bukedea District),
+52. Bukedea HCIII (Bukedea District),
+53. Kidera HCIV (Buyende District),
+54. Bugaya HCIII (Buyende District),
+55. Bumanya HCIV (Kaliro District),
+56. Nawaikoke HCIII (Kaliro District),
+57. Kiyunga HCIV (Luuka District),
+58. Ikumbya HCIV (Luuka District),
+59. Budondo HCIV (Jinja District),
+60. Butagaya HCIII (Jinja District),
+61. Buwaiswa HCIV (Mayuge District),
+62. Kigandalo HCIII (Mayuge District),
+63. Lumino HCIII (Busia District),
+64. Busitema HCIII (Busia District),
+65. Kihihi HCIV (Kanungu District),
+66. Amolatar HCIV (Amolatar District),
+67. Dokolo HCIV (Dokolo District),
+68. Alebtong HCIV (Alebtong District),
+69. Orum HCIV (Otuke District),
+70. Nagongera HCIV (Tororo District)",0,1,,,1.00E+00,3.30E+01,6.40E+01,33.11489283,18.2056219,,▆▇▆▇▇,%39.0g
+Region,Region of country,numeric,"1. North Buganda / Tooro,
+2. Bunyoro,
+3. West Nile,
+4. Acholi,
+5. Lango,
+6. Teso / Karamoja,
+7. Busoga / Bukedi,
+8. Kigezi,
+9. IRS Districts",0,1,,,1.00E+00,4.00E+00,7.00E+00,4.442028538,1.901107772,,▅▂▅▃▇,%21.0g
+LLINarm,Type of LLIN randomized to,numeric,"1. PBO,
+2. Royal Guard",0,1,,,1.00E+00,1.00E+00,2.00E+00,1.490456483,0.499924353,,▇▁▁▁▇,%11.0g
+LLINdistmonth,Month LLINs distributed,numeric,,0,1,,,7.30E+02,7.30E+02,7.30E+02,731.3862499,1.548726316,,▇▇▁▁▅,%tmMon_YY
+hhid,Household ID,numeric,,0,1,,,2.00E+08,2.30E+08,2.60E+08,233135007.9,18206491.55,,▆▇▆▇▇,%16.0f
+linenum,HH member line number,numeric,,0,1,,,1.00E+00,3.00E+00,1.70E+01,3.269503984,2.073983032,,▇▂▁▁▁,%8.0g
+uniqueid,Unique HH member ID (hhid + linenum),numeric,,0,1,,,2.00E+10,2.30E+10,2.60E+10,23313500798,1820649155,,▆▇▆▇▇,%13.0f
+participantsname,HH member name,character,,0,1,15335,0,2,,27,,,0,,%77s
+gender,Gender of participant,numeric,"1. Male,
+2. Female",0,1,,,1.00E+00,2.00E+00,2.00E+00,1.549385385,0.497570474,,▆▁▁▁▇,%8.0g
+hoh,Head of household,numeric,"0. Not head of household,
+1. Head of household",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.21749336,0.412553647,,▇▁▁▁▂,%21.0g
+relation,Participant relationship to head of household,numeric,"0. Self (household head),
+1. husband/wife,
+2. son/daughter,
+3. father/mother,
+4. grandson/granddaughter/great-grandson/great-granddaughter,
+5. grandmother/grandfather/great-grandmother/great-grandfather,
+6. Brother/Sister,
+7. Aunt/Uncle,
+8. Cousin,
+9. Niece/Nephew,
+10. Stepchild,
+11. Foster child,
+12. Girlfriend,
+13. Boyfriend,
+14. House helper,
+15. Employee,
+16. Renter,
+17. Student-boarder,
+18. Other,
+19. In-law,
+20. Other not related",0,1,,,0.00E+00,2.00E+00,2.00E+01,2.000926555,2.160632711,,▇▁▁▁▁,%59.0g
+relation_oth,Participant's relationship to the household head,character,,0,1,31,0,2,,19,,,0,,%19s
+relationCAT,Relationship categories,numeric,"1. Head of household,
+2. 1st degree relative,
+3. 2nd degree relative,
+4. Not related",0,1,,,1.00E+00,2.00E+00,4.00E+00,1.929149422,0.616556351,,▃▇▁▂▁,%19.0g
+lessthantwo,participant less than 2yrs,numeric,"-9. Skipped (for HoH),
+0. No,
+1.  Yes",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.047872012,0.213501986,,▇▁▁▁▁,%17.0g
+age,Age in years if >=2,numeric,,0,1,,,-9.00E+00,1.40E+01,1.10E+02,19.41021681,18.33379509,,▇▅▂▁▁,%8.0g
+agemonths,agein months if <2,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.30E+01,-8.096485268,4.261235603,,▇▁▁▁▁,%8.0g
+ageforlogic,Age in years again,numeric,,0,1,,,0.00E+00,1.40E+01,1.10E+02,19.84112669,17.75772031,,▇▃▁▁▁,%8.0g
+ageyrs,Age in years,numeric,,0,1,,,4.20E-02,1.40E+01,1.10E+02,19.88045381,17.71493304,,▇▃▁▁▁,%9.0g
+agecat,Age categories,numeric,"1. < 5 years,
+2. 5-15 years,
+3. 16 years or older",0,1,,,1.00E+00,2.00E+00,3.00E+00,2.279201927,0.761373173,,▃▁▆▁▇,%17.0g
+hm_malaria,Treated for malaria in last 6 months?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-7.00E+00,0.00E+00,1.00E+00,0.287849775,0.493008949,,▁▁▁▁▇,%10.0g
+hm_malaria_mrc,"If treated for malaria, at MRC?",numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-6.128420532,4.469980684,,▇▁▁▁▃,%10.0g
+hm_seekcare,"If not at MRC, where treated?",numeric,"-7. Don’t know,
+0. specific UMSP MRC,
+1. Other public health facility,
+2. Traditional healer,
+3. Private pharmacy,
+4. Private health facility,
+5. Community Health Worker,
+6. Self-treatment with none of the above involved,
+7. Other, specify,
+8. NGO health facility,
+9. Dispensary,
+10. Shop/Kiosk,
+11. Petty Trader,
+12. Neighbor,
+13. Traditional Healer",0,1,,,-9.00E+00,-9.00E+00,8.00E+00,-8.311631355,2.88639631,,▇▁▁▁▁,%46.0g
+seekcare_oth,Other place malaria treated,character,,0,1,3,0,2,,14,,,0,,%14s
+fever2wks,Fever in the last 2 weeks?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-7.00E+00,0.00E+00,1.00E+00,0.032738279,0.270519263,,▁▁▁▁▇,%10.0g
+feverday,How many days ago did the fever start?,numeric,,0,1,,,-9.00E+00,-9.00E+00,6.00E+01,-8.412564087,3.127564275,,▇▁▁▁▁,%8.0g
+feverseverity,How severe was the fever?,numeric,"-7. Don’t know,
+1. Mild fever,
+2. Moderate fever,
+3. Severe fever",0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.596886775,2.034986838,,▇▁▁▁▁,%14.0g
+feveroutcome,Did they get better?,numeric,"-7. Don’t know,
+1. Yes,
+2. Still ill,
+3. Died",0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.608437828,1.974273745,,▇▁▁▁▁,%12.0g
+durationofillness,How many days did the illness last?,numeric,,0,1,,,-9.00E+00,-9.00E+00,9.00E+01,-8.676941133,2.121326199,,▇▁▁▁▁,%8.0g
+mainactivity,What is the person's main activity,numeric,"1. Farmer,
+2. Laborer,
+3. Shopkeeper/ retail,
+4. Business,
+5. Childcare,
+6. Student,
+7. Civil servant,
+8. Child (not studying),
+9. No occupation,
+10. Other",0,1,,,1.00E+00,6.00E+00,1.00E+01,5.238495275,2.945013016,,▇▂▇▇▂,%20.0g
+durationoffwork,Days unable to work due to illness over last 2 weeks,numeric,,0,1,,,-9.00E+00,-9.00E+00,9.00E+01,-8.457718204,2.52680598,,▇▁▁▁▁,%8.0g
+caregiver,Was someone in the house unable to carry on activities due to caregiving?,numeric,"DH note: set -9 and 0 to :::UNDEF::: so that this won't be multivalued at household level -7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.538081413,2.021899085,,▇▁▁▁▁,%10.0g
+caregiverduration,Days requiring caregiving in the last 2 weeks,numeric,set -9 to :::UNDEF:::,0,1,,,-9.00E+00,-9.00E+00,1.40E+01,-8.825498795,1.462867847,,▇▁▁▁▁,%8.0g
+treatmentyn,Did they get treatmet from someone?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.528877633,2.062612543,,▇▁▁▁▁,%10.0g
+reasonnotreat,Why did they not get treatment from someone,numeric,"1. Not severe enough,
+2. Got better,
+3. Not enough money,
+4. too far away,
+5. No transport,
+6. Family would not let me,
+7. Other",0,1,,,-9.00E+00,-9.00E+00,7.00E+00,-8.67094941,2.049910765,,▇▁▁▁▁,%23.0g
+othreasonnotreat,Other reason they did not get treatment from someone,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+fever2wks_act,"If fever, where treated?",character,,0,1,21,0,1,,5,,,0,,%9s
+firstprovider,Where care first sought for this fever,numeric,"-7. Don’t know,
+0. specific UMSP MRC,
+1. Other public health facility,
+2. Traditional healer,
+3. Private pharmacy,
+4. Private health facility,
+5. Community Health Worker,
+6. Self-treatment with none of the above involved,
+7. Other, specify,
+8. NGO health facility,
+9. Dispensary,
+10. Shop/Kiosk,
+11. Petty Trader,
+12. Neighbor,
+13. Traditional Healer",0,1,,,-9.00E+00,-9.00E+00,1.00E+01,-8.72753104,1.79264103,,▇▁▁▁▁,%46.0g
+fever2wks_oth,Other place fever treated,character,,0,1,2,0,2,,9,,,0,,%9s
+timetotreat1,Days until starting treatment,numeric,"0. Same day,
+1. Next day,
+2. Day after next,
+3. 3 days later,
+4. 4 days later",0,1,,,-9.00E+00,-9.00E+00,4.00E+00,-8.769843721,1.486169617,,▇▁▁▁▁,%14.0g
+reasonprovider1,Reason for chosing provider,numeric,"1. Proximity,
+2. Good reputation,
+3. Inexpensive,
+4. Good personal experience,
+5. Qualificaition of staff,
+6. Availability of drugs,
+7. Relative/friend works here,
+8. Can get treatment on credit,
+9. Just to see,
+10. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,9.00E+00,-8.694483909,1.993982134,,▇▁▁▁▁,%27.0g
+oreasonprovider1,Other reason for chosing provider,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+totalcost1,Shillings spent at this provider,numeric,,0,1,,,-9.00E+00,-9.00E+00,5.00E+05,167.8326642,4480.828129,,▇▁▁▁▁,%12.0g
+distance1,Distance to this provider (km),numeric,,0,1,,,-9.00E+00,-9.00E+00,4.00E+01,-8.757798505,1.601313087,,▇▁▁▁▁,%8.0g
+transport1,Method of transportation,numeric,"1. Walk,
+2. Bike,
+3. Motorcycle / Boda boda,
+4. Private car,
+5. Public taxi/bus,
+6. Boat,
+7. Donkey/horse,
+8. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,8.00E+00,-8.753845204,1.590411587,,▇▁▁▁▁,%22.0g
+othtransport1,Other method of transportation,character,,0,1,4,0,2,,20,,,0,,%20s
+journeypeople1,How many people transported,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.754462907,1.587513633,,▇▁▁▁▁,%8.0g
+journeytime1,Duration of transportation,character,,0,1,25,0,1,,11,,,0,,%19s
+transportcost1,Cost of transportation,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+04,7.52109457,389.3397415,,▇▁▁▁▁,%8.0g
+providerperson1,Type of provider seen,numeric,"1. Doctor,
+2. Medical assistant,
+3. Nurse,
+4. Nursing assistant,
+5. Pharmacist,
+6. Relative of health care worker,
+7. Shopkeeper,
+8. Village health worker,
+9. TBA (??),
+10. Traditional healer,
+11. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,1.10E+01,-8.708999938,1.887595225,,▇▁▁▁▁,%30.0g
+oproviderperson1,Other type of provider seen,character,,0,1,4,0,2,,20,,,0,,%20s
+overnight1,Nights spent at facility,numeric,,0,1,,,-9.00E+00,-9.00E+00,7.00E+00,-8.784050899,1.395283141,,▇▁▁▁▁,%8.0g
+diagnosis1,Advisted to have diagnostic test,numeric,"1. No advice, no test,
+2. No advice, but had test,
+3. Advised, but decline,
+4. Advised and had test",0,1,,,-9.00E+00,-9.00E+00,4.00E+00,-8.71838903,1.824170144,,▇▁▁▁▁,%23.0g
+test1,Diagnostic test done,numeric,"-7. Don’t know,
+1. RDT,
+2. Microscopy,
+3. Both RDT and microscopy",0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.845759466,1.242020774,,▇▁▁▁▁,%23.0g
+testcost1,Cost of diagnostic test,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.50E+04,9.656062759,328.0519817,,▇▁▁▁▁,%8.0g
+testresult1,Result of diagnostic test,numeric,"1. Positive,
+2. Negative,
+3. Don't know",0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.846315399,1.238728093,,▇▁▁▁▁,%10.0g
+wait1,Time spent waiting,character,,0,1,102,0,1,,20,,,0,,%20s
+receivedrugs1,Medications received or prescribed,numeric,"-7. Don’t know,
+1. Received medicine,
+2. Receibed prescription,
+3. No, did not receive medicine or prescription",0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.760084008,1.544860164,,▇▁▁▁▁,%44.0g
+drugcode1,All medications recieved,character,,0,1,36,0,1,,8,,,0,,%9s
+aldose1,Dose of AL,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.40E+01,-8.706096732,2.598249875,,▇▁▁▁▁,%8.0g
+alcost1,Cost of AL,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.60E+04,17.73012539,383.9771673,,▇▁▁▁▁,%8.0g
+artedose1,Dose of artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,8.00E+00,-8.988325406,0.403437899,,▇▁▁▁▁,%8.0g
+artecost1,Cost of artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+04,-5.285996664,251.8596299,,▇▁▁▁▁,%8.0g
+amoddose1,Dose of amodiaquine,numeric,,0,1,,,-9.00E+00,-9.00E+00,8.00E+00,-8.997158564,0.211170227,,▇▁▁▁▁,%8.0g
+amodcost1,Cost of amodiaquine,numeric,,0,1,,,-9.00E+00,-9.00E+00,7.00E+03,-8.325035518,59.25525548,,▇▁▁▁▁,%8.0g
+dpdose1,Dose of DP,numeric,,0,1,,,-9.00E+00,-9.00E+00,6.00E+00,-8.993884737,0.275916895,,▇▁▁▁▁,%8.0g
+dpcost1,Cost of DP,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.00E+04,-5.869973439,155.7546261,,▇▁▁▁▁,%8.0g
+qndose1,Dose of quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+qncost1,Cost of quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+arteivdose1,Dose of IV artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.988140095,0.377076894,,▇▁▁▁▁,%8.0g
+arteivcost1,Cost of IV artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.50E+04,1.540737538,455.9968581,,▇▁▁▁▁,%12.0g
+qnivdose1,Dose of IV quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.992216937,0.299185466,,▇▁▁▁▁,%8.0g
+qnivcost1,Cost of IV quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+04,-1.396133177,431.0845402,,▇▁▁▁▁,%8.0g
+panadose1,Dose of panadol,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.80E+01,-8.756007165,2.134271925,,▇▁▁▁▁,%8.0g
+panacost1,Cost of panadol,numeric,,0,1,,,-9.00E+00,-9.00E+00,5.00E+03,-1.863425783,100.0391538,,▇▁▁▁▁,%8.0g
+amoxdose1,Dose of amoxicillin,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+01,-8.950398419,1.182275041,,▇▁▁▁▁,%8.0g
+amoxcost1,Cost of amoxicillin,numeric,,0,1,,,-9.00E+00,-9.00E+00,6.00E+03,-5.60337266,112.0628999,,▇▁▁▁▁,%8.0g
+odrugdose1,Dose of other drug,character,,0,1,41,0,1,,76,,,0,,%76s
+recommendation1,Other drugs recommended,character,,0,1,21,0,1,,9,,,0,,%9s
+orecommendation1,Other drugs recommended not on list,character,,0,1,10,0,1,,33,,,0,,%33s
+consultcost,Cost of consultation,numeric,,0,1,,,-9.00E+00,-9.00E+00,4.00E+04,7.179998765,555.9390123,,▇▁▁▁▁,%12.0g
+foodcost1,Cost of food,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+04,2.219840633,375.4760254,,▇▁▁▁▁,%8.0g
+othercost1,Type of other costs not mentioned,numeric,"1. Medical Supplies,
+2. Inpatient stay,
+3. Other investigations,
+4. Other (specify),
+5. None",0,1,,,-9.00E+00,-9.00E+00,5.00E+00,-8.672493669,2.109194244,,▇▁▁▁▁,%20.0g
+othspecost1,Amount of other costs not mentioned,character,,0,1,3,0,2,,41,,,0,,%41s
+followupadv1,Asked to return to provider?,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.783803817,1.391920307,,▇▁▁▁▁,%8.0g
+returnvisit1,Number of additional visits made,numeric,,0,1,,,-9.00E+00,-9.00E+00,5.00E+00,-8.96157885,0.623548576,,▇▁▁▁▁,%8.0g
+secondprovider,2nd place care sought for this fever,numeric,"-7. Don’t know,
+0. specific UMSP MRC,
+1. Other public health facility,
+2. Traditional healer,
+3. Private pharmacy,
+4. Private health facility,
+5. Community Health Worker,
+6. Self-treatment with none of the above involved,
+7. Other, specify (DH note: map to dispensary)
+8. NGO health facility,
+9. Dispensary,
+10. Shop/Kiosk,
+11. Petty Trader,
+12. Neighbor,
+13. Traditional Healer",0,1,,,-9.00E+00,-9.00E+00,1.10E+01,-8.971276793,0.612934249,,▇▁▁▁▁,%46.0g
+fever2wks_oth2,Other place fever treated,character,,0,1,2,0,2,,9,,,0,,%9s
+reasonprovider2,Reason for chosing provider,numeric,"1. Proximity,
+2. Good reputation,
+3. Inexpensive,
+4. Good personal experience,
+5. Qualificaition of staff,
+6. Availability of drugs,
+7. Relative/friend works here,
+8. Can get treatment on credit,
+9. Just to see,
+10. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,1.00E+01,-8.973994688,0.603202257,,▇▁▁▁▁,%27.0g
+oreasonprovider2,Other reason for chosing provider,character,,0,1,2,0,2,,23,,,0,,%23s
+totalcost2,Shillings spent at this provider,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+04,3.420717771,453.9696261,,▇▁▁▁▁,%8.0g
+distance2,Distance to this provider (km),numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.980665884,0.441748079,,▇▁▁▁▁,%8.0g
+transport2,Method of transportation,numeric,"1. Walk,
+2. Bike,
+3. Motorcycle / Boda boda,
+4. Private car,
+5. Public taxi/bus,
+6. Boat,
+7. Donkey/horse,
+8. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.979554018,0.468440123,,▇▁▁▁▁,%22.0g
+othtransport2,Other method of transportation,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+journeypeople2,How many people transported,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.979739329,0.463076653,,▇▁▁▁▁,%8.0g
+journeytime2,Duration of transportation,character,,0,1,6,0,2,,10,,,0,,%20s
+transportcost2,Cost of transportation,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+03,-8.241522021,35.33279046,,▇▁▁▁▁,%8.0g
+providerperson2,Type of provider seen,numeric,"1. Doctor,
+2. Medical assistant,
+3. Nurse,
+4. Nursing assistant,
+5. Pharmacist,
+6. Relative of health care worker,
+7. Shopkeeper,
+8. Village health worker,
+9. TBA (??),
+10. Traditional healer,
+11. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,9.00E+00,-8.975909568,0.553902342,,▇▁▁▁▁,%30.0g
+oproviderperson2,Other type of provider seen,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+overnight2,Nights spent at facility,numeric,,0,1,,,-9.00E+00,-9.00E+00,0.00E+00,-8.982766076,0.393469025,,▇▁▁▁▁,%8.0g
+diagnosis2,Advisted to have diagnostic test,numeric,"1. No advice, no test,
+2. No advice, but had test,
+3. Advised, but decline,
+4. Advised and had test",0,1,,,-9.00E+00,-9.00E+00,4.00E+00,-8.978812774,0.495328609,,▇▁▁▁▁,%23.0g
+test2,Diagnostic test done,numeric,"-7. Don’t know,
+1. RDT,
+2. Microscopy,
+3. Both RDT and microscopy",0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.992834641,0.275779644,,▇▁▁▁▁,%23.0g
+testcost2,Cost of diagnostic test,numeric,,0,1,,,-9.00E+00,-9.00E+00,7.00E+03,-8.067329668,64.45721396,,▇▁▁▁▁,%8.0g
+testresult2,Result of diagnostic test,numeric,"1. Positive,
+2. Negative,
+3. Don't know",0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.993019952,0.267945175,,▇▁▁▁▁,%10.0g
+wait2,Time spent waiting,character,,0,1,15,0,1,,20,,,0,,%20s
+receivedrugs2,Medications received or prescribed,numeric,"-7. Don’t know,
+1. Received medicine,
+2. Receibed prescription,
+3. No, did not receive medicine or prescription",0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.980665884,0.441608217,,▇▁▁▁▁,%44.0g
+drugcode2,All medications recieved,character,,0,1,12,0,1,,5,,,0,,%9s
+aldose2,Dose of AL,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.40E+01,-8.975353635,0.794687004,,▇▁▁▁▁,%8.0g
+alcost2,Cost of AL,numeric,,0,1,,,-9.00E+00,-9.00E+00,5.00E+03,-6.507381555,94.50049202,,▇▁▁▁▁,%8.0g
+artedose2,Dose of artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,6.00E+00,-8.999073445,0.117891162,,▇▁▁▁▁,%8.0g
+artecost2,Cost of artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.50E+04,-8.072888999,117.9618965,,▇▁▁▁▁,%8.0g
+amoddose2,Dose of amodiaquine,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+amodcost2,Cost of amodiaquine,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+dpdose2,Dose of DP,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.999320526,0.086453519,,▇▁▁▁▁,%8.0g
+dpcost2,Cost of DP,numeric,,0,1,,,-9.00E+00,-9.00E+00,6.00E+03,-8.62882204,47.22719941,,▇▁▁▁▁,%8.0g
+qndose2,Dose of quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.40E+01,-8.998579282,0.180766448,,▇▁▁▁▁,%8.0g
+qncost2,Cost of quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+03,-8.875903391,15.78955627,,▇▁▁▁▁,%8.0g
+arteivdose2,Dose of IV artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+00,-8.999258756,0.094312929,,▇▁▁▁▁,%8.0g
+arteivcost2,Cost of IV artesunate,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.50E+04,-8.072888999,117.9618965,,▇▁▁▁▁,%8.0g
+qnivdose2,Dose of IV quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+qnivcost2,Cost of IV quinine,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+panadose2,Dose of panadol,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.80E+01,-8.971523874,0.763959638,,▇▁▁▁▁,%8.0g
+panacost2,Cost of panadol,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+03,-7.948915931,35.59170036,,▇▁▁▁▁,%8.0g
+amoxdose2,Dose of amoxicillin,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+01,-8.989560813,0.527196816,,▇▁▁▁▁,%8.0g
+amoxcost2,Cost of amoxicillin,numeric,,0,1,,,-9.00E+00,-9.00E+00,3.00E+03,-8.193094076,43.56547633,,▇▁▁▁▁,%8.0g
+odrugdose2,Dose of other drug,character,,0,1,4,0,1,,23,,,0,,%23s
+recommendation2,Other drugs recommended,character,,0,1,3,0,2,,4,,,0,,%9s
+orecommendation2,Other drugs recommended not on list,character,,0,1,4,0,2,,12,,,0,,%12s
+consultcost2,Cost of consultation,numeric,,0,1,,,-9.00E+00,-9.00E+00,7.00E+03,-8.488603373,55.65515911,,▇▁▁▁▁,%8.0g
+foodcost2,Cost of food,numeric,,0,1,,,-9.00E+00,-9.00E+00,5.00E+03,-8.673914386,39.36956048,,▇▁▁▁▁,%8.0g
+othercost2,Type of other costs not mentioned,numeric,"1. Medical Supplies,
+2. Inpatient stay,
+3. Other investigations,
+4. Other (specify),
+5. None",0,1,,,-9.00E+00,-9.00E+00,5.00E+00,-8.973191673,0.612062927,,▇▁▁▁▁,%20.0g
+othspecost2,Amount of other costs not mentioned,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+followupadv2,Asked to return to provider?,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.982457224,0.400843706,,▇▁▁▁▁,%8.0g
+returnvisit2,Number of additional visits made,numeric,,0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.997035024,0.168910827,,▇▁▁▁▁,%8.0g
+hm_covid,COVID suspected in last 9 months?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-7.00E+00,0.00E+00,1.00E+00,0.005312249,0.150270152,,▁▁▁▁▇,%10.0g
+hm_covidtest,Tested positive for COVID in last 9 months?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.001297177,0.035994089,,▇▁▁▁▁,%10.0g
+hmdatecovid,Date of positive COVID test,character,,0,1,17,0,2,,11,,,0,,%11s
+hm_covidvac,Vaccinated for COVID?,numeric,"-7. Don't know,
+0. No,
+1. Yes",0,1,,,-7.00E+00,0.00E+00,1.00E+00,0.127555748,0.973886792,,▁▁▁▁▇,%10.0g
+hm_covidvacdoses,Number of vaccine doses,numeric,,0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-6.628204336,4.317641576,,▇▁▁▁▂,%8.0g
+hm_covidvac_type,Type of vaccine (first dose),numeric,"-7. Don't know,
+1. Astra-Zeneca,
+2. Sinovac/Sinopharm,
+3. Novavax,
+4. mRNA,
+5. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,5.00E+00,-6.2742603,5.080366504,,▇▁▁▁▁,%17.0g
+hm_covidvac_oth,Other type of vaccine (first dose),character,,0,1,67,0,2,,22,,,0,,%22s
+hm_covidvacdate,Date of vaccine (first dose),character,,0,1,886,0,1,,11,,,0,,%11s
+hm_covidvac_type2,Type of vaccine (2nd dose),numeric,"-7. Don't know,
+1. Astra-Zeneca,
+2. Sinovac/Sinopharm,
+3. Novavax,
+4. mRNA,
+5. Other (specify)",0,1,,,-9.00E+00,-9.00E+00,5.00E+00,-8.46803385,2.365412417,,▇▁▁▁▁,%17.0g
+othhm_covidvac_type2,Other type of vaccine (2nd dose),character,,0,1,13,0,2,,19,,,0,,%19s
+hm_covidvacdate2,Date of vaccine (2nd dose),character,,0,1,418,0,1,,11,,,0,,%11s
+brandnetlastnight,Brand of net slept under last night,numeric,"1. Royal Guard,
+2. PermaNet 2.0,
+3. PermaNet 3.0,
+4. Olyset Net,
+5. Olyset Net Plus,
+6. Duranet,
+7. Interceptor,
+8. Netprotect,
+9. KO net,
+10. MAGNet,
+11. Iconet,
+12. Safi net,
+13. B52,
+14. Bamboo hut,
+15. Century,
+16. Lucky net,
+17. Victoria,
+18. Homemade net,
+19. Dawa net,
+20. Iconlife,
+21. Yorkool,
+22. Safe net,
+23. DK,
+24. Kooper net,
+25. Royal Sentry Net,
+26. LLIN NOS,
+27. Untreated net NOS,
+28. No label,
+29. Not observed,
+30. TANA LLIN,
+96. Other brand",3860,0.761566496,,,1.00E+00,3.00E+00,3.00E+01,2.998702247,4.691660585,,▇▁▁▁▁,%17.0g
+netlastnight,Slept under bednet last night,numeric,,0,1,,,0.00E+00,1.00E+00,1.00E+00,0.761566496,0.426138693,,▂▁▁▁▇,%9.0g
+LLINlastnight,Slept under LLIN last night,numeric,,0,1,,,0.00E+00,1.00E+00,1.00E+00,0.751497931,0.432157757,,▂▁▁▁▇,%9.0g
+clinicalsurvey,Included in clinical survey database,numeric,"0. No,
+1. Yes",0,1,,,0.00E+00,1.00E+00,1.00E+00,0.63246649,0.482148306,,▅▁▁▁▇,%9.0g
+intnum,Interviewer's Number,numeric,,5950,0.63246649,,,1.00E+01,2.70E+01,3.40E+01,27.09356382,4.466413983,,▁▁▅▇▆,%8.0g
+age2to10,Whether 2-10 years of age and eligible for clinical survey,numeric,"0. Not 2-10 years of age,
+1. 2-10 years of age",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.370127865,0.482853632,,▇▁▁▁▅,%21.0g
+age2to10consented,Age 2-10 years and consented for clinical survey,numeric,,0,1,,,0.00E+00,0.00E+00,1.00E+00,0.302242263,0.459243841,,▇▁▁▁▃,%9.0g
+inclusion_criteria,Is participant eligible for Clinical Survey,numeric,"0. No,
+1. Yes",0,1,,,0.00E+00,1.00E+00,1.00E+00,0.63246649,0.482148306,,▅▁▁▁▇,%8.0g
+ageclinical,Age in years from clinical survey,numeric,,5950,0.63246649,,,-9.00E+00,8.00E+00,1.10E+02,15.02050982,16.00903758,,▇▂▁▁▁,%8.0g
+fever,particiapant have fever in the last 48 hours,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.264869616,4.351224907,,▃▁▁▁▇,%14.0g
+temperature,Temperature of participant,numeric,-8.  Refused,5950,0.63246649,,,-9.00E+00,3.60E+01,4.00E+01,23.18064264,20.72543527,,▃▁▁▁▇,%9.0g
+elevatedtemp,Temperature >= 38.0,numeric,"0. No,
+1. Yes",8948,0.447279017,,,0.00E+00,0.00E+00,1.00E+00,0.057588731,0.232980182,,▇▁▁▁▁,%9.0g
+febrile,Subjective fever or elevated temperature,numeric,"0. No,
+1. Yes",8948,0.447279017,,,0.00E+00,1.00E+00,1.00E+00,0.536804309,0.498678039,,▇▁▁▁▇,%9.0g
+coughyn,Cough present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.486570954,4.206966189,,▃▁▁▁▇,%29.0g
+shortbryn,SOB present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.631409317,4.10028776,,▃▁▁▁▇,%29.0g
+sorethryn,Sore throat present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.626330696,4.104828051,,▃▁▁▁▇,%29.0g
+fatigueyn,Fatigue present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.610606505,4.116757669,,▃▁▁▁▇,%29.0g
+myalgiasyn,Muslce aches present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.604648891,4.121252893,,▃▁▁▁▇,%29.0g
+fluyn,Runny nose present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.513624377,4.187627352,,▃▁▁▁▇,%29.0g
+anosmiayn,Anosmia present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.634925286,4.100268845,,▃▁▁▁▇,%29.0g
+headacheyn,HA present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.56411759,4.152796359,,▃▁▁▁▇,%29.0g
+abdpainyn,Abdominal pain present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.601230589,4.124489165,,▃▁▁▁▇,%29.0g
+vomityn,Vomiting present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.632874304,4.099168419,,▃▁▁▁▇,%29.0g
+diarrhoeayn,Diarrhea present?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.629846665,4.10148081,,▃▁▁▁▇,%29.0g
+lungyn,History of chronic lung problems?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.635901944,4.098187394,,▃▁▁▁▇,%29.0g
+heartyn,History of chronic heart disease?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.636390272,4.097146184,,▃▁▁▁▇,%29.0g
+hypertension,History of high blood pressure?,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.637659928,4.100844904,,▃▁▁▁▇,%29.0g
+diabetes,History of diabetes?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.64039457,4.098750909,,▃▁▁▁▇,%29.0g
+outsidevillage,Travel out of village in last month?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.602207247,4.124417712,,▃▁▁▁▇,%29.0g
+outsidecountry,Travel out of Uganda in last month?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.634925286,4.098934613,,▃▁▁▁▇,%29.0g
+cntcovidphy,Direct contact with someone with COVID?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.635120617,4.098117896,,▃▁▁▁▇,%29.0g
+carecovid,Direct care for someone with COVID?,numeric,"0. No,
+1. Yes,
+9. Don’t know or cannot assess",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.628088681,4.096388969,,▃▁▁▁▇,%29.0g
+consent,Participant consent to lab testing,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+0. No,
+1. Yes,
+2. Not at home",5950,0.63246649,,,0.00E+00,1.00E+00,2.00E+00,1.267408927,0.470442465,,▁▁▇▁▃,%14.0g
+consent2,Participant consent to future use of biological specimens,numeric,"-9. Skipped,
+0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,1.00E+00,1.00E+00,-1.814532669,4.483792496,,▃▁▁▁▇,%14.0g
+fpbarcode1,Barcode for filter paper,character,,0,1,7235,5950,0,,4,,,0,,%9s
+fpbarcode2,Reenter barcode for filter paper,character,,0,1,7235,5950,0,,4,,,0,,%9s
+bsbarcode1,Barcode for blood smear,character,,0,1,7243,5950,0,,4,,,0,,%9s
+bsbarcode2,Reenter barcode for blood smear,character,,0,1,7243,5950,0,,4,,,0,,%9s
+rdtdone,RDT Done,numeric,"0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-3.090731517,4.696957472,,▅▁▁▁▇,%14.0g
+RDTiffebrile,RDT done if febrile,numeric,"0. No,
+1. Yes",12302,0.240101303,,,0.00E+00,1.00E+00,1.00E+00,0.999742732,0.01603957,,▁▁▁▁▇,%9.0g
+rdtrslt,Result of RDT,numeric,"-9. Skipped,
+0. Negative,
+1. Positive",5950,0.63246649,,,-9.00E+00,-9.00E+00,1.00E+00,-5.388905167,4.62671202,,▇▁▁▁▅,%14.0g
+parasitedensity,Parasite density,numeric,,8948,0.447279017,,,0.00E+00,0.00E+00,7.30E+05,2275.526032,15863.88278,,▇▁▁▁▁,%12.0g
+gametocytes,Whether gametocytes present,numeric,"0. Absent,
+1. Present",8948,0.447279017,,,0.00E+00,0.00E+00,1.00E+00,0.032039774,0.176117887,,▇▁▁▁▁,%8.0g
+BSdich,Blood smear dichotomized,numeric,"0. Negative,
+1. Positive",8948,0.447279017,,,0.00E+00,0.00E+00,1.00E+00,0.197624637,0.398234908,,▇▁▁▁▂,%9.0g
+requireweight,Does this child need their weight measured,numeric,"-9. Skipped,
+0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.275124524,4.347725021,,▃▁▁▁▇,%8.0g
+weight,Weight in kg,numeric,-9. Refused,5950,0.63246649,,,-9.00E+00,-9.00E+00,9.90E+01,3.262701436,19.31295976,,▇▃▁▁▁,%9.0g
+meds,medication prescribed to participant,numeric,"0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.381677898,4.279893007,,▃▁▁▁▇,%14.0g
+whichmeds,Which medication was prescribed?,character,,0,1,9,5950,0,,13,,,0,,%13s
+al,Artemether-lumefantrine given,numeric,"0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,-9.00E+00,1.00E+00,-6.511280398,4.258455697,,▇▁▁▁▃,%14.0g
+panadol,Panadol given,numeric,"0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,-9.00E+00,1.00E+00,-6.447699971,4.359411428,,▇▁▁▁▃,%14.0g
+other,Other med given,numeric,"0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,-9.00E+00,1.00E+00,-6.701728684,3.927764926,,▇▁▁▁▃,%14.0g
+descothermed,Other medication,character,,0,1,273,5950,0,,31,,,0,,%31s
+referred,Was participant referred for additional care?,numeric,"0. No,
+1. Yes",5950,0.63246649,,,-9.00E+00,0.00E+00,1.00E+00,-2.628870007,4.102630744,,▃▁▁▁▇,%14.0g
+whyreferred,Why referred,character,,0,1,76,5950,0,,80,,,0,,%80s
+age2to4,Whether 2-4 years of age,numeric,"0. Not 2-4 years of age,
+1. 2-4 years of age",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.141330533,0.348372947,,▇▁▁▁▁,%20.0g
+age2to4consented,Age 2-4 years and consented for clinical survey,numeric,,0,1,,,0.00E+00,0.00E+00,1.00E+00,0.129285317,0.335525823,,▇▁▁▁▁,%9.0g
+hemocue,Hemocue testing,numeric,"-9. Skipped or N/A,
+-7. Don't know,
+1. Tested,
+2. Not enough blood drawn,
+3. Test Failed",5950,0.63246649,,,-9.00E+00,-9.00E+00,3.00E+01,-6.64478953,4.39779531,,▇▂▁▁▁,%22.0g
+hbdone,Hemoglobin measured,numeric,"0. No,
+1. Yes",5950,0.63246649,,,0.00E+00,0.00E+00,1.00E+00,0.224924309,0.417552862,,▇▁▁▁▂,%9.0g
+hemoglobin,hemoglobin level in gm/dL,numeric,,13885,0.142318858,,,1.30E+00,1.10E+01,1.90E+01,11.32508681,1.37231324,,▁▁▇▅▁,%9.0g
+anemia11,Anemia defined as Hb < 11,numeric,"0. No,
+1. Yes",13886,0.142257088,,,0.00E+00,0.00E+00,1.00E+00,0.370820669,0.483129437,,▇▁▁▁▅,%9.0g
+anemia10,Anemia defined as Hb < 10,numeric,"0. No,
+1. Yes",13886,0.142257088,,,0.00E+00,0.00E+00,1.00E+00,0.128962223,0.335230913,,▇▁▁▁▁,%9.0g
+anemia8,Anemia defined as Hb < 8,numeric,"0. No,
+1. Yes",13886,0.142257088,,,0.00E+00,0.00E+00,1.00E+00,0.016500217,0.127416676,,▇▁▁▁▁,%9.0g
+stoptime,End time of interview,character,,0,1,10229,5950,0,,23,,,0,,%23s
+BSdone,,numeric,,8948,0.447279017,,,1.00E+00,1.00E+00,1.00E+00,1,0,,▁▁▇▁▁,%9.0g
+baselineMI3m,Basline malaria incidence per 1000 PY (3 months pre-intervention),numeric,,0,1,,,8.70E+01,7.00E+02,3.20E+03,764.4251035,519.1840877,,▇▆▁▁▁,%9.0g

@@ -1,0 +1,927 @@
+name,label,data_type,value_labels,n_missing,complete_rate,n_unique,empty,min,median,max,mean,sd,whitespace,hist,format.stata
+mrctype,Residents eligible for clinical surveys,numeric,"0. Focussed,
+1. Expanded",0,1,,,0.00E+00,1.00E+00,1.00E+00,0.501861178,0.500051285,,▇▁▁▁▇,%8.0g
+intnum,Interviewer's Number,numeric,,0,1,,,1.00E+01,1.50E+01,3.40E+01,15.06021458,3.809710516,,▇▇▂▁▁,%8.0g
+starttime,Date/time of start,character,,0,1,4564,0,23,,23,,,0,,%23s
+date,Date of visit,Date,,0,1,97,,11/24/21,1/22/22,4/1/22,,,,,%d
+survey,Survey round,numeric,"1. Baseline,
+2. 12-month,
+3. 24-month,
+4. 36-month",0,1,,,2.00E+00,2.00E+00,2.00E+00,2,0,,▁▁▇▁▁,%8.0g
+region,Region of country,numeric,"1. North Buganda/Tooro,
+2. Bunyoro,
+3. West Nile,
+4. Acholi,
+5. Lango,
+6. Teso / Karamoja,
+7. Busoga / Bukedi,
+8. Kigezi,
+9. IRS Districts",0,1,,,1.00E+00,4.00E+00,7.00E+00,4.34398949,1.963786943,,▆▂▆▃▇,%19.0g
+mrccode,MRC code,numeric,"1. Kasambya HCIII (Mubende District),
+2. Kiyuni HCIII (Mubende District),
+3. Bbaale HCIV (Kayunga District),
+4. Kangulumira HCIV (Kayunga District),
+5. Kyegegwa HCIV (Kyegegwa District),
+6. Kakabara HCIII (Kyegegwa District),
+7. Kibaale HCIV (Kibaale District),
+8. Kyebando HCIII (Kibaale District),
+9. Kigorobya HCIV (Hoima District),
+10. Butema HCIII (Hoima District),
+11. Bwijanga HCIV (Masindi District),
+12. Kyatiri HCIII (Masindi District),
+13. Kigumba HCIII (Kiryandongo District),
+14. Diima HCIII (Kiryandongo District),
+15. Opia HCIII (Arua District),
+16. Cilio HCIII (Arua District),
+17. Lobule HCIII (Koboko District),
+18. Ayipe HCIII (Koboko District),
+19. Metu HCIII (Moyo District),
+20. Lefori HCIII (Moyo District),
+21. Koch Goma HCIV (Nwoya District),
+22. Alero HCIII (Nwoya District),
+23. Atiak HCIV (Amuru District),
+24. Amuru HCIII (Amuru District),
+25. Awach HCIV (Gulu District),
+26. Pabwo HCIII (Gulu District),
+27. Lalogi HCIV (Omoro District),
+28. Bobi HCIII (Omoro District),
+29. Padibe HCIV (Lamwo District),
+30. Madi-Opei HCIII (Lamwo District),
+31. Namokora HCIV (Kitgum District),
+32. Kitgum-Matidi HCIII (Kitgum District),
+33. Patongo HCIII (Agago District),
+34. Lira-Kato HCIII (Agago District),
+35. Anyeke HCIV (Oyam District),
+36. Otwal HCIII (Oyam District),
+37. Aboke HCIV (Kole District),
+38. Bala HCIII (Kole District),
+39. Teboke HCIII (Apac District),
+40. Akokoro HCIII (Apac District),
+41. Aduku HCIV (Kwania District),
+42. Apwori HCIII (Kwania District),
+43. Lokolia HCIII (Kaabong District),
+44. Kalapata HCIII (Kaabong District),
+45. Kapelebyong HCIV (Kapelebyong District),
+46. Obalanga HCIII (Kapelebyong District),
+47. Morungatuny HCIII (Amuria Distric),
+48. Asamuk HCIII (Amuria Distric),
+49. Kamaca HCIII (Kumi District),
+50. Omatenga HCIII (Kumi District),
+51. Kolir HCIII (Bukedea District),
+52. Bukedea HCIII (Bukedea District),
+53. Kidera HCIV (Buyende District),
+54. Bugaya HCIII (Buyende District),
+55. Bumanya HCIV (Kaliro District),
+56. Nawaikoke HCIII (Kaliro District),
+57. Kiyunga HCIV (Luuka District),
+58. Ikumbya HCIV (Luuka District),
+59. Budondo HCIV (Jinja District),
+60. Butagaya HCIII (Jinja District),
+61. Buwaiswa HCIV (Mayuge District),
+62. Kigandalo HCIII (Mayuge District),
+63. Lumino HCIII (Busia District),
+64. Busitema HCIII (Busia District),
+65. Kihihi HCIV (Kanungu District),
+66. Amolatar HCIV (Amolatar District),
+67. Dokolo HCIV (Dokolo District),
+68. Alebtong HCIV (Alebtong District),
+69. Orum HCIV (Otuke District),
+70. Nagongera HCIV (Tororo District)",0,1,,,1.00E+00,3.30E+01,6.40E+01,32.34026713,18.61082881,,▇▆▇▇▇,%39.0g
+mrcname,MRC name,character,,0,1,64,0,10,,19,,,0,,%19s
+village,UMSP village code,numeric,"103070402. ALYEM,
+103070411. OGUL CENTRAL,
+103070412. OGUL EAST,
+103070414. TEKWORO,
+103160301. BARDEGE,
+103160302. COUNTY HQTRS,
+103160304. OPOROT CENTRAL,
+103160306. OPOROT NORTH,
+104040101. ALEBTONG ATIDI A,
+104040102. ALEBTONG ATIDI B,
+104040103. ALEBTONG HEADQUARTERS,
+104040104. ALYEC,
+105040301. AMOLATAR HEADQUARTERS 'A',
+105040501. AMOLATAR HEADQUARTERS 'B',
+105040502. CORNER APUTI,
+105040503. INOMO,
+105040504. ORIMAI,
+107070302. MODOK,
+107070304. MUGANA,
+107070305. OKOONA,
+107080102. ADUKAIT,
+107080103. AMASENIKO,
+107080201. ADIPALA,
+107100302. ATEUSO,
+107100304. OJINGAI,
+107100307. OMUNYIR,
+107100403. AKUYA,
+107110506. OBAJAI/AJESAI,
+107110507. OBALANGA CENTRE,
+108010301. LABONGO GALI,
+108030101. Kal East,
+109060102. ABYEIBUTI,
+109060104. AKOKORO T/C,
+109060707. KAYEI,
+109060708. TETUGO,
+109060709. WANGCENYE,
+109121003. ADULA A,
+109121004. ADULA B,
+109121009. OKAROWOK,
+110020606. ODOA,
+110020701. AJUVU,
+110020704. EDIOA,
+110020705. MILLO,
+110020708. PARAKU,
+110280302. Doli,
+110280308. Yivu,
+110280802. Ewavuni,
+110280803. Kongodo,
+110280805. Opia Centre,
+116040101. BUKEDEA A,
+116040102. OKOONA UNITED,
+116040103. BUKEDEA B,
+116040201. EMOKORI A,
+116120301. ADAMACA,
+116120302. KAGOLOTO,
+116120303. AMAGORO,
+116120801. KANYUMU,
+116120802. KOLIR CENTRAL,
+124040403. NAMBEWO,
+124040404. NAMUKOMBE,
+124040405. SYANYONJA,
+124100101. BUCHWERE,
+124100102. BUDALANGI A,
+124100103. BUDALANGI B,
+124100106. BWERERO A,
+124100108. DOMA A,
+124100109. DOMA B,
+124100203. LUMINO I,
+129010101. BUGAYA T/CENTRE,
+129010201. BUGWERI/NABIGWO,
+129080303. KIWAMBYA,
+129080307. KITETE,
+130090103. AKAIDEBE,
+132010203. Payuta,
+132030601. KULUKENO,
+133020101. KIFUMURA I,
+133020102. KIFURANSA,
+133020301. KIGONA,
+133020302. KIHENDA,
+133110202. KIRYANDONGO,
+133110301. KIGOROBYA I,
+133110302. KIGOROBYA II,
+133110401. KIKONKONA,
+133110402. KIKWANANA,
+137010404. BUYALA TRADING CENTRE,
+137010407. NAMIZI CENTRAL,
+137040401. KAMIRA,
+138010201. KALODEKE,
+138010203. LOKOLIA CENTRE,
+138010206. NAPETABUL,
+138050201. KALAPATA CENTRE,
+138050208. MORU - EDIKAE EAST,
+138050209. MORU EDIKAE WEST,
+138050214. NAPEICHOKEI,
+145030110. NABWEYO,
+145030111. NAIGAZI,
+145030112. NAMBULA/NABUKALU,
+145130305. KANANSYAIKYE A,
+145130306. KANANSYAIKYE B,
+145140301. BUKUNYA,
+145140302. KAJUBU,
+145140303. LUKUMI,
+145140305. NAWAIKOKE,
+150090202. CENTRAL KIHIIHI,
+150090204. MARKET CELL,
+150090205. NDEEBA,
+150090207. RUTWE,
+154010101. BBAALE EAST,
+154010601. KABAKU,
+154010603. NABISUBYAKI,
+154060103. KANGULUMIRA CENTRAL,
+154060109. KIWUGU,
+155060301. KIBAALE,
+155070201. KIHUURA,
+155070202. KIRASA,
+155070203. KISAALIZI A,
+155070204. KISAALIZI B,
+159030104. KIDIDIMA,
+159080101. ALENGO,
+159080103. DIIMA A,
+159080104. DIIMA B,
+159080109. PII-AKEYO,
+161030103. BOBI CENTRAL,
+161030106. PAGWA AWERE,
+161090101. MISSION,
+161090102. ORYANG CENTRAL,
+161090103. PAGER,
+161090104. PUNU AKURU,
+161090105. TWON OKUN,
+162030101. AGMBARU,
+162030102. BALALA,
+162030107. KITIMIRI,
+162040307. Kijiriba,
+162040309. Manabu 'A',
+162040701. Dasa,
+162040705. Lu'De'Dela,
+163020106. ACUNGU LYEC 'A',
+163020403. ATEK,
+163020417. ARAO,
+163070411. OLAI,
+163070414. OLIL,
+163070716. TECAMBIA MAIN,
+165020601. ADODOI,
+165030602. OMATENGA,
+165030701. MORU,
+165030702. OOGORIA,
+168030312. MISENYI,
+168070211. KYEGEGWA,
+171040101. CENTRAL,
+171040103. POBUDI,
+171040104. POPANY,
+171040402. GUDA PALWO,
+171070101. ATWOL A,
+171070102. ATWOL B,
+171070104. LOTIBOL,
+171070105. MISSION,
+171070201. ANYIBI,
+173040202. IKUMBYA,
+173060401. KIYUNGA HOSPITAL,
+173060402. KIYUNGA CENTRAL,
+173060403. KIYUNGA INDUSTRIAL,
+180020213. MUSOMA,
+180020310. KITAMBA,
+180020313. KYAMUKUDUMI,
+180080105. KYABAKAMI,
+180080106. KYATIRI CENTRE,
+180080201. KYAKAYAGA I,
+180080203. KYAMBOGO,
+180080204. NYAKASAGAZI I,
+180080205. NYAKASAGAZI II,
+181060103. BUWAISWA,
+181060402. NAKATE,
+181060403. NAMADHI,
+181100101. BUGONDO,
+181100301. KIGANDALO A,
+181100302. KIGANDALO B,
+187060101. COLOA EAST,
+187060102. COLOA WEST,
+187060202. EBWEA,
+187060203. KIBIRA,
+187060205. MARINGU EAST,
+187070401. CECELOGO,
+187070405. GWERE LUZIRA,
+187070406. GWERE MONDI,
+187070407. INDRI,
+187070410. METU T/C,
+187070413. PAMENYUA,
+189070104. KASAMBYA A,
+189070106. KASAMBYA CENTRAL,
+189070107. KIMWANYI A,
+189140105. KIYUUNI,
+202010101. ATOCON,
+202040401. Kal 'A1',
+202040402. Kal 'A2',
+202040403. Kal 'B',
+203010103. TEOWAK,
+203010202. KALAMOMIYA,
+203040104. OPWAC,
+203040105. OTAL,
+204080201. ADWIRPIDA,
+204080202. ADWONG IBUTO,
+204080203. AKAIDEBE,
+204080205. BARODUGU,
+204080306. TEBOKE,
+205130504. ALEGE,
+205130516. OGUK,
+205130519. OTWAL TRADING CENTRE 'A',
+205130522. TE - YAO,
+205140105. Agoa,
+205140108. Akata Kata,
+205140204. Akaidebe,
+205140207. ALUT KOT,
+205140215. OKARO WOK,
+219150101. AWANYA,
+219150201. MAHANGA,
+219150202. TAWO JWOK,
+223030101. Akaidebe,
+223030104. Olami 'A',
+223030105. Olami 'B',
+223040103. APWORI,
+223040105. AYAT,
+223040108. OMULE,
+223040109. OYIKOWANGE,
+223040110. WI GWENG A,
+223040111. WI GWENG B",0,1,,,1.00E+08,1.60E+08,2.20E+08,153435271.3,33146029.34,,▆▅▇▃▃,%25.0f
+vcode,Village code,numeric,,0,1,,,1.00E+00,1.00E+00,6.00E+00,1.925114955,1.172803705,,▇▂▁▁▁,%8.0g
+Region,Region of country,numeric,"1. North Buganda / Tooro,
+2. Bunyoro,
+3. West Nile,
+4. Acholi,
+5. Lango,
+6. Teso / Karamoja,
+7. Busoga / Bukedi,
+8. Kigezi,
+9. IRS Districts",0,1,,,1.00E+00,4.00E+00,7.00E+00,4.34398949,1.963786943,,▆▂▆▃▇,%21.0g
+LLINarm,Type of LLIN randomized to,numeric,"1. PBO,
+2. Royal Guard",0,1,,,1.00E+00,1.00E+00,2.00E+00,1.490037224,0.499955472,,▇▁▁▁▇,%11.0g
+LLINdistmonth,Month LLINs distributed,numeric,,0,1,,,7.30E+02,7.30E+02,7.30E+02,731.4847821,1.599160174,,▇▇▁▁▆,%tmMon_YY
+hhnum,Household number,numeric,,0,1,,,1.00E+00,1.10E+02,1.40E+03,176.6187869,185.3784372,,▇▂▁▁▁,%8.0g
+hhid,Household ID,numeric,,0,1,,,2.00E+08,2.30E+08,2.60E+08,232359690.5,18611829.77,,▇▆▇▇▇,%16.0f
+hhid2,Household ID2,numeric,,0,1,,,2.00E+08,2.30E+08,2.60E+08,232359692.7,18611829.6,,▇▆▇▇▇,%12.0g
+enrolled,Household enrolled?,numeric,"0. No,
+1.  Yes",0,1,,,0.00E+00,1.00E+00,1.00E+00,0.770308737,0.420680326,,▂▁▁▁▇,%17.0g
+conducting_survey,Whether or not the survey was conducted,numeric,"0. No,
+1.  Yes",0,1,,,0.00E+00,1.00E+00,1.00E+00,0.770308737,0.420680326,,▂▁▁▁▇,%8.0g
+exclreason,Reason for exclusion,numeric,"-9. Skipped or NA,
+1. Dwelling destroyed or not found,
+2. Household vacant,
+3. Unable to locate adult x 3 attempts,
+4. No Adult resident aged 18 or older present,
+5. Adult is not a usual resident, present on the previous night,
+6. Adult resident not willing to provide informed consent",0,1,,,-9.00E+00,-9.00E+00,6.00E+00,-6.227501642,5.116955098,,▇▁▁▂▁,%60.0g
+npeople,Number of people live in the house (permanent residents),numeric,,0,1,,,-9.00E+00,4.00E+00,5.00E+01,1.427851982,6.017021724,,▅▇▁▁▁,%8.0g
+NUMPEOP,Number of people based on household members,numeric,,1046,0.770965623,,,1.00E+00,4.00E+00,1.70E+01,4.597841522,2.078060694,,▇▅▁▁▁,%9.0g
+allagesscreened,Number all ages eligible for clinical survey,numeric,,1046,0.770965623,,,0.00E+00,3.00E+00,1.50E+01,2.907980687,2.059359575,,▇▃▁▁▁,%9.0g
+allagesconsented,Number all ages consented for clinical survey,numeric,,1046,0.770965623,,,0.00E+00,2.00E+00,1.00E+01,2.056518035,1.325638023,,▇▃▁▁▁,%9.0g
+BSdoneallages,Number all ages with BS done,numeric,,1046,0.770965623,,,0.00E+00,2.00E+00,1.00E+01,2.056518035,1.325638023,,▇▃▁▁▁,%9.0g
+BSposallages,Number all ages with positive BS,numeric,,1046,0.770965623,,,0.00E+00,0.00E+00,6.00E+00,0.406418631,0.699718884,,▇▁▁▁▁,%9.0g
+age2to10,Number 2-10 years old based on household members,numeric,,1046,0.770965623,,,0.00E+00,2.00E+00,1.00E+01,1.701789264,1.088013036,,▇▂▁▁▁,%21.0g
+age2to10consented,Number 2-10 years consented for clinical survey,numeric,,1046,0.770965623,,,0.00E+00,1.00E+00,6.00E+00,1.389662028,0.868217822,,▇▃▁▁▁,%9.0g
+BSdone2to10,Number 2-10 years with BS done,numeric,,1046,0.770965623,,,0.00E+00,1.00E+00,6.00E+00,1.389662028,0.868217822,,▇▃▁▁▁,%9.0g
+BSpos2to10,Number 2-10 years with positive BS,numeric,,1046,0.770965623,,,0.00E+00,0.00E+00,5.00E+00,0.333712014,0.613042057,,▇▁▁▁▁,%9.0g
+age2to4,Number of 2-4 years old based on household members,numeric,,1046,0.770965623,,,0.00E+00,1.00E+00,4.00E+00,0.649815393,0.661700285,,▇▇▂▁▁,%20.0g
+age2to4consented,Number 2-4 years consented for clinical survey,numeric,,1046,0.770965623,,,0.00E+00,1.00E+00,4.00E+00,0.5944334,0.625874591,,▇▇▁▁▁,%9.0g
+Hbdone,Number 2-4 years with Hb done,numeric,,1046,0.770965623,,,0.00E+00,1.00E+00,4.00E+00,0.592729338,0.625675515,,▇▇▁▁▁,%9.0g
+Hblessthan11,Number 2-4 years with Hb < 11 gm/dl,numeric,,1046,0.770965623,,,0.00E+00,0.00E+00,3.00E+00,0.207895484,0.444608007,,▇▂▁▁▁,%9.0g
+Hblessthan10,Number 2-4 years with Hb < 10 gm/dl,numeric,,1046,0.770965623,,,0.00E+00,0.00E+00,3.00E+00,0.070718546,0.273545265,,▇▁▁▁▁,%9.0g
+Hblessthan8,Number 2-4 years with Hb < 8 gm/dl,numeric,,1046,0.770965623,,,0.00E+00,0.00E+00,2.00E+00,0.008804317,0.096423348,,▇▁▁▁▁,%9.0g
+swater,Main drinking water source,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+10. borehole,
+11. pipe into dwelling,
+12. piped into yard/compound,
+13. public tap,
+21. open well in yard/compound,
+22. open public well,
+31. protected well in yard/compound,
+32. protected public well,
+41. protected spring,
+42. unprotected spring,
+43. river/stream,
+44. pond/lake,
+45. dam,
+51. rainwater,
+61. water truck,
+71. bottled water,
+96. other",0,1,,,-9.00E+00,1.00E+01,7.10E+01,8.07641778,11.52692415,,▂▇▁▁▁,%31.0g
+swaterCOL,Main source of drinking water collapsed,numeric,"-8. Refused to answer,
+1. Piped or bottled water,
+2. Well water,
+3. Open water source",0,1,,,-9.00E+00,1.00E+00,3.00E+00,-1.163126779,4.301021855,,▂▁▁▁▇,%22.0g
+otherscs,other source of water,character,,0,1,4,0,2,,32,,,0,,%32s
+tfaclty,Toilet facility,numeric,"-9. Skipped or NA,
+-7. Don't know,
+1. flush toilet,
+2. vip latrine,
+3. covered pit latrine no slab,
+4. covered pit latrine w/slab,
+5. uncovered pit latrine no slab,
+6. uncovered pit latrine w/slab,
+7. composting  toilet,
+8. no facility/bush/field,
+96. other",0,1,,,-9.00E+00,4.00E+00,8.00E+00,1.150645938,5.671167899,,▃▁▁▇▅,%29.0g
+tfacltyCOL,Toilet facility collapsed,numeric,"1. Flush,
+2. Covered pit latrine,
+3. Uncovered pit latrine,
+4. No latrine",0,1,,,-9.00E+00,2.00E+00,4.00E+00,-0.21283118,4.828443796,,▂▁▁▁▇,%21.0g
+sanitationcat,Improved or unimproved sanitation,numeric,"0. uncovered pit latrine or no facility,
+1. flush toilet, vip or covered pit latrine",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.802277206,3.952866642,,▂▁▁▁▇,%40.0g
+otherfcy,other kind of toilet,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+fueltype,Fuel type used for cooking,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+1. electricity,
+2. lpg/natural gas,
+3. biogas,
+4. paraffin/kerosene,
+5. charcoal,
+6. firewood,
+7. straw/shrubs/grass,
+8. animal dung,
+95. no food cooked in household,
+96. other",0,1,,,-9.00E+00,6.00E+00,9.50E+01,2.46179111,6.93615024,,▇▁▁▁▁,%27.0g
+fueltypeCOL,Type of fuel mainly used for cooking collapsed,numeric,"1. Synthetic fuel,
+2. Charcoal,
+3. Firewood,
+95. No food cooked in house",0,1,,,-9.00E+00,3.00E+00,9.50E+01,0.164002628,5.87350529,,▇▁▁▁▁,%23.0g
+otherfuel,other fuel type,character,,0,1,2,0,2,,11,,,0,,%11s
+senergy,main lighting energy source,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+1. electricity,
+2. solar,
+3. gas,
+4. paraffin - hurricane lamp,
+5. paraffin - pressure lamp,
+6. paraffin - wick lamp,
+7. firewood,
+8. candles,
+9. torch/battery powered lamp,
+10. Phone,
+96. other",0,1,,,-9.00E+00,2.00E+00,1.00E+01,1.401138603,6.398010704,,▅▁▇▁▅,%26.0g
+senergyCOL,Main source of energy for lighting collapsed,numeric,"-8. Refused to answer,
+1. Electricity/Solar/battery powered,
+2. Gas or paraffin,
+3. Firewood or candles",0,1,,,-9.00E+00,1.00E+00,3.00E+00,-1.195533173,4.279247073,,▂▁▁▁▇,%33.0g
+othereng,other lighting source,character,,0,1,8,0,2,,27,,,0,,%27s
+mmfloor,Main floor material,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+11. earth or sand,
+12. earth and dung,
+31. parquet or polished wood,
+33. mosaic or tiles,
+34. bricks,
+35. cement/concrete,
+36. stones,
+96. other",0,1,,,-9.00E+00,1.20E+01,3.60E+01,13.86117802,16.01414718,,▃▁▇▁▅,%24.0g
+mmfloorCOL,Main material of floor collapsed,numeric,"0. Earth,
+1. Not earth",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.766805343,3.973319023,,▂▁▁▁▇,%9.0g
+othermmf,other floor material,character,,0,1,2,0,2,,5,,,0,,%9s
+mmroof,main roof material,numeric,"-9. Skipped,
+-7. Don't know,
+11. thatched (including papyrus),
+12. mud,
+21. wood/planks,
+22. iron sheets,
+23. asbestos,
+24. tiles,
+25. tin,
+26. cement,
+96. other",0,1,,,-9.00E+00,1.10E+01,2.60E+01,11.26582001,12.05954433,,▅▁▆▁▇,%28.0g
+mmroofCOL,Main materials roof collapsed,numeric,"0. Natural materials(mud/wood/thatched),
+1. Synthetic materials",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.62710751,4.049841798,,▂▁▁▁▇,%36.0g
+othermmr,other roof material,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+mmewalls,exterior wall material,numeric,"-9. Skipped or NA,
+-7. Don't know,
+11. thatched/straw,
+21. mud and poles,
+22. un-burnt bricks,
+23. un-burnt bricks with plaster/cement,
+24. burnt bricks with mud,
+31. cement blocks,
+32. stone,
+33. timber,
+34. burnt bricks with plaster/cement,
+35. iron sheets,
+96. other",0,1,,,-9.00E+00,2.20E+01,3.50E+01,19.08627108,16.25889702,,▅▁▁▇▇,%35.0g
+mmewallsCOL,main wall materials collapsed,numeric,"0. Natural materials,
+1. Synthetic or processed materials",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.650536457,4.037446712,,▂▁▁▁▇,%32.0g
+othermme,other exterior wall material,character,,0,1,5,0,2,,24,,,0,,%24s
+eaves,Eaves present?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.512590322,4.107966525,,▂▁▁▁▇,%17.0g
+eavetype,Type of eaves,numeric,"-9. Skipped or NA,
+-7. Don't know,
+1. Open,
+2. Closed",0,1,,,-9.00E+00,1.00E+00,2.00E+00,-3.188307423,5.221717,,▆▁▁▁▇,%13.0g
+eaveCOL,Type of eaves collapsed,numeric,"1. No eaves,
+2. Closed eaves,
+3. Open eaves",1049,0.770308737,,,1.00E+00,2.00E+00,3.00E+00,2.095508812,0.804082036,,▆▁▇▁▇,%12.0g
+housetype,"Housetype based on walls, roof, and eaves",numeric,"0. Traditional,
+1. Modern",1049,0.770308737,,,0.00E+00,0.00E+00,1.00E+00,0.394826606,0.488882906,,▇▁▁▁▅,%11.0g
+windows,Household has windows?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.668710313,4.027711682,,▂▁▁▁▇,%17.0g
+covered,Windows covered?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-5.052112984,4.854194647,,▇▁▁▁▅,%17.0g
+screened,Windows screened?,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-5.33369827,4.511809681,,▇▁▁▁▅,%8.0g
+hhrooms,Sleeping rooms,numeric,"-8. Refused to answer,
+-7. Don't know",0,1,,,-9.00E+00,1.00E+00,1.40E+01,-0.583534049,4.686956434,,▂▁▇▁▁,%17.0g
+crowding,Number of persons per room used for sleeping,numeric,,1049,0.770308737,,,3.30E-01,2.50E+00,1.50E+01,2.724457438,1.317642093,,▇▂▁▁▁,%9.0g
+crowdingCOL,Number of persons per room used for sleeping dichotomized,numeric,"0. 3 or more persons per room used for sleeping,
+1. Less than 3 persons per room used for sleeping",1049,0.770308737,,,0.00E+00,1.00E+00,1.00E+00,0.569073337,0.495276287,,▆▁▁▁▇,%46.0g
+hhspaces,Sleeping spaces,numeric,"-8. Refused to answer,
+-7. Don't know",0,1,,,-9.00E+00,2.00E+00,1.40E+01,0.236479089,5.215937254,,▃▁▇▁▁,%17.0g
+electricity,does hh have electricity,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.954455879,3.860197252,,▂▁▁▁▇,%17.0g
+radio,Radio,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.698927086,4.011291136,,▂▁▁▁▇,%17.0g
+cassette,Cassette player,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.025180644,3.814297061,,▂▁▁▁▇,%17.0g
+tv,Television,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.969783228,3.850406572,,▂▁▁▁▇,%17.0g
+fridge,Refrigerator,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.052769871,3.79588391,,▂▁▁▁▇,%17.0g
+tble,Table,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.596671776,4.065685744,,▂▁▁▁▇,%17.0g
+chair,Chairs,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.401795489,4.160429987,,▂▁▁▁▇,%17.0g
+sofa,Sofa set,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.965622947,3.853072532,,▂▁▁▁▇,%17.0g
+bed,Bed,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.490913072,4.118518292,,▂▁▁▁▇,%17.0g
+cupboard,Cupboard,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.987519159,3.838969801,,▂▁▁▁▇,%17.0g
+clock,Clock,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.024085833,3.815021792,,▂▁▁▁▇,%17.0g
+mobile,Mobile phone,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.475366762,4.125998963,,▂▁▁▁▇,%17.0g
+watch,Watch,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.987300197,3.839111703,,▂▁▁▁▇,%17.0g
+bicycle,Bicycle,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.799211736,3.95465087,,▂▁▁▁▇,%17.0g
+scooter,Motorcycle or motor scooter,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.982045106,3.842512037,,▂▁▁▁▇,%17.0g
+car,Car or truck,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.056054303,3.793672548,,▂▁▁▁▇,%17.0g
+mboat,Boat with a motor,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.065688636,3.787162,,▂▁▁▁▇,%17.0g
+nomboat,Boat without a motor,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.06612656,3.786865218,,▂▁▁▁▇,%17.0g
+bankacco,Bank account,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.950076637,3.862978859,,▂▁▁▁▇,%17.0g
+internet,Device to access internet,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.978760674,3.846226763,,▂▁▁▁▇,%17.0g
+device,Type of device,numeric,"-7. Don't know,
+1. Smartphone,
+2. Tablet,
+3. Laptop computer,
+4. Desktop computer,
+5. Smartphone and laptop,
+6. Smartphone and tablet,
+7. Smartphone and desktop,
+8. Smartphone, tablet, and laptop,
+9. Smartphone, laptop, and desktop,
+10. Smartphone, tablet, laptop, and desktop",0,1,,,-9.00E+00,-9.00E+00,1.00E+01,-8.075104007,2.959695654,,▇▁▁▁▁,%39.0g
+deviceCOL,Type of device used to access the internet collapsed,numeric,"1. Smartphone only,
+2. Computer or tablet",0,1,,,-9.00E+00,-9.00E+00,2.00E+00,-8.094153711,2.88179728,,▇▁▁▁▁,%18.0g
+smartphone,Smartphone,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.100284651,2.861378667,,▇▁▁▁▁,%17.0g
+tablet,Tablet,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.189183271,2.578786809,,▇▁▁▁▁,%17.0g
+laptop,Laptop,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.184585067,2.594233421,,▇▁▁▁▁,%17.0g
+desktop,Desktop,numeric,"0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-8.189840158,2.57657192,,▇▁▁▁▁,%17.0g
+numaland,Acres of land,numeric,"-8. Refused to answer,
+-7. Don't know",0,1,,,-9.00E+00,1.00E+00,1.00E+04,344.6640464,1804.912738,,▇▁▁▁▁,%17.0g
+numalandCOL,Acres of land owned collapsed,numeric,"-7. Unknown,
+1. None,
+2. <=1,
+3. >1-3,
+4. >=4",1049,0.770308737,,,-7.00E+00,3.00E+00,4.00E+00,2.53297328,1.182239325,,▁▁▁▂▇,%9.0g
+numalanddich,Acres of land owned dichotomized,numeric,"0. <=1 acre or none,
+1. >1 acre",1049,0.770308737,,,0.00E+00,1.00E+00,1.00E+00,0.5352473,0.498826982,,▇▁▁▁▇,%16.0g
+dmarkt,Distance to market,numeric,"-8. Refused to answer,
+-7. Don't know",0,1,,,-9.00E+00,6.00E-01,1.00E+02,-0.770777314,6.082394554,,▇▁▁▁▁,%17.0g
+dmarktCOL,Distance to nearest market dichotomized,numeric,"-7. Unknown,
+0. 3 or more km,
+1. Less than 3 km",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.467703087,4.151874388,,▂▁▁▁▇,%14.0g
+hhmeals,meals per day,numeric,-8. Refused to answer,0,1,,,-9.00E+00,2.00E+00,5.00E+00,-0.263192468,4.797330133,,▃▁▁▇▅,%17.0g
+hhmealscat,Number of meals per day,numeric,"1. 1,
+2. 2,
+3. 3 or more,
+4. Missing",0,1,,,-9.00E+00,2.00E+00,3.00E+00,-0.268447559,4.793110915,,▂▁▁▁▇,%9.0g
+hhnumt,Days HH ate meat,numeric,-8. Refused to answer,0,1,,,-9.00E+00,0.00E+00,7.00E+00,-1.243485877,4.369218067,,▃▁▅▇▁,%17.0g
+hhnumtCOL,Whether or not they ate meat in the last week,numeric,"0. Did not eat meat in the last week,
+1. Ate meat in the last week",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.583315086,4.078351353,,▂▁▁▁▇,%33.0g
+hhnumtcat,Number of days eating meat in the past week,numeric,"-8. Refused to answer,
+0. None,
+1. 1,
+2. 2,
+3. 3 or more",1049,0.770308737,,,-8.00E+00,1.00E+00,3.00E+00,0.995167709,0.989986523,,▁▁▁▅▇,%17.0g
+hhpsf,Hiw often fail to satisfy hh needs,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+1. never,
+2. seldom,
+3. sometimes,
+4. often,
+5. always",0,1,,,-9.00E+00,2.00E+00,5.00E+00,-0.111670681,4.948288172,,▅▁▁▆▇,%17.0g
+hhpsfCOL,How often fails to satisfy HH food needs collapsed,numeric,"0. always/often,
+1. seldom/sometimes,
+2. never",0,1,,,-9.00E+00,1.00E+00,2.00E+00,-1.223560324,4.280586644,,▂▁▁▁▇,%16.0g
+dhfcty,Nearest health facility,numeric,"-8. Refused to answer,
+-7. Don't know",0,1,,,-9.00E+00,7.00E-01,1.00E+02,-0.925344864,5.785742268,,▇▁▁▁▁,%17.0g
+dhfctycat,Distance to nearest health facility categories,numeric,"0. < 1 km,
+1. 1-<2 km,
+2. 2-<3 km,
+3. 3 or more km,
+4. Missing",0,1,,,0.00E+00,1.00E+00,4.00E+00,1.709437267,1.532922629,,▇▇▃▂▆,%12.0g
+mthfcty,How would you go to health facility,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+1. car/motorcycle,
+2. public transport(bus,taxi),
+3. animal/animal cart,
+4. walking,
+5. bicycle,
+7. boat,
+96. other",0,1,,,-9.00E+00,4.00E+00,5.00E+00,0.841033501,5.443304533,,▃▁▁▁▇,%26.0g
+mthfctyCOL,Mode of transportation to health facililty collapsed,numeric,"0. Walking,
+1. Other",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.916575432,3.884028846,,▂▁▁▁▇,%9.0g
+othermth,other means,character,,0,1,10,0,2,,36,,,0,,%36s
+ahwker,Community health worker present,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.545215678,4.208547634,,▂▁▁▁▇,%17.0g
+amchwker,CHW has malaria medicines,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.635209109,4.107519529,,▃▁▁▁▇,%17.0g
+pspray,Asked permission to spray,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-2.065250712,3.787458709,,▂▁▁▁▇,%17.0g
+gpspray,Granted permission to spray,numeric,"0. No,
+1. Yes",0,1,,,0.00E+00,0.00E+00,1.00E+00,0.001751697,0.041821185,,▇▁▁▁▁,%17.0g
+rgspray,Reason permission to spray not granted,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+1. had a sick person/baby,
+2. spraying not effective against mosquitoes,
+3. spraying chemicals are harmful,
+4. someone in the house was pregnant,
+96. other",0,1,,,-9.00E+00,-9.00E+00,9.60E+01,-8.977008977,1.55372371,,▇▁▁▁▁,%41.0g
+otherrgs,Other reasons spraying not permitted,character,,0,1,2,0,2,,69,,,0,,%69s
+cov_spray,Les likely to allow spraying during COVID,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.592511496,4.079495427,,▂▁▁▁▇,%17.0g
+tspray,last sprayed-months,numeric,-8. Refused to answer,0,1,,,-9.00E+00,-9.00E+00,1.20E+01,-8.942850887,0.945756607,,▇▁▁▁▁,%17.0g
+receivenet,Nets recieved during last UCC,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.384497482,4.168295496,,▂▁▁▁▇,%17.0g
+manynet,How many nets did you recieve from the UCC,numeric,,0,1,,,-9.00E+00,2.00E+00,1.20E+01,-1.104444931,5.485679596,,▅▁▇▂▁,%8.0g
+manynetCOL,Net recieved from last UCC collapsed,numeric,"0. 0,
+1. 1,
+2. 2,
+3. 3,
+4. 4 or more",1049,0.770308737,,,0.00E+00,2.00E+00,4.00E+00,2.172256964,1.215436245,,▃▃▇▆▅,%9.0g
+manynow,How many nets do you still have from the UCC,numeric,,0,1,,,-9.00E+00,2.00E+00,1.20E+01,-1.327567331,5.324057567,,▅▁▇▁▁,%8.0g
+manynowCOL,Net still have from last UCC collapsed,numeric,"0. 0,
+1. 1,
+2. 2,
+3. 3,
+4. 4 or more",1049,0.770308737,,,0.00E+00,2.00E+00,4.00E+00,1.928084139,1.182856079,,▃▅▇▅▂,%9.0g
+nettype,What type of UCC nets did you recieve,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No nets recieved,
+1. Royal Guard,
+2. Permanet 3.0,
+3. Other",1049,0.770308737,,,-7.00E+00,1.00E+00,2.00E+00,1.306708357,0.910567549,,▁▁▁▁▇,%17.0g
+othernet,Other net type recieved,character,,0,1,7,0,1,,20,,,0,,%20s
+neteduc,Did you recieve any net education,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-2.285964528,4.590180971,,▃▁▁▁▇,%17.0g
+whynonet,Why did you not recieved nets from UCC,numeric,"-9. Missing,
+-8. Refused to answer,
+-7. Don't know,
+1. No nets delivered to home,
+2. Did not go to collect nets,
+3. Never told to collect nets,
+4. Told HH did not need nets,
+5. Away when nets distributed,
+6. Local leaders refused to accept nets,
+7. Given to a child to take to boarding school,
+8. Other,
+9. Told HH not in register,
+10. Nets had run out,
+11. Problems with ID/registration",0,1,,,-9.00E+00,-9.00E+00,1.10E+01,-7.777534487,4.022875213,,▇▁▁▁▁,%54.0g
+whyother,Other reasons UCC nets not recieved,character,,0,1,59,0,2,,80,,,0,,%80s
+havenets,Do you have any bednets in the house?,numeric,"0. No nets,
+1. At least 1 net",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.3595358,4.179493412,,▂▁▁▁▇,%14.0g
+nnets,Number of bednets in the house per household survey,numeric,,0,1,,,-9.00E+00,2.00E+00,1.10E+01,-0.3450843,4.875500966,,▃▁▇▂▁,%8.0g
+totalnet,Number of bednets per household,numeric,,1044,0.771403547,,,0.00E+00,2.00E+00,1.20E+01,2.208629009,1.364935436,,▇▃▁▁▁,%9.0g
+totalnetcat,Bednets in the house categories,numeric,"0. 0,
+1. 1,
+2. 2,
+3. 3,
+4. 4 or more",1044,0.771403547,,,0.00E+00,2.00E+00,4.00E+00,2.122622765,1.146189272,,▂▅▇▅▃,%9.0g
+totalLLIN,Number of any type of LLIN per household,numeric,,1044,0.771403547,,,0.00E+00,2.00E+00,1.20E+01,2.173431734,1.370268506,,▇▃▁▁▁,%9.0g
+totalLLINcat,LLINs in the house categories,numeric,"0. 0,
+1. 1,
+2. 2,
+3. 3,
+4. 4 or more",1044,0.771403547,,,0.00E+00,2.00E+00,4.00E+00,2.09026398,1.157561131,,▂▅▇▅▃,%9.0g
+totalPermaNet,Number of PermaNet 3.0 LLINs per household,numeric,,1044,0.771403547,,,0.00E+00,0.00E+00,1.20E+01,1.079193869,1.407462155,,▇▂▁▁▁,%9.0g
+totalPermaNetcat,PermaNet nets in the house categories,numeric,"0. 0,
+1. 1,
+2. 2,
+3. 3,
+4. 4 or more",1044,0.771403547,,,0.00E+00,0.00E+00,4.00E+00,1.042009651,1.286122868,,▇▂▃▂▁,%9.0g
+totalRoyalGuard,Number of Royal Guard LLINs per household,numeric,,1044,0.771403547,,,0.00E+00,0.00E+00,1.00E+01,0.933011638,1.312823957,,▇▁▁▁▁,%9.0g
+totalRoyalGuardcat,RoyalGuard nets in the house categories,numeric,"0. 0,
+1. 1,
+2. 2,
+3. 3,
+4. 4 or more",1044,0.771403547,,,0.00E+00,0.00E+00,4.00E+00,0.914277604,1.247838772,,▇▂▂▁▁,%9.0g
+ANYnetdich,Whether household has any bednets,numeric,"0. No bednets,
+1. At least 1 bednet",1044,0.771403547,,,0.00E+00,1.00E+00,1.00E+00,0.919103037,0.272715521,,▁▁▁▁▇,%17.0g
+ANYLLINdich,Whether household has any LLINs,numeric,"0. No LLINs,
+1. At least 1 LLIN",1044,0.771403547,,,0.00E+00,1.00E+00,1.00E+00,0.908884473,0.287814177,,▁▁▁▁▇,%15.0g
+ANYPNdich,Whether household has any PermaNet 3.0 LLINs,numeric,"0. No PermaNet 3.0,
+1. At least 1 PermaNet 3.0",1044,0.771403547,,,0.00E+00,0.00E+00,1.00E+00,0.474311666,0.499410557,,▇▁▁▁▇,%23.0g
+ANYRGdich,Whether household has any Royal Guard LLINs,numeric,"0. No Royal Guard,
+1. At least 1 Royal Guard",1044,0.771403547,,,0.00E+00,0.00E+00,1.00E+00,0.416690321,0.493080631,,▇▁▁▁▆,%22.0g
+NETSPERPERSON,Number of bednets per household member,numeric,,1047,0.770746661,,,0.00E+00,5.00E-01,5.00E+00,0.526285435,0.344290253,,▇▁▁▁▁,%9.0g
+LLINSPERPERSON,Number of LLINs per household member,numeric,,1047,0.770746661,,,0.00E+00,5.00E-01,5.00E+00,0.515600703,0.338158648,,▇▁▁▁▁,%9.0g
+PNPERPERSON,Number of PermaNet 3.0 per household member,numeric,,1047,0.770746661,,,0.00E+00,0.00E+00,5.00E+00,0.257464293,0.342119996,,▇▁▁▁▁,%9.0g
+RGPERPERSON,Number of Royal Guard per household member,numeric,,1047,0.770746661,,,0.00E+00,0.00E+00,2.00E+00,0.218288011,0.307592832,,▇▃▁▁▁,%9.0g
+ADEQUATENETS,Whether at least 1 bednet per 2 persons,numeric,"0. No,
+1. Yes",1047,0.770746661,,,0.00E+00,1.00E+00,1.00E+00,0.592329545,0.491471134,,▆▁▁▁▇,%9.0g
+ADEQUATELLINS,Whether at least 1 LLIN per 2 persons,numeric,"0. No,
+1. Yes",1047,0.770746661,,,0.00E+00,1.00E+00,1.00E+00,0.582102273,0.493283229,,▆▁▁▁▇,%9.0g
+ADEQUATEPN,Whether at least 1 PermaNet 3.0 per 2 persons,numeric,"0. No,
+1. Yes",1047,0.770746661,,,0.00E+00,0.00E+00,1.00E+00,0.286079545,0.451991236,,▇▁▁▁▃,%9.0g
+ADEQUATERG,Whether at least 1 Royal Guard per 2 persons,numeric,"0. No,
+1. Yes",1047,0.770746661,,,0.00E+00,0.00E+00,1.00E+00,0.243465909,0.429234903,,▇▁▁▁▂,%9.0g
+cov_hear,Have you heard of COVID?,numeric,"-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.349682505,4.218894494,,▂▁▁▁▇,%17.0g
+cov_spread,How can COVID be spread?,character,,0,1,31,0,1,,9,,,0,,%9s
+cov_sx,If you had COVID symptoms what would you do?,character,,0,1,172,0,1,,20,,,0,,%20s
+cov_daily,Has your life been changed,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.832712941,3.938093904,,▂▁▁▁▇,%17.0g
+cov_daily1,How has your life been changed,character,,0,1,804,0,2,,80,,,0,,%80s
+cov_work,Has work been affected?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.78103788,3.968255493,,▂▁▁▁▇,%17.0g
+hwcov_work,How has work been affected?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Other,
+1. I have had to reduce my work,
+2. I am unable to find work,
+3. I am physically unable to work,
+4. Lost income,
+5. Fear of getting COVID,
+6. Children at home (schools closed),
+7. Unable to garden with group,
+8. Increased use of mask/SOPs",0,1,,,-9.00E+00,-9.00E+00,4.00E+00,-5.920735713,4.852698973,,▇▁▁▂▂,%33.0g
+cov_workothr,Other ways work affected,character,,0,1,100,0,2,,75,,,0,,%75s
+cov_cont,Do you worry about COVID?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.469892709,4.13497656,,▂▁▁▁▇,%17.0g
+cov_crowd,Do you avoid crowds?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.3739873,4.176809285,,▂▁▁▁▇,%17.0g
+cov_handwash,Do you wash hands more?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.502299102,4.114910067,,▂▁▁▁▇,%17.0g
+cov_sanit,Do you have access to hand sanitizer?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.94832494,3.865676218,,▂▁▁▁▇,%17.0g
+cov_mask,Do you wear a mask outside?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.440332822,4.142593375,,▂▁▁▁▇,%17.0g
+cov_masktype,What type of mask?,character,,0,1,15,0,1,,7,,,0,,%9s
+othmask,Other mask type,numeric,,0,1,,,-9.00E+00,-9.00E+00,-9.00E+00,-9,0,,▁▁▇▁▁,%8.0g
+cov_nomask,Why no mask in public?,character,,0,1,31,0,1,,7,,,0,,%9s
+oth_nomask,Other reasons no mask in public?,character,,0,1,72,0,1,,44,,,0,,%44s
+cov_flu,Do you stay away from people with symptoms,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.396102474,4.177942272,,▂▁▁▁▇,%17.0g
+cov_know,Where information about COVID recieved,character,,0,1,85,0,1,,13,,,0,,%13s
+cov_protect,How you protect against COVID,character,,0,1,103,0,1,,15,,,0,,%15s
+hhpsf_covid,Additional problems accessing food,numeric,"-8. refused to answer,
+-7. don’t know,
+1. never,
+2. seldom,
+3. sometimes,
+4. often,
+5. always",0,1,,,-9.00E+00,3.00E+00,5.00E+00,-0.005474053,4.996820346,,▃▁▁▅▇,%17.0g
+hfcty_covid1,Travel to health facility more difficult during lockdown,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.870593387,3.926797339,,▂▁▁▁▇,%17.0g
+hfcty_covid2,Public transport available now?,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.476899496,4.130146026,,▂▁▁▁▇,%17.0g
+other_hfcty_cov2,Other effects on ability to access health facilities,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.940004379,3.869350153,,▂▁▁▁▇,%17.0g
+speoth_hfcty_cov2,Specify other effects on ability to access health facilities,character,,0,1,11,0,1,,5,,,0,,%9s
+othspecify_hfcty_cov2,If other give details of other effects of COVID on access to HF,character,,0,1,47,0,1,,78,,,0,,%78s
+hfcty_covid3,Changes in care at local HF,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.795051456,3.957067236,,▂▁▁▁▇,%17.0g
+hfcty_changes,"If yes, what changesin care at local HF",character,,0,1,15,0,1,,7,,,0,,%9s
+other_hfcty_changes,"If other above, what changes have you noticed",character,,0,1,161,0,2,,80,,,0,,%80s
+travel_cov,Less likely to travel,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,0.00E+00,1.00E+00,-1.69520473,4.015293938,,▂▁▁▁▇,%17.0g
+vac_cov,Have you had opportunity to get COVID vaccine,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-1.527479746,4.100636717,,▂▁▁▁▇,%17.0g
+vac_cov1,Did you get the COVID vaccine,numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,1.00E+00,1.00E+00,-3.619005912,4.971162356,,▇▁▁▁▇,%17.0g
+vac_cov2,"If no, why did you not get vaccine",character,,0,1,16,0,1,,7,,,0,,%9s
+vac_cov3,"If offered vaccine, would you accept",numeric,"-9. Skipped or NA,
+-8. Refused to answer,
+-7. Don't know,
+0. No,
+1. Yes",0,1,,,-9.00E+00,-9.00E+00,1.00E+00,-6.588351215,4.223292842,,▇▁▁▁▂,%17.0g
+vac_cov4,"If not, why would you decline vaccine",numeric,,0,1,,,-9.00E+00,-9.00E+00,6.00E+00,-8.399167944,2.594061281,,▇▁▁▁▁,%8.0g
+totvisit,number of visits to hh,numeric,,0,1,,,1.00E+00,1.00E+00,3.00E+00,1.541712284,0.756603838,,▇▁▃▁▂,%8.0g
+sw_ver,Software Version,character,,0,1,10,0,23,,23,,,0,,%23s
+stoptime,End time of interview,character,,0,1,4566,0,23,,23,,,0,,%23s
+wealthindex1,Weath index using Katie's PCA model,numeric,,1049,0.770308737,,,-3.00E+00,-4.80E-01,7.60E+00,-2.29E-05,2.166165022,,▇▇▂▁▁,%9.0g
+wealthcat3,Wealth categories in tertiles,numeric,"1. poorest,
+2. middle,
+3. least poor",1049,0.770308737,,,1.00E+00,2.00E+00,3.00E+00,1.993462194,0.81303876,,▇▁▇▁▇,%10.0g
+wealthcat5,Wealth categories in quantiles,numeric,,1049,0.770308737,,,1.00E+00,3.00E+00,5.00E+00,2.986355884,1.41756168,,▇▇▇▇▇,%8.0g
+Tcat,,numeric,"1. Thatched / Thatched,
+2. Mud and poles / Thatched,
+3. Mud and poles / Iron sheets,
+4. Bricks no plaster / Thatched,
+5. Bricks no plaster / Iron sheets,
+6. Bricks with plaster / Thatched,
+7. Bricks with plaster / Iron sheets",2456,0.462229034,,,1.00E+00,4.00E+00,7.00E+00,4.110847939,1.657392113,,▆▂▇▂▆,%33.0g
+eavedich,,numeric,"1. Open,
+2. Closed or absent",0,1,,,1.00E+00,2.00E+00,2.00E+00,1.71075104,0.453463366,,▃▁▁▁▇,%16.0g
