@@ -1,5 +1,7 @@
 # $SourceFileURL$
 ---
+webapp_bundle_type_segment: clinepi
+
 product: ClinEpiDB
 _self_url_scheme: https
 modelconfig_modelName: clinEpiModel
