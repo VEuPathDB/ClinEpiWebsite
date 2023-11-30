@@ -15,7 +15,7 @@ modelprop:
   SITE_SEARCH_SERVICE_URL: /site-search
 eda:
   enabled: "true"
-  example_analyses_author: 854899613
+  example_analyses_author: 222087130,1926010,295652793,220902410,854899613
   single_app_mode: pass
 user_datasets_workspace:
   enabled: "true"
