@@ -30,11 +30,12 @@ public class AccessRequestSubmitter {
     // In one transaction...
     //   (1) insert a DB record for the new request and
     //   (2) email the request to the appropriate parties
+    String acctDbLink = wdkModel.getModelConfig().getAppDB().getAcctDbLink();
     try (
-        Connection conn = wdkModel.getAccountDb().getDataSource().getConnection();
+        Connection conn = wdkModel.getAppDb().getDataSource().getConnection();
     ) {
       conn.setAutoCommit(false);
-      String sql = insertRequestPreparedStatementBody();
+      String sql = insertRequestPreparedStatementBody(acctDbLink);
 
       try (
           PreparedStatement ps = insertRequestPreparedStatement(conn, sql, params);
@@ -65,9 +66,9 @@ public class AccessRequestSubmitter {
     return requestInitiated || params.inTestMode() ? SubmissionResult.SUCCESSFUL : SubmissionResult.ALREADY_REQUESTED;
   }
 
-  private static String insertRequestPreparedStatementBody() {
+  private static String insertRequestPreparedStatementBody(String acctDbLink) {
     return "INSERT INTO\n"
-      + "  studyaccess.end_users (\n"
+      + "  studyaccess.end_users" + acctDbLink + " (\n"
       + "    user_id\n"
       + "  , dataset_presenter_id\n"
       + "  , purpose\n"
@@ -88,14 +89,14 @@ public class AccessRequestSubmitter {
       + ", ? -- prior_auth\n"
       + ", (\n"
       + "    SELECT restriction_level_id\n"
-      + "    FROM studyaccess.restriction_level"
+      + "    FROM studyaccess.restriction_level" + acctDbLink
       + "    WHERE name = ?"
       + "  ) -- restriction_level\n"
       + ", ? -- approval_status\n"
       + "FROM dual\n"
       + "WHERE NOT EXISTS (\n"
       + "  SELECT user_id, dataset_presenter_id\n"
-      + "  FROM studyaccess.end_users\n"
+      + "  FROM studyaccess.end_users" + acctDbLink + "\n"
       + "  WHERE user_id = ?\n"
       + "    AND dataset_presenter_id = ?\n"
       + ")";

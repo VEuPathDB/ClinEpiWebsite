@@ -68,7 +68,7 @@ public class AccessRequestService extends UserService {
       @PathParam("dataset-id") String datasetId) throws WdkModelException, ConflictException, DataValidationException {
     LOG.info("Handling an access request for user id " + userId + " and dataset id " + datasetId + "...");
 
-    if (userId != this.getSessionUser().getUserId() || this.getSessionUser().isGuest()) {
+    if (userId != this.getRequestingUser().getUserId() || this.getRequestingUser().isGuest()) {
       return Response.status(Status.UNAUTHORIZED).build();
     }
 
@@ -102,7 +102,7 @@ public class AccessRequestService extends UserService {
     RecordClass datasetRecordClass = getRecordClassOrNotFound(DATASET_RECORD_CLASS);
 
     List<RecordInstance> records = RecordClass.getRecordInstances(
-      getSessionUser(), 
+      getRequestingUser(),
       createPrimaryKeyValue(datasetRecordClass, datasetId)
     );
 
