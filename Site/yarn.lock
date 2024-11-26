@@ -3,6 +3,6 @@
 
 
 "@veupathdb/clinepi-site@^1.1.0":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.2.5.tgz#5ab217935b2ee6a67547bed4eae74a4d40f59fa3"
-  integrity sha512-c9M4WcXScN+pdSqTT0oB9BcFHwfSkeBpiWWv1W6u0QDN5nfMDe8k3jhjM/+AC0lkvF3vpWnv/XG8AnsE+GOx8w==
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.2.7.tgz#9a153d0e769832fdcdf1cea111d1c8867e5327af"
+  integrity sha512-cGBKZi+rBoLy9BjI46fPYvJcgPBIVeNwxZr4x8lbpz9zGWV00O1TuCXoG1E4rmRCttaNew/NLRZiXA/fAQ39dA==
