@@ -28,12 +28,12 @@ import org.gusdb.wdk.model.record.attribute.AttributeFieldDataType;
 import org.gusdb.wdk.service.request.RecordRequest;
 import org.gusdb.wdk.service.request.exception.ConflictException;
 import org.gusdb.wdk.service.request.exception.DataValidationException;
-import org.gusdb.wdk.service.service.user.UserService;
+import org.gusdb.wdk.service.service.user.AbstractUserService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class AccessRequestService extends UserService {
+public class AccessRequestService extends AbstractUserService {
   
   private static final Logger LOG = Logger.getLogger(AccessRequestService.class);
   private static final String DATASET_RECORD_CLASS = "dataset";
