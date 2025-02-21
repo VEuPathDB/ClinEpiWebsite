@@ -2,6 +2,6 @@
   "name": "clinepi-site-deployer",
   "private": true,
   "dependencies": {
-    "@veupathdb/clinepi-site": "1.2.20-patch.1"
+    "@veupathdb/clinepi-site": "^1.2.20-patch.2"
   }
 }
