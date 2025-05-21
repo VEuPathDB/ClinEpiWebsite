@@ -83,6 +83,13 @@ community_env_map:
   b_prefix: static-content.veupathdb.org/
   default: qa.static-content.veupathdb.org/
 
+user_datasets_workspace:
+  showExtraMetadata: "{{ showExtraMetadata_env_map[prefix]|default(showExtraMetadata_env_map['default']) }}"  
+
+showExtraMetadata_env_map:
+   w_prefix: false
+   default: true
+
 eda:
   # Disable full screen apps for w sites, until they pass qa
   enableFullScreenApps: "{{ 'false' if prefix == 'w_prefix' else 'true' }}"
