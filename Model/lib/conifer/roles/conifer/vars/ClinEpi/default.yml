@@ -11,6 +11,8 @@ modelprop:
   CLINEPI_ACCESS_REQUEST_EMAIL: help@clinepidb.org
   SHOW_UNRELEASED_DATA: '{{ showUnreleasedData }}'
   SITE_SEARCH_SERVICE_URL: /site-search
+  REMOTE_STUDYACCESS_SCHEMA: '{{ remoteStudyAccessSchema }}'
+  REMOTE_USERACCOUNTS_SCHEMA: '{{ remoteUserAccountsSchema }}'
 eda:
   enabled: "true"
   example_analyses_author: 222087130,1926010,295652793,220902410,854899613
