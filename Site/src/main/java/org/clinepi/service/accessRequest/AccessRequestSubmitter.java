@@ -30,12 +30,12 @@ public class AccessRequestSubmitter {
     // In one transaction...
     //   (1) insert a DB record for the new request and
     //   (2) email the request to the appropriate parties
-    String acctDbLink = wdkModel.getProperties().get("ACCT_DBLINK");
+    String remoteStudyaccessSchema = wdkModel.getProperties().get("REMOTE_STUDYACCESS_SCHEMA");
     try (
         Connection conn = wdkModel.getAppDb().getDataSource().getConnection();
     ) {
       conn.setAutoCommit(false);
-      String sql = insertRequestPreparedStatementBody(acctDbLink);
+      String sql = insertRequestPreparedStatementBody(remoteStudyaccessSchema);
 
       try (
           PreparedStatement ps = insertRequestPreparedStatement(conn, sql, params);
@@ -66,9 +66,9 @@ public class AccessRequestSubmitter {
     return requestInitiated || params.inTestMode() ? SubmissionResult.SUCCESSFUL : SubmissionResult.ALREADY_REQUESTED;
   }
 
-  private static String insertRequestPreparedStatementBody(String acctDbLink) {
+  private static String insertRequestPreparedStatementBody(String remoteStudyaccessSchema) {
     return "INSERT INTO\n"
-      + "  studyaccess.end_users" + acctDbLink + " (\n"
+      + "  " + remoteStudyaccessSchema + "end_users (\n"
       + "    user_id\n"
       + "  , dataset_presenter_id\n"
       + "  , purpose\n"
@@ -89,14 +89,14 @@ public class AccessRequestSubmitter {
       + ", ? -- prior_auth\n"
       + ", (\n"
       + "    SELECT restriction_level_id\n"
-      + "    FROM studyaccess.restriction_level" + acctDbLink
+      + "    FROM " + remoteStudyaccessSchema + "restriction_level\n"
       + "    WHERE name = ?"
       + "  ) -- restriction_level\n"
       + ", ? -- approval_status\n"
       + "FROM dual\n"
       + "WHERE NOT EXISTS (\n"
       + "  SELECT user_id, dataset_presenter_id\n"
-      + "  FROM studyaccess.end_users" + acctDbLink + "\n"
+      + "  FROM " + remoteStudyaccessSchema + "end_users\n"
       + "  WHERE user_id = ?\n"
       + "    AND dataset_presenter_id = ?\n"
       + ")";
