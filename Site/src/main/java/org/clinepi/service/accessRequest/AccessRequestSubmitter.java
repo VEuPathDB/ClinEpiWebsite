@@ -30,7 +30,7 @@ public class AccessRequestSubmitter {
     // In one transaction...
     //   (1) insert a DB record for the new request and
     //   (2) email the request to the appropriate parties
-    String acctDbLink = wdkModel.getModelConfig().getAppDB().getAcctDbLink();
+    String acctDbLink = wdkModel.getProperties().get("ACCT_DBLINK");
     try (
         Connection conn = wdkModel.getAppDb().getDataSource().getConnection();
     ) {
