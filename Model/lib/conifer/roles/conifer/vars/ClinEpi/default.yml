@@ -1,6 +1,5 @@
 # $SourceFileURL$
 ---
-product: ClinEpiDB
 _self_url_scheme: https
 modelconfig_modelName: clinEpiModel
 showUnreleasedData: 'false'
