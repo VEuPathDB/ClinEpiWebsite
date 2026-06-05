@@ -68,7 +68,7 @@ modelprop:
   'attr=google_analytics_id xpath=sites/site[@hostname=\"{}\"] default='.format( hostname|swap_hostname(_host_frontends) )
   )
 }}"
-  COMMUNITY_SITE: "//{{ community_env_map[prefix]|default(community_env_map['default']) }}"
+  COMMUNITY_SITE: "//{{ community_env_map[prefix_vdi]|default(community_env_map['default']) }}"
 
 # construct a prefix from hostname, like w_prefix, q_prefix
 prefix: "{{ hostname | regex_replace('^([a-z])[0-9].*','\\1_prefix') }}"
@@ -77,9 +77,13 @@ prefix: "{{ hostname | regex_replace('^([a-z])[0-9].*','\\1_prefix') }}"
 # really feels like a bad idea.  please don't let this cancer spread.  Find a
 # generalized way to do this in the future... 
 community_env_map:
-  w_prefix: static-content.veupathdb.org/
-  b_prefix: static-content.veupathdb.org/
-  default: qa.static-content.veupathdb.org/
+#   w_prefix: static-content.veupathdb.org/
+#   b_prefix: beta.static-content.veupathdb.org/
+   w1_prefix: static-content.veupathdb.org/
+   b1_prefix: b1.static-content.veupathdb.org/
+   w2_prefix: static-content.veupathdb.org/
+   b2_prefix: b2.static-content.veupathdb.org/
+   default: qa.static-content.veupathdb.org/
 
 eda:
   # Disable full screen apps for w sites, until they pass qa
