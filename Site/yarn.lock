@@ -2,12 +2,18 @@
 # yarn lockfile v1
 
 
-"@veupathdb/clinepi-site@1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.4.4.tgz#e9c91412bd94343890033a8eabc6c3e3c878745d"
-  integrity sha512-5rgLpR/4dHoYe+ZW3sDTleBWHPcsa02NErqtYERwGIgAzs4FlpiXXL+qeRrs8NRg92LbkZO3dCqAK3PS9vJWCQ==
+"@types/trusted-types@^2.0.7":
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-2.0.7.tgz#baccb07a970b91707df3a3e8ba6896c57ead2d11"
+  integrity sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==
+
+"@veupathdb/clinepi-site@1.4.5":
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.4.5.tgz#0b46b12edd1f66c33c7140f6c9ed60c1f43fdc55"
+  integrity sha512-1+BOFUe1zFRgwCzv/NvVwaQIcUGL6ENKKbzUVgm7ocXZtvN+rJhMu+ywTlezEpCZbYJQKmp7YRyzV03AfaDfPA==
   dependencies:
     "@veupathdb/preferred-organisms" "workspace:^"
+    dompurify "^3.4.7"
 
 "@veupathdb/preferred-organisms@workspace:^":
   version "1.1.16"
@@ -16,6 +22,13 @@
   dependencies:
     lodash "^4.17.21"
     recoil "^0.2.0"
+
+dompurify@^3.4.7:
+  version "3.4.8"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.8.tgz#6c54f8c207160e7f83fcb7f4fd05a82ac36b1cdc"
+  integrity sha512-yb1cEmaOum7wFvOCSQxyfgVlv5D47Rc30iZWoMpbDIWTnJ6grDDQyu2KFJzB2k7u0pMuJcQ1zphH//fFnw2tjQ==
+  optionalDependencies:
+    "@types/trusted-types" "^2.0.7"
 
 hamt_plus@1.0.2:
   version "1.0.2"
