@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@veupathdb/clinepi-site@1.5.13":
-  version "1.5.13"
-  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.5.13.tgz#a9eab362319e1aa74c733e315d6c294528f745c3"
-  integrity sha512-HH+1bbYBncC3SmPbpSnnP4Yes9+LHkrNzl7wz6LK3fzTOL284Oofek2QsGt2DJxlm93iZlnGDm0QgF8QDZzDpg==
+"@veupathdb/clinepi-site@1.5.15":
+  version "1.5.15"
+  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.5.15.tgz#435d5dc9b09021beca64609906fe249b36391533"
+  integrity sha512-1DTY1USlGlmbO9tDyOqA+MCLQ3NUiUiXvwgb9z/5SKLKOYQHixs0fNxqXWxOAopQgCrjYXFV5HhPokhGW//0vQ==
