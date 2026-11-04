@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@veupathdb/genomics-site": "1.5.33"
+  }
+}
