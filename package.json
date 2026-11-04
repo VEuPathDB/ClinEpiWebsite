@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "@veupathdb/genomics-site": "1.5.33"
+    "@veupathdb/clinepi-site": "1.5.33"
   }
 }
