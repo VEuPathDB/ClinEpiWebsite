@@ -2,7 +2,3 @@
 # yarn lockfile v1
 
 
-"@veupathdb/clinepi-site@1.5.33":
-  version "1.5.33"
-  resolved "https://registry.yarnpkg.com/@veupathdb/clinepi-site/-/clinepi-site-1.5.33.tgz#9af23c40210796f5a34a4e5c4b0cd315961fc65f"
-  integrity sha512-PGEihBFnEeOw7tOVgmxFP4hSWHivX4N31YYvOzjaL9UrYDC8CLKI634lFDpRTLs1MFDkHj1zsEB/sSrCMvyAgA==
