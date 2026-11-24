@@ -6,10 +6,17 @@ modelconfig_adminEmail:
   - "{{ 'rdoherty$pcbi.upenn.edu'|replace('$', '@') }}"
   - "{{ 'sfischer$pcbi.upenn.edu'|replace('$', '@') }}"
 
-modelconfig_appDb_maxIdle: 2
-modelconfig_appDb_maxActive: 40
-modelconfig_userDb_maxIdle: 10
-modelconfig_commentdb.maxIdle: 10
+modelconfig_appDb_minIdle: 5
+modelconfig_appDb_maxIdle: 20
+modelconfig_appDb_maxActive: 20
+modelconfig_appDb_timeBetweenEvictionRunsMillis: 30000
+modelconfig_appDb_softMinEvictableIdleTimeMillis: 300000
+
+modelconfig_userDb_minIdle: 5
+modelconfig_userDb_maxIdle: 20
+modelconfig_userDb_maxActive: 20
+modelconfig_userDb_timeBetweenEvictionRunsMillis: 30000
+modelconfig_userDb_softMinEvictableIdleTimeMillis: 300000
 
 _showUnreleasedDataFlag:
   integrate.clinepidb.org: 'true'
